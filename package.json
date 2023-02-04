@@ -4,6 +4,8 @@
   "description": "provide services to embtr app",
   "main": "index.js",
   "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
