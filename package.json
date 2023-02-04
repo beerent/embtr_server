@@ -1,0 +1,25 @@
+{
+  "name": "embtr_server",
+  "version": "0.0.1",
+  "description": "provide services to embtr app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beerent/embtr_server.git"
+  },
+  "author": "beerent",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/beerent/embtr_server/issues"
+  },
+  "homepage": "https://github.com/beerent/embtr_server#readme",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
