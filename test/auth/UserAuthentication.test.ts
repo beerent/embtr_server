@@ -9,7 +9,7 @@ describe('create user fail cases', () => {
         const response = await request(app).post('/user/create').send(body);
 
         expect(response.statusCode).toBe(INVALID_EMAIL.code);
-        expect(response.body.message).toBe(INVALID_EMAIL.message);
+        expect(response.body).toEqual(INVALID_EMAIL);
     });
 
     test('password is missing', async () => {
@@ -17,7 +17,7 @@ describe('create user fail cases', () => {
         const response = await request(app).post('/user/create').send(body);
 
         expect(response.statusCode).toBe(INVALID_PASSWORD.code);
-        expect(response.body.message).toBe(INVALID_PASSWORD.message);
+        expect(response.body).toEqual(INVALID_PASSWORD);
     });
 
     test('a user that already exists', async () => {
@@ -25,7 +25,7 @@ describe('create user fail cases', () => {
         const response = await request(app).post('/user/create').send(body);
 
         expect(response.statusCode).toBe(EMAIL_ALREADY_IN_USE.code);
-        expect(response.body.message).toBe(EMAIL_ALREADY_IN_USE.message);
+        expect(response.body).toEqual(EMAIL_ALREADY_IN_USE);
     });
 });
 
@@ -39,6 +39,6 @@ describe('create user success case', () => {
         const response = await request(app).post('/user/create').send(body);
 
         expect(response.statusCode).toBe(SUCCESS.code);
-        expect(response.body.message).toBe(SUCCESS.message);
+        expect(response.body).toEqual(SUCCESS);
     });
 });
