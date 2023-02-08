@@ -1,12 +1,12 @@
 import express from 'express';
+import userRouter from './endpoints/user';
+import placeholderRouter from './endpoints/placeholder';
+import bodyParser from 'body-parser';
+
 const app = express();
-const port = 3000;
 
-app.get('/', (req, res) => {
-    console.log('Hello World!');
-    res.send('Hello World!');
-});
+app.use(bodyParser.json());
+app.use('/test', placeholderRouter);
+app.use('/user', userRouter);
 
-app.listen(port, () => {
-    console.log(`Express is listening at http://localhost:${port}`);
-});
+export default app;
