@@ -1,10 +1,8 @@
 import { firebase } from './Firebase';
 
 export class UserAuthentication {
-    public static async authenticate(req) {
-        if (true) return true;
-
-        const bearerToken = this.getBearerToken(req.headers.authorization);
+    public static async authenticate(authorization: string) {
+        const bearerToken = this.getBearerToken(authorization);
         if (!bearerToken) {
             return false;
         }
@@ -23,7 +21,7 @@ export class UserAuthentication {
         return authorization.split('Bearer ')[1];
     }
 
-    private static isBearer(authorization) {
+    private static isBearer(authorization: string) {
         if (!authorization || !authorization.includes('Bearer')) {
             return false;
         }

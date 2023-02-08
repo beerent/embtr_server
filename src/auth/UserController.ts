@@ -1,5 +1,6 @@
 import { EMAIL_ALREADY_IN_USE, INVALID_EMAIL, INVALID_PASSWORD, RequestResponse, SUCCESS } from 'src/common/RequestResponses';
 import { firebase } from './Firebase';
+import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 
 export class UserController {
     public static async createUser(email?: string, password?: string): Promise<RequestResponse> {
@@ -18,6 +19,8 @@ export class UserController {
             return EMAIL_ALREADY_IN_USE;
         }
 
+        const user = await this.create(email, password);
+
         return SUCCESS;
     }
 
@@ -30,11 +33,35 @@ export class UserController {
     }
 
     private static async userExists(email: string): Promise<boolean> {
+        const user = await this.getUser(email);
+        return user !== undefined;
+    }
+
+    private static async getUser(email: string): Promise<UserRecord | undefined> {
         try {
-            await firebase.auth().getUserByEmail(email);
-            return true;
+            return await firebase.auth().getUserByEmail(email);
         } catch {
-            return false;
+            return undefined;
+        }
+    }
+
+    private static async create(email: string, password: string): Promise<UserRecord> {
+        const user: UserRecord = await firebase.auth().createUser({
+            email,
+            password,
+        });
+
+        return user;
+    }
+
+    public static async deleteUser(email?: string): Promise<void> {
+        if (email === undefined) {
+            return;
+        }
+
+        const user = await this.getUser(email);
+        if (user) {
+            await firebase.auth().deleteUser(user.uid);
         }
     }
 }
