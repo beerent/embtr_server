@@ -1,7 +1,7 @@
+import app from '@src/app';
+import { UserController } from '@src/auth/UserController';
+import { EMAIL_ALREADY_IN_USE, INVALID_EMAIL, INVALID_PASSWORD, SUCCESS } from '@src/common/RequestResponses';
 import request from 'supertest';
-import { EMAIL_ALREADY_IN_USE, INVALID_EMAIL, INVALID_PASSWORD, SUCCESS } from 'src/common/RequestResponses';
-import app from 'src/app';
-import { UserController } from 'src/auth/UserController';
 
 describe('create user fail cases', () => {
     test('email is missing', async () => {

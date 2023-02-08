@@ -4,8 +4,8 @@
     "description": "provide services to embtr app",
     "main": "index.js",
     "scripts": {
-        "build": " npx tsc",
-        "start": "node dist/app.js",
+        "build": "npx tsc",
+        "start": "node dist/src/server.js",
         "test": "jest"
     },
     "repository": {
@@ -26,9 +26,14 @@
         "ts-jest": "^29.0.5",
         "typescript": "^4.9.5"
     },
+    "_moduleAliases": {
+        "@src": "dist/src/",
+        "@resources": "dist/resources/"
+    },
     "dependencies": {
         "body-parser": "^1.20.1",
         "express": "^4.18.2",
-        "firebase-admin": "^11.5.0"
+        "firebase-admin": "^11.5.0",
+        "module-alias": "^2.2.2"
     }
 }

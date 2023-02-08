@@ -1,4 +1,5 @@
-import app from 'src/app';
+require('module-alias/register');
+import app from '@src/app';
 
 const port = 3000;
 

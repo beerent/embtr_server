@@ -1,4 +1,4 @@
-import { EMAIL_ALREADY_IN_USE, INVALID_EMAIL, INVALID_PASSWORD, RequestResponse, SUCCESS } from 'src/common/RequestResponses';
+import { EMAIL_ALREADY_IN_USE, INVALID_EMAIL, INVALID_PASSWORD, RequestResponse, SUCCESS } from '@src/common/RequestResponses';
 import { firebase } from './Firebase';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 

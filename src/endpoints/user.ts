@@ -1,6 +1,6 @@
-import express, { Request, Response } from 'express';
-import { UserController } from 'src/auth/UserController';
-import { RequestResponse } from 'src/common/RequestResponses';
+import { UserController } from '@src/auth/UserController';
+import { RequestResponse } from '@src/common/RequestResponses';
+import express from 'express';
 
 const userRouter = express.Router();
 
