@@ -8,8 +8,24 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "npx",
+            "runtimeArgs": ["ts-node", "src/server.ts"],
+            "name": "run",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["ts-node", "./node_modules/.bin/jest"],
+            "name": "tests",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npx",
             "runtimeArgs": ["ts-node", "--inspect-brk", "./node_modules/.bin/jest"],
-            "name": "jest debug",
+            "name": "debug tests",
             "console": "integratedTerminal"
         }
     ]
