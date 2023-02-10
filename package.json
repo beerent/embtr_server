@@ -4,8 +4,8 @@
     "description": "provide services to embtr app",
     "main": "index.js",
     "scripts": {
-        "build": "npm install",
-        "start": "ts-node src/server.ts",
+        "build": "npm install; npx tsc",
+        "start": "node dist/src/server.js",
         "test": "jest"
     },
     "repository": {

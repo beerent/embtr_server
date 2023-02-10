@@ -1,62 +1,30 @@
-import {
-    CREATE_USER_EMAIL_IN_USE,
-    CREATE_USER_ERROR,
-    CREATE_USER_INVALID_EMAIL,
-    CREATE_USER_INVALID_PASSWORD,
-    RequestResponse,
-    SUCCESS,
-} from '@src/common/RequestResponses';
+import { CREATE_USER_EMAIL_IN_USE, CREATE_USER_ERROR, CREATE_USER_INVALID_EMAIL, CREATE_USER_INVALID_PASSWORD, SUCCESS } from '@src/common/RequestResponses';
 import { firebase } from './Firebase';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import { logger } from '@src/common/logger/Logger';
+import { CreateUserRequest, Response } from '@resources/types';
+
+interface CreateUserResult {
+    user: UserRecord | undefined;
+    response: Response;
+}
 
 export class UserController {
-    public static async createUser(email?: string, password?: string): Promise<RequestResponse> {
-        const validEmail = email !== undefined && this.isValidEmail(email);
-        if (!validEmail) {
-            return CREATE_USER_INVALID_EMAIL;
+    public static async createUser(body: CreateUserRequest): Promise<Response> {
+        const createResponse = await this.create(body.email, body.password);
+        if (createResponse.response !== SUCCESS) {
+            return createResponse.response;
         }
 
-        const validPassword = password !== undefined && this.isValidPassword(password);
-        if (!validPassword) {
-            return CREATE_USER_INVALID_PASSWORD;
-        }
-
-        const userExists = await this.userExists(email);
-        if (userExists) {
-            return CREATE_USER_EMAIL_IN_USE;
-        }
-
-        const user = await this.create(email, password);
-        if (!user) {
-            return CREATE_USER_ERROR;
-        }
-
-        await firebase
-            .auth()
-            .generateEmailVerificationLink(email)
-            .then((link) => {
-                //TODO - send email
-                logger.info('Email verification link:', link);
-            });
+        //await firebase
+        //    .auth()
+        //    .generateEmailVerificationLink(body.email)
+        //    .then((link) => {
+        //        //TODO - send email
+        //        logger.info('Email verification link:', link);
+        //    });
 
         return SUCCESS;
-    }
-
-    private static isValidEmail(email: string): boolean {
-        const emailValidationRegEx =
-            /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-        return emailValidationRegEx.test(String(email).toLowerCase());
-    }
-
-    private static isValidPassword(password: string): boolean {
-        return password.length > 0;
-    }
-
-    private static async userExists(email: string): Promise<boolean> {
-        const user = await this.getUser(email);
-        return user !== undefined;
     }
 
     private static async getUser(email: string): Promise<UserRecord | undefined> {
@@ -67,7 +35,17 @@ export class UserController {
         }
     }
 
-    private static async create(email: string, password: string): Promise<UserRecord | undefined> {
+    private static async create(email: string, password: string): Promise<CreateUserResult> {
+        if (!email) {
+            return { user: undefined, response: CREATE_USER_INVALID_EMAIL };
+        }
+
+        if (!password) {
+            return { user: undefined, response: CREATE_USER_INVALID_PASSWORD };
+        }
+
+        console.log('Creating user:', email, password);
+
         let user: UserRecord | undefined = undefined;
         try {
             user = await firebase.auth().createUser({
@@ -75,12 +53,26 @@ export class UserController {
                 password,
             });
 
-            return user;
+            return {
+                user,
+                response: SUCCESS,
+            };
         } catch (error) {
-            logger.error('Error creating user:', error);
+            // @ts-ignore :(
+            const code = error.errorInfo.code;
+            logger.error('Error creating user:', code);
+
+            switch (code) {
+                case 'auth/email-already-exists':
+                    return { user: undefined, response: CREATE_USER_EMAIL_IN_USE };
+                case 'auth/invalid-email':
+                    return { user: undefined, response: CREATE_USER_INVALID_EMAIL };
+                case 'auth/invalid-password':
+                    return { user: undefined, response: CREATE_USER_INVALID_PASSWORD };
+            }
         }
 
-        return undefined;
+        return { user: undefined, response: CREATE_USER_ERROR };
     }
 
     public static async deleteUser(email?: string): Promise<void> {
