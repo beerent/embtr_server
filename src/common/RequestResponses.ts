@@ -9,6 +9,9 @@ export enum HttpCode {
     CREATE_USER_INVALID_EMAIL = 400,
     CREATE_USER_INVALID_PASSWORD = 400,
     CREATE_USER_ERROR = 400,
+
+    FORGOT_PASSWORD_INVALID_EMAIL = 400,
+    FORGOT_PASSWORD_UNKNOWN_EMAIL = 400,
 }
 
 export const SUCCESS: Response = {
@@ -18,6 +21,9 @@ export const SUCCESS: Response = {
     message: 'success',
 };
 
+/*
+ * Create User
+ */
 export const CREATE_USER_EMAIL_IN_USE: Response = {
     httpCode: HttpCode.CREATE_USER_EMAIL_IN_USE,
     internalCode: Code.CREATE_USER_EMAIL_IN_USE,
@@ -44,4 +50,22 @@ export const CREATE_USER_ERROR: Response = {
     internalCode: Code.GENERIC_ERROR,
     success: false,
     message: 'an error occured.',
+};
+
+/*
+ * Forgot Password
+ */
+
+export const FORGOT_PASSWORD_INVALID_EMAIL: Response = {
+    httpCode: HttpCode.FORGOT_PASSWORD_INVALID_EMAIL,
+    internalCode: Code.FORGOT_PASSWORD_INVALID_EMAIL,
+    success: false,
+    message: 'invalid email address',
+};
+
+export const FORGOT_PASSWORD_UNKNOWN_EMAIL: Response = {
+    httpCode: HttpCode.FORGOT_PASSWORD_UNKNOWN_EMAIL,
+    internalCode: Code.FORGOT_PASSWORD_UNKNOWN_EMAIL,
+    success: false,
+    message: 'unknown email address',
 };

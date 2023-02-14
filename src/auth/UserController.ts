@@ -1,8 +1,17 @@
-import { CREATE_USER_EMAIL_IN_USE, CREATE_USER_ERROR, CREATE_USER_INVALID_EMAIL, CREATE_USER_INVALID_PASSWORD, SUCCESS } from '@src/common/RequestResponses';
+import {
+    CREATE_USER_EMAIL_IN_USE,
+    CREATE_USER_ERROR,
+    CREATE_USER_INVALID_EMAIL,
+    CREATE_USER_INVALID_PASSWORD,
+    FORGOT_PASSWORD_INVALID_EMAIL,
+    FORGOT_PASSWORD_UNKNOWN_EMAIL,
+    SUCCESS,
+} from '@src/common/RequestResponses';
 import { firebase } from './Firebase';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import { logger } from '@src/common/logger/Logger';
-import { CreateUserRequest, Response } from '@resources/types';
+import { CreateUserRequest, ForgotPasswordRequest, Response } from '@resources/types';
+import { EmailController } from '@src/notifications/email/EmailController';
 
 interface CreateUserResult {
     user: UserRecord | undefined;
@@ -16,14 +25,21 @@ export class UserController {
             return createResponse.response;
         }
 
-        //await firebase
-        //    .auth()
-        //    .generateEmailVerificationLink(body.email)
-        //    .then((link) => {
-        //        //TODO - send email
-        //        logger.info('Email verification link:', link);
-        //    });
+        await this.sendVerificationEmail(body.email);
+        return SUCCESS;
+    }
 
+    public static async forgotPassword(body: ForgotPasswordRequest): Promise<Response> {
+        if (!body.email) {
+            return FORGOT_PASSWORD_INVALID_EMAIL;
+        }
+
+        const user = await this.getUser(body.email);
+        if (!user) {
+            return FORGOT_PASSWORD_UNKNOWN_EMAIL;
+        }
+
+        await this.sendForgotPasswordEmail(body.email);
         return SUCCESS;
     }
 
@@ -43,8 +59,6 @@ export class UserController {
         if (!password) {
             return { user: undefined, response: CREATE_USER_INVALID_PASSWORD };
         }
-
-        console.log('Creating user:', email, password);
 
         let user: UserRecord | undefined = undefined;
         try {
@@ -73,6 +87,22 @@ export class UserController {
         }
 
         return { user: undefined, response: CREATE_USER_ERROR };
+    }
+
+    private static async sendVerificationEmail(email: string): Promise<void> {
+        const link = await firebase.auth().generateEmailVerificationLink(email);
+        const subject = 'Verify your email';
+        const text = `Please click the link to verify your email: ${link}`;
+
+        await EmailController.sendEmail(email, subject, text);
+    }
+
+    private static async sendForgotPasswordEmail(email: string): Promise<void> {
+        const link = await firebase.auth().generatePasswordResetLink(email);
+        const subject = 'Reset your password';
+        const text = `Please click the link to reset your password: ${link}. If you did not request a password reset, you are safe to ignore this email.`;
+
+        await EmailController.sendEmail(email, subject, text);
     }
 
     public static async deleteUser(email?: string): Promise<void> {

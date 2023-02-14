@@ -4,6 +4,10 @@ export interface CreateUserRequest {
     password: string;
 }
 
+export interface ForgotPasswordRequest {
+    email: string
+}
+
 export interface Response {
     httpCode: number;
     internalCode: Code;
