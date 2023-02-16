@@ -8,6 +8,10 @@ export interface ForgotPasswordRequest {
     email: string
 }
 
+export interface VerifyEmailRequest {
+    email: string
+}
+
 export interface Response {
     httpCode: number;
     internalCode: Code;

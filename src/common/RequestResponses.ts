@@ -12,6 +12,9 @@ export enum HttpCode {
 
     FORGOT_PASSWORD_INVALID_EMAIL = 400,
     FORGOT_PASSWORD_UNKNOWN_EMAIL = 400,
+
+    SEND_VERIFICATION_EMAIL_INVALID_EMAIL = 400,
+    SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL = 400,
 }
 
 export const SUCCESS: Response = {
@@ -66,6 +69,24 @@ export const FORGOT_PASSWORD_INVALID_EMAIL: Response = {
 export const FORGOT_PASSWORD_UNKNOWN_EMAIL: Response = {
     httpCode: HttpCode.FORGOT_PASSWORD_UNKNOWN_EMAIL,
     internalCode: Code.FORGOT_PASSWORD_UNKNOWN_EMAIL,
+    success: false,
+    message: 'unknown email address',
+};
+
+/*
+ * SEMD VERIFICATION EMAIL
+ */
+
+export const SEND_VERIFICATION_EMAIL_INVALID_EMAIL: Response = {
+    httpCode: HttpCode.SEND_VERIFICATION_EMAIL_INVALID_EMAIL,
+    internalCode: Code.SEND_VERIFICATION_EMAIL_INVALID_EMAIL,
+    success: false,
+    message: 'invalid email address',
+};
+
+export const SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL: Response = {
+    httpCode: HttpCode.SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
+    internalCode: Code.SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     success: false,
     message: 'unknown email address',
 };

@@ -1,5 +1,5 @@
 import { firestore } from '@src/auth/Firebase';
-import { EmailController } from '@src/notifications/email/EmailController';
+import { EmailController } from '@src/controller/EmailController';
 
 describe.skip('send email success test case', () => {
     test('email is sent', async () => {
