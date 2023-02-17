@@ -8,6 +8,7 @@ import {
     FORGOT_PASSWORD_INVALID_EMAIL,
     FORGOT_PASSWORD_UNKNOWN_EMAIL,
     SEND_VERIFICATION_EMAIL_INVALID_EMAIL,
+    SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
     SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     SUCCESS,
 } from '@src/common/RequestResponses';
@@ -145,6 +146,14 @@ describe('send verification email', () => {
 
             expect(response.statusCode).toBe(SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL.httpCode);
             expect(response.body).toEqual(SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL);
+        });
+
+        test('send verify email multiple times', async () => {
+            const body: VerifyEmailRequest = { email: 'send_verify_email_test@embtr.com' };
+            await request(app).post(USER_SEND_EMAIL_VERIFICATION_ENDPOINT).send(body);
+            const response = await request(app).post(USER_SEND_EMAIL_VERIFICATION_ENDPOINT).send(body);
+
+            expect(response.statusCode).toBe(SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS.httpCode);
         });
     });
 

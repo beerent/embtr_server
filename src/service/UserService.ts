@@ -7,6 +7,7 @@ import {
     FORGOT_PASSWORD_INVALID_EMAIL,
     FORGOT_PASSWORD_UNKNOWN_EMAIL,
     SEND_VERIFICATION_EMAIL_INVALID_EMAIL,
+    SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
     SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     SUCCESS,
 } from '@src/common/RequestResponses';
@@ -14,6 +15,11 @@ import { Code } from '@resources/codes';
 import { CreateUserResult, UserController } from '@src/controller/UserController';
 import { firebase } from '@src/auth/Firebase';
 import { EmailController } from '@src/controller/EmailController';
+
+interface EmailVerificationLink {
+    link: string;
+    error?: string;
+}
 
 export class UserService {
     public static async create(request: CreateUserRequest): Promise<Response> {
@@ -26,7 +32,12 @@ export class UserService {
             return this.getFailureResponse(result);
         }
 
-        this.sendEmailVerificationEmail(request.email);
+        const emailVerificationLink = await this.getEmailVerificationLink(request.email);
+        if (emailVerificationLink.error) {
+            return CREATE_USER_ERROR;
+        }
+
+        await this.sendEmailVerificationEmail(request.email, emailVerificationLink);
         return SUCCESS;
     }
 
@@ -54,7 +65,13 @@ export class UserService {
             return SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL;
         }
 
-        await this.sendEmailVerificationEmail(request.email);
+        const emailVerificationLink = await this.getEmailVerificationLink(request.email);
+        if (emailVerificationLink.error) {
+            return SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS;
+        }
+
+        await this.sendEmailVerificationEmail(request.email, emailVerificationLink);
+
         return SUCCESS;
     }
 
@@ -81,12 +98,27 @@ export class UserService {
         return CREATE_USER_ERROR;
     }
 
-    private static async sendEmailVerificationEmail(email: string): Promise<void> {
-        const link = await firebase.auth().generateEmailVerificationLink(email);
+    private static async getEmailVerificationLink(email: string): Promise<EmailVerificationLink> {
+        try {
+            const link = await firebase.auth().generateEmailVerificationLink(email);
+            return { link };
+        } catch (error) {
+            //@ts-ignore :(
+            if (error.message.includes('TOO MANY ATTEMPTS')) {
+                return { link: '', error: 'too many attempts' };
+            }
+        }
+
+        return { link: '', error: 'unknown error' };
+    }
+
+    private static async sendEmailVerificationEmail(email: string, link: EmailVerificationLink): Promise<EmailVerificationLink> {
         const subject = 'Verify your email';
-        const text = `Please click the link to verify your email: ${link}`;
+        const text = `Please click the link to verify your email: ${link.link}`;
 
         await EmailController.sendEmail(email, subject, text);
+
+        return link;
     }
 
     private static async sendForgotPasswordEmail(email: string): Promise<void> {

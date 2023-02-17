@@ -15,6 +15,7 @@ export enum HttpCode {
 
     SEND_VERIFICATION_EMAIL_INVALID_EMAIL = 400,
     SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL = 400,
+    SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS = 400,
 }
 
 export const SUCCESS: Response = {
@@ -89,4 +90,11 @@ export const SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL: Response = {
     internalCode: Code.SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     success: false,
     message: 'unknown email address',
+};
+
+export const SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS: Response = {
+    httpCode: HttpCode.SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
+    internalCode: Code.SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
+    success: false,
+    message: 'too many verify email attempts',
 };
