@@ -22,6 +22,7 @@
         "@babel/preset-env": "^7.20.2",
         "@types/jest": "^29.4.0",
         "@types/supertest": "^2.0.12",
+        "prisma": "^4.10.1",
         "supertest": "^6.3.3",
         "ts-jest": "^29.0.5",
         "typescript": "^4.9.5"
@@ -31,7 +32,9 @@
         "@resources": "resources/"
     },
     "dependencies": {
+        "@prisma/client": "^4.10.1",
         "body-parser": "^1.20.1",
+        "dotenv": "^16.0.3",
         "express": "^4.18.2",
         "firebase-admin": "^11.5.0",
         "module-alias": "^2.2.2",

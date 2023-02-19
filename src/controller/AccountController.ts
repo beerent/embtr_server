@@ -3,13 +3,13 @@ import { logger } from '@src/common/logger/Logger';
 import { firebase } from '@src/auth/Firebase';
 import { Code } from '@resources/codes';
 
-export interface CreateUserResult {
+export interface CreateAccountResult {
     user: UserRecord | undefined;
     code: Code;
 }
 
-export class UserController {
-    public static async create(email: string, password: string): Promise<CreateUserResult> {
+export class AccountController {
+    public static async create(email: string, password: string): Promise<CreateAccountResult> {
         let user: UserRecord | undefined = undefined;
         try {
             user = await firebase.auth().createUser({
@@ -28,11 +28,11 @@ export class UserController {
 
             switch (code) {
                 case 'auth/email-already-exists':
-                    return { user: undefined, code: Code.CREATE_USER_EMAIL_IN_USE };
+                    return { user: undefined, code: Code.CREATE_ACCOUNT_EMAIL_IN_USE };
                 case 'auth/invalid-email':
-                    return { user: undefined, code: Code.CREATE_USER_INVALID_EMAIL };
+                    return { user: undefined, code: Code.CREATE_ACCOUNT_INVALID_EMAIL };
                 case 'auth/invalid-password':
-                    return { user: undefined, code: Code.CREATE_USER_INVALID_PASSWORD };
+                    return { user: undefined, code: Code.CREATE_ACCOUNT_INVALID_PASSWORD };
             }
         }
 
@@ -52,8 +52,9 @@ export class UserController {
 
     public static async get(email: string): Promise<UserRecord | undefined> {
         try {
-            return await firebase.auth().getUserByEmail(email);
-        } catch {
+            const user = await firebase.auth().getUserByEmail(email);
+            return user;
+        } catch (error) {
             return undefined;
         }
     }

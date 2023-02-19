@@ -24,7 +24,7 @@
             "type": "node",
             "request": "launch",
             "runtimeExecutable": "npx",
-            "runtimeArgs": ["ts-node", "--inspect-brk", "./node_modules/.bin/jest", "--watch"],
+            "runtimeArgs": ["ts-node", "--inspect-brk", "./node_modules/.bin/jest", "--watch", "--silent"],
 
             "name": "debug tests",
             "console": "integratedTerminal"

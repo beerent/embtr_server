@@ -1,15 +1,19 @@
 import { Code } from './codes';
-export interface CreateUserRequest {
+export interface CreateAccountRequest {
     email: string;
     password: string;
 }
 
-export interface ForgotPasswordRequest {
+export interface ForgotAccountPasswordRequest {
     email: string
 }
 
-export interface VerifyEmailRequest {
+export interface VerifyAccountEmailRequest {
     email: string
+}
+
+export interface GetAccountRequest {
+    uid: string
 }
 
 export interface Response {

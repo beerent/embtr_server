@@ -1,18 +1,18 @@
-import { Response, CreateUserRequest, ForgotPasswordRequest, VerifyEmailRequest } from '@resources/types';
+import { CreateAccountRequest, ForgotAccountPasswordRequest, Response, VerifyAccountEmailRequest } from '@resources/types';
 import {
-    CREATE_USER_EMAIL_IN_USE,
-    CREATE_USER_ERROR,
-    CREATE_USER_INVALID_EMAIL,
-    CREATE_USER_INVALID_PASSWORD,
-    FORGOT_PASSWORD_INVALID_EMAIL,
-    FORGOT_PASSWORD_UNKNOWN_EMAIL,
-    SEND_VERIFICATION_EMAIL_INVALID_EMAIL,
-    SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
-    SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
+    CREATE_ACCOUNT_EMAIL_IN_USE,
+    CREATE_ACCOUNT_ERROR,
+    CREATE_ACCOUNT_INVALID_EMAIL,
+    CREATE_ACCOUNT_INVALID_PASSWORD,
+    FORGOT_ACCOUNT_PASSWORD_INVALID_EMAIL,
+    FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL,
+    SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL,
+    SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
+    SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     SUCCESS,
 } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
-import { CreateUserResult, UserController } from '@src/controller/UserController';
+import { CreateAccountResult, AccountController } from '@src/controller/AccountController';
 import { firebase } from '@src/auth/Firebase';
 import { EmailController } from '@src/controller/EmailController';
 
@@ -21,53 +21,53 @@ interface EmailVerificationLink {
     error?: string;
 }
 
-export class UserService {
-    public static async create(request: CreateUserRequest): Promise<Response> {
+export class AccountService {
+    public static async create(request: CreateAccountRequest): Promise<Response> {
         if (!request.email || !request.password) {
             return this.getInvalidRequestResponse(request);
         }
 
-        const result: CreateUserResult = await UserController.create(request.email, request.password);
+        const result: CreateAccountResult = await AccountController.create(request.email, request.password);
         if (result.code !== Code.SUCCESS) {
             return this.getFailureResponse(result);
         }
 
         const emailVerificationLink = await this.getEmailVerificationLink(request.email);
         if (emailVerificationLink.error) {
-            return CREATE_USER_ERROR;
+            return CREATE_ACCOUNT_ERROR;
         }
 
         await this.sendEmailVerificationEmail(request.email, emailVerificationLink);
         return SUCCESS;
     }
 
-    public static async forgotPassword(request: ForgotPasswordRequest): Promise<Response> {
+    public static async forgotPassword(request: ForgotAccountPasswordRequest): Promise<Response> {
         if (!request.email) {
-            return FORGOT_PASSWORD_INVALID_EMAIL;
+            return FORGOT_ACCOUNT_PASSWORD_INVALID_EMAIL;
         }
 
-        const user = await UserController.get(request.email);
+        const user = await AccountController.get(request.email);
         if (!user) {
-            return FORGOT_PASSWORD_UNKNOWN_EMAIL;
+            return FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL;
         }
 
         await this.sendForgotPasswordEmail(request.email);
         return SUCCESS;
     }
 
-    public static async sendVerificationEmail(request: VerifyEmailRequest): Promise<Response> {
+    public static async sendVerificationEmail(request: VerifyAccountEmailRequest): Promise<Response> {
         if (!request.email) {
-            return SEND_VERIFICATION_EMAIL_INVALID_EMAIL;
+            return SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL;
         }
 
-        const user = await UserController.get(request.email);
+        const user = await AccountController.get(request.email);
         if (!user) {
-            return SEND_VERIFICATION_EMAIL_UNKNOWN_EMAIL;
+            return SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL;
         }
 
         const emailVerificationLink = await this.getEmailVerificationLink(request.email);
         if (emailVerificationLink.error) {
-            return SEND_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS;
+            return SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS;
         }
 
         await this.sendEmailVerificationEmail(request.email, emailVerificationLink);
@@ -75,27 +75,27 @@ export class UserService {
         return SUCCESS;
     }
 
-    private static getInvalidRequestResponse(request: CreateUserRequest): Response {
+    private static getInvalidRequestResponse(request: CreateAccountRequest): Response {
         if (!request.email) {
-            return CREATE_USER_INVALID_EMAIL;
+            return CREATE_ACCOUNT_INVALID_EMAIL;
         }
 
-        return CREATE_USER_INVALID_PASSWORD;
+        return CREATE_ACCOUNT_INVALID_PASSWORD;
     }
 
-    private static getFailureResponse(result: CreateUserResult): Response {
+    private static getFailureResponse(result: CreateAccountResult): Response {
         switch (result.code) {
-            case Code.CREATE_USER_INVALID_EMAIL:
-                return CREATE_USER_INVALID_EMAIL;
+            case Code.CREATE_ACCOUNT_INVALID_EMAIL:
+                return CREATE_ACCOUNT_INVALID_EMAIL;
 
-            case Code.CREATE_USER_INVALID_PASSWORD:
-                return CREATE_USER_INVALID_PASSWORD;
+            case Code.CREATE_ACCOUNT_INVALID_PASSWORD:
+                return CREATE_ACCOUNT_INVALID_PASSWORD;
 
-            case Code.CREATE_USER_EMAIL_IN_USE:
-                return CREATE_USER_EMAIL_IN_USE;
+            case Code.CREATE_ACCOUNT_EMAIL_IN_USE:
+                return CREATE_ACCOUNT_EMAIL_IN_USE;
         }
 
-        return CREATE_USER_ERROR;
+        return CREATE_ACCOUNT_ERROR;
     }
 
     private static async getEmailVerificationLink(email: string): Promise<EmailVerificationLink> {
