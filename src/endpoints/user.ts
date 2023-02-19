@@ -1,5 +1,4 @@
 import { CreateAccountRequest, Response } from '@resources/types';
-import { logger } from '@src/common/logger/Logger';
 import { authenticate } from '@src/middleware/authentication';
 import { AccountService } from '@src/service/AccountService';
 import express from 'express';
