@@ -1,4 +1,11 @@
-import { CreateAccountRequest, ForgotAccountPasswordRequest, Response, VerifyAccountEmailRequest } from '@resources/types';
+import {
+    AuthenticationRequest,
+    AuthenticationResponse,
+    CreateAccountRequest,
+    ForgotAccountPasswordRequest,
+    Response,
+    VerifyAccountEmailRequest,
+} from '@resources/types';
 import {
     CREATE_ACCOUNT_EMAIL_IN_USE,
     CREATE_ACCOUNT_ERROR,
@@ -9,12 +16,14 @@ import {
     SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL,
     SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
     SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
+    ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
     SUCCESS,
 } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
 import { CreateAccountResult, AccountController } from '@src/controller/AccountController';
 import { firebase } from '@src/auth/Firebase';
 import { EmailController } from '@src/controller/EmailController';
+import { AuthenticationController } from '@src/controller/AuthenticationController';
 
 interface EmailVerificationLink {
     link: string;
@@ -73,6 +82,19 @@ export class AccountService {
         await this.sendEmailVerificationEmail(request.email, emailVerificationLink);
 
         return SUCCESS;
+    }
+
+    public static async authenticate(request: AuthenticationRequest): Promise<AuthenticationResponse> {
+        if (!request.email || !request.password) {
+            return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
+        }
+
+        const idToken = await AuthenticationController.getValidIdToken(request.email, request.password);
+        if (!idToken) {
+            return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
+        }
+
+        return { ...SUCCESS, token: idToken };
     }
 
     private static getInvalidRequestResponse(request: CreateAccountRequest): Response {

@@ -1,5 +1,5 @@
 import { Code } from '@resources/codes';
-import { Response } from '@resources/types';
+import { AuthenticationResponse, Response } from '@resources/types';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -17,6 +17,8 @@ export enum HttpCode {
     SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL = 400,
     SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL = 400,
     SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS = 400,
+
+    ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS = 400,
 }
 
 export const SUCCESS: Response = {
@@ -105,4 +107,18 @@ export const SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS: Response = {
     internalCode: Code.SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
     success: false,
     message: 'too many verify email attempts',
+};
+
+/*
+ * ACCOUNT AUTHENTICATION
+ */
+export const ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS: AuthenticationResponse = {
+    httpCode: HttpCode.ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
+    internalCode: Code.ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
+    success: false,
+    message: 'invalid username/password',
+};
+
+export const ACCOUNT_AUTHENTICATION_SUCCESS: AuthenticationResponse = {
+    ...SUCCESS,
 };

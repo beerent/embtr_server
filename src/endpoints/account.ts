@@ -1,4 +1,4 @@
-import { CreateAccountRequest, ForgotAccountPasswordRequest, Response, VerifyAccountEmailRequest } from '@resources/types';
+import { AuthenticationRequest, AuthenticationResponse, CreateAccountRequest, ForgotAccountPasswordRequest, Response, VerifyAccountEmailRequest } from '@resources/types';
 import { logger } from '@src/common/logger/Logger';
 import { AccountService } from '@src/service/AccountService';
 import express from 'express';
@@ -30,6 +30,16 @@ accountRouter.post('/send_verification_email', async (req, res) => {
     logger.info('POST response /account/send_verification_email', response);
 
     res.status(response.httpCode).json(response);
+});
+
+accountRouter.post('/authenticate', async (req, res) => {
+    logger.info('POST request /account/authenticate', req.body);
+    const body: AuthenticationRequest = req.body;
+    const response: AuthenticationResponse = await AccountService.authenticate(body);
+    logger.info('POST response /account/authenticate', response);
+
+    res.status(response.httpCode).json(response);
+
 });
 
 export default accountRouter;

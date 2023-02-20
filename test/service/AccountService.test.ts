@@ -1,7 +1,8 @@
 import { ACCOUNT, ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT } from '@resources/endpoints';
-import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types';
+import { AuthenticationRequest, AuthenticationResponse, CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types';
 import app from '@src/app';
 import {
+    ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
     CREATE_ACCOUNT_EMAIL_IN_USE,
     CREATE_ACCOUNT_INVALID_EMAIL,
     CREATE_ACCOUNT_INVALID_PASSWORD,
@@ -11,7 +12,6 @@ import {
     SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
     SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     SUCCESS,
-    UNAUTHORIZED,
 } from '@src/common/RequestResponses';
 import { EmailController } from '@src/controller/EmailController';
 import { AccountController } from '@src/controller/AccountController';
@@ -184,6 +184,48 @@ describe('send verification email', () => {
             await request(app).post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT).send(body);
 
             expect(EmailController.sendEmail).toHaveBeenCalled();
+        });
+    });
+});
+
+describe('authenticate', () => {
+    describe('fail cases', () => {
+        test('missing email in body', async () => {
+            const response = await request(app).post('/account/authenticate').send({ password: 'password' });
+
+            expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);
+            expect(response.body).toEqual(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS);
+        });
+
+        test('missing password in body', async () => {
+            const response = await request(app).post('/account/authenticate').send({ email: 'email@embtr.com' });
+
+            expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);
+            expect(response.body).toEqual(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS);
+        });
+
+        test('incorrect user/password', async () => {
+            const body: AuthenticationRequest = { email: 'test@embtr.com', password: 'password' };
+            const response = await request(app).post('/account/authenticate').send(body);
+
+            expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);
+            expect(response.body).toEqual(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS);
+        });
+    });
+});
+
+describe('authenticate', () => {
+    const email = 'authentication_test@embtr.com';
+    describe('success case', () => {
+        beforeAll(async () => {
+            await AccountController.delete(email);
+            await AccountController.create(email, 'password');
+        });
+        test('successfully returns token', async () => {
+            const response = await request(app).post('/account/authenticate').send({ email, password: 'password' });
+
+            expect(response.statusCode).toBe(SUCCESS.httpCode);
+            expect(response.body.token).toBeTruthy();
         });
     });
 });
