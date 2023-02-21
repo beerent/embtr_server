@@ -2,6 +2,7 @@ import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import { logger } from '@src/common/logger/Logger';
 import { firebase } from '@src/auth/Firebase';
 import { Code } from '@resources/codes';
+import { Role } from '@src/roles/Roles';
 
 export interface CreateAccountResult {
     user: UserRecord | undefined;
@@ -44,9 +45,9 @@ export class AccountController {
             return;
         }
 
-        const user = await this.get(email);
-        if (user) {
-            await firebase.auth().deleteUser(user.uid);
+        const account = await this.get(email);
+        if (account) {
+            await firebase.auth().deleteUser(account.uid);
         }
     }
 
@@ -56,6 +57,14 @@ export class AccountController {
             return user;
         } catch (error) {
             return undefined;
+        }
+    }
+
+    public static async updateAccountRoles(userRecord: UserRecord, roles: Role[]): Promise<void> {
+        try {
+            await firebase.auth().setCustomUserClaims(userRecord.uid, { roles });
+        } catch (error) {
+            logger.error('Error updating user roles:', error);
         }
     }
 }

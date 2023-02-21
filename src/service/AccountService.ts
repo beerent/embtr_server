@@ -89,7 +89,7 @@ export class AccountService {
             return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
         }
 
-        const idToken = await AuthenticationController.getValidIdToken(request.email, request.password);
+        const idToken = await AuthenticationController.generateValidIdToken(request.email, request.password);
         if (!idToken) {
             return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
         }

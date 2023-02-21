@@ -212,15 +212,14 @@ describe('authenticate', () => {
             expect(response.body).toEqual(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS);
         });
     });
-});
 
-describe('authenticate', () => {
-    const email = 'authentication_test@embtr.com';
     describe('success case', () => {
+        const email = 'authentication_test@embtr.com';
         beforeAll(async () => {
             await AccountController.delete(email);
             await AccountController.create(email, 'password');
         });
+
         test('successfully returns token', async () => {
             const response = await request(app).post('/account/authenticate').send({ email, password: 'password' });
 

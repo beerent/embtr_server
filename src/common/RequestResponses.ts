@@ -1,9 +1,10 @@
 import { Code } from '@resources/codes';
-import { AuthenticationResponse, Response } from '@resources/types';
+import { AuthenticationResponse, GetUserResponse, Response } from '@resources/types';
 
 export enum HttpCode {
     SUCCESS = 200,
     UNAUTHORIZED = 401,
+    FORBIDDEN = 403,
 
     //create account errors
     CREATE_ACCOUNT_EMAIL_IN_USE = 409,
@@ -32,7 +33,14 @@ export const UNAUTHORIZED: Response = {
     httpCode: HttpCode.UNAUTHORIZED,
     internalCode: Code.UNAUTHORIZED,
     success: true,
-    message: 'success',
+    message: 'unauthorized',
+};
+
+export const FORBIDDEN: Response = {
+    httpCode: HttpCode.FORBIDDEN,
+    internalCode: Code.FORBIDDEN,
+    success: true,
+    message: 'unauthorized',
 };
 
 /*
@@ -120,5 +128,12 @@ export const ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS: AuthenticationResponse 
 };
 
 export const ACCOUNT_AUTHENTICATION_SUCCESS: AuthenticationResponse = {
+    ...SUCCESS,
+};
+
+/*
+ * USER
+ */
+export const GET_USER_SUCCESS: GetUserResponse = {
     ...SUCCESS,
 };

@@ -2,6 +2,7 @@ export enum Code {
     SUCCESS,
     UNAUTHORIZED,
     GENERIC_ERROR,
+    FORBIDDEN,
 
     //CREATE USER
     CREATE_ACCOUNT_EMAIL_IN_USE,
