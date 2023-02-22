@@ -5,6 +5,7 @@ export enum HttpCode {
     SUCCESS = 200,
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
+    RESOURCE_NOT_FOUND = 404,
 
     //create account errors
     CREATE_ACCOUNT_EMAIL_IN_USE = 409,
@@ -32,15 +33,22 @@ export const SUCCESS: Response = {
 export const UNAUTHORIZED: Response = {
     httpCode: HttpCode.UNAUTHORIZED,
     internalCode: Code.UNAUTHORIZED,
-    success: true,
+    success: false,
     message: 'unauthorized',
 };
 
 export const FORBIDDEN: Response = {
     httpCode: HttpCode.FORBIDDEN,
     internalCode: Code.FORBIDDEN,
-    success: true,
-    message: 'unauthorized',
+    success: false,
+    message: 'access forbidden',
+};
+
+export const RESOURCE_NOT_FOUND: Response = {
+    httpCode: HttpCode.RESOURCE_NOT_FOUND,
+    internalCode: Code.RESOURCE_NOT_FOUND,
+    success: false,
+    message: 'resource not found',
 };
 
 /*
@@ -136,4 +144,8 @@ export const ACCOUNT_AUTHENTICATION_SUCCESS: AuthenticationResponse = {
  */
 export const GET_USER_SUCCESS: GetUserResponse = {
     ...SUCCESS,
+};
+
+export const GET_USER_FAILED_NOT_FOUND: GetUserResponse = {
+    ...RESOURCE_NOT_FOUND,
 };

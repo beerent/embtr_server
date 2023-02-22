@@ -3,7 +3,9 @@
         "baseUrl": ".",
         "paths": {
             "@src/*": ["src/*"],
-            "@resources/*": ["resources/*"]
+            "@test/*": ["test/*"],
+            "@resources/*": ["resources/*"],
+            "@database/*": ["prisma/*"]
         },
         "outDir": "dist",
         "module": "commonjs",

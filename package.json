@@ -29,7 +29,9 @@
     },
     "_moduleAliases": {
         "@src": "src/",
-        "@resources": "resources/"
+        "@test": "test/",
+        "@resources": "resources/",
+        "@database": "prisma/"
     },
     "dependencies": {
         "@prisma/client": "^4.10.1",

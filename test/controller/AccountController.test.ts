@@ -1,6 +1,6 @@
 import { AccountController, CreateAccountResult } from '@src/controller/AccountController';
 import { CREATE_ACCOUNT_EMAIL_IN_USE, CREATE_ACCOUNT_INVALID_EMAIL, CREATE_ACCOUNT_INVALID_PASSWORD, SUCCESS } from '@src/common/RequestResponses';
-import { ADMIN_ROLE, Role } from '@src/roles/Roles';
+import { Role } from '@src/roles/Roles';
 
 describe('create account', () => {
     describe('fail cases', () => {

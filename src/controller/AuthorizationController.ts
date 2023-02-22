@@ -5,14 +5,11 @@ require('dotenv').config();
 export class AuthorizationController {
     public static async getRolesFromToken(authorizationHeader: string): Promise<Role[]> {
         const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
-        if (!decodedToken) {
+
+        if (!decodedToken?.roles) {
             return [];
         }
 
-        if (!decodedToken.claims.roles) {
-            return [];
-        }
-
-        return decodedToken.claims.roles;
+        return decodedToken.roles;
     }
 }
