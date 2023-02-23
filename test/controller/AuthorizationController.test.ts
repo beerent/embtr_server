@@ -31,4 +31,26 @@ describe('authorization', () => {
             });
         });
     });
+
+    describe('uid extraction', () => {
+        describe('fail cases', () => {
+            test('bearer token is missing', async () => {
+                const uid = await AuthorizationController.getUidFromToken('');
+                expect(uid).toBeUndefined();
+            });
+
+            test('bearer token is invalid', async () => {
+                const uid = await AuthorizationController.getUidFromToken('invalid token');
+                expect(uid).toBeUndefined();
+            });
+        });
+
+        describe('success cases', () => {
+            test('can get uid', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+                const uid = await AuthorizationController.getUidFromToken(`Bearer ${token}`);
+                expect(uid).toBeDefined();
+            });
+        });
+    });
 });

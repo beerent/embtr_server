@@ -12,4 +12,14 @@ export class AuthorizationController {
 
         return decodedToken.roles;
     }
+
+    public static async getUidFromToken(authorizationHeader: string): Promise<string | undefined> {
+        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+
+        if (!decodedToken?.uid) {
+            return undefined;
+        }
+
+        return decodedToken.uid;
+    }
 }

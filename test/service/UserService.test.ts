@@ -36,6 +36,14 @@ describe('user service tests', () => {
             expect(response.body.user).toBeUndefined();
         });
 
+        test('get self user with insufficient permissions', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app).get(`${USER}/${RO_NO_ROLE_TEST_USER_UID}`).set('Authorization', `Bearer ${requesterToken}`).send();
+
+            expect(response.status).toEqual(GET_USER_SUCCESS.httpCode);
+            expect(response.body.user).toBeDefined();
+        });
+
         test('get unknown user with sufficient permissions', async () => {
             const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
             const response = await request(app).get(`${USER}/invalid_user`).set('Authorization', `Bearer ${requesterToken}`).send();
