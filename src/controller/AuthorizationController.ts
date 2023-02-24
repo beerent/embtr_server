@@ -22,4 +22,14 @@ export class AuthorizationController {
 
         return decodedToken.uid;
     }
+
+    public static async getEmailFromToken(authorizationHeader: string): Promise<string | undefined> {
+        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+
+        if (!decodedToken?.email) {
+            return undefined;
+        }
+
+        return decodedToken.email;
+    }
 }

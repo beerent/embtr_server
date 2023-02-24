@@ -53,4 +53,27 @@ describe('authorization', () => {
             });
         });
     });
+
+    describe('email extraction', () => {
+        describe('fail cases', () => {
+            test('bearer token is missing', async () => {
+                const uid = await AuthorizationController.getEmailFromToken('');
+                expect(uid).toBeUndefined();
+            });
+
+            test('bearer token is invalid', async () => {
+                const uid = await AuthorizationController.getEmailFromToken('invalid token');
+                expect(uid).toBeUndefined();
+            });
+        });
+
+        describe('success cases', () => {
+            test('can get uid', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+                const email = await AuthorizationController.getEmailFromToken(`Bearer ${token}`);
+
+                expect(email).toBe(RO_USER_ROLE_TEST_USER_EMAIL);
+            });
+        });
+    });
 });

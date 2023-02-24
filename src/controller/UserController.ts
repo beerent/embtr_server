@@ -23,10 +23,18 @@ export class UserController {
         return newUser;
     }
 
-    public static async delete(user: User): Promise<User | null> {
+    public static async deleteByUid(uid: string): Promise<User | null> {
         return await prisma.user.delete({
             where: {
-                uid: user.uid,
+                uid: uid,
+            },
+        });
+    }
+
+    public static async deleteByEmail(email: string): Promise<void> {
+        await prisma.user.deleteMany({
+            where: {
+                email: email,
             },
         });
     }

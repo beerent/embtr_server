@@ -39,3 +39,9 @@ export interface GetUserResponse extends Response {
         email: string;
     }
 }
+
+export interface CreateUserRequest {
+}
+
+export interface CreateUserResponse extends Response {
+}

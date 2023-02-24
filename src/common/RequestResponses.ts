@@ -1,5 +1,5 @@
 import { Code } from '@resources/codes';
-import { AuthenticationResponse, GetUserResponse, Response } from '@resources/types';
+import { AuthenticationResponse, CreateUserResponse, GetUserResponse, Response } from '@resources/types';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -21,6 +21,9 @@ export enum HttpCode {
     SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS = 400,
 
     ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS = 400,
+
+    USER_CREATE_FAILED = 400,
+    USER_CREATE_ALREADY_EXISTS = 409,
 }
 
 export const SUCCESS: Response = {
@@ -101,7 +104,7 @@ export const FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL: Response = {
 };
 
 /*
- * SEMD VERIFICATION EMAIL
+ * SEND VERIFICATION EMAIL
  */
 
 export const SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL: Response = {
@@ -148,4 +151,22 @@ export const GET_USER_SUCCESS: GetUserResponse = {
 
 export const GET_USER_FAILED_NOT_FOUND: GetUserResponse = {
     ...RESOURCE_NOT_FOUND,
+};
+
+export const CREATE_USER_FAILED: Response = {
+    httpCode: HttpCode.USER_CREATE_FAILED,
+    internalCode: Code.USER_CREATE_FAILED,
+    success: false,
+    message: 'failed to create user',
+};
+
+export const CREATE_USER_ALREADY_EXISTS: Response = {
+    httpCode: HttpCode.USER_CREATE_ALREADY_EXISTS,
+    internalCode: Code.USER_CREATE_ALREADY_EXISTS,
+    success: false,
+    message: 'user already exists',
+};
+
+export const CREATE_USER_SUCCESS: CreateUserResponse = {
+    ...SUCCESS,
 };
