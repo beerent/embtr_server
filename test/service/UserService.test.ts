@@ -1,5 +1,5 @@
 import { USER } from '@resources/endpoints';
-import { CreateUserRequest } from '@resources/types';
+import { CreateUserRequest, UpdateUserRequest } from '@resources/types';
 import app from '@src/app';
 import {
     CREATE_USER_ALREADY_EXISTS,
@@ -8,16 +8,21 @@ import {
     GET_USER_FAILED_NOT_FOUND,
     GET_USER_SUCCESS,
     RESOURCE_NOT_FOUND,
+    SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
 import { AccountController } from '@src/controller/AccountController';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { UserController } from '@src/controller/UserController';
+import { Role } from '@src/roles/Roles';
 import {
     RO_NO_ROLE_TEST_USER_EMAIL,
     RO_NO_ROLE_TEST_USER_UID,
     RO_USER_ROLE_TEST_USER_EMAIL,
     RO_USER_ROLE_TEST_USER_UID,
+    RW_NO_ROLE_TEST_USER_EMAIL,
+    RW_USER_ROLE_TEST_USER_EMAIL,
+    RW_USER_ROLE_TEST_USER_UID,
     TEST_USER_PASSWORD,
 } from '@test/util/DedicatedTestUsers';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
@@ -110,6 +115,62 @@ describe('user service tests', () => {
                 const response = await request(app).post(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
 
                 expect(response.status).toEqual(CREATE_USER_SUCCESS.httpCode);
+            });
+        });
+    });
+
+    describe('update user', () => {
+        describe('fail cases', () => {
+            test('update user with unauthenticated account', async () => {
+                const body: UpdateUserRequest = {};
+                const response = await request(app).patch(`${USER}`).send(body);
+
+                expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            });
+
+            test('update user with insuffecient permissions', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RW_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: UpdateUserRequest = {};
+                const response = await request(app).patch(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
+
+                expect(response.status).toEqual(FORBIDDEN.httpCode);
+            });
+            // update user with insufficient permissions
+        });
+
+        describe('success cases', () => {
+            test('update user with sufficient permissions returns success', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+                const body: UpdateUserRequest = {};
+                const response = await request(app).patch(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
+
+                expect(response.status).toEqual(SUCCESS.httpCode);
+            });
+
+            test('update user with sufficient permissions updates user', async () => {
+                const randomString = Math.random().toString(36).substring(7);
+
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: UpdateUserRequest = { displayName: randomString };
+                await request(app).patch(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
+                const user = await UserController.getByUid(RW_USER_ROLE_TEST_USER_UID);
+
+                expect(user?.displayName).toEqual(randomString);
+            });
+
+            test('update user with sufficient permissions does not change unmodified fields', async () => {
+                const initialLocation = 'Austin, TX';
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                await UserController.update(RW_USER_ROLE_TEST_USER_UID, { location: initialLocation });
+
+                const body: UpdateUserRequest = { displayName: 'displayName' };
+                await request(app).patch(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
+                const user = await UserController.getByUid(RW_USER_ROLE_TEST_USER_UID);
+
+                expect(user?.location).toEqual(initialLocation);
             });
         });
     });

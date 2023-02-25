@@ -1,5 +1,13 @@
-import { CreateUserResponse, GetUserResponse } from '@resources/types';
-import { CREATE_USER_ALREADY_EXISTS, CREATE_USER_FAILED, CREATE_USER_SUCCESS, GET_USER_FAILED_NOT_FOUND, GET_USER_SUCCESS } from '@src/common/RequestResponses';
+import { CreateUserResponse, GetUserResponse, Response, UpdateUserRequest } from '@resources/types';
+import {
+    CREATE_USER_ALREADY_EXISTS,
+    CREATE_USER_FAILED,
+    CREATE_USER_SUCCESS,
+    GET_USER_FAILED_NOT_FOUND,
+    GET_USER_SUCCESS,
+    SUCCESS,
+    UPDATE_USER_FAILED,
+} from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { UserController } from '@src/controller/UserController';
 import { Request } from 'express';
@@ -33,5 +41,17 @@ export class UserService {
         }
 
         return CREATE_USER_FAILED;
+    }
+
+    public static async update(request: Request, updateUserRequest: UpdateUserRequest): Promise<Response> {
+        const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
+        const email = await AuthorizationController.getEmailFromToken(request.headers.authorization!);
+
+        if (!uid || !email) {
+            return UPDATE_USER_FAILED;
+        }
+
+        await UserController.update(uid, { ...updateUserRequest });
+        return SUCCESS;
     }
 }

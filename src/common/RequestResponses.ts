@@ -24,6 +24,7 @@ export enum HttpCode {
 
     USER_CREATE_FAILED = 400,
     USER_CREATE_ALREADY_EXISTS = 409,
+    USER_UPDATE_FAILED = 400,
 }
 
 export const SUCCESS: Response = {
@@ -169,4 +170,11 @@ export const CREATE_USER_ALREADY_EXISTS: Response = {
 
 export const CREATE_USER_SUCCESS: CreateUserResponse = {
     ...SUCCESS,
+};
+
+export const UPDATE_USER_FAILED: Response = {
+    httpCode: HttpCode.USER_UPDATE_FAILED,
+    internalCode: Code.USER_UPDATE_FAILED,
+    success: false,
+    message: 'failed to update user',
 };

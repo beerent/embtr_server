@@ -1,4 +1,5 @@
 import { Code } from './codes';
+import { UserModel } from './models';
 
 export interface CreateAccountRequest {
     email: string;
@@ -34,14 +35,14 @@ export interface AuthenticationResponse extends Response {
 }
 
 export interface GetUserResponse extends Response {
-    user?: {
-        uid: string;
-        email: string;
-    }
+    user?: UserModel
 }
 
 export interface CreateUserRequest {
 }
 
 export interface CreateUserResponse extends Response {
+}
+
+export interface UpdateUserRequest extends UserModel {
 }

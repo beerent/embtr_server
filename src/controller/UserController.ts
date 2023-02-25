@@ -1,5 +1,6 @@
 import { User } from '@prisma/client';
 import { prisma } from '@database/prisma';
+import { UserModel } from '@resources/models';
 
 export class UserController {
     public static async getByUid(uid: string): Promise<User | null> {
@@ -39,16 +40,16 @@ export class UserController {
         });
     }
 
-    public static async update(uid: string, email: string): Promise<User | null> {
-        const user = await prisma.user.update({
+    public static async update(uid: string, user: UserModel): Promise<User | null> {
+        const updatedUser = await prisma.user.update({
             where: {
                 uid: uid,
             },
             data: {
-                email: email,
+                ...user,
             },
         });
 
-        return user;
+        return updatedUser;
     }
 }
