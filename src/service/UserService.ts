@@ -8,8 +8,10 @@ import {
     SUCCESS,
     UPDATE_USER_FAILED,
 } from '@src/common/RequestResponses';
+import { AccountController } from '@src/controller/AccountController';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { UserController } from '@src/controller/UserController';
+import { Role } from '@src/roles/Roles';
 import { Request } from 'express';
 
 export class UserService {
@@ -36,11 +38,13 @@ export class UserService {
         }
 
         const newUser = await UserController.create(uid, email);
-        if (newUser) {
-            return CREATE_USER_SUCCESS;
+        if (!newUser) {
+            return CREATE_USER_FAILED;
         }
 
-        return CREATE_USER_FAILED;
+        await AccountController.updateAccountRoles(uid, [Role.USER]);
+
+        return CREATE_USER_SUCCESS;
     }
 
     public static async update(request: Request, updateUserRequest: UpdateUserRequest): Promise<Response> {

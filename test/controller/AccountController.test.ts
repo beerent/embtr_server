@@ -99,7 +99,7 @@ describe('update account roles', () => {
         const account = await AccountController.get(email);
 
         expect(account!.customClaims).toBeFalsy();
-        await AccountController.updateAccountRoles(account!, [Role.ADMIN]);
+        await AccountController.updateAccountRoles(account!.uid, [Role.ADMIN]);
         const updatedaccount = await AccountController.get(email);
         expect(updatedaccount!.customClaims!.roles).toEqual([Role.ADMIN]);
     });

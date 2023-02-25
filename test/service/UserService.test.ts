@@ -13,7 +13,9 @@ import {
 } from '@src/common/RequestResponses';
 import { AccountController } from '@src/controller/AccountController';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
+import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { UserController } from '@src/controller/UserController';
+import { getBearerToken } from '@src/general/auth/BearerTokenUtility';
 import { Role } from '@src/roles/Roles';
 import {
     RO_NO_ROLE_TEST_USER_EMAIL,
@@ -102,7 +104,7 @@ describe('user service tests', () => {
         describe('success cases', () => {
             const email = 'create_user_test@embtr.com';
 
-            beforeAll(async () => {
+            beforeEach(async () => {
                 await UserController.deleteByEmail(email);
                 await AccountController.delete(email);
                 await AccountController.create(email, TEST_USER_PASSWORD);
@@ -115,6 +117,24 @@ describe('user service tests', () => {
                 const response = await request(app).post(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
 
                 expect(response.status).toEqual(CREATE_USER_SUCCESS.httpCode);
+            });
+
+            test('create user with authenticated account sets user role', async () => {
+                const token = await AuthenticationController.generateValidIdToken(email, TEST_USER_PASSWORD);
+
+                //verify account has no roles
+                const initialRoles = await AuthorizationController.getRolesFromToken(getBearerToken(token));
+                expect(initialRoles).toEqual([]);
+
+                //create user
+                const body: CreateUserRequest = {};
+                await request(app).post(`${USER}`).set('Authorization', getBearerToken(token)).send(body);
+
+                const updatedToken = await AuthenticationController.generateValidIdToken(email, TEST_USER_PASSWORD);
+
+                //verify account has user role
+                const createdUserRoles = await AuthorizationController.getRolesFromToken(getBearerToken(updatedToken));
+                expect(createdUserRoles).toEqual([Role.USER]);
             });
         });
     });

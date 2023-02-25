@@ -16,6 +16,7 @@ import {
 import { EmailController } from '@src/controller/EmailController';
 import { AccountController } from '@src/controller/AccountController';
 import request from 'supertest';
+import { RO_NO_ROLE_TEST_USER_EMAIL } from '@test/util/DedicatedTestUsers';
 
 describe('create user', () => {
     describe('fail cases', () => {
@@ -205,7 +206,7 @@ describe('authenticate', () => {
         });
 
         test('incorrect user/password', async () => {
-            const body: AuthenticationRequest = { email: 'test@embtr.com', password: 'password' };
+            const body: AuthenticationRequest = { email: RO_NO_ROLE_TEST_USER_EMAIL, password: 'notthepassword' };
             const response = await request(app).post('/account/authenticate').send(body);
 
             expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);

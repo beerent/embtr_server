@@ -24,7 +24,7 @@ userRouter.patch('/', authenticate, authorizeUserPatch, async (req, res) => {
     const body: UpdateUserRequest = req.body;
     const response = await UserService.update(req, body);
 
-    res.status(SUCCESS.httpCode).json(SUCCESS);
+    res.status(response.httpCode).json(response);
 });
 
 export default userRouter;

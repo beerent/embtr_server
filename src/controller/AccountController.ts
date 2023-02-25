@@ -60,9 +60,9 @@ export class AccountController {
         }
     }
 
-    public static async updateAccountRoles(userRecord: UserRecord, roles: Role[]): Promise<void> {
+    public static async updateAccountRoles(uid: string, roles: Role[]): Promise<void> {
         try {
-            await firebase.auth().setCustomUserClaims(userRecord.uid, { roles });
+            await firebase.auth().setCustomUserClaims(uid, { roles });
         } catch (error) {
             logger.error('Error updating user roles:', error);
         }

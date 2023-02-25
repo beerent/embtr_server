@@ -10,17 +10,12 @@ export class TokenCache {
             return undefined;
         }
 
-        await this.decodeAndAddTokenToCache(encodedToken);
-
-        const decodedToken = this.getDecodedTokenFromCache(encodedToken);
-        if (!decodedToken) {
-            return undefined;
+        let decodedToken = this.getDecodedTokenFromCache(encodedToken);
+        if (decodedToken) {
+            return decodedToken;
         }
 
-        if (this.isTokenExpired(decodedToken)) {
-            this.removeTokenFromCache(encodedToken);
-            return undefined;
-        }
+        decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
 
         return decodedToken;
     }
@@ -41,17 +36,19 @@ export class TokenCache {
         return authorization.startsWith('Bearer ');
     }
 
-    private static async decodeAndAddTokenToCache(token: string) {
+    private static async decodeAndAddTokenToCache(token: string): Promise<DecodedIdToken | undefined> {
         const decodedToken: DecodedIdToken | undefined = await this.getDecodedTokenFromFirebase(token);
         if (!decodedToken) {
-            return;
+            return undefined;
         }
 
         if (this.isTokenExpired(decodedToken)) {
-            return;
+            return undefined;
         }
 
         this.addDecodedTokenToCache(token, decodedToken);
+
+        return decodedToken;
     }
 
     private static async getDecodedTokenFromFirebase(token: string) {
@@ -70,8 +67,18 @@ export class TokenCache {
         return expirationDate < currentTime;
     }
 
-    private static getDecodedTokenFromCache(token: string) {
-        return this.tokenCache.get(token);
+    private static getDecodedTokenFromCache(encodedToken: string) {
+        const decodedToken = this.tokenCache.get(encodedToken);
+        if (!decodedToken) {
+            return undefined;
+        }
+
+        if (this.isTokenExpired(decodedToken)) {
+            this.removeTokenFromCache(encodedToken);
+            return undefined;
+        }
+
+        return decodedToken;
     }
 
     private static addDecodedTokenToCache(token: string, decodedToken: DecodedIdToken) {

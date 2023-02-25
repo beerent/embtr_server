@@ -7,6 +7,12 @@ import userRouter from './endpoints/user';
 const app = express();
 
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.originalUrl}`);
+    next();
+});
+
 app.use('/user', userRouter);
 app.use('/test', placeholderRouter);
 app.use('/account', accountRouter);
