@@ -1,8 +1,8 @@
 import express from 'express';
-import accountRouter from './endpoints/account';
-import placeholderRouter from './endpoints/placeholder';
+import accountRouter from './endpoints/AccountRouter';
+import taskRouter from './endpoints/TaskRouter';
 import bodyParser from 'body-parser';
-import userRouter from './endpoints/user';
+import userRouter from './endpoints/UserRouter';
 
 const app = express();
 
@@ -14,7 +14,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/user', userRouter);
-app.use('/test', placeholderRouter);
+app.use('/task', taskRouter);
 app.use('/account', accountRouter);
 
 export default app;

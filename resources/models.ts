@@ -6,3 +6,8 @@ export interface UserModel {
     location?: string;
     bio?: string;
 }
+
+export interface TaskModel {
+    title?: string;
+    description: string | null;
+}

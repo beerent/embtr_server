@@ -1,5 +1,5 @@
 import { Code } from './codes';
-import { UserModel } from './models';
+import { UserModel, TaskModel } from './models';
 
 export interface CreateAccountRequest {
     email: string;
@@ -45,4 +45,17 @@ export interface CreateUserResponse extends Response {
 }
 
 export interface UpdateUserRequest extends UserModel {
+}
+
+export interface GetTaskResponse extends Response {
+    task?: TaskModel
+}
+
+
+export interface CreateTaskRequest {
+    title: string;
+    description?: string;
+}
+
+export interface CreateTaskResponse extends Response {
 }

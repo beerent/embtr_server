@@ -1,5 +1,5 @@
 import { Code } from '@resources/codes';
-import { AuthenticationResponse, CreateUserResponse, GetUserResponse, Response } from '@resources/types';
+import { AuthenticationResponse, CreateTaskResponse, CreateUserResponse, GetTaskResponse, GetUserResponse, Response } from '@resources/types';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -25,6 +25,10 @@ export enum HttpCode {
     USER_CREATE_FAILED = 400,
     USER_CREATE_ALREADY_EXISTS = 409,
     USER_UPDATE_FAILED = 400,
+
+    TASK_CREATE_FAILED_ALREADY_EXISTS = 409,
+    TASK_CREATE_FAILED_MISSING_REQUIREMENTS = 400,
+    TASK_CREATE_SUCCESS = 200,
 }
 
 export const SUCCESS: Response = {
@@ -177,4 +181,27 @@ export const UPDATE_USER_FAILED: Response = {
     internalCode: Code.USER_UPDATE_FAILED,
     success: false,
     message: 'failed to update user',
+};
+
+/*
+ * TASK
+ */
+
+export const GET_TASK_FAILED_NOT_FOUND: GetTaskResponse = {
+    ...RESOURCE_NOT_FOUND,
+};
+
+export const GET_TASK_SUCCESS: GetTaskResponse = {
+    ...SUCCESS,
+};
+
+export const CREATE_TASK_FAILED_ALREADY_EXISTS: Response = {
+    httpCode: HttpCode.TASK_CREATE_FAILED_ALREADY_EXISTS,
+    internalCode: Code.TASK_CREATE_FAILED_ALREADY_EXISTS,
+    success: false,
+    message: 'task already exists',
+};
+
+export const CREATE_TASK_SUCCESS: CreateTaskResponse = {
+    ...SUCCESS,
 };

@@ -1,8 +1,6 @@
 import { GetUserResponse, UpdateUserRequest } from '@resources/types';
-import { SUCCESS } from '@src/common/RequestResponses';
-import { logger } from '@src/common/logger/Logger';
 import { authenticate } from '@src/middleware/authentication';
-import { authorizeUserGet, authorizeUserPatch } from '@src/middleware/user/userAuthorization';
+import { authorizeUserGet, authorizeUserPatch } from '@src/middleware/user/UserAuthorization';
 import { UserService } from '@src/service/UserService';
 import express from 'express';
 

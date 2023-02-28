@@ -7,7 +7,6 @@ import {
     FORBIDDEN,
     GET_USER_FAILED_NOT_FOUND,
     GET_USER_SUCCESS,
-    RESOURCE_NOT_FOUND,
     SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
@@ -27,7 +26,6 @@ import {
     RW_USER_ROLE_TEST_USER_UID,
     TEST_USER_PASSWORD,
 } from '@test/util/DedicatedTestUsers';
-import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import request from 'supertest';
 
 describe('user service tests', () => {
