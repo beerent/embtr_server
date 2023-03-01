@@ -1,5 +1,4 @@
 import { CreateTaskRequest } from '@resources/types';
-import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeGet, authorizePost } from '@src/middleware/task/TaskAuthorization';
 import { TaskService } from '@src/service/TaskService';

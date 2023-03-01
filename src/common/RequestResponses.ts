@@ -1,5 +1,14 @@
 import { Code } from '@resources/codes';
-import { AuthenticationResponse, CreateTaskResponse, CreateUserResponse, GetTaskResponse, GetUserResponse, Response } from '@resources/types';
+import {
+    AuthenticationResponse,
+    CreatePlannedDayResponse,
+    CreateTaskResponse,
+    CreateUserResponse,
+    GetPlannedDayResponse,
+    GetTaskResponse,
+    GetUserResponse,
+    Response,
+} from '@resources/types';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -203,5 +212,28 @@ export const CREATE_TASK_FAILED_ALREADY_EXISTS: Response = {
 };
 
 export const CREATE_TASK_SUCCESS: CreateTaskResponse = {
+    ...SUCCESS,
+};
+
+/*
+ * PLANNED DAY
+ */
+
+export const GET_PLANNED_DAY_FAILED_NOT_FOUND: GetPlannedDayResponse = {
+    ...RESOURCE_NOT_FOUND,
+};
+
+export const GET_PLANNED_DAY_SUCCESS: GetPlannedDayResponse = {
+    ...SUCCESS,
+};
+
+export const CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS: Response = {
+    httpCode: HttpCode.TASK_CREATE_FAILED_ALREADY_EXISTS,
+    internalCode: Code.TASK_CREATE_FAILED_ALREADY_EXISTS,
+    success: false,
+    message: 'planned day already exists',
+};
+
+export const CREATE_PLANNED_DAY_SUCCESS: CreatePlannedDayResponse = {
     ...SUCCESS,
 };
