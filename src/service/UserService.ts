@@ -43,6 +43,7 @@ export class UserService {
         }
 
         await AccountController.updateAccountRoles(uid, [Role.USER]);
+        await AccountController.updateCustomClaim(uid, 'userId', newUser.id);
 
         return CREATE_USER_SUCCESS;
     }

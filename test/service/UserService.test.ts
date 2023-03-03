@@ -117,7 +117,7 @@ describe('user service tests', () => {
                 expect(response.status).toEqual(CREATE_USER_SUCCESS.httpCode);
             });
 
-            test('create user with authenticated account sets user role', async () => {
+            test('with authenticated account sets user role as custom claim', async () => {
                 const token = await AuthenticationController.generateValidIdToken(email, TEST_USER_PASSWORD);
 
                 //verify account has no roles
@@ -133,6 +133,24 @@ describe('user service tests', () => {
                 //verify account has user role
                 const createdUserRoles = await AuthorizationController.getRolesFromToken(getBearerToken(updatedToken));
                 expect(createdUserRoles).toEqual([Role.USER]);
+            });
+
+            test('with authenticated account sets userId as custom claim', async () => {
+                const token = await AuthenticationController.generateValidIdToken(email, TEST_USER_PASSWORD);
+
+                //verify account has no user id
+                const userId = await AuthorizationController.getUserIdFromToken(getBearerToken(token));
+                expect(userId).toBeUndefined();
+
+                //create user
+                const body: CreateUserRequest = {};
+                await request(app).post(`${USER}`).set('Authorization', getBearerToken(token)).send(body);
+
+                const updatedToken = await AuthenticationController.generateValidIdToken(email, TEST_USER_PASSWORD);
+
+                //verify account has userId
+                const createdUserId = await AuthorizationController.getUserIdFromToken(getBearerToken(updatedToken));
+                expect(createdUserId).toBeDefined();
             });
         });
     });

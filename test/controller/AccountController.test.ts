@@ -34,11 +34,11 @@ describe('create account', () => {
     describe('success case', () => {
         const email = 'create_account_test@embtr.com';
 
-        afterAll(async () => {
+        beforeEach(async () => {
             await AccountController.delete(email);
         });
 
-        test('create a account', async () => {
+        test('create an account', async () => {
             const result: CreateAccountResult = await AccountController.create(email, 'password');
             expect(result.code).toEqual(SUCCESS.internalCode);
         });
@@ -97,10 +97,40 @@ describe('update account roles', () => {
 
     test('can update roles', async () => {
         const account = await AccountController.get(email);
-
         expect(account!.customClaims).toBeFalsy();
+
         await AccountController.updateAccountRoles(account!.uid, [Role.ADMIN]);
         const updatedaccount = await AccountController.get(email);
         expect(updatedaccount!.customClaims!.roles).toEqual([Role.ADMIN]);
+    });
+
+    test('update roles does not clear other claims', async () => {
+        const account = await AccountController.get(email);
+        await AccountController.updateCustomClaim(account!.uid, 'key', 'value');
+
+        let updatedAccount = await AccountController.get(email);
+        expect(updatedAccount!.customClaims!.key).toEqual('value');
+
+        updatedAccount = await AccountController.get(email);
+        await AccountController.updateAccountRoles(account!.uid, [Role.ADMIN]);
+        expect(updatedAccount!.customClaims!.key).toEqual('value');
+    });
+});
+
+describe('update custom claims', () => {
+    const email = 'update_roles_test@embtr.com';
+
+    beforeEach(async () => {
+        await AccountController.delete(email);
+        await AccountController.create(email, 'password');
+    });
+
+    test('can update custom claims', async () => {
+        const account = await AccountController.get(email);
+        expect(account!.customClaims).toBeFalsy();
+
+        await AccountController.updateCustomClaim(account!.uid, 'testClaim', 'testValue');
+        const updatedaccount = await AccountController.get(email);
+        expect(updatedaccount!.customClaims!.testClaim).toEqual('testValue');
     });
 });

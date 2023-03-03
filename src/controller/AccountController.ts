@@ -61,10 +61,31 @@ export class AccountController {
     }
 
     public static async updateAccountRoles(uid: string, roles: Role[]): Promise<void> {
+        await this.updateCustomClaim(uid, 'roles', roles);
+    }
+
+    public static async updateCustomClaim(uid: string, key: string, value: unknown): Promise<void> {
+        let updatedClaims = { [key]: value };
+        const currentClaims = await this.getCustomClaims(uid);
+        if (currentClaims) {
+            updatedClaims = { ...currentClaims, [key]: value };
+        }
+
         try {
-            await firebase.auth().setCustomUserClaims(uid, { roles });
+            await firebase.auth().setCustomUserClaims(uid, updatedClaims);
         } catch (error) {
-            logger.error('Error updating user roles:', error);
+            logger.error('Error updating user custom claims:', error);
+        }
+    }
+
+    public static async getCustomClaims(uid: string): Promise<unknown> {
+        try {
+            const user = await firebase.auth().getUser(uid);
+            const customClaims = user.customClaims;
+
+            return customClaims;
+        } catch (error) {
+            logger.error('Error getting user custom claims:', error);
         }
     }
 }

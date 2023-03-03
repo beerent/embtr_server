@@ -39,13 +39,13 @@ model PlannedDay {
   id        Int      @id @default(autoincrement())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int      @db.Int
-  daykey    String   @db.VarChar(10)
+  dayKey    String   @db.VarChar(10)
   date      DateTime @db.Date
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   //  PlannedTask PlannedTask[]
 
-  @@index([userId, daykey], name: "user_id_daykey")
+  @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")
 }
 

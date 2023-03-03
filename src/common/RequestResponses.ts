@@ -15,6 +15,8 @@ export enum HttpCode {
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
     RESOURCE_NOT_FOUND = 404,
+    RESOURCE_ALREADY_EXISTS = 404,
+    GENERAL_FAILURE = 400,
 
     //create account errors
     CREATE_ACCOUNT_EMAIL_IN_USE = 409,
@@ -66,6 +68,20 @@ export const RESOURCE_NOT_FOUND: Response = {
     internalCode: Code.RESOURCE_NOT_FOUND,
     success: false,
     message: 'resource not found',
+};
+
+export const RESOURCE_ALREADY_EXISTS: Response = {
+    httpCode: HttpCode.RESOURCE_ALREADY_EXISTS,
+    internalCode: Code.RESOURCE_ALREADY_EXISTS,
+    success: false,
+    message: 'resource not found',
+};
+
+export const GENERAL_FAILURE: Response = {
+    httpCode: HttpCode.GENERAL_FAILURE,
+    internalCode: Code.CREATE_PLANNED_DAY_FAILED,
+    success: false,
+    message: 'a failure occured',
 };
 
 /*
@@ -228,12 +244,15 @@ export const GET_PLANNED_DAY_SUCCESS: GetPlannedDayResponse = {
 };
 
 export const CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS: Response = {
-    httpCode: HttpCode.TASK_CREATE_FAILED_ALREADY_EXISTS,
-    internalCode: Code.TASK_CREATE_FAILED_ALREADY_EXISTS,
-    success: false,
+    ...RESOURCE_ALREADY_EXISTS,
     message: 'planned day already exists',
 };
 
 export const CREATE_PLANNED_DAY_SUCCESS: CreatePlannedDayResponse = {
     ...SUCCESS,
+};
+
+export const CREATE_PLANNED_DAY_FAILED: CreatePlannedDayResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to create planned day',
 };

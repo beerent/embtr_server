@@ -1,7 +1,14 @@
+import { AccountController } from '@src/controller/AccountController';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { Role } from '@src/roles/Roles';
-import { RO_NO_ROLE_TEST_USER_EMAIL, RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD } from '@test/util/DedicatedTestUsers';
+import {
+    RO_NO_ROLE_TEST_USER_EMAIL,
+    RO_USER_ROLE_TEST_USER_EMAIL,
+    RO_USER_ROLE_TEST_USER_ID,
+    RO_USER_ROLE_TEST_USER_UID,
+    TEST_USER_PASSWORD,
+} from '@test/util/DedicatedTestUsers';
 
 describe('authorization', () => {
     describe('role extraction', () => {
@@ -73,6 +80,31 @@ describe('authorization', () => {
                 const email = await AuthorizationController.getEmailFromToken(`Bearer ${token}`);
 
                 expect(email).toBe(RO_USER_ROLE_TEST_USER_EMAIL);
+            });
+        });
+    });
+
+    describe('user id extraction', () => {
+        describe('fail cases', () => {
+            test('bearer token is missing', async () => {
+                const id = await AuthorizationController.getUserIdFromToken('');
+                expect(id).toBeUndefined();
+            });
+
+            test('bearer token is invalid', async () => {
+                const id = await AuthorizationController.getUserIdFromToken('invalid token');
+                expect(id).toBeUndefined();
+            });
+        });
+
+        describe('success cases', () => {
+            test('can get userId', async () => {
+                AccountController.updateCustomClaim(RO_USER_ROLE_TEST_USER_UID, 'userId', RO_USER_ROLE_TEST_USER_ID);
+
+                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+                const userId = await AuthorizationController.getUserIdFromToken(`Bearer ${token}`);
+
+                expect(userId).toBe(RO_USER_ROLE_TEST_USER_ID);
             });
         });
     });
