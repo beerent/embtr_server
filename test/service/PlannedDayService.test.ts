@@ -24,9 +24,11 @@ import {
 import request from 'supertest';
 
 const KNOWN_GOOD_PLANNED_DAY_ID = '29';
+const KNOWN_GOOD_PLANNED_DAY_USER_ID = RW_USER_ROLE_TEST_USER_ID;
+const KNOWN_GOOD_PLANNED_DAY_DAY_KEY = '1991-01-01';
 
 describe('planned day service', () => {
-    describe('get planned day', () => {
+    describe('get planned day by id', () => {
         test('get planned day with unauthenticated account', async () => {
             const response = await request(app).get(`${PLANNED_DAY}1`).set('Authorization', 'Bearer Trash').send();
 
@@ -36,7 +38,7 @@ describe('planned day service', () => {
 
         test('get unknown plannedDay with insufficient permissions', async () => {
             const requesterToken = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
-            const response = await request(app).get(`${PLANNED_DAY}99999999`).set('Authorization', `Bearer ${requesterToken}`).send();
+            const response = await request(app).get(`${PLANNED_DAY}1`).set('Authorization', `Bearer ${requesterToken}`).send();
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
             expect(response.body.plannedDay).toBeUndefined();
@@ -66,9 +68,76 @@ describe('planned day service', () => {
             expect(response.body.plannedDay).toBeUndefined();
         });
 
-        test('get known task with sufficient permissions', async () => {
+        test('get known plannedDay with sufficient permissions', async () => {
             const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
             const response = await request(app).get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_ID}`).set('Authorization', `Bearer ${requesterToken}`).send();
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
+            expect(response.body.plannedDay).toBeDefined();
+        });
+    });
+
+    describe('get planned day by user', () => {
+        test('get planned day with unauthenticated account', async () => {
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/${KNOWN_GOOD_PLANNED_DAY_DAY_KEY}`)
+                .set('Authorization', 'Bearer Trash')
+                .send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.task).toBeUndefined();
+        });
+
+        test('get unknown plannedDay with insufficient permissions', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/1001-12-25`)
+                .set('Authorization', `Bearer ${requesterToken}`)
+                .send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('get known plannedDay with insufficient permissions', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/${KNOWN_GOOD_PLANNED_DAY_DAY_KEY}`)
+                .set('Authorization', `Bearer ${requesterToken}`)
+                .send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('get invalid plannedDay with sufficient permissions', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/blah`)
+                .set('Authorization', `Bearer ${requesterToken}`)
+                .send();
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('get unknown plannedDay with sufficient permissions', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/1001-12-25`)
+                .set('Authorization', `Bearer ${requesterToken}`)
+                .send();
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('get known plannedDay with sufficient permissions', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/${KNOWN_GOOD_PLANNED_DAY_DAY_KEY}`)
+                .set('Authorization', `Bearer ${requesterToken}`)
+                .send();
 
             expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
             expect(response.body.plannedDay).toBeDefined();
@@ -174,10 +243,5 @@ describe('planned day service', () => {
                 expect(response.body).toEqual(CREATE_PLANNED_DAY_SUCCESS);
             });
         });
-    });
-
-    describe('getOrCreate plannedDay', () => {
-        // verify a new plannedDay is created if it doesn't exist
-        //verify a pre-existing plannedDay is returned if it exists
     });
 });

@@ -61,6 +61,11 @@ export interface CreateTaskResponse extends Response {
 
 }
 
+export interface GetPlannedDayRequest {
+    userId: number;
+    dayKey: string;
+}
+
 export interface GetPlannedDayResponse extends Response {
     plannedDay?: PlannedDayModel
 }

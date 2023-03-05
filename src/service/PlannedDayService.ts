@@ -1,4 +1,4 @@
-import { CreatePlannedDayRequest, CreatePlannedDayResponse, GetPlannedDayResponse } from '@resources/types';
+import { CreatePlannedDayRequest, CreatePlannedDayResponse, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
@@ -8,16 +8,22 @@ import {
     GET_PLANNED_DAY_SUCCESS,
 } from '@src/common/RequestResponses';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class PlannedDayService {
-    public static async get(id: string | number): Promise<GetPlannedDayResponse> {
-        if (isNaN(Number(id))) {
-            return GET_PLANNED_DAY_FAILED_NOT_FOUND;
+    public static async getById(id: number): Promise<GetPlannedDayResponse> {
+        const plannedDay = await PlannedDayController.get(id);
+
+        if (plannedDay) {
+            const convertedPlannedDay = ModelConverter.convertPlannedDayWithUser(plannedDay);
+            return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 
-        const plannedDay = await PlannedDayController.get(Number(id));
+        return GET_PLANNED_DAY_FAILED_NOT_FOUND;
+    }
+
+    public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
+        const plannedDay = await PlannedDayController.getByUserAndDayKey(request.userId, request.dayKey);
 
         if (plannedDay) {
             const convertedPlannedDay = ModelConverter.convertPlannedDayWithUser(plannedDay);
