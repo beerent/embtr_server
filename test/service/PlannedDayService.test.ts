@@ -4,9 +4,11 @@ import app from '@src/app';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
+    CREATE_PLANNED_DAY_SUCCESS,
     FORBIDDEN,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
+    SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
@@ -126,7 +128,6 @@ describe('planned day service', () => {
             });
         });
 
-        //wrong user
         describe('create planned day', () => {
             const userId = RW_USER_ROLE_TEST_USER_ID + 1;
             const dateString = '2020-01-01';
@@ -150,5 +151,33 @@ describe('planned day service', () => {
                 expect(response.body).toEqual(FORBIDDEN);
             });
         });
+
+        describe('create planned day', () => {
+            const userId = RW_USER_ROLE_TEST_USER_ID;
+            const dateString = '2020-01-01';
+
+            beforeAll(async () => {
+                await PlannedDayController.deleteByUserAndDayKey(userId, dateString);
+            });
+
+            test('success case', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: CreatePlannedDayRequest = {
+                    userId: userId,
+                    dayKey: dateString,
+                };
+
+                const response = await request(app).post(`${PLANNED_DAY}`).set('Authorization', `Bearer ${token}`).send(body);
+
+                expect(response.status).toEqual(SUCCESS.httpCode);
+                expect(response.body).toEqual(CREATE_PLANNED_DAY_SUCCESS);
+            });
+        });
+    });
+
+    describe('getOrCreate plannedDay', () => {
+        // verify a new plannedDay is created if it doesn't exist
+        //verify a pre-existing plannedDay is returned if it exists
     });
 });
