@@ -25,7 +25,6 @@ export class AccountController {
         } catch (error) {
             // @ts-ignore :(
             const code = error.errorInfo.code;
-            logger.error('Error creating user:', code);
 
             switch (code) {
                 case 'auth/email-already-exists':
@@ -78,7 +77,7 @@ export class AccountController {
         }
     }
 
-    public static async getCustomClaims(uid: string): Promise<unknown> {
+    private static async getCustomClaims(uid: string): Promise<unknown> {
         try {
             const user = await firebase.auth().getUser(uid);
             const customClaims = user.customClaims;

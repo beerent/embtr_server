@@ -172,7 +172,6 @@ describe('user service tests', () => {
 
                 expect(response.status).toEqual(FORBIDDEN.httpCode);
             });
-            // update user with insufficient permissions
         });
 
         describe('success cases', () => {
