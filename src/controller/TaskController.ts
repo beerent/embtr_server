@@ -23,6 +23,22 @@ export class TaskController {
         return task;
     }
 
+    public static async getAllLikeTitle(title: string): Promise<Task[]> {
+        const tasks = await prisma.task.findMany({
+            where: {
+                title: {
+                    startsWith: title,
+                },
+            },
+        });
+
+        if (tasks) {
+            return tasks;
+        }
+
+        return [];
+    }
+
     public static async create(title: string, description?: string, createdById?: number): Promise<Task | null> {
         const newTask = await prisma.task.create({
             data: {

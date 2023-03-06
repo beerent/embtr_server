@@ -1,8 +1,18 @@
-import { CreateTaskRequest, CreateTaskResponse, GetTaskResponse } from '@resources/types';
+import { Task } from '@prisma/client';
+import { TaskModel } from '@resources/models';
+import { CreateTaskRequest, CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types';
 import { CREATE_TASK_FAILED_ALREADY_EXISTS, GET_TASK_FAILED_NOT_FOUND, GET_TASK_SUCCESS, SUCCESS } from '@src/common/RequestResponses';
 import { TaskController } from '@src/controller/TaskController';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class TaskService {
+    public static async search(query: string): Promise<SearchTasksResponse> {
+        const tasks: Task[] = await TaskController.getAllLikeTitle(query);
+        const taskModels: TaskModel[] = ModelConverter.convertTasks(tasks);
+
+        return { ...SUCCESS, tasks: taskModels };
+    }
+
     public static async get(id: string | number): Promise<GetTaskResponse> {
         if (isNaN(Number(id))) {
             return GET_TASK_FAILED_NOT_FOUND;
@@ -22,7 +32,7 @@ export class TaskService {
             return CREATE_TASK_FAILED_ALREADY_EXISTS;
         }
 
-        const newTask = await TaskController.create(body.title, body.description);
+        await TaskController.create(body.title, body.description);
         return SUCCESS;
     }
 }

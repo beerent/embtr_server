@@ -8,6 +8,7 @@ import {
     GetTaskResponse,
     GetUserResponse,
     Response,
+    SearchTasksResponse,
 } from '@resources/types';
 
 export enum HttpCode {
@@ -229,6 +230,17 @@ export const CREATE_TASK_FAILED_ALREADY_EXISTS: Response = {
 
 export const CREATE_TASK_SUCCESS: CreateTaskResponse = {
     ...SUCCESS,
+};
+
+export const SEARCH_TASKS_SUCCESS: SearchTasksResponse = {
+    ...SUCCESS,
+    tasks: [],
+};
+
+export const SEARCH_TASKS_FAILED: SearchTasksResponse = {
+    ...GENERAL_FAILURE,
+    message: 'invalid search parameters',
+    tasks: [],
 };
 
 /*

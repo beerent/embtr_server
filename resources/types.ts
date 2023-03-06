@@ -51,6 +51,9 @@ export interface GetTaskResponse extends Response {
     task?: TaskModel
 }
 
+export interface SearchTasksResponse extends Response {
+    tasks: TaskModel[]
+}
 
 export interface CreateTaskRequest {
     title: string;
@@ -78,4 +81,3 @@ export interface CreatePlannedDayRequest {
 export interface CreatePlannedDayResponse extends Response {
 
 }
-

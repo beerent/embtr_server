@@ -1,5 +1,5 @@
-import { UserModel, PlannedDayModel } from '@resources/models';
-import { PlannedDay, User } from '@prisma/client';
+import { UserModel, PlannedDayModel, TaskModel } from '@resources/models';
+import { PlannedDay, Task, User } from '@prisma/client';
 import { PlannedDayWithUserReturnType } from '@src/controller/PlannedDayController';
 import { CreatePlannedDayRequest } from '@resources/types';
 
@@ -23,5 +23,14 @@ export class ModelConverter {
             createdAt: new Date(),
             updatedAt: new Date(),
         };
+    }
+
+    public static convertTasks(tasks: Task[]): TaskModel[] {
+        return tasks.map((task) => {
+            return {
+                title: task.title,
+                description: task.description,
+            };
+        });
     }
 }

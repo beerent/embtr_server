@@ -1,10 +1,18 @@
 import { CreateTaskRequest } from '@resources/types';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeGet, authorizePost } from '@src/middleware/task/TaskAuthorization';
+import { validateSearch as validateSearchTasks } from '@src/middleware/task/TaskValidation';
 import { TaskService } from '@src/service/TaskService';
 import express from 'express';
 
 const taskRouter = express.Router();
+
+taskRouter.get('/', authenticate, authorizeGet, validateSearchTasks, async (req, res) => {
+    const query: string = req.query.q as string;
+
+    const response = await TaskService.search(query);
+    res.status(response.httpCode).json(response);
+});
 
 taskRouter.get('/:id', authenticate, authorizeGet, async (req, res) => {
     const id = req.params.id;

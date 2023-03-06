@@ -7,7 +7,8 @@ import {
     FORBIDDEN,
     GET_TASK_FAILED_NOT_FOUND,
     GET_TASK_SUCCESS,
-    SUCCESS,
+    SEARCH_TASKS_FAILED,
+    SEARCH_TASKS_SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
@@ -105,6 +106,50 @@ describe('TaskService tests', () => {
 
                 const response = await request(app).post(`${TASK}`).set('Authorization', `Bearer ${token}`).send(body);
                 expect(response.status).toEqual(CREATE_TASK_SUCCESS.httpCode);
+            });
+        });
+    });
+
+    describe('search tasks', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).get(`${TASK}`).set('Authorization', `Bearer unauthorized`).send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body).toEqual(UNAUTHORIZED);
+        });
+
+        test('unauthorized', async () => {
+            const token = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app).get(`${TASK}`).set('Authorization', `Bearer ${token}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app).get(`${TASK}`).query({}).set('Authorization', `Bearer ${token}`).send();
+
+            expect(response.status).toEqual(SEARCH_TASKS_FAILED.httpCode);
+            expect(response.body.tasks).toEqual([]);
+        });
+
+        describe('succes cases', () => {
+            beforeAll(async () => {
+                await TaskController.deleteByTitle('test task 01a');
+                await TaskController.deleteByTitle('test task 01b');
+                await TaskController.deleteByTitle('test task invalid');
+                await TaskController.create('test task 01a', 'test task description');
+                await TaskController.create('test task 01b', 'test task description');
+                await TaskController.create('test task invalid', 'test task description');
+            });
+
+            test('search by title', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+                const response = await request(app).get(`${TASK}`).query({ q: 'test task 01' }).set('Authorization', `Bearer ${token}`).send();
+
+                expect(response.status).toEqual(SEARCH_TASKS_SUCCESS.httpCode);
+                expect(response.body.tasks.length).toEqual(2);
             });
         });
     });
