@@ -15,10 +15,8 @@ export async function authorizeGet(req: Request, res: Response, next: NextFuncti
 }
 
 export async function authorizePost(req: Request, res: Response, next: NextFunction) {
-    const body: CreatePlannedDayRequest = req.body;
-
-    const requesterId = await AuthorizationController.getUserIdFromToken(req.headers.authorization!);
-    if (requesterId !== body.userId) {
+    const userId = await AuthorizationController.getUserIdFromToken(req.headers.authorization!);
+    if (!userId) {
         return res.status(FORBIDDEN.httpCode).json(FORBIDDEN);
     }
 

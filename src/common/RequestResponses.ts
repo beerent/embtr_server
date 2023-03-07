@@ -268,3 +268,18 @@ export const CREATE_PLANNED_DAY_FAILED: CreatePlannedDayResponse = {
     ...GENERAL_FAILURE,
     message: 'failed to create planned day',
 };
+
+export const CREATE_PLANNED_TASK_FAILED: CreatePlannedDayResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to create planned task',
+};
+
+export const CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY: CreatePlannedDayResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to create planned task. unknown planned day.',
+};
+
+export const CREATE_PLANNED_TASK_UNKNOWN_TASK: CreatePlannedDayResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to create planned task. unknown task.',
+};

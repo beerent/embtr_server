@@ -1,6 +1,8 @@
 import z from 'zod';
 import { NextFunction, Request, Response } from 'express';
-import { GET_PLANNED_DAY_FAILED_NOT_FOUND } from '@src/common/RequestResponses';
+import { CREATE_PLANNED_DAY_FAILED, CREATE_PLANNED_TASK_FAILED, GET_PLANNED_DAY_FAILED_NOT_FOUND } from '@src/common/RequestResponses';
+import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { AuthenticationController } from '@src/controller/AuthenticationController';
 
 const plannedDayGetById = z.object({
     id: z.coerce.number(),
@@ -24,6 +26,33 @@ export const validateGetByUser = (req: Request, res: Response, next: NextFunctio
         plannedDayGetByUser.parse(req.params);
     } catch (error) {
         return res.status(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode).json(GET_PLANNED_DAY_FAILED_NOT_FOUND);
+    }
+
+    next();
+};
+
+const plannedDayPost = z.object({
+    dayKey: z.string().min(1),
+});
+export const validatePlannedDayPost = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        plannedDayPost.parse(req.body);
+    } catch (error) {
+        return res.status(CREATE_PLANNED_DAY_FAILED.httpCode).json(CREATE_PLANNED_DAY_FAILED);
+    }
+
+    next();
+};
+
+const plannedTaskPost = z.object({
+    plannedDayId: z.coerce.number(),
+    taskId: z.coerce.number(),
+});
+export const validatePlannedTaskPost = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        plannedTaskPost.parse(req.body);
+    } catch (error) {
+        return res.status(CREATE_PLANNED_TASK_FAILED.httpCode).json(CREATE_PLANNED_TASK_FAILED);
     }
 
     next();

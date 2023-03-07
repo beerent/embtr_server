@@ -1,10 +1,13 @@
 import { PLANNED_DAY } from '@resources/endpoints';
-import { CreatePlannedDayRequest } from '@resources/types';
+import { CreatePlannedDayRequest, CreatePlannedTaskRequest } from '@resources/types';
 import app from '@src/app';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
     CREATE_PLANNED_DAY_SUCCESS,
+    CREATE_PLANNED_TASK_FAILED,
+    CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY,
+    CREATE_PLANNED_TASK_UNKNOWN_TASK,
     FORBIDDEN,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
@@ -13,10 +16,11 @@ import {
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
+import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import { TaskController } from '@src/controller/TaskController';
 import {
     RO_NO_ROLE_TEST_USER_EMAIL,
     RO_USER_ROLE_TEST_USER_EMAIL,
-    RO_USER_ROLE_TEST_USER_ID,
     RW_USER_ROLE_TEST_USER_EMAIL,
     RW_USER_ROLE_TEST_USER_ID,
     TEST_USER_PASSWORD,
@@ -162,7 +166,6 @@ describe('planned day service', () => {
 
         test('create planned day invalid', async () => {
             const body: CreatePlannedDayRequest = {
-                userId: RO_USER_ROLE_TEST_USER_ID,
                 dayKey: '',
             };
 
@@ -186,7 +189,6 @@ describe('planned day service', () => {
                 const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
                 const body: CreatePlannedDayRequest = {
-                    userId: RW_USER_ROLE_TEST_USER_ID,
                     dayKey: dateString,
                 };
 
@@ -194,30 +196,6 @@ describe('planned day service', () => {
 
                 expect(response.status).toEqual(CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS.httpCode);
                 expect(response.body).toEqual(CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS);
-            });
-        });
-
-        describe('create planned day', () => {
-            const userId = RW_USER_ROLE_TEST_USER_ID + 1;
-            const dateString = '2020-01-01';
-
-            beforeAll(async () => {
-                await PlannedDayController.deleteByUserAndDayKey(userId, dateString);
-                await PlannedDayController.create(userId, new Date(dateString), dateString);
-            });
-
-            test('wrong user', async () => {
-                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
-
-                const body: CreatePlannedDayRequest = {
-                    userId: userId,
-                    dayKey: dateString,
-                };
-
-                const response = await request(app).post(`${PLANNED_DAY}`).set('Authorization', `Bearer ${token}`).send(body);
-
-                expect(response.status).toEqual(FORBIDDEN.httpCode);
-                expect(response.body).toEqual(FORBIDDEN);
             });
         });
 
@@ -233,7 +211,6 @@ describe('planned day service', () => {
                 const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
 
                 const body: CreatePlannedDayRequest = {
-                    userId: userId,
                     dayKey: dateString,
                 };
 
@@ -241,6 +218,136 @@ describe('planned day service', () => {
 
                 expect(response.status).toEqual(SUCCESS.httpCode);
                 expect(response.body).toEqual(CREATE_PLANNED_DAY_SUCCESS);
+            });
+        });
+    });
+
+    describe('create planned task', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', 'Bearer Trash').send({});
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const token = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${token}`).send({});
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('invalid', async () => {
+            const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${token}`).send({});
+
+            expect(response.status).toEqual(CREATE_PLANNED_TASK_FAILED.httpCode);
+            expect(response.body).toEqual(CREATE_PLANNED_TASK_FAILED);
+        });
+
+        describe('missing dependencies', () => {
+            const dayKey = '2020-01-01';
+            let plannedDayId: number;
+
+            beforeAll(async () => {
+                await PlannedDayController.deleteByUserAndDayKey(RW_USER_ROLE_TEST_USER_ID, dayKey);
+                plannedDayId = (await PlannedDayController.create(RW_USER_ROLE_TEST_USER_ID, new Date(dayKey), dayKey)).id;
+            });
+
+            test('unknown task', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: CreatePlannedTaskRequest = {
+                    plannedDayId,
+                    taskId: 0,
+                };
+
+                const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${token}`).send(body);
+
+                expect(response.status).toEqual(CREATE_PLANNED_TASK_UNKNOWN_TASK.httpCode);
+                expect(response.body).toEqual(CREATE_PLANNED_TASK_UNKNOWN_TASK);
+            });
+        });
+
+        describe('missing dependencies', () => {
+            const taskTitle = 'unknown plannedDay task name test';
+            let taskId: number;
+
+            beforeAll(async () => {
+                await TaskController.deleteByTitle(taskTitle);
+                taskId = (await TaskController.create(taskTitle))!.id;
+            });
+
+            test('unknown plannedDay', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: CreatePlannedTaskRequest = {
+                    plannedDayId: 0,
+                    taskId,
+                };
+
+                const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${token}`).send(body);
+
+                expect(response.status).toEqual(CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY.httpCode);
+                expect(response.body).toEqual(CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY);
+            });
+        });
+
+        describe('invalid dependencies', () => {
+            const dayKey = '2020-01-01';
+            let plannedDayId: number;
+
+            beforeAll(async () => {
+                await PlannedDayController.deleteByUserAndDayKey(RW_USER_ROLE_TEST_USER_ID, dayKey);
+                plannedDayId = (await PlannedDayController.create(RW_USER_ROLE_TEST_USER_ID, new Date(dayKey), dayKey)).id;
+            });
+
+            test('plannedDay belongs to different user', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: CreatePlannedTaskRequest = {
+                    plannedDayId,
+                    taskId: 0,
+                };
+
+                const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${token}`).send(body);
+
+                expect(response.status).toEqual(CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY.httpCode);
+                expect(response.body).toEqual(CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY);
+            });
+        });
+
+        describe('success case', () => {
+            const dayKey = '2020-01-01';
+            const taskName = 'plannedDaySuccessCaseTaskName';
+            let taskId: number;
+            let plannedDayId: number;
+
+            beforeAll(async () => {
+                await PlannedDayController.deleteByUserAndDayKey(RW_USER_ROLE_TEST_USER_ID, dayKey);
+                plannedDayId = (await PlannedDayController.create(RW_USER_ROLE_TEST_USER_ID, new Date(dayKey), dayKey)).id;
+
+                await TaskController.deleteByTitle(taskName);
+                taskId = (await TaskController.create(taskName))!.id;
+            });
+
+            afterAll(async () => {
+                await PlannedTaskController.deleteByUserIdAndPlannedDayIdAndTaskId(RW_USER_ROLE_TEST_USER_ID, plannedDayId, taskId);
+                await TaskController.deleteByTitle(taskName);
+                await PlannedDayController.deleteByUserAndDayKey(RW_USER_ROLE_TEST_USER_ID, dayKey);
+            });
+
+            test('success case', async () => {
+                const token = await AuthenticationController.generateValidIdToken(RW_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+
+                const body: CreatePlannedTaskRequest = {
+                    plannedDayId,
+                    taskId,
+                };
+
+                const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${token}`).send(body);
+                expect(response.status).toEqual(SUCCESS.httpCode);
             });
         });
     });

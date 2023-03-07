@@ -44,13 +44,15 @@ export class PlannedDayController {
     }
 
     public static async deleteByUserAndDayKey(userId: number, dayKey: string) {
-        await prisma.plannedDay.delete({
-            where: {
-                unique_user_daykey: {
-                    userId: userId,
-                    dayKey: dayKey,
+        try {
+            await prisma.plannedDay.delete({
+                where: {
+                    unique_user_daykey: {
+                        userId: userId,
+                        dayKey: dayKey,
+                    },
                 },
-            },
-        });
+            });
+        } catch (error) {}
     }
 }

@@ -1,7 +1,8 @@
 import { CreatePlannedDayRequest, GetPlannedDayRequest } from '@resources/types';
+import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeGet, authorizePost } from '@src/middleware/planned_day/PlannedDayAuthorization';
-import { validateGetById, validateGetByUser } from '@src/middleware/planned_day/PlannedDayValidation';
+import { validateGetById, validateGetByUser, validatePlannedDayPost, validatePlannedTaskPost } from '@src/middleware/planned_day/PlannedDayValidation';
 import { PlannedDayService } from '@src/service/PlannedDayService';
 import express from 'express';
 
@@ -24,10 +25,13 @@ plannedDayRouter.get('/:userId/:dayKey', authenticate, authorizeGet, validateGet
     res.status(response.httpCode).json(response);
 });
 
-plannedDayRouter.post('/', authenticate, authorizePost, async (req, res) => {
-    const body: CreatePlannedDayRequest = req.body;
+plannedDayRouter.post('/', authenticate, authorizePost, validatePlannedDayPost, async (req, res) => {
+    const response = await PlannedDayService.create(req);
+    res.status(response.httpCode).json(response);
+});
 
-    const response = await PlannedDayService.create(body);
+plannedDayRouter.post('/planned-task', authenticate, authorizePost, validatePlannedTaskPost, async (req, res) => {
+    const response = await PlannedDayService.createPlannedTask(req);
     res.status(response.httpCode).json(response);
 });
 

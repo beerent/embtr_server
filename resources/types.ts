@@ -74,10 +74,14 @@ export interface GetPlannedDayResponse extends Response {
 }
 
 export interface CreatePlannedDayRequest {
-    userId: number;
     dayKey: string;
 }
 
 export interface CreatePlannedDayResponse extends Response {
 
+}
+
+export interface CreatePlannedTaskRequest {
+    taskId: number,
+    plannedDayId: number
 }
