@@ -78,7 +78,6 @@ export interface CreatePlannedDayRequest {
 }
 
 export interface CreatePlannedDayResponse extends Response {
-
 }
 
 export interface CreatePlannedTaskRequest {

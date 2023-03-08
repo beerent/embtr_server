@@ -1,4 +1,5 @@
 export interface UserModel {
+    id?: number,
     uid?: string;
     email?: string;
     displayName?: string;
@@ -8,11 +9,13 @@ export interface UserModel {
 }
 
 export interface TaskModel {
+    id?: number,
     title?: string;
     description: string | null;
 }
 
 export interface PlannedDayModel {
+    id?: number,
     user?: UserModel;
     dayKey?: string;
     date?: Date;

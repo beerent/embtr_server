@@ -20,7 +20,8 @@ export class TaskService {
 
         const task = await TaskController.get(Number(id));
         if (task) {
-            return { ...GET_TASK_SUCCESS, task: { title: task.title, description: task.description } };
+            const taskModel: TaskModel = ModelConverter.convertTask(task);
+            return { ...GET_TASK_SUCCESS, task: taskModel };
         }
 
         return GET_TASK_FAILED_NOT_FOUND;
