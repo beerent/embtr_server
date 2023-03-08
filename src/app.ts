@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 app.use((req, res, next): void => {
     const oldSend = res.send;
     res.send = function (this: Response, data: any): any {
-        logger.debug(`Response for ${req.method} ${req.baseUrl}${req.path}: ${data}`);
+        logger.info(`Response for ${req.method} ${req.baseUrl}${req.path}: ${data}`);
         return oldSend.apply(this, arguments as any);
     };
     next();

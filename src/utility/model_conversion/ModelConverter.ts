@@ -18,10 +18,10 @@ export class ModelConverter {
         const plannedDayModel: PlannedDayModel = {
             id: plannedDay.id,
             user: this.convertUser(plannedDay.user),
-            dayKey: '',
-            date: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            dayKey: plannedDay.dayKey,
+            date: plannedDay.date,
+            createdAt: plannedDay.createdAt,
+            updatedAt: plannedDay.updatedAt,
         };
 
         plannedDayModel.plannedTasks = this.convertPlannedTasks(plannedDay.plannedTasks, plannedDayModel);

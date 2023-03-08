@@ -55,7 +55,8 @@ export class PlannedDayService {
 
         const createdPlannedDay = await PlannedDayController.create(userId, date, dayKey);
         if (createdPlannedDay) {
-            return CREATE_PLANNED_DAY_SUCCESS;
+            const convertedPlannedDay: PlannedDayModel = ModelConverter.convertPlannedDay(createdPlannedDay);
+            return { ...CREATE_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 
         return CREATE_PLANNED_DAY_FAILED;

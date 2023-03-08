@@ -16,6 +16,15 @@ export class PlannedDayController {
                 dayKey,
                 date,
             },
+            include: {
+                user: true,
+                plannedTasks: {
+                    include: {
+                        task: true,
+                        plannedDay: true,
+                    },
+                },
+            },
         });
     }
 

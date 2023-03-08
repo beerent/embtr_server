@@ -1,5 +1,5 @@
 import { PLANNED_DAY } from '@resources/endpoints';
-import { CreatePlannedDayRequest, CreatePlannedTaskRequest, GetPlannedDayResponse } from '@resources/types';
+import { CreatePlannedDayRequest, CreatePlannedDayResponse, CreatePlannedTaskRequest, GetPlannedDayResponse } from '@resources/types';
 import app from '@src/app';
 import {
     CREATE_PLANNED_DAY_FAILED,
@@ -238,9 +238,11 @@ describe('planned day service', () => {
                 };
 
                 const response = await request(app).post(`${PLANNED_DAY}`).set('Authorization', `Bearer ${token}`).send(body);
+                const responseObject: CreatePlannedDayResponse = response.body;
 
                 expect(response.status).toEqual(SUCCESS.httpCode);
-                expect(response.body).toEqual(CREATE_PLANNED_DAY_SUCCESS);
+                expect(responseObject.success).toBeTruthy();
+                expect(responseObject.plannedDay?.dayKey).toEqual(dateString);
             });
         });
     });
