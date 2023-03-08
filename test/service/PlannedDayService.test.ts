@@ -1,5 +1,5 @@
 import { PLANNED_DAY } from '@resources/endpoints';
-import { CreatePlannedDayRequest, CreatePlannedTaskRequest } from '@resources/types';
+import { CreatePlannedDayRequest, CreatePlannedTaskRequest, GetPlannedDayResponse } from '@resources/types';
 import app from '@src/app';
 import {
     CREATE_PLANNED_DAY_FAILED,
@@ -79,6 +79,16 @@ describe('planned day service', () => {
             expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
             expect(response.body.plannedDay).toBeDefined();
         });
+
+        test('returns plannedTasks with plannedDay', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app).get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_ID}`).set('Authorization', `Bearer ${requesterToken}`).send();
+
+            const responseBody: GetPlannedDayResponse = response.body;
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
+            expect(responseBody.plannedDay!.plannedTasks!.length).toBeGreaterThan(0);
+        });
     });
 
     describe('get planned day by user', () => {
@@ -145,6 +155,19 @@ describe('planned day service', () => {
 
             expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
             expect(response.body.plannedDay).toBeDefined();
+        });
+
+        test('returns plannedTasks with plannedDay', async () => {
+            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${KNOWN_GOOD_PLANNED_DAY_USER_ID}/${KNOWN_GOOD_PLANNED_DAY_DAY_KEY}`)
+                .set('Authorization', `Bearer ${requesterToken}`)
+                .send();
+
+            const responseBody: GetPlannedDayResponse = response.body;
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
+            expect(responseBody.plannedDay!.plannedTasks!.length).toBeGreaterThan(0);
         });
     });
 

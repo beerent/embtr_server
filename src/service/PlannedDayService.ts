@@ -1,3 +1,4 @@
+import { PlannedDayModel } from '@resources/models';
 import { CreatePlannedDayRequest, CreatePlannedDayResponse, CreatePlannedTaskRequest, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types';
 import {
     CREATE_PLANNED_DAY_FAILED,
@@ -23,7 +24,7 @@ export class PlannedDayService {
         const plannedDay = await PlannedDayController.get(id);
 
         if (plannedDay) {
-            const convertedPlannedDay = ModelConverter.convertPlannedDayWithUser(plannedDay);
+            const convertedPlannedDay = ModelConverter.convertPlannedDay(plannedDay);
             return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 
@@ -34,7 +35,7 @@ export class PlannedDayService {
         const plannedDay = await PlannedDayController.getByUserAndDayKey(request.userId, request.dayKey);
 
         if (plannedDay) {
-            const convertedPlannedDay = ModelConverter.convertPlannedDayWithUser(plannedDay);
+            const convertedPlannedDay: PlannedDayModel = ModelConverter.convertPlannedDay(plannedDay);
             return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 

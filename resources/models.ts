@@ -14,6 +14,12 @@ export interface TaskModel {
     description: string | null;
 }
 
+export interface PlannedTaskModel {
+    id?: number,
+    plannedDay?: PlannedDayModel,
+    task?: TaskModel
+}
+
 export interface PlannedDayModel {
     id?: number,
     user?: UserModel;
@@ -21,4 +27,5 @@ export interface PlannedDayModel {
     date?: Date;
     createdAt?: Date;
     updatedAt?: Date;
+    plannedTasks?: PlannedTaskModel[]
 }

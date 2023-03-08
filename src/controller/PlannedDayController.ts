@@ -1,7 +1,8 @@
 import { prisma } from '@database/prisma';
-import { Prisma } from '@prisma/client';
+import { PlannedDay, PlannedTask, Task, User } from '@prisma/client';
 
-export type PlannedDayWithUserReturnType = Prisma.PromiseReturnType<typeof PlannedDayController.get>;
+export type PlannedDayFull = (PlannedDay & { user: User; plannedTasks: PlannedTaskFull[] }) | null;
+export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
 
 export class PlannedDayController {
     public static async create(userId: number, date: Date, dayKey: string) {
@@ -18,18 +19,24 @@ export class PlannedDayController {
         });
     }
 
-    public static async get(id: number) {
+    public static async get(id: number): Promise<PlannedDayFull> {
         return await prisma.plannedDay.findUnique({
             where: {
                 id: id,
             },
             include: {
                 user: true,
+                plannedTasks: {
+                    include: {
+                        task: true,
+                        plannedDay: true,
+                    },
+                },
             },
         });
     }
 
-    public static async getByUserAndDayKey(userId: number, dayKey: string) {
+    public static async getByUserAndDayKey(userId: number, dayKey: string): Promise<PlannedDayFull> {
         return await prisma.plannedDay.findUnique({
             where: {
                 unique_user_daykey: {
@@ -39,6 +46,12 @@ export class PlannedDayController {
             },
             include: {
                 user: true,
+                plannedTasks: {
+                    include: {
+                        task: true,
+                        plannedDay: true,
+                    },
+                },
             },
         });
     }
