@@ -37,7 +37,7 @@ model Task {
 
 model PlannedDay {
   id           Int           @id @default(autoincrement())
-  user         User          @relation(fields: [userId], references: [id])
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       Int           @db.Int
   dayKey       String        @db.VarChar(10)
   date         DateTime      @db.Date
@@ -52,9 +52,9 @@ model PlannedDay {
 model PlannedTask {
   id           Int        @id @default(autoincrement())
   plannedDayId Int        @db.Int
-  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Restrict)
+  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
   taskId       Int        @db.Int
-  task         Task       @relation(fields: [taskId], references: [id], onDelete: Restrict)
+  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 

@@ -1,5 +1,8 @@
-import { UserModel, PlannedDayModel, TaskModel, PlannedTaskModel } from '@resources/models';
 import { Task, User } from '@prisma/client';
+import { PlannedDayModel } from '@resources/models/PlannedDayModel';
+import { PlannedTaskModel } from '@resources/models/PlannedTaskModel';
+import { TaskModel } from '@resources/models/TaskModel';
+import { UserModel } from '@resources/models/UserModel';
 import { PlannedDayFull, PlannedTaskFull } from '@src/controller/PlannedDayController';
 
 export class ModelConverter {

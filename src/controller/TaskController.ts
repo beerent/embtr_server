@@ -60,4 +60,18 @@ export class TaskController {
             logger.error('attempted to delete object that doesnt exist', error);
         }
     }
+
+    public static async deleteAllLikeTitle(title: string): Promise<void> {
+        try {
+            await prisma.task.deleteMany({
+                where: {
+                    title: {
+                        startsWith: title,
+                    },
+                },
+            });
+        } catch (error) {
+            logger.error('attempted to delete object that doesnt exist', error);
+        }
+    }
 }

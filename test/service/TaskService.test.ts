@@ -13,10 +13,52 @@ import {
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { TaskController } from '@src/controller/TaskController';
-import { RO_NO_ROLE_TEST_USER_EMAIL, RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD } from '@test/util/DedicatedTestUsers';
 import request from 'supertest';
+import { TestUtility } from '@test/test_utility/TestUtility';
+import { Role } from '@src/roles/Roles';
 
 describe('TaskService tests', () => {
+    const ACCOUNT_WITH_NO_ROLES = 'ts_account_no_roles@embtr.com';
+
+    const ACCOUNT_WITH_USER_ROLE = 'ts_account_user_role@embtr.com';
+
+    const TEST_TASK_TITLE = 'ts_test_task';
+    let TEST_TASK_ID: number;
+
+    const TEST_TASK_TO_CREATE = 'ts_test_task_to_create';
+
+    const TEST_TASK_SEARCH_PREFIX = 'task_service_test_';
+    const TEST_TASK_SEARCH_TITLE_1 = `${TEST_TASK_SEARCH_PREFIX}test task 01a`;
+    const TEST_TASK_SEARCH_TITLE_2 = `${TEST_TASK_SEARCH_PREFIX}test task 01b`;
+    const TEST_TASK_SEARCH_TITLE_3 = `${TEST_TASK_SEARCH_PREFIX}test task invalid`;
+
+    beforeAll(async () => {
+        // create test accounts
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES);
+        await TestUtility.createAccountWithUser(ACCOUNT_WITH_NO_ROLES, 'password', Role.INVALID);
+
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE);
+        await TestUtility.createAccountWithUser(ACCOUNT_WITH_USER_ROLE, 'password', Role.USER);
+
+        // create test tasks
+        await TaskController.deleteAllLikeTitle(TEST_TASK_SEARCH_PREFIX);
+        await TaskController.deleteAllLikeTitle('ts_test_');
+
+        const task = await TaskController.create(TEST_TASK_TITLE);
+        TEST_TASK_ID = task!.id;
+
+        await TaskController.create(TEST_TASK_SEARCH_TITLE_1);
+        await TaskController.create(TEST_TASK_SEARCH_TITLE_2);
+        await TaskController.create(TEST_TASK_SEARCH_TITLE_3);
+    });
+
+    afterAll(async () => {
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES);
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE);
+        await TaskController.deleteAllLikeTitle(TEST_TASK_SEARCH_PREFIX);
+        await TaskController.deleteAllLikeTitle('ts_test_');
+    });
+
     describe('get task', () => {
         test('get task with unauthenticated account', async () => {
             const response = await request(app).get(`${TASK}1`).set('Authorization', 'Bearer Trash').send();
@@ -26,7 +68,7 @@ describe('TaskService tests', () => {
         });
 
         test('get unknown task with insufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const requesterToken = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password');
             const response = await request(app).get(`${TASK}99999999`).set('Authorization', `Bearer ${requesterToken}`).send();
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
@@ -34,7 +76,7 @@ describe('TaskService tests', () => {
         });
 
         test('get known task with insufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const requesterToken = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password');
             const response = await request(app).get(`${TASK}1`).set('Authorization', `Bearer ${requesterToken}`).send();
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
@@ -42,7 +84,7 @@ describe('TaskService tests', () => {
         });
 
         test('get invalid task with sufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const requesterToken = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
             const response = await request(app).get(`${TASK}hello`).set('Authorization', `Bearer ${requesterToken}`).send();
 
             expect(response.status).toEqual(GET_TASK_FAILED_NOT_FOUND.httpCode);
@@ -50,7 +92,7 @@ describe('TaskService tests', () => {
         });
 
         test('get unknown task with sufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const requesterToken = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
             const response = await request(app).get(`${TASK}99999999`).set('Authorization', `Bearer ${requesterToken}`).send();
 
             expect(response.status).toEqual(GET_TASK_FAILED_NOT_FOUND.httpCode);
@@ -58,8 +100,8 @@ describe('TaskService tests', () => {
         });
 
         test('get known task with sufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
-            const response = await request(app).get(`${TASK}1`).set('Authorization', `Bearer ${requesterToken}`).send();
+            const requesterToken = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
+            const response = await request(app).get(`${TASK}${TEST_TASK_ID}`).set('Authorization', `Bearer ${requesterToken}`).send();
 
             expect(response.status).toEqual(GET_TASK_SUCCESS.httpCode);
             expect(response.body.task).toBeDefined();
@@ -76,7 +118,7 @@ describe('TaskService tests', () => {
         });
 
         test('create task with insufficient permissions', async () => {
-            const token = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const token = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password');
 
             const body = {};
             const response = await request(app).post(`${TASK}`).set('Authorization', `Bearer ${token}`).send(body);
@@ -86,27 +128,19 @@ describe('TaskService tests', () => {
         });
 
         test('create task that already exists with sufficient permissions', async () => {
-            const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
-            const body: CreateTaskRequest = { title: 'Test Task 1', description: 'Test Task Description' };
+            const token = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
+            const body: CreateTaskRequest = { title: TEST_TASK_TITLE, description: 'Test Task Description' };
 
             const response = await request(app).post(`${TASK}`).set('Authorization', `Bearer ${token}`).send(body);
             expect(response.status).toEqual(CREATE_TASK_FAILED_ALREADY_EXISTS.httpCode);
         });
 
-        describe('create task with cleanup', () => {
-            const title = 'test task title';
+        test('create task with sufficient permissions', async () => {
+            const token = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
+            const body: CreateTaskRequest = { title: TEST_TASK_TO_CREATE, description: 'Test Task Description' };
 
-            beforeAll(async () => {
-                await TaskController.deleteByTitle(title);
-            });
-
-            test('create task with sufficient permissions', async () => {
-                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
-                const body: CreateTaskRequest = { title: title, description: 'Test Task Description' };
-
-                const response = await request(app).post(`${TASK}`).set('Authorization', `Bearer ${token}`).send(body);
-                expect(response.status).toEqual(CREATE_TASK_SUCCESS.httpCode);
-            });
+            const response = await request(app).post(`${TASK}`).set('Authorization', `Bearer ${token}`).send(body);
+            expect(response.status).toEqual(CREATE_TASK_SUCCESS.httpCode);
         });
     });
 
@@ -119,7 +153,7 @@ describe('TaskService tests', () => {
         });
 
         test('unauthorized', async () => {
-            const token = await AuthenticationController.generateValidIdToken(RO_NO_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const token = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password');
             const response = await request(app).get(`${TASK}`).set('Authorization', `Bearer ${token}`).send();
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
@@ -127,30 +161,23 @@ describe('TaskService tests', () => {
         });
 
         test('invalid', async () => {
-            const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
+            const token = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
             const response = await request(app).get(`${TASK}`).query({}).set('Authorization', `Bearer ${token}`).send();
 
             expect(response.status).toEqual(SEARCH_TASKS_FAILED.httpCode);
             expect(response.body.tasks).toEqual([]);
         });
 
-        describe('succes cases', () => {
-            beforeAll(async () => {
-                await TaskController.deleteByTitle('test task 01a');
-                await TaskController.deleteByTitle('test task 01b');
-                await TaskController.deleteByTitle('test task invalid');
-                await TaskController.create('test task 01a', 'test task description');
-                await TaskController.create('test task 01b', 'test task description');
-                await TaskController.create('test task invalid', 'test task description');
-            });
+        test('search by title', async () => {
+            const token = await AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password');
+            const response = await request(app)
+                .get(`${TASK}`)
+                .query({ q: `${TEST_TASK_SEARCH_PREFIX}test task 01` })
+                .set('Authorization', `Bearer ${token}`)
+                .send();
 
-            test('search by title', async () => {
-                const token = await AuthenticationController.generateValidIdToken(RO_USER_ROLE_TEST_USER_EMAIL, TEST_USER_PASSWORD);
-                const response = await request(app).get(`${TASK}`).query({ q: 'test task 01' }).set('Authorization', `Bearer ${token}`).send();
-
-                expect(response.status).toEqual(SEARCH_TASKS_SUCCESS.httpCode);
-                expect(response.body.tasks.length).toEqual(2);
-            });
+            expect(response.status).toEqual(SEARCH_TASKS_SUCCESS.httpCode);
+            expect(response.body.tasks.length).toEqual(2);
         });
     });
 });

@@ -1,5 +1,5 @@
-import { PlannedDayModel } from '@resources/models';
-import { CreatePlannedDayRequest, CreatePlannedDayResponse, CreatePlannedTaskRequest, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types';
+import { PlannedDayModel } from '@resources/models/PlannedDayModel';
+import { CreatePlannedDayResponse, CreatePlannedTaskRequest, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,

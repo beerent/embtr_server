@@ -126,7 +126,9 @@ export class AccountService {
             return { link };
         } catch (error) {
             //@ts-ignore :(
-            if (error.message.includes('TOO MANY ATTEMPTS')) {
+            const x = error!.message;
+            //@ts-ignore :(
+            if (error.message.includes('TOO_MANY_ATTEMPTS')) {
                 return { link: '', error: 'too many attempts' };
             }
         }

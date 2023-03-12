@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
 import { prisma } from '@database/prisma';
-import { UserModel } from '@resources/models';
+import { UserModel } from '@resources/models/UserModel';
 
 export class UserController {
     public static async getByUid(uid: string): Promise<User | null> {
