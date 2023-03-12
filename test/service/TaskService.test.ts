@@ -1,5 +1,4 @@
 import { TASK } from '@resources/endpoints';
-import { CreateTaskRequest } from '@resources/types';
 import app from '@src/app';
 import {
     CREATE_TASK_FAILED_ALREADY_EXISTS,
@@ -16,6 +15,7 @@ import { TaskController } from '@src/controller/TaskController';
 import request from 'supertest';
 import { TestUtility } from '@test/test_utility/TestUtility';
 import { Role } from '@src/roles/Roles';
+import { CreateTaskRequest } from '@resources/types/TaskTypes';
 
 describe('TaskService tests', () => {
     const ACCOUNT_WITH_NO_ROLES = 'ts_account_no_roles@embtr.com';

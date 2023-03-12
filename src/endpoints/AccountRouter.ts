@@ -1,11 +1,6 @@
-import {
-    AuthenticationRequest,
-    AuthenticationResponse,
-    CreateAccountRequest,
-    ForgotAccountPasswordRequest,
-    Response,
-    VerifyAccountEmailRequest,
-} from '@resources/types';
+import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/AccountTypes';
+import { AuthenticationRequest, AuthenticationResponse } from '@resources/types/RequestTypes';
+import { Response } from '@resources/types/RequestTypes';
 import { AccountService } from '@src/service/AccountService';
 import express from 'express';
 

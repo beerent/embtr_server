@@ -1,5 +1,6 @@
 import { PlannedDayModel } from '@resources/models/PlannedDayModel';
-import { CreatePlannedDayResponse, CreatePlannedTaskRequest, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types';
+import { CreatePlannedDayResponse, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types/PlannedDayTypes';
+import { CreatePlannedTaskRequest } from '@resources/types/PlannedTaskTypes';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
@@ -7,7 +8,6 @@ import {
     CREATE_PLANNED_TASK_FAILED,
     CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY,
     CREATE_PLANNED_TASK_UNKNOWN_TASK,
-    GENERAL_FAILURE,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
     SUCCESS,

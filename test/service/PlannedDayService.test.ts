@@ -1,5 +1,6 @@
 import { PLANNED_DAY } from '@resources/endpoints';
-import { CreatePlannedDayRequest, CreatePlannedDayResponse, CreatePlannedTaskRequest, GetPlannedDayResponse } from '@resources/types';
+import { CreatePlannedDayRequest, CreatePlannedDayResponse, GetPlannedDayResponse } from '@resources/types/PlannedDayTypes';
+import { CreatePlannedTaskRequest } from '@resources/types/PlannedTaskTypes';
 import app from '@src/app';
 import {
     CREATE_PLANNED_DAY_FAILED,

@@ -1,5 +1,4 @@
 import { ACCOUNT, ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT } from '@resources/endpoints';
-import { AuthenticationRequest, CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types';
 import app from '@src/app';
 import {
     ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
@@ -16,6 +15,8 @@ import {
 import { EmailController } from '@src/controller/EmailController';
 import { AccountController } from '@src/controller/AccountController';
 import request from 'supertest';
+import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/AccountTypes';
+import { AuthenticationRequest } from '@resources/types/RequestTypes';
 
 describe('account service tests', () => {
     const ACCOUNT_THAT_EXISTS = 'ast_email_that_exists@embtr.com';

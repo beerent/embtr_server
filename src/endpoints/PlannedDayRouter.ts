@@ -1,4 +1,4 @@
-import { GetPlannedDayRequest } from '@resources/types';
+import { GetPlannedDayRequest } from '@resources/types/PlannedDayTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeGet, authorizePost } from '@src/middleware/planned_day/PlannedDayAuthorization';
 import { validateGetById, validateGetByUser, validatePlannedDayPost, validatePlannedTaskPost } from '@src/middleware/planned_day/PlannedDayValidation';

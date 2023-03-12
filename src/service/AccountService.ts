@@ -1,12 +1,4 @@
 import {
-    AuthenticationRequest,
-    AuthenticationResponse,
-    CreateAccountRequest,
-    ForgotAccountPasswordRequest,
-    Response,
-    VerifyAccountEmailRequest,
-} from '@resources/types';
-import {
     CREATE_ACCOUNT_EMAIL_IN_USE,
     CREATE_ACCOUNT_ERROR,
     CREATE_ACCOUNT_INVALID_EMAIL,
@@ -24,6 +16,8 @@ import { CreateAccountResult, AccountController } from '@src/controller/AccountC
 import { firebase } from '@src/auth/Firebase';
 import { EmailController } from '@src/controller/EmailController';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
+import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/AccountTypes';
+import { AuthenticationRequest, AuthenticationResponse, Response } from '@resources/types/RequestTypes';
 
 interface EmailVerificationLink {
     link: string;

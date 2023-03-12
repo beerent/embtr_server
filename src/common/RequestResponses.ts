@@ -1,15 +1,9 @@
 import { Code } from '@resources/codes';
-import {
-    AuthenticationResponse,
-    CreatePlannedDayResponse,
-    CreateTaskResponse,
-    CreateUserResponse,
-    GetPlannedDayResponse,
-    GetTaskResponse,
-    GetUserResponse,
-    Response,
-    SearchTasksResponse,
-} from '@resources/types';
+
+import { AuthenticationResponse, Response } from '@resources/types/RequestTypes';
+import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/types/PlannedDayTypes';
+import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
+import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
