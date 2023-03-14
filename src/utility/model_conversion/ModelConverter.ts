@@ -3,7 +3,8 @@ import { PlannedDayModel } from '@resources/models/PlannedDayModel';
 import { PlannedTaskModel } from '@resources/models/PlannedTaskModel';
 import { TaskModel } from '@resources/models/TaskModel';
 import { UserModel } from '@resources/models/UserModel';
-import { PlannedDayFull, PlannedTaskFull } from '@src/controller/PlannedDayController';
+import { PlannedDayFull } from '@src/controller/PlannedDayController';
+import { PlannedTaskFull } from '@src/controller/PlannedTaskController';
 
 export class ModelConverter {
     public static convertUser(user: User): UserModel {
@@ -41,12 +42,32 @@ export class ModelConverter {
                 id: plannedTask.id,
                 plannedDay: clone,
                 task: this.convertTask(plannedTask.task),
+                status: plannedTask.status,
+                active: plannedTask.active,
             };
 
             plannedTaskModels.push(plannedTaskModel);
         });
 
         return plannedTaskModels;
+    }
+
+    public static convertPlannedTask(plannedTask: PlannedTaskFull): PlannedTaskModel {
+        if (!plannedTask) {
+            throw new Error('PlannedTask is null');
+        }
+
+        const plannedDay = structuredClone(plannedTask.plannedDay);
+
+        const plannedTaskModel: PlannedTaskModel = {
+            id: plannedTask.id,
+            plannedDay: plannedDay,
+            task: this.convertTask(plannedTask.task),
+            status: plannedTask.status,
+            active: plannedTask.active,
+        };
+
+        return plannedTaskModel;
     }
 
     public static convertTasks(tasks: Task[]): TaskModel[] {

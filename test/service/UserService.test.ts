@@ -49,12 +49,14 @@ describe('user service tests', () => {
     });
 
     afterAll(async () => {
-        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES);
-        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE);
-
-        await AccountController.delete(ACCOUNT_TO_CREATE_USER);
-        await AccountController.delete(ACCOUNT_TO_CREATE_USER_2);
-        await AccountController.delete(ACCOUNT_TO_CREATE_USER_3);
+        const deletes = [
+            await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES),
+            await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE),
+            await TestUtility.deleteAccountWithUser(ACCOUNT_TO_CREATE_USER),
+            await TestUtility.deleteAccountWithUser(ACCOUNT_TO_CREATE_USER_2),
+            await TestUtility.deleteAccountWithUser(ACCOUNT_TO_CREATE_USER_3),
+        ];
+        await Promise.all(deletes);
     });
 
     describe('get user', () => {

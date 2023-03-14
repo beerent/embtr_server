@@ -14,4 +14,6 @@ export interface CreateTaskRequest {
   description?: string;
 }
 
-export interface CreateTaskResponse extends Response {}
+export interface CreateTaskResponse extends Response {
+  task?: TaskModel
+}

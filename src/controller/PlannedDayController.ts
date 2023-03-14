@@ -1,8 +1,8 @@
 import { prisma } from '@database/prisma';
-import { PlannedDay, PlannedTask, Task, User } from '@prisma/client';
+import { PlannedDay, User } from '@prisma/client';
+import { PlannedTaskFull } from './PlannedTaskController';
 
 export type PlannedDayFull = (PlannedDay & { user: User; plannedTasks: PlannedTaskFull[] }) | null;
-export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
 
 export class PlannedDayController {
     public static async create(userId: number, date: Date, dayKey: string) {
@@ -36,6 +36,9 @@ export class PlannedDayController {
             include: {
                 user: true,
                 plannedTasks: {
+                    where: {
+                        active: true,
+                    },
                     include: {
                         task: true,
                         plannedDay: true,
@@ -56,6 +59,9 @@ export class PlannedDayController {
             include: {
                 user: true,
                 plannedTasks: {
+                    where: {
+                        active: true,
+                    },
                     include: {
                         task: true,
                         plannedDay: true,

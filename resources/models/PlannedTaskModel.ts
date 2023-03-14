@@ -5,4 +5,6 @@ export interface PlannedTaskModel {
   id?: number;
   plannedDay?: PlannedDayModel;
   task?: TaskModel;
+  status?: string;
+  active?: boolean;
 }

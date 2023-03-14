@@ -4,6 +4,7 @@ import { AuthenticationResponse, Response } from '@resources/types/RequestTypes'
 import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/types/PlannedDayTypes';
 import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
+import { UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -222,6 +223,11 @@ export const CREATE_TASK_FAILED_ALREADY_EXISTS: Response = {
     message: 'task already exists',
 };
 
+export const CREATE_TASK_FAILED: Response = {
+    ...GENERAL_FAILURE,
+    message: 'failed to create task',
+};
+
 export const CREATE_TASK_SUCCESS: CreateTaskResponse = {
     ...SUCCESS,
 };
@@ -276,4 +282,9 @@ export const CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY: CreatePlannedDayResponse =
 export const CREATE_PLANNED_TASK_UNKNOWN_TASK: CreatePlannedDayResponse = {
     ...GENERAL_FAILURE,
     message: 'failed to create planned task. unknown task.',
+};
+
+export const UPDATE_PLANNED_TASK_FAILED: UpdatePlannedTaskResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to updated planned task',
 };

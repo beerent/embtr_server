@@ -33,7 +33,12 @@ export class TaskService {
             return CREATE_TASK_FAILED_ALREADY_EXISTS;
         }
 
-        await TaskController.create(body.title, body.description);
-        return SUCCESS;
+        const task = await TaskController.create(body.title, body.description);
+        if (task) {
+            const taskModel: TaskModel = ModelConverter.convertTask(task);
+            return { ...SUCCESS, task: taskModel };
+        }
+
+        return CREATE_TASK_FAILED_ALREADY_EXISTS;
     }
 }

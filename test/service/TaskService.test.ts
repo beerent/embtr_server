@@ -15,7 +15,7 @@ import { TaskController } from '@src/controller/TaskController';
 import request from 'supertest';
 import { TestUtility } from '@test/test_utility/TestUtility';
 import { Role } from '@src/roles/Roles';
-import { CreateTaskRequest } from '@resources/types/TaskTypes';
+import { CreateTaskRequest, CreateTaskResponse } from '@resources/types/TaskTypes';
 
 describe('TaskService tests', () => {
     const ACCOUNT_WITH_NO_ROLES = 'ts_account_no_roles@embtr.com';
@@ -140,7 +140,10 @@ describe('TaskService tests', () => {
             const body: CreateTaskRequest = { title: TEST_TASK_TO_CREATE, description: 'Test Task Description' };
 
             const response = await request(app).post(`${TASK}`).set('Authorization', `Bearer ${token}`).send(body);
+            const createTaskResponse: CreateTaskResponse = response.body;
+
             expect(response.status).toEqual(CREATE_TASK_SUCCESS.httpCode);
+            expect(createTaskResponse.task).toBeDefined();
         });
     });
 

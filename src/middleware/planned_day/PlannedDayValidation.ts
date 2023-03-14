@@ -1,8 +1,11 @@
 import z from 'zod';
 import { NextFunction, Request, Response } from 'express';
-import { CREATE_PLANNED_DAY_FAILED, CREATE_PLANNED_TASK_FAILED, GET_PLANNED_DAY_FAILED_NOT_FOUND } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
+import {
+    CREATE_PLANNED_DAY_FAILED,
+    CREATE_PLANNED_TASK_FAILED,
+    GET_PLANNED_DAY_FAILED_NOT_FOUND,
+    UPDATE_PLANNED_TASK_FAILED,
+} from '@src/common/RequestResponses';
 
 const plannedDayGetById = z.object({
     id: z.coerce.number(),
@@ -53,6 +56,19 @@ export const validatePlannedTaskPost = (req: Request, res: Response, next: NextF
         plannedTaskPost.parse(req.body);
     } catch (error) {
         return res.status(CREATE_PLANNED_TASK_FAILED.httpCode).json(CREATE_PLANNED_TASK_FAILED);
+    }
+
+    next();
+};
+
+const plannedTaskPatch = z.object({
+    id: z.coerce.number(),
+});
+export const validatePlannedTaskPatch = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        plannedTaskPatch.parse(req.body.plannedTask);
+    } catch (error) {
+        return res.status(UPDATE_PLANNED_TASK_FAILED.httpCode).json(UPDATE_PLANNED_TASK_FAILED);
     }
 
     next();

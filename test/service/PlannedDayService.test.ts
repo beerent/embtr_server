@@ -1,6 +1,6 @@
 import { PLANNED_DAY } from '@resources/endpoints';
 import { CreatePlannedDayRequest, CreatePlannedDayResponse, GetPlannedDayResponse } from '@resources/types/PlannedDayTypes';
-import { CreatePlannedTaskRequest } from '@resources/types/PlannedTaskTypes';
+import { CreatePlannedTaskRequest, UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
 import app from '@src/app';
 import {
     CREATE_PLANNED_DAY_FAILED,
@@ -13,6 +13,7 @@ import {
     GET_PLANNED_DAY_SUCCESS,
     SUCCESS,
     UNAUTHORIZED,
+    UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
@@ -39,6 +40,11 @@ describe('planned day service', () => {
     const TEST_EXISTING_PLANNED_DAY_KEY = '1001-01-01';
     const TEST_EXISTING_PLANNED_DAY_DATE = new Date(TEST_EXISTING_PLANNED_DAY_KEY);
     let TEST_EXISTING_PLANNED_DAY_ID: number;
+
+    let TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID: number;
+    let TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID_2: number;
+    const TEST_EXISTING_PLANNED_TASK_TO_UPDATE_2_INITIAL_STATUS = 'initial status';
+    let TEST_EXISTING_INACTIVE_PLANNED_TASK_ID: number;
 
     const TEST_PLANNED_DAY_KEY_TO_CREATE = '1001-01-02';
 
@@ -79,7 +85,23 @@ describe('planned day service', () => {
         );
         TEST_EXISTING_PLANNED_DAY_ID = plannedDay.id;
 
-        await PlannedTaskController.create(plannedDay, task!);
+        const taskGenerations = [
+            PlannedTaskController.create(plannedDay, task!),
+            PlannedTaskController.create(plannedDay, task!),
+            PlannedTaskController.create(plannedDay, task!),
+            PlannedTaskController.create(plannedDay, task!),
+        ];
+        const [_, createdTask2, createdTask3, inactiveTask] = await Promise.all(taskGenerations);
+        TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID = createdTask2!.id;
+        TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID_2 = createdTask3!.id;
+        TEST_EXISTING_INACTIVE_PLANNED_TASK_ID = inactiveTask!.id;
+
+        const taskUpdates = [
+            PlannedTaskController.update({ id: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID_2, status: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_2_INITIAL_STATUS }),
+            PlannedTaskController.update({ id: TEST_EXISTING_INACTIVE_PLANNED_TASK_ID, active: false }),
+        ];
+        await Promise.all(taskUpdates);
+        const x = 5;
     });
 
     afterAll(async () => {
@@ -149,6 +171,18 @@ describe('planned day service', () => {
 
             expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
             expect(responseBody.plannedDay!.plannedTasks!.length).toBeGreaterThan(0);
+        });
+
+        test('does not return inactive plannedTasks with plannedDay', async () => {
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${TEST_EXISTING_PLANNED_DAY_ID}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            const responseBody: GetPlannedDayResponse = response.body;
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
+            expect(responseBody.plannedDay!.plannedTasks!.find((task) => task.id === TEST_EXISTING_INACTIVE_PLANNED_TASK_ID)).toBeUndefined();
         });
     });
 
@@ -221,6 +255,18 @@ describe('planned day service', () => {
             expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
             expect(responseBody.plannedDay!.plannedTasks!.length).toBeGreaterThan(0);
         });
+
+        test('does not return inactive plannedTasks with plannedDay', async () => {
+            const response = await request(app)
+                .get(`${PLANNED_DAY}${USER_ACCOUNT_WITH_USER_ROLE.user.id}/${TEST_EXISTING_PLANNED_DAY_KEY}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            const responseBody: GetPlannedDayResponse = response.body;
+
+            expect(response.status).toEqual(GET_PLANNED_DAY_SUCCESS.httpCode);
+            expect(responseBody.plannedDay!.plannedTasks!.find((task) => task.id === TEST_EXISTING_INACTIVE_PLANNED_TASK_ID)).toBeUndefined();
+        });
     });
 
     describe('create planned day', () => {
@@ -279,14 +325,14 @@ describe('planned day service', () => {
             const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', 'Bearer Trash').send({});
 
             expect(response.status).toEqual(UNAUTHORIZED.httpCode);
-            expect(response.body.plannedDay).toBeUndefined();
+            expect(response.body.plannedTask).toBeUndefined();
         });
 
         test('unauthorized', async () => {
             const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
-            expect(response.body.plannedDay).toBeUndefined();
+            expect(response.body.plannedTask).toBeUndefined();
         });
 
         test('invalid', async () => {
@@ -340,6 +386,77 @@ describe('planned day service', () => {
 
             const response = await request(app).post(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
             expect(response.status).toEqual(SUCCESS.httpCode);
+        });
+    });
+
+    describe('complete planned task', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).patch(`${PLANNED_DAY}planned-task`).set('Authorization', 'Bearer Trash').send({});
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).patch(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.plannedDay).toBeUndefined();
+        });
+
+        test('invalid', async () => {
+            const body: UpdatePlannedTaskRequest = {
+                plannedTask: {},
+            };
+            const response = await request(app).patch(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(UPDATE_PLANNED_TASK_FAILED.httpCode);
+            expect(response.body).toEqual(UPDATE_PLANNED_TASK_FAILED);
+        });
+
+        test('does not exist', async () => {
+            const body: UpdatePlannedTaskRequest = {
+                plannedTask: {
+                    id: 0,
+                },
+            };
+
+            const response = await request(app).patch(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(UPDATE_PLANNED_TASK_FAILED.httpCode);
+            expect(response.body).toEqual(UPDATE_PLANNED_TASK_FAILED);
+        });
+
+        test('can update status', async () => {
+            const body: UpdatePlannedTaskRequest = {
+                plannedTask: {
+                    id: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID,
+                    status: 'updated_status',
+                },
+            };
+
+            const response = await request(app).patch(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+
+            const updateResponse: UpdatePlannedTaskResponse = response.body;
+            expect(updateResponse.plannedTask?.status).toEqual('updated_status');
+        });
+
+        test('does not changed untouched fields', async () => {
+            const body: UpdatePlannedTaskRequest = {
+                plannedTask: {
+                    id: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID_2,
+                    active: false,
+                },
+            };
+
+            const response = await request(app).patch(`${PLANNED_DAY}planned-task`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+
+            const updateResponse: UpdatePlannedTaskResponse = response.body;
+            expect(updateResponse.plannedTask?.status).toEqual(TEST_EXISTING_PLANNED_TASK_TO_UPDATE_2_INITIAL_STATUS);
         });
     });
 });

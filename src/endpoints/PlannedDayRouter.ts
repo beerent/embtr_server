@@ -1,7 +1,13 @@
 import { GetPlannedDayRequest } from '@resources/types/PlannedDayTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeGet, authorizePost } from '@src/middleware/planned_day/PlannedDayAuthorization';
-import { validateGetById, validateGetByUser, validatePlannedDayPost, validatePlannedTaskPost } from '@src/middleware/planned_day/PlannedDayValidation';
+import {
+    validateGetById,
+    validateGetByUser,
+    validatePlannedDayPost,
+    validatePlannedTaskPatch,
+    validatePlannedTaskPost,
+} from '@src/middleware/planned_day/PlannedDayValidation';
 import { PlannedDayService } from '@src/service/PlannedDayService';
 import express from 'express';
 
@@ -31,6 +37,11 @@ plannedDayRouter.post('/', authenticate, authorizePost, validatePlannedDayPost, 
 
 plannedDayRouter.post('/planned-task', authenticate, authorizePost, validatePlannedTaskPost, async (req, res) => {
     const response = await PlannedDayService.createPlannedTask(req);
+    res.status(response.httpCode).json(response);
+});
+
+plannedDayRouter.patch('/planned-task', authenticate, authorizePost, validatePlannedTaskPatch, async (req, res) => {
+    const response = await PlannedDayService.update(req);
     res.status(response.httpCode).json(response);
 });
 
