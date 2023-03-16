@@ -44,6 +44,7 @@ model PlannedDay {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   plannedTasks PlannedTask[]
+  DayResult    DayResult[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")
@@ -63,4 +64,19 @@ model PlannedTask {
   @@index([plannedDayId], name: "planned_day_id")
   @@index([taskId], name: "task_id")
   @@map("planned_task")
+}
+
+model DayResult {
+  id           Int        @id @default(autoincrement())
+  plannedDayId Int        @db.Int
+  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active       Boolean    @default(true)
+  //comments
+  //likes
+  //photos
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([plannedDayId], name: "planned_day_id")
+  @@map("day_result")
 }

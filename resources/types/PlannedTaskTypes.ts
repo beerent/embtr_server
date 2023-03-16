@@ -1,15 +1,16 @@
-import { PlannedTaskModel } from '../models/PlannedTaskModel';
-import { Response } from './RequestTypes';
+import { PlannedTaskModel } from "../models/PlannedTaskModel";
+import {Response} from "./RequestTypes";
 
 export interface CreatePlannedTaskRequest {
-    taskId: number;
-    plannedDayId: number;
+  taskId: number;
+  plannedDayId: number;
 }
 
 export interface UpdatePlannedTaskRequest {
-    plannedTask: PlannedTaskModel;
+  plannedTask: PlannedTaskModel
 }
 
 export interface UpdatePlannedTaskResponse extends Response {
-    plannedTask?: PlannedTaskModel;
-}
+  plannedTask?: PlannedTaskModel
+
+} 

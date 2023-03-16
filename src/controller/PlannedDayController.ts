@@ -1,8 +1,20 @@
 import { prisma } from '@database/prisma';
-import { PlannedDay, User } from '@prisma/client';
-import { PlannedTaskFull } from './PlannedTaskController';
+import { Prisma } from '@prisma/client';
 
-export type PlannedDayFull = (PlannedDay & { user: User; plannedTasks: PlannedTaskFull[] }) | null;
+export type PlannedDayFull = Prisma.PromiseReturnType<typeof PlannedDayController.get>;
+
+export const PlannedDayInclude = {
+    user: true,
+    plannedTasks: {
+        where: {
+            active: true,
+        },
+        include: {
+            task: true,
+            plannedDay: true,
+        },
+    },
+} satisfies Prisma.PlannedDayInclude;
 
 export class PlannedDayController {
     public static async create(userId: number, date: Date, dayKey: string) {
@@ -16,39 +28,20 @@ export class PlannedDayController {
                 dayKey,
                 date,
             },
-            include: {
-                user: true,
-                plannedTasks: {
-                    include: {
-                        task: true,
-                        plannedDay: true,
-                    },
-                },
-            },
+            include: PlannedDayInclude,
         });
     }
 
-    public static async get(id: number): Promise<PlannedDayFull> {
+    public static async get(id: number) {
         return await prisma.plannedDay.findUnique({
             where: {
                 id: id,
             },
-            include: {
-                user: true,
-                plannedTasks: {
-                    where: {
-                        active: true,
-                    },
-                    include: {
-                        task: true,
-                        plannedDay: true,
-                    },
-                },
-            },
+            include: PlannedDayInclude,
         });
     }
 
-    public static async getByUserAndDayKey(userId: number, dayKey: string): Promise<PlannedDayFull> {
+    public static async getByUserAndDayKey(userId: number, dayKey: string) {
         return await prisma.plannedDay.findUnique({
             where: {
                 unique_user_daykey: {
@@ -56,18 +49,7 @@ export class PlannedDayController {
                     dayKey,
                 },
             },
-            include: {
-                user: true,
-                plannedTasks: {
-                    where: {
-                        active: true,
-                    },
-                    include: {
-                        task: true,
-                        plannedDay: true,
-                    },
-                },
-            },
+            include: PlannedDayInclude,
         });
     }
 

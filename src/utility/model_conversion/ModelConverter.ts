@@ -1,8 +1,10 @@
 import { Task, User } from '@prisma/client';
+import { DayResultModel } from '@resources/models/DayResultModel';
 import { PlannedDayModel } from '@resources/models/PlannedDayModel';
 import { PlannedTaskModel } from '@resources/models/PlannedTaskModel';
 import { TaskModel } from '@resources/models/TaskModel';
 import { UserModel } from '@resources/models/UserModel';
+import { DayResultFull } from '@src/controller/DayResultController';
 import { PlannedDayFull } from '@src/controller/PlannedDayController';
 import { PlannedTaskFull } from '@src/controller/PlannedTaskController';
 
@@ -12,6 +14,21 @@ export class ModelConverter {
             uid: user.uid,
             email: user.email,
         };
+    }
+
+    public static convertDayResult(dayResult: DayResultFull): DayResultModel {
+        if (!dayResult) {
+            throw new Error('DayResult is null');
+        }
+
+        const dayResultModel: DayResultModel = {
+            id: dayResult.id,
+            plannedDay: this.convertPlannedDay(dayResult.plannedDay),
+            createdAt: dayResult.createdAt,
+            updatedAt: dayResult.updatedAt,
+        };
+
+        return dayResultModel;
     }
 
     public static convertPlannedDay(plannedDay: PlannedDayFull): PlannedDayModel {
