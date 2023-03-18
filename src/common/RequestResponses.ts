@@ -5,7 +5,7 @@ import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/type
 import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
 import { UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
-import { GetDayResultResponse } from '@resources/types/DayResultTypes';
+import { CreateDayResultResponse, GetDayResultResponse } from '@resources/types/DayResultTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -305,6 +305,25 @@ export const GET_DAY_RESULT_FAILED: GetDayResultResponse = {
     message: 'get day result failed',
 };
 
+export const GET_DAY_RESULTS_SUCCESS: GetDayResultResponse = {
+    ...SUCCESS,
+};
+
+export const GET_DAY_RESULTS_FAILED: GetDayResultResponse = {
+    ...GENERAL_FAILURE,
+    message: 'get day results failed',
+};
+
 export const GET_DAY_RESULT_SUCCESS: GetDayResultResponse = {
     ...SUCCESS,
+};
+
+export const CREATE_DAY_RESULT_INVALID: CreateDayResultResponse = {
+    ...GENERAL_FAILURE,
+    message: 'invalid request',
+};
+
+export const CREATE_DAY_RESULT_FAILED: CreateDayResultResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to create day result',
 };

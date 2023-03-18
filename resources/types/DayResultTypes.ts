@@ -9,3 +9,15 @@ export interface GetDayResultRequest {
   userId: number,
   dayKey: string
 }
+
+export interface GetDayResultsResponse extends Response {
+  dayResults?: DayResultModel[]
+}
+
+export interface CreateDayResultRequest {
+  plannedDayId: number,
+};
+
+export interface CreateDayResultResponse extends Response {
+  dayResult?: DayResultModel
+}

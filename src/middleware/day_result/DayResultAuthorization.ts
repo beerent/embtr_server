@@ -12,3 +12,13 @@ export async function authorizeGet(req: Request, res: Response, next: NextFuncti
 
     next();
 }
+
+export async function authorizePost(req: Request, res: Response, next: NextFunction) {
+    const userRoles = await AuthorizationController.getRolesFromToken(req.headers.authorization!);
+
+    if (!userRoles.includes(Role.ADMIN) && !userRoles.includes(Role.USER)) {
+        return res.status(FORBIDDEN.httpCode).json(FORBIDDEN);
+    }
+
+    next();
+}

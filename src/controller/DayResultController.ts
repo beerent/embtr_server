@@ -11,15 +11,21 @@ export const DayResultInclude = {
 } satisfies Prisma.DayResultInclude;
 
 export class DayResultController {
-    public static async create(plannedDay: PlannedDay) {
+    public static async create(plannedDayId: number) {
         return await prisma.dayResult.create({
             data: {
                 plannedDay: {
                     connect: {
-                        id: plannedDay.id,
+                        id: plannedDayId,
                     },
                 },
             },
+            include: DayResultInclude,
+        });
+    }
+
+    public static async getAll() {
+        return await prisma.dayResult.findMany({
             include: DayResultInclude,
         });
     }

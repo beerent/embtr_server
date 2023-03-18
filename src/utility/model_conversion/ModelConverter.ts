@@ -16,6 +16,10 @@ export class ModelConverter {
         };
     }
 
+    public static convertDayResults(dayResult: DayResultFull[]): DayResultModel[] {
+        return dayResult.map((dayResult) => this.convertDayResult(dayResult));
+    }
+
     public static convertDayResult(dayResult: DayResultFull): DayResultModel {
         if (!dayResult) {
             throw new Error('DayResult is null');
