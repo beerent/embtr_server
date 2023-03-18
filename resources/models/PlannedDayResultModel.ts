@@ -1,6 +1,6 @@
 import { PlannedDayModel } from "./PlannedDayModel";
 
-export interface DayResultModel {
+export interface PlannedDayResultModel {
   id?: number;
   plannedDay?: PlannedDayModel;
   createdAt?: Date;

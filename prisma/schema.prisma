@@ -19,6 +19,7 @@ model User {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   PlannedDay  PlannedDay[]
+  //plannedDayResultLikes PlannedDayResultLikes[]
 
   @@map("user")
 }
@@ -36,15 +37,15 @@ model Task {
 }
 
 model PlannedDay {
-  id           Int           @id @default(autoincrement())
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       Int           @db.Int
-  dayKey       String        @db.VarChar(10)
-  date         DateTime      @db.Date
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  plannedTasks PlannedTask[]
-  DayResult    DayResult[]
+  id               Int                @id @default(autoincrement())
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId           Int                @db.Int
+  dayKey           String             @db.VarChar(10)
+  date             DateTime           @db.Date
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  plannedTasks     PlannedTask[]
+  plannedDayResult PlannedDayResult[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")
@@ -66,7 +67,7 @@ model PlannedTask {
   @@map("planned_task")
 }
 
-model DayResult {
+model PlannedDayResult {
   id           Int        @id @default(autoincrement())
   plannedDayId Int        @db.Int
   plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
@@ -76,7 +77,23 @@ model DayResult {
   //photos
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+  //plannedDayResultLikes PlannedDayResultLikes[]
 
   @@unique([plannedDayId], name: "planned_day_id")
   @@map("day_result")
 }
+
+//model PlannedDayResultLikes {
+//  id          Int       @id @default(autoincrement())
+//  dayResultId Int       @db.Int
+//  dayResult   DayResult @relation(fields: [dayResultId], references: [id], onDelete: Cascade)
+//  userId      Int       @db.Int
+//  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+//  createdAt   DateTime  @default(now())
+//  updatedAt   DateTime  @updatedAt
+
+//  @@index([userId])
+//  @@index([dayResultId])
+//  @@unique([dayResultId, userId], name: "day_result_id_user_id")
+//  @@map("day_result_likes")
+//}

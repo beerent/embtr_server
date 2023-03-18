@@ -4,8 +4,8 @@ import { AuthenticationResponse, Response } from '@resources/types/RequestTypes'
 import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/types/PlannedDayTypes';
 import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
-import { UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
-import { CreateDayResultResponse, GetDayResultResponse } from '@resources/types/DayResultTypes';
+import { UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
+import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse } from '@resources/types/PlannedDayResultTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -290,40 +290,40 @@ export const UPDATE_PLANNED_TASK_FAILED: UpdatePlannedTaskResponse = {
     message: 'failed to updated planned task',
 };
 
-export const GET_DAY_RESULT_INVALID: GetDayResultResponse = {
+export const GET_DAY_RESULT_INVALID: GetPlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'invalid request',
 };
 
-export const GET_DAY_RESULT_UNKNOWN: GetDayResultResponse = {
+export const GET_DAY_RESULT_UNKNOWN: GetPlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'unknown day result',
 };
 
-export const GET_DAY_RESULT_FAILED: GetDayResultResponse = {
+export const GET_DAY_RESULT_FAILED: GetPlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'get day result failed',
 };
 
-export const GET_DAY_RESULTS_SUCCESS: GetDayResultResponse = {
+export const GET_DAY_RESULTS_SUCCESS: GetPlannedDayResultResponse = {
     ...SUCCESS,
 };
 
-export const GET_DAY_RESULTS_FAILED: GetDayResultResponse = {
+export const GET_DAY_RESULTS_FAILED: GetPlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'get day results failed',
 };
 
-export const GET_DAY_RESULT_SUCCESS: GetDayResultResponse = {
+export const GET_DAY_RESULT_SUCCESS: GetPlannedDayResultResponse = {
     ...SUCCESS,
 };
 
-export const CREATE_DAY_RESULT_INVALID: CreateDayResultResponse = {
+export const CREATE_DAY_RESULT_INVALID: CreatePlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'invalid request',
 };
 
-export const CREATE_DAY_RESULT_FAILED: CreateDayResultResponse = {
+export const CREATE_DAY_RESULT_FAILED: CreatePlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'failed to create day result',
 };

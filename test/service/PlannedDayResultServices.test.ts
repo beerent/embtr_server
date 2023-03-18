@@ -1,5 +1,5 @@
-import { DAY_RESULT } from '@resources/endpoints';
-import { CreateDayResultRequest, GetDayResultResponse, GetDayResultsResponse } from '@resources/types/DayResultTypes';
+import { PLANNED_DAY_RESULT } from '@resources/endpoints';
+import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse } from '@resources/types/PlannedDayResultTypes';
 import app from '@src/app';
 import {
     CREATE_DAY_RESULT_FAILED,
@@ -13,8 +13,8 @@ import {
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { DayResultController } from '@src/controller/DayResultController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
+import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { Role } from '@src/roles/Roles';
@@ -79,7 +79,7 @@ describe('DayResultServices', () => {
         const task = await TaskController.create(TEST_TASK_TITLE);
         await PlannedTaskController.create(plannedDay, task!);
 
-        const dayResult = await DayResultController.create(plannedDay.id);
+        const dayResult = await PlannedDayResultController.create(plannedDay.id);
         TEST_EXISTING_DAY_RESULT_ID = dayResult.id;
     });
 
@@ -92,28 +92,28 @@ describe('DayResultServices', () => {
 
     describe('get by id', () => {
         test('unauthenticated', async () => {
-            const response = await request(app).get(`${DAY_RESULT}id`).set('Authorization', 'Bearer Trash').send({});
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}id`).set('Authorization', 'Bearer Trash').send({});
 
             expect(response.status).toEqual(UNAUTHORIZED.httpCode);
             expect(response.body.dayResult).toBeUndefined();
         });
 
         test('unauthorized', async () => {
-            const response = await request(app).get(`${DAY_RESULT}id`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}id`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
             expect(response.body.dayResult).toBeUndefined();
         });
 
         test('invalid', async () => {
-            const response = await request(app).get(`${DAY_RESULT}invalid`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}invalid`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
 
             expect(response.status).toEqual(GET_DAY_RESULT_INVALID.httpCode);
             expect(response.body.dayResult).toBeUndefined();
         });
 
         test('non-existing day result', async () => {
-            const response = await request(app).get(`${DAY_RESULT}0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
 
             expect(response.status).toEqual(GET_DAY_RESULT_UNKNOWN.httpCode);
             expect(response.body.dayResult).toBeUndefined();
@@ -121,12 +121,12 @@ describe('DayResultServices', () => {
 
         test('valid', async () => {
             const response = await request(app)
-                .get(`${DAY_RESULT}${TEST_EXISTING_DAY_RESULT_ID}`)
+                .get(`${PLANNED_DAY_RESULT}${TEST_EXISTING_DAY_RESULT_ID}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send();
 
             expect(response.status).toEqual(GET_DAY_RESULT_SUCCESS.httpCode);
-            const responseObject: GetDayResultResponse = response.body;
+            const responseObject: GetPlannedDayResultResponse = response.body;
             expect(responseObject!.dayResult!.id).toEqual(TEST_EXISTING_DAY_RESULT_ID);
         });
     });
@@ -134,7 +134,7 @@ describe('DayResultServices', () => {
     describe('get by user and dayKey', () => {
         test('unauthenticated', async () => {
             const response = await request(app)
-                .get(`${DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/${TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT}`)
+                .get(`${PLANNED_DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/${TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT}`)
                 .set('Authorization', 'Bearer Trash')
                 .send();
 
@@ -144,7 +144,7 @@ describe('DayResultServices', () => {
 
         test('unauthorized', async () => {
             const response = await request(app)
-                .get(`${DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/${TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT}`)
+                .get(`${PLANNED_DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/${TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`)
                 .send();
 
@@ -154,7 +154,7 @@ describe('DayResultServices', () => {
 
         test('invalid', async () => {
             const response = await request(app)
-                .get(`${DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/a}`)
+                .get(`${PLANNED_DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/a}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send();
 
@@ -164,7 +164,7 @@ describe('DayResultServices', () => {
 
         test('non-existing day result', async () => {
             const response = await request(app)
-                .get(`${DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/3000-01-01}`)
+                .get(`${PLANNED_DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/3000-01-01}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send();
 
@@ -174,50 +174,50 @@ describe('DayResultServices', () => {
 
         test('valid', async () => {
             const response = await request(app)
-                .get(`${DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/${TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT}`)
+                .get(`${PLANNED_DAY_RESULT}${ACCOUNT_USER_WITH_USER_ROLE.user.id}/${TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send();
 
             expect(response.status).toEqual(GET_DAY_RESULT_SUCCESS.httpCode);
-            const responseObject: GetDayResultResponse = response.body;
+            const responseObject: GetPlannedDayResultResponse = response.body;
             expect(responseObject!.dayResult!.id).toEqual(TEST_EXISTING_DAY_RESULT_ID);
         });
     });
 
     describe('get all', () => {
         test('unauthenticated', async () => {
-            const response = await request(app).get(`${DAY_RESULT}`).set('Authorization', 'Bearer Trash').send();
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}`).set('Authorization', 'Bearer Trash').send();
 
             expect(response.status).toEqual(UNAUTHORIZED.httpCode);
             expect(response.body.dayResult).toBeUndefined();
         });
 
         test('unauthorized', async () => {
-            const response = await request(app).get(`${DAY_RESULT}`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
             expect(response.body.dayResult).toBeUndefined();
         });
 
         test('valid', async () => {
-            const response = await request(app).get(`${DAY_RESULT}`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+            const response = await request(app).get(`${PLANNED_DAY_RESULT}`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
 
             expect(response.status).toEqual(GET_DAY_RESULTS_SUCCESS.httpCode);
-            const responseObject: GetDayResultsResponse = response.body;
+            const responseObject: GetPlannedDayResultsResponse = response.body;
             expect(responseObject!.dayResults!.length).toBeGreaterThan(1);
         });
     });
 
     describe('create', () => {
         test('unauthenticated', async () => {
-            const response = await request(app).post(DAY_RESULT).set('Authorization', 'Bearer Trash').send({});
+            const response = await request(app).post(PLANNED_DAY_RESULT).set('Authorization', 'Bearer Trash').send({});
 
             expect(response.status).toEqual(UNAUTHORIZED.httpCode);
             expect(response.body).toEqual(UNAUTHORIZED);
         });
 
         test('unauthorized', async () => {
-            const response = await request(app).post(DAY_RESULT).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+            const response = await request(app).post(PLANNED_DAY_RESULT).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
             expect(response.body).toEqual(FORBIDDEN);
@@ -225,7 +225,7 @@ describe('DayResultServices', () => {
 
         test('invalid', async () => {
             const response = await request(app)
-                .post(DAY_RESULT)
+                .post(PLANNED_DAY_RESULT)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send({ plannedDayId: 'invalid' });
 
@@ -234,7 +234,10 @@ describe('DayResultServices', () => {
         });
 
         test('does not exist', async () => {
-            const response = await request(app).post(DAY_RESULT).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({ plannedDayId: 0 });
+            const response = await request(app)
+                .post(PLANNED_DAY_RESULT)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send({ plannedDayId: 0 });
 
             expect(response.status).toEqual(CREATE_DAY_RESULT_FAILED.httpCode);
             expect(response.body).toEqual(CREATE_DAY_RESULT_FAILED);
@@ -242,7 +245,7 @@ describe('DayResultServices', () => {
 
         test('valid', async () => {
             const response = await request(app)
-                .post(DAY_RESULT)
+                .post(PLANNED_DAY_RESULT)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send({ plannedDayId: TEST_PLANNED_DAY_TO_CREATE_RESULT_ID });
 

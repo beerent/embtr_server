@@ -4,7 +4,7 @@ import taskRouter from './endpoints/TaskRouter';
 import bodyParser from 'body-parser';
 import userRouter from './endpoints/UserRouter';
 import plannedDayRouter from './endpoints/PlannedDayRouter';
-import dayResultRouter from './endpoints/DayResultRouter';
+import plannedDayResultRouter from './endpoints/PlannedDayResultRouter';
 import { logger } from './common/logger/Logger';
 
 const app = express();
@@ -24,6 +24,6 @@ app.use('/user', userRouter);
 app.use('/task', taskRouter);
 app.use('/account', accountRouter);
 app.use('/planned-day', plannedDayRouter);
-app.use('/day-result', dayResultRouter);
+app.use('/planned-day-result', plannedDayResultRouter);
 
 export default app;

@@ -1,11 +1,11 @@
 import { Task, User } from '@prisma/client';
-import { DayResultModel } from '@resources/models/DayResultModel';
+import { PlannedDayResultModel } from '@resources/models/PlannedDayResultModel';
 import { PlannedDayModel } from '@resources/models/PlannedDayModel';
 import { PlannedTaskModel } from '@resources/models/PlannedTaskModel';
 import { TaskModel } from '@resources/models/TaskModel';
 import { UserModel } from '@resources/models/UserModel';
-import { DayResultFull } from '@src/controller/DayResultController';
 import { PlannedDayFull } from '@src/controller/PlannedDayController';
+import { PlannedDayResultFull } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskFull } from '@src/controller/PlannedTaskController';
 
 export class ModelConverter {
@@ -16,16 +16,16 @@ export class ModelConverter {
         };
     }
 
-    public static convertDayResults(dayResult: DayResultFull[]): DayResultModel[] {
+    public static convertDayResults(dayResult: PlannedDayResultFull[]): PlannedDayResultModel[] {
         return dayResult.map((dayResult) => this.convertDayResult(dayResult));
     }
 
-    public static convertDayResult(dayResult: DayResultFull): DayResultModel {
+    public static convertDayResult(dayResult: PlannedDayResultFull): PlannedDayResultModel {
         if (!dayResult) {
             throw new Error('DayResult is null');
         }
 
-        const dayResultModel: DayResultModel = {
+        const dayResultModel: PlannedDayResultModel = {
             id: dayResult.id,
             plannedDay: this.convertPlannedDay(dayResult.plannedDay),
             createdAt: dayResult.createdAt,

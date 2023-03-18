@@ -2,17 +2,17 @@ import { prisma } from '@database/prisma';
 import { PlannedDayInclude } from './PlannedDayController';
 import { PlannedDay, Prisma } from '@prisma/client';
 
-export type DayResultFull = Prisma.PromiseReturnType<typeof DayResultController.getById>;
+export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
-export const DayResultInclude = {
+export const PlannedDayResultInclude = {
     plannedDay: {
         include: PlannedDayInclude,
     },
-} satisfies Prisma.DayResultInclude;
+} satisfies Prisma.PlannedDayResultInclude;
 
-export class DayResultController {
+export class PlannedDayResultController {
     public static async create(plannedDayId: number) {
-        return await prisma.dayResult.create({
+        return await prisma.plannedDayResult.create({
             data: {
                 plannedDay: {
                     connect: {
@@ -20,34 +20,34 @@ export class DayResultController {
                     },
                 },
             },
-            include: DayResultInclude,
+            include: PlannedDayResultInclude,
         });
     }
 
     public static async getAll() {
-        return await prisma.dayResult.findMany({
-            include: DayResultInclude,
+        return await prisma.plannedDayResult.findMany({
+            include: PlannedDayResultInclude,
         });
     }
 
     public static async getById(id: number) {
-        return await prisma.dayResult.findUnique({
+        return await prisma.plannedDayResult.findUnique({
             where: {
                 id: id,
             },
-            include: DayResultInclude,
+            include: PlannedDayResultInclude,
         });
     }
 
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
-        return await prisma.dayResult.findFirst({
+        return await prisma.plannedDayResult.findFirst({
             where: {
                 plannedDay: {
                     userId,
                     dayKey,
                 },
             },
-            include: DayResultInclude,
+            include: PlannedDayResultInclude,
         });
     }
 }
