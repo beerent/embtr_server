@@ -21,3 +21,11 @@ export interface CreatePlannedDayResultRequest {
 export interface CreatePlannedDayResultResponse extends Response {
   dayResult?: PlannedDayResultModel;
 }
+
+export interface UpdatePlannedDayRequest {
+  plannedDayResult?: PlannedDayResultModel 
+}
+
+export interface UpdatePlannedDayResponse extends Response {
+  plannedDayResult?: PlannedDayResultModel 
+}

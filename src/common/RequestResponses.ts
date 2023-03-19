@@ -5,7 +5,7 @@ import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/type
 import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
 import { UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
-import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse } from '@resources/types/PlannedDayResultTypes';
+import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse, UpdatePlannedDayResponse } from '@resources/types/PlannedDayResultTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -288,6 +288,16 @@ export const CREATE_PLANNED_TASK_UNKNOWN_TASK: CreatePlannedDayResponse = {
 export const UPDATE_PLANNED_TASK_FAILED: UpdatePlannedTaskResponse = {
     ...GENERAL_FAILURE,
     message: 'failed to updated planned task',
+};
+
+export const UPDATE_PLANNED_DAY_RESULT_INVALID: UpdatePlannedDayResponse = {
+    ...GENERAL_FAILURE,
+    message: 'invalid request',
+};
+
+export const UPDATE_PLANNED_DAY_RESULT_UNKNOWN: UpdatePlannedDayResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed to update planned day result. unknown planned day.',
 };
 
 export const GET_DAY_RESULT_INVALID: GetPlannedDayResultResponse = {

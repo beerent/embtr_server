@@ -22,20 +22,21 @@ export class ModelConverter {
         };
     }
 
-    public static convertDayResults(dayResult: PlannedDayResultFull[]): PlannedDayResultModel[] {
-        return dayResult.map((dayResult) => this.convertDayResult(dayResult));
+    public static convertPlannedDayResults(plannedDayResults: PlannedDayResultFull[]): PlannedDayResultModel[] {
+        return plannedDayResults.map((dayResult) => this.convertPlannedDayResult(dayResult));
     }
 
-    public static convertDayResult(dayResult: PlannedDayResultFull): PlannedDayResultModel {
-        if (!dayResult) {
+    public static convertPlannedDayResult(plannedDayResult: PlannedDayResultFull): PlannedDayResultModel {
+        if (!plannedDayResult) {
             throw new Error('DayResult is null');
         }
 
         const dayResultModel: PlannedDayResultModel = {
-            id: dayResult.id,
-            plannedDay: this.convertPlannedDay(dayResult.plannedDay),
-            createdAt: dayResult.createdAt,
-            updatedAt: dayResult.updatedAt,
+            id: plannedDayResult.id,
+            plannedDay: this.convertPlannedDay(plannedDayResult.plannedDay),
+            description: plannedDayResult.description ?? undefined,
+            createdAt: plannedDayResult.createdAt,
+            updatedAt: plannedDayResult.updatedAt,
         };
 
         return dayResultModel;

@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { PlannedDayInclude } from './PlannedDayController';
-import { PlannedDay, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+import { PlannedDayResultModel } from '@resources/models/PlannedDayResultModel';
 
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
@@ -22,6 +23,22 @@ export class PlannedDayResultController {
             },
             include: PlannedDayResultInclude,
         });
+    }
+
+    public static async update(plannedDayResult: PlannedDayResultModel): Promise<PlannedDayResultFull> {
+        const description = plannedDayResult.description !== undefined ? { description: plannedDayResult.description } : {};
+
+        const result = await prisma.plannedDayResult.update({
+            where: {
+                id: plannedDayResult.id,
+            },
+            data: {
+                ...description,
+            },
+            include: PlannedDayResultInclude,
+        });
+
+        return result;
     }
 
     public static async getAll() {
