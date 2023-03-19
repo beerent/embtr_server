@@ -13,6 +13,12 @@ export class ModelConverter {
         return {
             uid: user.uid,
             email: user.email,
+            location: user.location ?? undefined,
+            bio: user.bio ?? undefined,
+            displayName: user.displayName ?? undefined,
+            username: user.username ?? undefined,
+            photoUrl: user.photoUrl ?? undefined,
+            bannerUrl: user.bannerUrl ?? undefined,
         };
     }
 

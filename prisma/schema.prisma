@@ -16,6 +16,8 @@ model User {
   displayName String?      @db.VarChar(255)
   location    String?      @db.VarChar(255)
   bio         String?      @db.VarChar(255)
+  photoUrl    String?      @db.VarChar(255)
+  bannerUrl   String?      @db.VarChar(255)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   PlannedDay  PlannedDay[]

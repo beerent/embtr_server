@@ -6,4 +6,6 @@ export interface UserModel {
   username?: string;
   location?: string;
   bio?: string;
+  photoUrl?: string;
+  bannerUrl?: string;
 }
