@@ -1,4 +1,4 @@
-import { Task, User } from '@prisma/client';
+import { PlannedDayResultImage, Task, User } from '@prisma/client';
 import { PlannedDayResultModel } from '@resources/models/PlannedDayResultModel';
 import { PlannedDayModel } from '@resources/models/PlannedDayModel';
 import { PlannedTaskModel } from '@resources/models/PlannedTaskModel';
@@ -7,6 +7,7 @@ import { UserModel } from '@resources/models/UserModel';
 import { PlannedDayFull } from '@src/controller/PlannedDayController';
 import { PlannedDayResultFull } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskFull } from '@src/controller/PlannedTaskController';
+import { PlannedDayResultImageModel } from '@resources/models/PlannedDayResultImageModel';
 
 export class ModelConverter {
     public static convertUser(user: User): UserModel {
@@ -39,7 +40,29 @@ export class ModelConverter {
             updatedAt: plannedDayResult.updatedAt,
         };
 
+        dayResultModel.plannedDayResultImages = this.convertPlannedDayResultImages(plannedDayResult.plannedDayResultImages, dayResultModel);
+
         return dayResultModel;
+    }
+
+    public static convertPlannedDayResultImages(
+        plannedDayResultImages: PlannedDayResultImage[],
+        plannedDayResult: PlannedDayResultModel
+    ): PlannedDayResultImageModel[] {
+        return plannedDayResultImages.map((image) => this.convertPlannedDayResultImage(image, plannedDayResult));
+    }
+
+    public static convertPlannedDayResultImage(
+        plannedDayResultImage: PlannedDayResultImage,
+        plannedDayResult: PlannedDayResultModel
+    ): PlannedDayResultImageModel {
+        const clone = structuredClone(plannedDayResult);
+
+        return {
+            id: plannedDayResultImage.id,
+            url: plannedDayResultImage.url,
+            plannedDayResult: clone,
+        };
     }
 
     public static convertPlannedDay(plannedDay: PlannedDayFull): PlannedDayModel {

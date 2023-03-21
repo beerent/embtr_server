@@ -1,4 +1,5 @@
 import { PlannedDayModel } from "./PlannedDayModel";
+import { PlannedDayResultImageModel } from "./PlannedDayResultImageModel";
 
 export interface PlannedDayResultModel {
   id?: number;
@@ -6,4 +7,5 @@ export interface PlannedDayResultModel {
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  plannedDayResultImages?: PlannedDayResultImageModel[];
 }

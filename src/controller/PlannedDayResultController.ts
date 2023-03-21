@@ -1,11 +1,16 @@
 import { prisma } from '@database/prisma';
 import { PlannedDayInclude } from './PlannedDayController';
-import { Prisma } from '@prisma/client';
+import { PlannedDayResultImage, Prisma } from '@prisma/client';
 import { PlannedDayResultModel } from '@resources/models/PlannedDayResultModel';
 
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
 export const PlannedDayResultInclude = {
+    plannedDayResultImages: {
+        include: {
+            plannedDayResult: true,
+        },
+    },
     plannedDay: {
         include: PlannedDayInclude,
     },
@@ -25,15 +30,35 @@ export class PlannedDayResultController {
         });
     }
 
-    public static async update(plannedDayResult: PlannedDayResultModel): Promise<PlannedDayResultFull> {
+    public static async x() {
+        return await prisma.plannedDayResultImage.findUnique({
+            where: { id: 1 },
+            include: {
+                plannedDayResult: {
+                    include: PlannedDayResultInclude,
+                },
+            },
+        });
+    }
+
+    public static async update(plannedDayResult: PlannedDayResultModel) {
         const description = plannedDayResult.description !== undefined ? { description: plannedDayResult.description } : {};
 
+        const plannedDayResultImages = {
+            upsert: plannedDayResult.plannedDayResultImages
+                ?.filter((image) => image.url !== undefined)
+                .map((image) => ({
+                    where: { id: image.id ?? -1 },
+                    create: { url: image.url! },
+                    update: { url: image.url! },
+                })),
+        };
+
         const result = await prisma.plannedDayResult.update({
-            where: {
-                id: plannedDayResult.id,
-            },
+            where: { id: plannedDayResult.id },
             data: {
                 ...description,
+                plannedDayResultImages,
             },
             include: PlannedDayResultInclude,
         });

@@ -70,20 +70,33 @@ model PlannedTask {
 }
 
 model PlannedDayResult {
-  id           Int        @id @default(autoincrement())
-  plannedDayId Int        @db.Int
-  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active       Boolean    @default(true)
-  description  String?    @db.VarChar(255)
+  id                     Int                     @id @default(autoincrement())
+  plannedDayId           Int                     @db.Int
+  plannedDay             PlannedDay              @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active                 Boolean                 @default(true)
+  description            String?                 @db.VarChar(255)
   //comments
   //likes
   //photos
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
   //plannedDayResultLikes PlannedDayResultLikes[]
+  plannedDayResultImages PlannedDayResultImage[]
 
   @@unique([plannedDayId], name: "planned_day_id")
   @@map("day_result")
+}
+
+model PlannedDayResultImage {
+  id                 Int              @id @default(autoincrement())
+  plannedDayResultId Int              @db.Int
+  plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
+  url                String           @db.VarChar(255)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([plannedDayResultId])
+  @@map("day_result_image")
 }
 
 //model PlannedDayResultLikes {
