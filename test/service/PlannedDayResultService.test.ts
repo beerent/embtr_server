@@ -345,6 +345,7 @@ describe('DayResultServices', () => {
             expect(response.body.plannedDayResult.description).toEqual(randomString);
         });
 
+
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.plannedDayResult).toBeDefined();
             expect(response.body.plannedDayResult.description).toEqual(randomString);
