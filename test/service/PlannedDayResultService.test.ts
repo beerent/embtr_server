@@ -1,5 +1,5 @@
 import { PLANNED_DAY_RESULT } from '@resources/endpoints';
-import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse, UpdatePlannedDayRequest } from '@resources/types/PlannedDayResultTypes';
+import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse, UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 import app from '@src/app';
 import {
     CREATE_DAY_RESULT_FAILED,
@@ -331,7 +331,7 @@ describe('DayResultServices', () => {
 
         test('valid', async () => {
             const randomString = Math.random().toString(36).substring(7);
-            const body: UpdatePlannedDayRequest = {
+            const body: UpdatePlannedDayResultRequest = {
                 plannedDayResult: {
                     id: TEST_EXISTING_PLANNED_DAY_RESULT_ID,
                     description: randomString,

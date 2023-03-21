@@ -1,7 +1,7 @@
 import z from 'zod';
 import { NextFunction, Request, Response } from 'express';
 import { GET_DAY_RESULT_INVALID, UPDATE_PLANNED_DAY_RESULT_INVALID } from '@src/common/RequestResponses';
-import { UpdatePlannedDayRequest } from '@resources/types/PlannedDayResultTypes';
+import { UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 
 const dayResultGetById = z.object({
     id: z.coerce.number(),
@@ -50,7 +50,7 @@ const plannedDayResultPatch = z.object({
 });
 export const validatePatch = (req: Request, res: Response, next: NextFunction) => {
     try {
-        const request = req.body as UpdatePlannedDayRequest;
+        const request = req.body as UpdatePlannedDayResultRequest;
         plannedDayResultPatch.parse(request);
     } catch (error) {
         return res.status(UPDATE_PLANNED_DAY_RESULT_INVALID.httpCode).json(UPDATE_PLANNED_DAY_RESULT_INVALID);

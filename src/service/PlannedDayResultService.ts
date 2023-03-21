@@ -4,8 +4,8 @@ import {
     GetPlannedDayResultRequest,
     GetPlannedDayResultResponse,
     GetPlannedDayResultsResponse,
-    UpdatePlannedDayRequest,
-    UpdatePlannedDayResponse,
+    UpdatePlannedDayResultRequest,
+    UpdatePlannedDayResultResponse,
 } from '@resources/types/PlannedDayResultTypes';
 import {
     CREATE_DAY_RESULT_FAILED,
@@ -37,8 +37,8 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
-    public static async update(request: Request): Promise<UpdatePlannedDayResponse> {
-        const updateRequest: UpdatePlannedDayRequest = request.body;
+    public static async update(request: Request): Promise<UpdatePlannedDayResultResponse> {
+        const updateRequest: UpdatePlannedDayResultRequest = request.body;
 
         const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
         if (!userId) {

@@ -22,10 +22,10 @@ export interface CreatePlannedDayResultResponse extends Response {
   dayResult?: PlannedDayResultModel;
 }
 
-export interface UpdatePlannedDayRequest {
-  plannedDayResult?: PlannedDayResultModel 
+export interface UpdatePlannedDayResultRequest {
+  plannedDayResult?: PlannedDayResultModel;
 }
 
-export interface UpdatePlannedDayResponse extends Response {
-  plannedDayResult?: PlannedDayResultModel 
+export interface UpdatePlannedDayResultResponse extends Response {
+  plannedDayResult?: PlannedDayResultModel;
 }
