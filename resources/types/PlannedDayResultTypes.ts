@@ -1,4 +1,4 @@
-import { PlannedDayResult as PlannedDayResultModel } from "../schema";
+import { PlannedDayResult as PlannedDayResultModel, PlannedDayResultComment as PlannedDayResultCommentModel } from "../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetPlannedDayResultResponse extends Response {
@@ -28,4 +28,11 @@ export interface UpdatePlannedDayResultRequest {
 
 export interface UpdatePlannedDayResultResponse extends Response {
   plannedDayResult?: PlannedDayResultModel;
+}
+
+export interface CreatePlannedDayResultCommentRequest {
+  plannedDayResultComment?: PlannedDayResultCommentModel;
+}
+
+export interface CreatePlannedDayResultCommentResponse extends Response {
 }

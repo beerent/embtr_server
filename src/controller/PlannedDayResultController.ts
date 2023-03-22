@@ -1,11 +1,17 @@
 import { prisma } from '@database/prisma';
 import { PlannedDayInclude } from './PlannedDayController';
 import { Prisma } from '@prisma/client';
-import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { PlannedDayResultComment as PlannedDayResultCommentModel, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
 export const PlannedDayResultInclude = {
+    PlannedDayResultComments: {
+        include: {
+            plannedDayResult: true,
+            user: true,
+        },
+    },
     plannedDayResultImages: {
         include: {
             plannedDayResult: true,
@@ -30,35 +36,17 @@ export class PlannedDayResultController {
         });
     }
 
-    public static async x() {
-        return await prisma.plannedDayResultImage.findUnique({
-            where: { id: 1 },
-            include: {
-                plannedDayResult: {
-                    include: PlannedDayResultInclude,
-                },
-            },
-        });
-    }
-
     public static async update(plannedDayResult: PlannedDayResultModel) {
-        const description = plannedDayResult.description !== undefined ? { description: plannedDayResult.description } : {};
-
-        const plannedDayResultImages = {
-            upsert: plannedDayResult.plannedDayResultImages
-                ?.filter((image) => image.url !== undefined)
-                .map((image) => ({
-                    where: { id: image.id ?? -1 },
-                    create: { url: image.url! },
-                    update: { url: image.url! },
-                })),
-        };
+        const description = await this.createDescriptionUpdate(plannedDayResult);
+        const plannedDayResultImages = await this.createPlannedDayResultImagesUpdate(plannedDayResult);
+        const plannedDayResultComments = await this.createPlannedDayResultCommentsUpdate(plannedDayResult);
 
         const result = await prisma.plannedDayResult.update({
             where: { id: plannedDayResult.id },
             data: {
                 ...description,
                 plannedDayResultImages,
+                PlannedDayResultComments: plannedDayResultComments,
             },
             include: PlannedDayResultInclude,
         });
@@ -91,5 +79,49 @@ export class PlannedDayResultController {
             },
             include: PlannedDayResultInclude,
         });
+    }
+
+    private static async createDescriptionUpdate(plannedDayResult: PlannedDayResultModel) {
+        const description = plannedDayResult.description;
+        if (!description) {
+            return {};
+        }
+
+        return { description };
+    }
+
+    private static async createPlannedDayResultImagesUpdate(plannedDayResult: PlannedDayResultModel) {
+        const images = plannedDayResult.plannedDayResultImages;
+        if (!images) {
+            return {};
+        }
+
+        return {
+            create: images
+                .filter((image) => image.url && !image.id)
+                .map((image) => ({
+                    url: image.url!,
+                })),
+        };
+    }
+
+    private static async createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
+        const comments = plannedDayResult.PlannedDayResultComments;
+        if (!comments) {
+            return {};
+        }
+
+        return {
+            create: comments
+                .filter((comment) => comment.comment && !comment.id)
+                .map((comment) => ({
+                    comment: comment.comment!,
+                    user: {
+                        connect: {
+                            id: comment.userId!,
+                        },
+                    },
+                })),
+        };
     }
 }

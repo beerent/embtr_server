@@ -9,19 +9,20 @@ generator client {
 }
 
 model User {
-  id          Int          @id @default(autoincrement())
-  uid         String       @unique @db.VarChar(255)
-  email       String       @db.VarChar(255)
-  username    String?      @db.VarChar(255)
-  displayName String?      @db.VarChar(255)
-  location    String?      @db.VarChar(255)
-  bio         String?      @db.VarChar(255)
-  photoUrl    String?      @db.VarChar(255)
-  bannerUrl   String?      @db.VarChar(255)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  PlannedDay  PlannedDay[]
+  id                      Int                       @id @default(autoincrement())
+  uid                     String                    @unique @db.VarChar(255)
+  email                   String                    @db.VarChar(255)
+  username                String?                   @db.VarChar(255)
+  displayName             String?                   @db.VarChar(255)
+  location                String?                   @db.VarChar(255)
+  bio                     String?                   @db.VarChar(255)
+  photoUrl                String?                   @db.VarChar(255)
+  bannerUrl               String?                   @db.VarChar(255)
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  PlannedDay              PlannedDay[]
   //plannedDayResultLikes PlannedDayResultLikes[]
+  PlannedDayResultComment PlannedDayResultComment[]
 
   @@map("user")
 }
@@ -70,21 +71,36 @@ model PlannedTask {
 }
 
 model PlannedDayResult {
-  id                     Int                     @id @default(autoincrement())
-  plannedDayId           Int                     @db.Int
-  plannedDay             PlannedDay              @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active                 Boolean                 @default(true)
-  description            String?                 @db.VarChar(255)
-  //comments
+  id                       Int                       @id @default(autoincrement())
+  plannedDayId             Int                       @db.Int
+  plannedDay               PlannedDay                @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active                   Boolean                   @default(true)
+  description              String?                   @db.VarChar(255)
   //likes
   //photos
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
   //plannedDayResultLikes PlannedDayResultLikes[]
-  plannedDayResultImages PlannedDayResultImage[]
+  plannedDayResultImages   PlannedDayResultImage[]
+  PlannedDayResultComments PlannedDayResultComment[]
 
   @@unique([plannedDayId], name: "planned_day_id")
   @@map("day_result")
+}
+
+model PlannedDayResultComment {
+  id                 Int              @id @default(autoincrement())
+  plannedDayResultId Int              @db.Int
+  plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
+  userId             Int              @db.Int
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment            String           @db.VarChar(255)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([plannedDayResultId])
+  @@map("planned_day_result_comment")
 }
 
 model PlannedDayResultImage {

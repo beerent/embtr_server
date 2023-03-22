@@ -1,7 +1,7 @@
 import z from 'zod';
 import { NextFunction, Request, Response } from 'express';
-import { GET_DAY_RESULT_INVALID, UPDATE_PLANNED_DAY_RESULT_INVALID } from '@src/common/RequestResponses';
-import { UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
+import { CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID, GET_DAY_RESULT_INVALID, UPDATE_PLANNED_DAY_RESULT_INVALID } from '@src/common/RequestResponses';
+import { CreatePlannedDayResultCommentRequest, UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 
 const dayResultGetById = z.object({
     id: z.coerce.number(),
@@ -54,6 +54,24 @@ export const validatePatch = (req: Request, res: Response, next: NextFunction) =
         plannedDayResultPatch.parse(request);
     } catch (error) {
         return res.status(UPDATE_PLANNED_DAY_RESULT_INVALID.httpCode).json(UPDATE_PLANNED_DAY_RESULT_INVALID);
+    }
+
+    next();
+};
+
+const plannedDayResultCommentPost = z.object({
+    plannedDayResultComment: z.object({
+        plannedDayResultId: z.coerce.number(),
+        userId: z.coerce.number(),
+        comment: z.string(),
+    }),
+});
+export const validateCommentPost = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const request = req.body as CreatePlannedDayResultCommentRequest;
+        plannedDayResultCommentPost.parse(request);
+    } catch (error) {
+        return res.status(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
     }
 
     next();

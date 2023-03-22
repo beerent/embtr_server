@@ -1,5 +1,7 @@
 import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
+    CreatePlannedDayResultCommentRequest,
+    CreatePlannedDayResultCommentResponse,
     CreatePlannedDayResultRequest,
     GetPlannedDayResultRequest,
     GetPlannedDayResultResponse,
@@ -9,6 +11,8 @@ import {
 } from '@resources/types/PlannedDayResultTypes';
 import {
     CREATE_DAY_RESULT_FAILED,
+    CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED,
+    CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     GET_DAY_RESULT_UNKNOWN,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
@@ -36,6 +40,24 @@ export class PlannedDayResultService {
         }
 
         return GET_DAY_RESULT_UNKNOWN;
+    }
+
+    public static async createComment(request: CreatePlannedDayResultCommentRequest): Promise<CreatePlannedDayResultCommentResponse> {
+        const plannedDayResult = await PlannedDayResultController.getById(request.plannedDayResultComment!.plannedDayResultId!);
+        if (!plannedDayResult) {
+            return CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED;
+        }
+
+        const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
+        plannedDayResultModel.PlannedDayResultComments = plannedDayResultModel.PlannedDayResultComments || [];
+        plannedDayResultModel.PlannedDayResultComments.push(request.plannedDayResultComment!);
+
+        const result = await PlannedDayResultController.update(plannedDayResultModel);
+        if (result) {
+            return SUCCESS;
+        }
+
+        return CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED;
     }
 
     public static async update(request: Request): Promise<UpdatePlannedDayResultResponse> {

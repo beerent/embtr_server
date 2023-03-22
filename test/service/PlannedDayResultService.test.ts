@@ -1,9 +1,15 @@
-import { PLANNED_DAY_RESULT } from '@resources/endpoints';
-import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse, UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
+import { ACCOUNT, PLANNED_DAY_RESULT } from '@resources/endpoints';
+import {
+    CreatePlannedDayResultCommentRequest,
+    GetPlannedDayResultResponse,
+    GetPlannedDayResultsResponse,
+    UpdatePlannedDayResultRequest,
+} from '@resources/types/PlannedDayResultTypes';
 import app from '@src/app';
 import {
     CREATE_DAY_RESULT_FAILED,
     CREATE_DAY_RESULT_INVALID,
+    CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     FORBIDDEN,
     GET_DAY_RESULTS_SUCCESS,
     GET_DAY_RESULT_INVALID,
@@ -33,7 +39,6 @@ describe('DayResultServices', () => {
 
     const ACCOUNT_WITH_USER_ROLE_2 = 'drs_account_user_roles_2@embtr.com';
     let ACCOUNT_WITH_USER_ROLE_2_TOKEN: string;
-    let ACCOUNT_USER_WITH_USER_ROLE_2: TestAccountWithUser;
 
     const TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT = '0100-01-02';
     let TEST_PLANNED_DAY_TO_CREATE_RESULT_ID: number;
@@ -41,6 +46,9 @@ describe('DayResultServices', () => {
     const TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT = '0100-01-01';
     const TEST_TASK_TITLE = 'DRS Test Task';
     let TEST_EXISTING_PLANNED_DAY_RESULT_ID: number;
+
+    const TEST_PLANNED_DAY_DATE_TO_COMMENT = '0100-01-03';
+    let TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID: number;
 
     beforeAll(async () => {
         //user deletes
@@ -59,7 +67,6 @@ describe('DayResultServices', () => {
         ];
         const [account1, account2, account3] = await Promise.all(creates);
         ACCOUNT_USER_WITH_USER_ROLE = account2;
-        ACCOUNT_USER_WITH_USER_ROLE_2 = account3;
 
         //user authenticates
         const authenticates = [
@@ -84,8 +91,9 @@ describe('DayResultServices', () => {
                 new Date(TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT),
                 TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT
             ),
+            PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date(TEST_PLANNED_DAY_DATE_TO_COMMENT), TEST_PLANNED_DAY_DATE_TO_COMMENT),
         ];
-        const [plannedDay, plannedDayToCreateResult] = await Promise.all(plannedDayCreates);
+        const [plannedDay, plannedDayToCreateResult, plannedDayToComment] = await Promise.all(plannedDayCreates);
         TEST_PLANNED_DAY_TO_CREATE_RESULT_ID = plannedDayToCreateResult.id;
 
         //tasks
@@ -93,8 +101,11 @@ describe('DayResultServices', () => {
         const task = await TaskController.create(TEST_TASK_TITLE);
         await PlannedTaskController.create(plannedDay, task!);
 
-        const dayResult = await PlannedDayResultController.create(plannedDay.id);
+        const plannedDayResultCreates = [PlannedDayResultController.create(plannedDay.id), PlannedDayResultController.create(plannedDayToComment.id)];
+        const [dayResult, dayResultToComment] = await Promise.all(plannedDayResultCreates);
+
         TEST_EXISTING_PLANNED_DAY_RESULT_ID = dayResult.id;
+        TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID = dayResultToComment.id;
     });
 
     afterAll(async () => {
@@ -359,6 +370,56 @@ describe('DayResultServices', () => {
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.plannedDayResult).toBeDefined();
             expect(response.body.plannedDayResult.description).toEqual(randomString);
+        });
+    });
+
+    describe('add comment', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID}/comment`)
+                .set('Authorization', 'Bearer Trash')
+                .send({});
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body).toEqual(UNAUTHORIZED);
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID}/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`)
+                .send({});
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID}/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send({});
+
+            expect(response.status).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode);
+            expect(response.body).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
+        });
+
+        test('valid', async () => {
+            const body: CreatePlannedDayResultCommentRequest = {
+                plannedDayResultComment: {
+                    plannedDayResultId: TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
+                    userId: ACCOUNT_USER_WITH_USER_ROLE.user.id,
+                    comment: 'comment',
+                },
+            };
+
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID}/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send(body);
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body).toEqual(SUCCESS);
         });
     });
 });

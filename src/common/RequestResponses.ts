@@ -5,7 +5,12 @@ import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/type
 import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
 import { UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
-import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse, UpdatePlannedDayResultResponse } from '@resources/types/PlannedDayResultTypes';
+import {
+    CreatePlannedDayResultCommentResponse,
+    CreatePlannedDayResultResponse,
+    GetPlannedDayResultResponse,
+    UpdatePlannedDayResultResponse,
+} from '@resources/types/PlannedDayResultTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -336,4 +341,18 @@ export const CREATE_DAY_RESULT_INVALID: CreatePlannedDayResultResponse = {
 export const CREATE_DAY_RESULT_FAILED: CreatePlannedDayResultResponse = {
     ...GENERAL_FAILURE,
     message: 'failed to create day result',
+};
+
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreatePlannedDayResultCommentResponse = {
+    ...GENERAL_FAILURE,
+    message: 'invalid comment request',
+};
+
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED: CreatePlannedDayResultCommentResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed comment request',
+};
+
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_SUCCESS: CreatePlannedDayResultCommentResponse = {
+    ...SUCCESS,
 };

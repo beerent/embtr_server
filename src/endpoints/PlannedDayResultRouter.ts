@@ -1,8 +1,15 @@
-import { CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
+import { CreatePlannedDayResultCommentRequest, CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 import { GetUserResponse } from '@resources/types/UserTypes';
+import { UNAUTHORIZED } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeGet, authorizePatch, authorizePost } from '@src/middleware/planned_day_result/PlannedDayResultAuthorization';
-import { validateGetById, validateGetByUser, validatePatch, validatePost } from '@src/middleware/planned_day_result/PlannedDayResultValidation';
+import {
+    validateCommentPost,
+    validateGetById,
+    validateGetByUser,
+    validatePatch,
+    validatePost,
+} from '@src/middleware/planned_day_result/PlannedDayResultValidation';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import express from 'express';
 
@@ -41,6 +48,12 @@ plannedDayResultRouter.post('/', authenticate, authorizePost, validatePost, asyn
 
 plannedDayResultRouter.patch('/', authenticate, authorizePatch, validatePatch, async (req, res) => {
     const response = await PlannedDayResultService.update(req);
+    res.status(response.httpCode).json(response);
+});
+
+plannedDayResultRouter.post('/:id/comment', authenticate, authorizePatch, validateCommentPost, async (req, res) => {
+    const body = req.body as CreatePlannedDayResultCommentRequest;
+    const response = await PlannedDayResultService.createComment(body);
     res.status(response.httpCode).json(response);
 });
 
