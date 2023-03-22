@@ -8,7 +8,6 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 export class TaskService {
     public static async search(query: string): Promise<SearchTasksResponse> {
         const tasks: Task[] = await TaskController.getAllLikeTitle(query);
-        const taskModels: TaskModel[] = ModelConverter.convertTasks(tasks);
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };
