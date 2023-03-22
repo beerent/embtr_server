@@ -1,8 +1,8 @@
-import { PlannedDayResultModel } from "../models/PlannedDayResultModel";
+import { PlannedDayResult as PlannedDayResultModel } from "../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetPlannedDayResultResponse extends Response {
-  dayResult?: PlannedDayResultModel;
+  plannedDayResult?: PlannedDayResultModel;
 }
 
 export interface GetPlannedDayResultRequest {
@@ -11,7 +11,7 @@ export interface GetPlannedDayResultRequest {
 }
 
 export interface GetPlannedDayResultsResponse extends Response {
-  dayResults?: PlannedDayResultModel[];
+  plannedDayResults?: PlannedDayResultModel[];
 }
 
 export interface CreatePlannedDayResultRequest {
@@ -19,7 +19,7 @@ export interface CreatePlannedDayResultRequest {
 }
 
 export interface CreatePlannedDayResultResponse extends Response {
-  dayResult?: PlannedDayResultModel;
+  plannedDayResult?: PlannedDayResultModel;
 }
 
 export interface UpdatePlannedDayResultRequest {

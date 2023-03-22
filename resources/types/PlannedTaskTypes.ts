@@ -1,5 +1,5 @@
-import { PlannedTaskModel } from "../models/PlannedTaskModel";
-import {Response} from "./RequestTypes";
+import { PlannedTask as PlannedTaskModel } from "../schema";
+import { Response } from "./RequestTypes";
 
 export interface CreatePlannedTaskRequest {
   taskId: number;
@@ -7,10 +7,9 @@ export interface CreatePlannedTaskRequest {
 }
 
 export interface UpdatePlannedTaskRequest {
-  plannedTask: PlannedTaskModel
+  plannedTask: PlannedTaskModel;
 }
 
 export interface UpdatePlannedTaskResponse extends Response {
-  plannedTask?: PlannedTaskModel
-
-} 
+  plannedTask?: PlannedTaskModel;
+}

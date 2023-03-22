@@ -1,4 +1,4 @@
-import { UserModel } from "../models/UserModel";
+import { User as UserModel } from "../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetUserResponse extends Response {

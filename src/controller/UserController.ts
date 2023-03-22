@@ -1,6 +1,6 @@
 import { User } from '@prisma/client';
+import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
-import { UserModel } from '@resources/models/UserModel';
 
 export class UserController {
     public static async getByUid(uid: string): Promise<User | null> {
@@ -41,12 +41,24 @@ export class UserController {
     }
 
     public static async update(uid: string, user: UserModel): Promise<User | null> {
+        const username = user.username !== undefined ? { username: user.username } : {};
+        const displayName = user.displayName !== undefined ? { displayName: user.displayName } : {};
+        const bio = user.bio !== undefined ? { bio: user.bio } : {};
+        const location = user.location !== undefined ? { location: user.location } : {};
+        const photoUrl = user.photoUrl !== undefined ? { photoUrl: user.photoUrl } : {};
+        const bannerUrl = user.bannerUrl !== undefined ? { bannerUrl: user.bannerUrl } : {};
+
         const updatedUser = await prisma.user.update({
             where: {
                 uid: uid,
             },
             data: {
-                ...user,
+                ...username,
+                ...displayName,
+                ...bio,
+                ...location,
+                ...photoUrl,
+                ...bannerUrl,
             },
         });
 

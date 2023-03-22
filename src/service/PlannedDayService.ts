@@ -1,4 +1,4 @@
-import { PlannedDayModel } from '@resources/models/PlannedDayModel';
+import { PlannedTask as PlannedTaskModel, PlannedDay as PlannedDayModel } from '@resources/schema';
 import { CreatePlannedDayResponse, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types/PlannedDayTypes';
 import { CreatePlannedTaskRequest, UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
 import {
@@ -25,7 +25,7 @@ export class PlannedDayService {
         const plannedDay = await PlannedDayController.get(id);
 
         if (plannedDay) {
-            const convertedPlannedDay = ModelConverter.convertPlannedDay(plannedDay);
+            const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
             return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 
@@ -36,7 +36,7 @@ export class PlannedDayService {
         const plannedDay = await PlannedDayController.getByUserAndDayKey(request.userId, request.dayKey);
 
         if (plannedDay) {
-            const convertedPlannedDay: PlannedDayModel = ModelConverter.convertPlannedDay(plannedDay);
+            const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
             return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 
@@ -56,7 +56,7 @@ export class PlannedDayService {
 
         const createdPlannedDay = await PlannedDayController.create(userId, date, dayKey);
         if (createdPlannedDay) {
-            const convertedPlannedDay: PlannedDayModel = ModelConverter.convertPlannedDay(createdPlannedDay);
+            const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
             return { ...CREATE_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
         }
 
@@ -99,7 +99,7 @@ export class PlannedDayService {
 
         const updatedPlannedTask = await PlannedTaskController.update(updateRequest.plannedTask);
         if (updatedPlannedTask) {
-            const updatedPlannedTaskModel = ModelConverter.convertPlannedTask(updatedPlannedTask);
+            const updatedPlannedTaskModel: PlannedTaskModel = ModelConverter.convert(updatedPlannedTask);
             return { ...SUCCESS, plannedTask: updatedPlannedTaskModel };
         }
 

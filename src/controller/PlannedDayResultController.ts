@@ -1,7 +1,7 @@
 import { prisma } from '@database/prisma';
 import { PlannedDayInclude } from './PlannedDayController';
-import { PlannedDayResultImage, Prisma } from '@prisma/client';
-import { PlannedDayResultModel } from '@resources/models/PlannedDayResultModel';
+import { Prisma } from '@prisma/client';
+import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 

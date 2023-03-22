@@ -1,5 +1,5 @@
 import { Task } from '@prisma/client';
-import { TaskModel } from '@resources/models/TaskModel';
+import { Task as TaskModel } from '@resources/schema';
 import { SearchTasksResponse, GetTaskResponse, CreateTaskRequest, CreateTaskResponse } from '@resources/types/TaskTypes';
 import { CREATE_TASK_FAILED_ALREADY_EXISTS, GET_TASK_FAILED_NOT_FOUND, GET_TASK_SUCCESS, SUCCESS } from '@src/common/RequestResponses';
 import { TaskController } from '@src/controller/TaskController';
@@ -9,6 +9,7 @@ export class TaskService {
     public static async search(query: string): Promise<SearchTasksResponse> {
         const tasks: Task[] = await TaskController.getAllLikeTitle(query);
         const taskModels: TaskModel[] = ModelConverter.convertTasks(tasks);
+        const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };
     }
@@ -20,7 +21,7 @@ export class TaskService {
 
         const task = await TaskController.get(Number(id));
         if (task) {
-            const taskModel: TaskModel = ModelConverter.convertTask(task);
+            const taskModel: TaskModel = ModelConverter.convert(task);
             return { ...GET_TASK_SUCCESS, task: taskModel };
         }
 
@@ -35,7 +36,7 @@ export class TaskService {
 
         const task = await TaskController.create(body.title, body.description);
         if (task) {
-            const taskModel: TaskModel = ModelConverter.convertTask(task);
+            const taskModel: TaskModel = ModelConverter.convert(task);
             return { ...SUCCESS, task: taskModel };
         }
 

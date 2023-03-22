@@ -145,7 +145,7 @@ describe('DayResultServices', () => {
 
             expect(response.status).toEqual(GET_DAY_RESULT_SUCCESS.httpCode);
             const responseObject: GetPlannedDayResultResponse = response.body;
-            expect(responseObject!.dayResult!.id).toEqual(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
+            expect(responseObject!.plannedDayResult!.id).toEqual(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
         });
     });
 
@@ -198,7 +198,7 @@ describe('DayResultServices', () => {
 
             expect(response.status).toEqual(GET_DAY_RESULT_SUCCESS.httpCode);
             const responseObject: GetPlannedDayResultResponse = response.body;
-            expect(responseObject!.dayResult!.id).toEqual(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
+            expect(responseObject!.plannedDayResult!.id).toEqual(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
         });
     });
 
@@ -222,7 +222,7 @@ describe('DayResultServices', () => {
 
             expect(response.status).toEqual(GET_DAY_RESULTS_SUCCESS.httpCode);
             const responseObject: GetPlannedDayResultsResponse = response.body;
-            expect(responseObject!.dayResults!.length).toBeGreaterThan(1);
+            expect(responseObject!.plannedDayResults!.length).toBeGreaterThan(1);
         });
     });
 
@@ -268,7 +268,7 @@ describe('DayResultServices', () => {
                 .send({ plannedDayId: TEST_PLANNED_DAY_TO_CREATE_RESULT_ID });
 
             expect(response.status).toEqual(SUCCESS.httpCode);
-            expect(response.body.dayResult).toBeDefined();
+            expect(response.body.plannedDayResult).toBeDefined();
         });
     });
 
@@ -345,6 +345,16 @@ describe('DayResultServices', () => {
             expect(response.body.plannedDayResult.description).toEqual(randomString);
         });
 
+        test.skip('can upload image', async () => {
+            const randomString = Math.random().toString(36).substring(7);
+            const body: UpdatePlannedDayResultRequest = {
+                plannedDayResult: {
+                    id: TEST_EXISTING_PLANNED_DAY_RESULT_ID,
+                    description: randomString,
+                },
+            };
+
+            const response = await request(app).patch(PLANNED_DAY_RESULT).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
 
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.plannedDayResult).toBeDefined();

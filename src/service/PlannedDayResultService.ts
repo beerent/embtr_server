@@ -1,4 +1,4 @@
-import { PlannedDayResultModel } from '@resources/models/PlannedDayResultModel';
+import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultRequest,
     GetPlannedDayResultRequest,
@@ -14,11 +14,12 @@ import {
     UPDATE_PLANNED_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
 } from '@src/common/RequestResponses';
-import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { Request } from 'express';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { PlannedDayResult } from '@prisma/client';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class PlannedDayResultService {
     public static async create(request: CreatePlannedDayResultRequest): Promise<GetPlannedDayResultResponse> {
@@ -27,11 +28,11 @@ export class PlannedDayResultService {
             return CREATE_DAY_RESULT_FAILED;
         }
 
-        const createdDayResult = await PlannedDayResultController.create(request.plannedDayId);
+        const createdPlannedDayResult: PlannedDayResult = await PlannedDayResultController.create(request.plannedDayId);
 
-        if (createdDayResult) {
-            const convertedDayResult: PlannedDayResultModel = ModelConverter.convertPlannedDayResult(createdDayResult);
-            return { ...SUCCESS, dayResult: convertedDayResult };
+        if (createdPlannedDayResult) {
+            const convertedDayResult: PlannedDayResultModel = ModelConverter.convert(createdPlannedDayResult);
+            return { ...SUCCESS, plannedDayResult: convertedDayResult };
         }
 
         return GET_DAY_RESULT_UNKNOWN;
@@ -56,7 +57,7 @@ export class PlannedDayResultService {
 
         const updatedPlannedDayResult = await PlannedDayResultController.update(updateRequest.plannedDayResult!);
         if (updatedPlannedDayResult) {
-            const updatedPlannedDayResultModel = ModelConverter.convertPlannedDayResult(updatedPlannedDayResult);
+            const updatedPlannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(updatedPlannedDayResult);
             return { ...SUCCESS, plannedDayResult: updatedPlannedDayResultModel };
         }
 
@@ -67,8 +68,8 @@ export class PlannedDayResultService {
         const dayResults = await PlannedDayResultController.getAll();
 
         if (dayResults) {
-            const convertedDayResults: PlannedDayResultModel[] = ModelConverter.convertPlannedDayResults(dayResults);
-            return { ...SUCCESS, dayResults: convertedDayResults };
+            const convertedDayResults: PlannedDayResultModel[] = ModelConverter.convertAll(dayResults);
+            return { ...SUCCESS, plannedDayResults: convertedDayResults };
         }
 
         return GET_DAY_RESULT_UNKNOWN;
@@ -78,8 +79,8 @@ export class PlannedDayResultService {
         const dayResult = await PlannedDayResultController.getById(id);
 
         if (dayResult) {
-            const convertedDayResult: PlannedDayResultModel = ModelConverter.convertPlannedDayResult(dayResult);
-            return { ...SUCCESS, dayResult: convertedDayResult };
+            const convertedDayResult: PlannedDayResultModel = ModelConverter.convert(dayResult);
+            return { ...SUCCESS, plannedDayResult: convertedDayResult };
         }
 
         return GET_DAY_RESULT_UNKNOWN;
@@ -89,8 +90,8 @@ export class PlannedDayResultService {
         const dayResult = await PlannedDayResultController.getByUserAndDayKey(request.userId, request.dayKey);
 
         if (dayResult) {
-            const convertedDayResult: PlannedDayResultModel = ModelConverter.convertPlannedDayResult(dayResult);
-            return { ...SUCCESS, dayResult: convertedDayResult };
+            const convertedDayResult: PlannedDayResultModel = ModelConverter.convert(dayResult);
+            return { ...SUCCESS, plannedDayResult: convertedDayResult };
         }
 
         return GET_DAY_RESULT_UNKNOWN;
