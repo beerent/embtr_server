@@ -1,6 +1,11 @@
 import z from 'zod';
 import { NextFunction, Request, Response } from 'express';
-import { CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID, GET_DAY_RESULT_INVALID, UPDATE_PLANNED_DAY_RESULT_INVALID } from '@src/common/RequestResponses';
+import {
+    CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
+    DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
+    GET_DAY_RESULT_INVALID,
+    UPDATE_PLANNED_DAY_RESULT_INVALID,
+} from '@src/common/RequestResponses';
 import { CreatePlannedDayResultCommentRequest, UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 
 const dayResultGetById = z.object({
@@ -59,19 +64,25 @@ export const validatePatch = (req: Request, res: Response, next: NextFunction) =
     next();
 };
 
-const plannedDayResultCommentPost = z.object({
-    plannedDayResultComment: z.object({
-        plannedDayResultId: z.coerce.number(),
-        userId: z.coerce.number(),
-        comment: z.string(),
-    }),
-});
 export const validateCommentPost = (req: Request, res: Response, next: NextFunction) => {
     try {
-        const request = req.body as CreatePlannedDayResultCommentRequest;
-        plannedDayResultCommentPost.parse(request);
+        z.object({ comment: z.string() }).parse(req.body);
+        z.object({ id: z.coerce.number() }).parse(req.params);
     } catch (error) {
         return res.status(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
+    }
+
+    next();
+};
+
+const plannedDayResultCommentDelete = z.object({
+    id: z.coerce.number(),
+});
+export const validateCommentDelete = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        plannedDayResultCommentDelete.parse(req.params);
+    } catch (error) {
+        return res.status(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID);
     }
 
     next();

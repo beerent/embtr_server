@@ -1,8 +1,9 @@
-import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { PlannedDayResultComment, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     CreatePlannedDayResultCommentResponse,
     CreatePlannedDayResultRequest,
+    DeletePlannedDayResultCommentRequest,
     GetPlannedDayResultRequest,
     GetPlannedDayResultResponse,
     GetPlannedDayResultsResponse,
@@ -14,6 +15,8 @@ import {
     CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED,
     CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
+    DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
+    DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     GET_DAY_RESULT_UNKNOWN,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
@@ -25,6 +28,8 @@ import { Request } from 'express';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { Response } from '@resources/types/RequestTypes';
+import { PlannedDayResultCommentController } from '@src/controller/PlannedDayResultCommentController';
 
 export class PlannedDayResultService {
     public static async create(request: CreatePlannedDayResultRequest): Promise<GetPlannedDayResultResponse> {
@@ -43,15 +48,25 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
-    public static async createComment(request: CreatePlannedDayResultCommentRequest): Promise<CreatePlannedDayResultCommentResponse> {
-        const plannedDayResult = await PlannedDayResultController.getById(request.plannedDayResultComment!.plannedDayResultId!);
+    public static async createComment(request: Request): Promise<CreatePlannedDayResultCommentResponse> {
+        const plannedDayResultId = Number(request.params.id);
+        const comment = (request.body as CreatePlannedDayResultCommentRequest).comment;
+
+        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        if (!userId) {
+            return CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID;
+        }
+
+        const plannedDayResult = await PlannedDayResultController.getById(plannedDayResultId);
         if (!plannedDayResult) {
             return CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
         }
 
+        const commentModel: PlannedDayResultComment = { comment, userId };
+
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
         plannedDayResultModel.PlannedDayResultComments = plannedDayResultModel.PlannedDayResultComments || [];
-        plannedDayResultModel.PlannedDayResultComments.push(request.plannedDayResultComment!);
+        plannedDayResultModel.PlannedDayResultComments.push(commentModel);
 
         const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
@@ -59,6 +74,22 @@ export class PlannedDayResultService {
         }
 
         return CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED;
+    }
+
+    public static async deleteComment(request: Request): Promise<Response> {
+        const id = Number(request.params.id);
+        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        if (!userId) {
+            return DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID;
+        }
+
+        const comment = await PlannedDayResultCommentController.get(id);
+        if (!comment || comment.user.id !== userId) {
+            return DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
+        }
+
+        await PlannedDayResultCommentController.delete(id);
+        return SUCCESS;
     }
 
     public static async update(request: Request): Promise<UpdatePlannedDayResultResponse> {

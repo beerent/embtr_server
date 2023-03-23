@@ -11,6 +11,8 @@ import {
     CREATE_DAY_RESULT_INVALID,
     CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
+    DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
+    DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     FORBIDDEN,
     GET_DAY_RESULTS_SUCCESS,
     GET_DAY_RESULT_INVALID,
@@ -23,6 +25,7 @@ import {
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
+import { PlannedDayResultCommentController } from '@src/controller/PlannedDayResultCommentController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
@@ -50,6 +53,7 @@ describe('DayResultServices', () => {
 
     const TEST_PLANNED_DAY_DATE_TO_COMMENT = '0100-01-03';
     let TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID: number;
+    let TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID: number;
 
     beforeAll(async () => {
         //user deletes
@@ -107,6 +111,13 @@ describe('DayResultServices', () => {
 
         TEST_EXISTING_PLANNED_DAY_RESULT_ID = dayResult.id;
         TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID = dayResultToComment.id;
+
+        const comment = await PlannedDayResultCommentController.create(
+            'Test Comment To Delete',
+            ACCOUNT_USER_WITH_USER_ROLE.user.id,
+            TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID
+        );
+        TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID = comment.id;
     });
 
     afterAll(async () => {
@@ -376,21 +387,24 @@ describe('DayResultServices', () => {
 
     describe('add comment', () => {
         test('unauthenticated', async () => {
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment`).set('Authorization', 'Bearer Trash').send({});
+            const response = await request(app).post(`${PLANNED_DAY_RESULT}0/comment`).set('Authorization', 'Bearer Trash').send({});
 
             expect(response.status).toEqual(UNAUTHORIZED.httpCode);
             expect(response.body).toEqual(UNAUTHORIZED);
         });
 
         test('unauthorized', async () => {
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+            const response = await request(app).post(`${PLANNED_DAY_RESULT}0/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
             expect(response.body).toEqual(FORBIDDEN);
         });
 
         test('invalid', async () => {
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}abc/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send({});
 
             expect(response.status).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode);
             expect(response.body).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
@@ -398,54 +412,82 @@ describe('DayResultServices', () => {
 
         test('unknown', async () => {
             const body: CreatePlannedDayResultCommentRequest = {
-                plannedDayResultComment: {
-                    plannedDayResultId: 0,
-                    userId: ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                    comment: 'comment',
-                },
+                comment: 'comment',
             };
 
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}0/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send(body);
 
             expect(response.status).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
             expect(response.body).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
         });
         test('valid', async () => {
             const body: CreatePlannedDayResultCommentRequest = {
-                plannedDayResultComment: {
-                    plannedDayResultId: TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
-                    userId: ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                    comment: 'comment',
-                },
+                comment: 'comment',
             };
 
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID}/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send(body);
 
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body).toEqual(SUCCESS);
         });
     });
 
-    describe.skip('delete comment', () => {
+    describe('delete comment', () => {
         test('unauthenticated', async () => {
-            const response = await request(app).delete(`${PLANNED_DAY_RESULT}/comment/0`).set('Authorization', 'Bearer Trash').send({});
+            const response = await request(app).delete(`${PLANNED_DAY_RESULT}comment/0`).set('Authorization', 'Bearer Trash').send();
 
             expect(response.status).toEqual(UNAUTHORIZED.httpCode);
             expect(response.body).toEqual(UNAUTHORIZED);
         });
 
         test('unauthorized', async () => {
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+            const response = await request(app).delete(`${PLANNED_DAY_RESULT}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
 
             expect(response.status).toEqual(FORBIDDEN.httpCode);
             expect(response.body).toEqual(FORBIDDEN);
         });
 
         test('invalid', async () => {
-            const response = await request(app).post(`${PLANNED_DAY_RESULT}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
+            const response = await request(app)
+                .delete(`${PLANNED_DAY_RESULT}/comment/abc`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
 
-            expect(response.status).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode);
-            expect(response.body).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
+            expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode);
+            expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID);
+        });
+
+        test('unknown', async () => {
+            const response = await request(app).delete(`${PLANNED_DAY_RESULT}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
+            expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
+        });
+
+        test('valid', async () => {
+            const response = await request(app)
+                .delete(`${PLANNED_DAY_RESULT}comment/${TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body).toEqual(SUCCESS);
+        });
+
+        test('wrong user', async () => {
+            const response = await request(app)
+                .delete(`${PLANNED_DAY_RESULT}comment/${TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_2_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
+            expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
         });
     });
 });

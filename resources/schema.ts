@@ -67,6 +67,7 @@ export interface PlannedDayResultComment {
   userId?: number;
   user?: User;
   comment?: string;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

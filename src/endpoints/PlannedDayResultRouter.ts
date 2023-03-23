@@ -3,6 +3,7 @@ import { GetUserResponse } from '@resources/types/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import {
+    validateCommentDelete,
     validateCommentPost,
     validateGetById,
     validateGetByUser,
@@ -50,9 +51,13 @@ plannedDayResultRouter.patch('/', authenticate, authorize, validatePatch, async 
     res.status(response.httpCode).json(response);
 });
 
-plannedDayResultRouter.post('/comment', authenticate, authorize, validateCommentPost, async (req, res) => {
-    const body = req.body as CreatePlannedDayResultCommentRequest;
-    const response = await PlannedDayResultService.createComment(body);
+plannedDayResultRouter.post('/:id/comment/', authenticate, authorize, validateCommentPost, async (req, res) => {
+    const response = await PlannedDayResultService.createComment(req);
+    res.status(response.httpCode).json(response);
+});
+
+plannedDayResultRouter.delete('/comment/:id', authenticate, authorize, validateCommentDelete, async (req, res) => {
+    const response = await PlannedDayResultService.deleteComment(req);
     res.status(response.httpCode).json(response);
 });
 

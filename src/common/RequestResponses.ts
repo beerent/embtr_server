@@ -349,7 +349,7 @@ export const CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreatePlannedDayResultCo
 };
 
 export const CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreatePlannedDayResultCommentResponse = {
-    ...GENERAL_FAILURE,
+    ...RESOURCE_NOT_FOUND,
     message: 'unknown planned day result',
 };
 
@@ -360,4 +360,14 @@ export const CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED: CreatePlannedDayResultCom
 
 export const CREATE_PLANNED_DAY_RESULT_COMMENT_SUCCESS: CreatePlannedDayResultCommentResponse = {
     ...SUCCESS,
+};
+
+export const DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreatePlannedDayResultCommentResponse = {
+    ...GENERAL_FAILURE,
+    message: 'invalid delete request',
+};
+
+export const DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreatePlannedDayResultCommentResponse = {
+    ...RESOURCE_NOT_FOUND,
+    message: 'comment not found',
 };
