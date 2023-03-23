@@ -1,8 +1,7 @@
 import { CreatePlannedDayResultCommentRequest, CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 import { GetUserResponse } from '@resources/types/UserTypes';
-import { UNAUTHORIZED } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
-import { authorizeGet, authorizePatch, authorizePost } from '@src/middleware/planned_day_result/PlannedDayResultAuthorization';
+import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import {
     validateCommentPost,
     validateGetById,
@@ -15,19 +14,19 @@ import express from 'express';
 
 const plannedDayResultRouter = express.Router();
 
-plannedDayResultRouter.get('/', authenticate, authorizeGet, async (req, res) => {
+plannedDayResultRouter.get('/', authenticate, authorize, async (req, res) => {
     const response: GetUserResponse = await PlannedDayResultService.getAll();
     res.status(response.httpCode).json(response);
 });
 
-plannedDayResultRouter.get('/:id', authenticate, authorizeGet, validateGetById, async (req, res) => {
+plannedDayResultRouter.get('/:id', authenticate, authorize, validateGetById, async (req, res) => {
     const id = Number(req.params.id);
     const response: GetUserResponse = await PlannedDayResultService.getById(id);
 
     res.status(response.httpCode).json(response);
 });
 
-plannedDayResultRouter.get('/:userId/:dayKey', authenticate, authorizeGet, validateGetByUser, async (req, res) => {
+plannedDayResultRouter.get('/:userId/:dayKey', authenticate, authorize, validateGetByUser, async (req, res) => {
     const request: GetPlannedDayResultRequest = {
         userId: Number(req.params.userId),
         dayKey: req.params.dayKey,
@@ -38,7 +37,7 @@ plannedDayResultRouter.get('/:userId/:dayKey', authenticate, authorizeGet, valid
     res.status(response.httpCode).json(response);
 });
 
-plannedDayResultRouter.post('/', authenticate, authorizePost, validatePost, async (req, res) => {
+plannedDayResultRouter.post('/', authenticate, authorize, validatePost, async (req, res) => {
     const request: CreatePlannedDayResultRequest = {
         plannedDayId: req.body.plannedDayId,
     };
@@ -46,12 +45,12 @@ plannedDayResultRouter.post('/', authenticate, authorizePost, validatePost, asyn
     res.status(response.httpCode).json(response);
 });
 
-plannedDayResultRouter.patch('/', authenticate, authorizePatch, validatePatch, async (req, res) => {
+plannedDayResultRouter.patch('/', authenticate, authorize, validatePatch, async (req, res) => {
     const response = await PlannedDayResultService.update(req);
     res.status(response.httpCode).json(response);
 });
 
-plannedDayResultRouter.post('/:id/comment', authenticate, authorizePatch, validateCommentPost, async (req, res) => {
+plannedDayResultRouter.post('/comment', authenticate, authorize, validateCommentPost, async (req, res) => {
     const body = req.body as CreatePlannedDayResultCommentRequest;
     const response = await PlannedDayResultService.createComment(body);
     res.status(response.httpCode).json(response);

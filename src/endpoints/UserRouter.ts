@@ -1,6 +1,7 @@
 import { GetUserResponse, UpdateUserRequest } from '@resources/types/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
-import { authorizeUserGet, authorizeUserPatch } from '@src/middleware/user/UserAuthorization';
+import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';
 import { UserService } from '@src/service/UserService';
 import express from 'express';
 
@@ -18,7 +19,7 @@ userRouter.post('/', authenticate, async (req, res) => {
     res.status(response.httpCode).json(response);
 });
 
-userRouter.patch('/', authenticate, authorizeUserPatch, async (req, res) => {
+userRouter.patch('/', authenticate, authorize, async (req, res) => {
     const body: UpdateUserRequest = req.body;
     const response = await UserService.update(req, body);
 

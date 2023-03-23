@@ -13,6 +13,7 @@ import {
     CREATE_DAY_RESULT_FAILED,
     CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED,
     CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
+    CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     GET_DAY_RESULT_UNKNOWN,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
@@ -45,7 +46,7 @@ export class PlannedDayResultService {
     public static async createComment(request: CreatePlannedDayResultCommentRequest): Promise<CreatePlannedDayResultCommentResponse> {
         const plannedDayResult = await PlannedDayResultController.getById(request.plannedDayResultComment!.plannedDayResultId!);
         if (!plannedDayResult) {
-            return CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED;
+            return CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
         }
 
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);

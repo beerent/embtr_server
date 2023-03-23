@@ -348,6 +348,11 @@ export const CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreatePlannedDayResultCo
     message: 'invalid comment request',
 };
 
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreatePlannedDayResultCommentResponse = {
+    ...GENERAL_FAILURE,
+    message: 'unknown planned day result',
+};
+
 export const CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED: CreatePlannedDayResultCommentResponse = {
     ...GENERAL_FAILURE,
     message: 'failed comment request',
