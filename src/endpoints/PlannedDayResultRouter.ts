@@ -7,6 +7,7 @@ import {
     validateCommentPost,
     validateGetById,
     validateGetByUser,
+    validateLikePost,
     validatePatch,
     validatePost,
 } from '@src/middleware/planned_day_result/PlannedDayResultValidation';
@@ -58,6 +59,11 @@ plannedDayResultRouter.post('/:id/comment/', authenticate, authorize, validateCo
 
 plannedDayResultRouter.delete('/comment/:id', authenticate, authorize, validateCommentDelete, async (req, res) => {
     const response = await PlannedDayResultService.deleteComment(req);
+    res.status(response.httpCode).json(response);
+});
+
+plannedDayResultRouter.post('/:id/like/', authenticate, authorize, validateLikePost, async (req, res) => {
+    const response = await PlannedDayResultService.createLike(req);
     res.status(response.httpCode).json(response);
 });
 

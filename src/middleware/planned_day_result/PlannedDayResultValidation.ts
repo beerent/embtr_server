@@ -87,3 +87,13 @@ export const validateCommentDelete = (req: Request, res: Response, next: NextFun
 
     next();
 };
+
+export const validateLikePost = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        z.object({ id: z.coerce.number() }).parse(req.params);
+    } catch (error) {
+        return res.status(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
+    }
+
+    next();
+};

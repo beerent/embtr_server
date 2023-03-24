@@ -1,4 +1,4 @@
-import { PlannedDayResultComment, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { PlannedDayResultComment, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     CreatePlannedDayResultCommentResponse,
@@ -17,7 +17,9 @@ import {
     CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
+    GENERAL_FAILURE,
     GET_DAY_RESULT_UNKNOWN,
+    RESOURCE_NOT_FOUND,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
@@ -48,6 +50,33 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
+    public static async createLike(request: Request): Promise<CreatePlannedDayResultCommentResponse> {
+        const plannedDayResultId = Number(request.params.id);
+
+        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        if (!userId) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        const plannedDayResult = await PlannedDayResultController.getById(plannedDayResultId);
+        if (!plannedDayResult) {
+            return { ...RESOURCE_NOT_FOUND, message: 'planned day not found' };
+        }
+
+        const likeModel: PlannedDayResultLike = { userId };
+
+        const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
+        plannedDayResultModel.plannedDayResultLikes = plannedDayResultModel.plannedDayResultComments || [];
+        plannedDayResultModel.plannedDayResultLikes.push(likeModel);
+
+        const result = await PlannedDayResultController.update(plannedDayResultModel);
+        if (result) {
+            return SUCCESS;
+        }
+
+        return CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED;
+    }
+
     public static async createComment(request: Request): Promise<CreatePlannedDayResultCommentResponse> {
         const plannedDayResultId = Number(request.params.id);
         const comment = (request.body as CreatePlannedDayResultCommentRequest).comment;
@@ -65,8 +94,8 @@ export class PlannedDayResultService {
         const commentModel: PlannedDayResultComment = { comment, userId };
 
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
-        plannedDayResultModel.PlannedDayResultComments = plannedDayResultModel.PlannedDayResultComments || [];
-        plannedDayResultModel.PlannedDayResultComments.push(commentModel);
+        plannedDayResultModel.plannedDayResultComments = plannedDayResultModel.plannedDayResultComments || [];
+        plannedDayResultModel.plannedDayResultComments.push(commentModel);
 
         const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {

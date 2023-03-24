@@ -22,6 +22,7 @@ model User {
   updatedAt               DateTime                  @updatedAt
   PlannedDay              PlannedDay[]
   PlannedDayResultComment PlannedDayResultComment[]
+  PlannedDayResultLike    PlannedDayResultLike[]
 
   @@map("user")
 }
@@ -78,7 +79,8 @@ model PlannedDayResult {
   createdAt                DateTime                  @default(now())
   updatedAt                DateTime                  @updatedAt
   plannedDayResultImages   PlannedDayResultImage[]
-  PlannedDayResultComments PlannedDayResultComment[]
+  plannedDayResultComments PlannedDayResultComment[]
+  plannedDayResultLikes    PlannedDayResultLike[]
 
   @@unique([plannedDayId], name: "planned_day_id")
   @@map("day_result")
@@ -98,6 +100,21 @@ model PlannedDayResultComment {
   @@index([userId])
   @@index([plannedDayResultId])
   @@map("planned_day_result_comment")
+}
+
+model PlannedDayResultLike {
+  id                 Int              @id @default(autoincrement())
+  plannedDayResultId Int              @db.Int
+  plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
+  userId             Int              @db.Int
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  active             Boolean          @default(true)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([plannedDayResultId])
+  @@map("planned_day_result_like")
 }
 
 model PlannedDayResultImage {

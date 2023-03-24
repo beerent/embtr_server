@@ -6,13 +6,13 @@ import { PlannedDayResultComment as PlannedDayResultCommentModel, PlannedDayResu
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
 export const PlannedDayResultInclude = {
-    PlannedDayResultComments: {
+    plannedDayResultComments: {
         where: {
             active: true,
         },
         include: {
-            plannedDayResult: true,
             user: true,
+            plannedDayResult: true,
         },
     },
     plannedDayResultImages: {
@@ -20,6 +20,15 @@ export const PlannedDayResultInclude = {
             active: true,
         },
         include: {
+            plannedDayResult: true,
+        },
+    },
+    plannedDayResultLikes: {
+        where: {
+            active: true,
+        },
+        include: {
+            user: true,
             plannedDayResult: true,
         },
     },
@@ -46,13 +55,15 @@ export class PlannedDayResultController {
         const description = await this.createDescriptionUpdate(plannedDayResult);
         const plannedDayResultImages = await this.createPlannedDayResultImagesUpdate(plannedDayResult);
         const plannedDayResultComments = await this.createPlannedDayResultCommentsUpdate(plannedDayResult);
+        const plannedDayResultLikes = await this.createPlannedDayResultLikesUpdate(plannedDayResult);
 
         const result = await prisma.plannedDayResult.update({
             where: { id: plannedDayResult.id },
             data: {
                 ...description,
                 plannedDayResultImages,
-                PlannedDayResultComments: plannedDayResultComments,
+                plannedDayResultComments: plannedDayResultComments,
+                plannedDayResultLikes: plannedDayResultLikes,
             },
             include: PlannedDayResultInclude,
         });
@@ -114,7 +125,7 @@ export class PlannedDayResultController {
     }
 
     private static async createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
-        const comments = plannedDayResult.PlannedDayResultComments;
+        const comments = plannedDayResult.plannedDayResultComments;
         if (!comments) {
             return {};
         }
@@ -127,6 +138,25 @@ export class PlannedDayResultController {
                     user: {
                         connect: {
                             id: comment.userId!,
+                        },
+                    },
+                })),
+        };
+    }
+
+    private static async createPlannedDayResultLikesUpdate(plannedDayResult: PlannedDayResultModel) {
+        const likes = plannedDayResult.plannedDayResultLikes;
+        if (!likes) {
+            return {};
+        }
+
+        return {
+            create: likes
+                .filter((like) => like.userId && !like.id)
+                .map((like) => ({
+                    user: {
+                        connect: {
+                            id: like.userId!,
                         },
                     },
                 })),

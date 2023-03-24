@@ -12,6 +12,7 @@ export interface User {
   updatedAt?: Date;
   PlannedDay?: PlannedDay[];
   PlannedDayResultComment?: PlannedDayResultComment[];
+  PlannedDayResultLike?: PlannedDayResultLike[];
 }
 
 export interface Task {
@@ -57,7 +58,8 @@ export interface PlannedDayResult {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDayResultImages?: PlannedDayResultImage[];
-  PlannedDayResultComments?: PlannedDayResultComment[];
+  plannedDayResultComments?: PlannedDayResultComment[];
+  plannedDayResultLikes?: PlannedDayResultLike[];
 }
 
 export interface PlannedDayResultComment {
@@ -67,6 +69,17 @@ export interface PlannedDayResultComment {
   userId?: number;
   user?: User;
   comment?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PlannedDayResultLike {
+  id?: number;
+  plannedDayResultId?: number;
+  plannedDayResult?: PlannedDayResult;
+  userId?: number;
+  user?: User;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
