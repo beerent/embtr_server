@@ -77,6 +77,7 @@ export interface PlannedDayResultImage {
   plannedDayResultId?: number;
   plannedDayResult?: PlannedDayResult;
   url?: string;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

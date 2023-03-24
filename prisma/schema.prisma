@@ -105,6 +105,7 @@ model PlannedDayResultImage {
   plannedDayResultId Int              @db.Int
   plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
   url                String           @db.VarChar(255)
+  active             Boolean          @default(true)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 

@@ -16,6 +16,9 @@ export const PlannedDayResultInclude = {
         },
     },
     plannedDayResultImages: {
+        where: {
+            active: true,
+        },
         include: {
             plannedDayResult: true,
         },
@@ -100,10 +103,12 @@ export class PlannedDayResultController {
         }
 
         return {
-            create: images
-                .filter((image) => image.url && !image.id)
+            upsert: plannedDayResult.plannedDayResultImages
+                ?.filter((image) => image.url !== undefined)
                 .map((image) => ({
-                    url: image.url!,
+                    where: { id: image.id ?? -1 },
+                    create: { url: image.url! },
+                    update: { url: image.url!, active: image.active ?? true },
                 })),
         };
     }
