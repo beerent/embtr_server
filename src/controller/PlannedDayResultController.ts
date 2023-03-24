@@ -7,6 +7,9 @@ export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayRes
 
 export const PlannedDayResultInclude = {
     PlannedDayResultComments: {
+        where: {
+            active: true,
+        },
         include: {
             plannedDayResult: true,
             user: true,
