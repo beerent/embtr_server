@@ -17,7 +17,7 @@ export enum HttpCode {
     UNAUTHORIZED = 401,
     FORBIDDEN = 403,
     RESOURCE_NOT_FOUND = 404,
-    RESOURCE_ALREADY_EXISTS = 404,
+    RESOURCE_ALREADY_EXISTS = 409,
     GENERAL_FAILURE = 400,
 
     //create account errors

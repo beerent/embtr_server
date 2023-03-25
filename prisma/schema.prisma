@@ -112,6 +112,7 @@ model PlannedDayResultLike {
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 
+  @@unique([userId, plannedDayResultId], name: "unique_user_day_result_id")
   @@index([userId])
   @@index([plannedDayResultId])
   @@map("planned_day_result_like")

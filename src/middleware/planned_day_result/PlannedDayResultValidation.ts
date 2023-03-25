@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from 'express';
 import {
     CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
+    GENERAL_FAILURE,
     GET_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
 } from '@src/common/RequestResponses';
@@ -92,7 +93,7 @@ export const validateLikePost = (req: Request, res: Response, next: NextFunction
     try {
         z.object({ id: z.coerce.number() }).parse(req.params);
     } catch (error) {
-        return res.status(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
+        return res.status(GENERAL_FAILURE.httpCode).json({ ...GENERAL_FAILURE, message: 'invalid like request' });
     }
 
     next();

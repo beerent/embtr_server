@@ -19,6 +19,7 @@ import {
     DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     GENERAL_FAILURE,
     GET_DAY_RESULT_UNKNOWN,
+    RESOURCE_ALREADY_EXISTS,
     RESOURCE_NOT_FOUND,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
@@ -60,7 +61,12 @@ export class PlannedDayResultService {
 
         const plannedDayResult = await PlannedDayResultController.getById(plannedDayResultId);
         if (!plannedDayResult) {
-            return { ...RESOURCE_NOT_FOUND, message: 'planned day not found' };
+            return { ...RESOURCE_NOT_FOUND, message: 'planned day result not found' };
+        }
+
+        const userAlreadyLiked = plannedDayResult.plannedDayResultLikes?.some((like) => like.userId === userId);
+        if (userAlreadyLiked) {
+            return { ...RESOURCE_ALREADY_EXISTS, message: 'user already liked planned day result' };
         }
 
         const likeModel: PlannedDayResultLike = { userId };

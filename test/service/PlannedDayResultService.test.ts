@@ -14,10 +14,13 @@ import {
     DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     FORBIDDEN,
+    GENERAL_FAILURE,
     GET_DAY_RESULTS_SUCCESS,
     GET_DAY_RESULT_INVALID,
     GET_DAY_RESULT_SUCCESS,
     GET_DAY_RESULT_UNKNOWN,
+    RESOURCE_ALREADY_EXISTS,
+    RESOURCE_NOT_FOUND,
     SUCCESS,
     UNAUTHORIZED,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
@@ -488,6 +491,65 @@ describe('DayResultServices', () => {
 
             expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
             expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
+        });
+    });
+
+    describe('add like', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).post(`${PLANNED_DAY_RESULT}id/like`).set('Authorization', 'Bearer Trash').send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body).toEqual(UNAUTHORIZED);
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).post(`${PLANNED_DAY_RESULT}id/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).post(`${PLANNED_DAY_RESULT}id/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(GENERAL_FAILURE.httpCode);
+            expect(response.body.message).toEqual('invalid like request');
+        });
+
+        test('unknown', async () => {
+            const response = await request(app).post(`${PLANNED_DAY_RESULT}0/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+            expect(response.body.message).toEqual('planned day result not found');
+        });
+
+        test('valid', async () => {
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID}/like`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            const plannedDayResult = await PlannedDayResultController.getById(TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID);
+
+            expect(plannedDayResult?.plannedDayResultLikes.length).toEqual(1);
+            expect(response.status).toEqual(SUCCESS.httpCode);
+        });
+
+        test('cannot like twice', async () => {
+            await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_ID}/like`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+            const response = await request(app)
+                .post(`${PLANNED_DAY_RESULT}${TEST_EXISTING_PLANNED_DAY_RESULT_ID}/like`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            const plannedDayResult = await PlannedDayResultController.getById(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
+
+            expect(plannedDayResult?.plannedDayResultLikes.length).toEqual(1);
+            expect(response.status).toEqual(RESOURCE_ALREADY_EXISTS.httpCode);
+            expect(response.body.message).toEqual('user already liked planned day result');
         });
     });
 });

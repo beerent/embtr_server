@@ -52,15 +52,17 @@ export class PlannedDayResultController {
     }
 
     public static async update(plannedDayResult: PlannedDayResultModel) {
-        const description = await this.createDescriptionUpdate(plannedDayResult);
-        const plannedDayResultImages = await this.createPlannedDayResultImagesUpdate(plannedDayResult);
-        const plannedDayResultComments = await this.createPlannedDayResultCommentsUpdate(plannedDayResult);
-        const plannedDayResultLikes = await this.createPlannedDayResultLikesUpdate(plannedDayResult);
+        const description = this.createDescriptionUpdate(plannedDayResult);
+        const active = this.createActiveUpdate(plannedDayResult);
+        const plannedDayResultImages = this.createPlannedDayResultImagesUpdate(plannedDayResult);
+        const plannedDayResultComments = this.createPlannedDayResultCommentsUpdate(plannedDayResult);
+        const plannedDayResultLikes = this.createPlannedDayResultLikesUpdate(plannedDayResult);
 
         const result = await prisma.plannedDayResult.update({
             where: { id: plannedDayResult.id },
             data: {
                 ...description,
+                ...active,
                 plannedDayResultImages,
                 plannedDayResultComments: plannedDayResultComments,
                 plannedDayResultLikes: plannedDayResultLikes,
@@ -73,6 +75,9 @@ export class PlannedDayResultController {
 
     public static async getAll() {
         return await prisma.plannedDayResult.findMany({
+            where: {
+                active: true,
+            },
             include: PlannedDayResultInclude,
         });
     }
@@ -89,6 +94,7 @@ export class PlannedDayResultController {
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
         return await prisma.plannedDayResult.findFirst({
             where: {
+                active: true,
                 plannedDay: {
                     userId,
                     dayKey,
@@ -98,7 +104,7 @@ export class PlannedDayResultController {
         });
     }
 
-    private static async createDescriptionUpdate(plannedDayResult: PlannedDayResultModel) {
+    private static createDescriptionUpdate(plannedDayResult: PlannedDayResultModel) {
         const description = plannedDayResult.description;
         if (!description) {
             return {};
@@ -107,7 +113,16 @@ export class PlannedDayResultController {
         return { description };
     }
 
-    private static async createPlannedDayResultImagesUpdate(plannedDayResult: PlannedDayResultModel) {
+    private static createActiveUpdate(plannedDayResult: PlannedDayResultModel) {
+        const active = plannedDayResult.active;
+        if (active === undefined) {
+            return {};
+        }
+
+        return { active };
+    }
+
+    private static createPlannedDayResultImagesUpdate(plannedDayResult: PlannedDayResultModel) {
         const images = plannedDayResult.plannedDayResultImages;
         if (!images) {
             return {};
@@ -124,7 +139,7 @@ export class PlannedDayResultController {
         };
     }
 
-    private static async createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
+    private static createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
         const comments = plannedDayResult.plannedDayResultComments;
         if (!comments) {
             return {};
@@ -144,7 +159,7 @@ export class PlannedDayResultController {
         };
     }
 
-    private static async createPlannedDayResultLikesUpdate(plannedDayResult: PlannedDayResultModel) {
+    private static createPlannedDayResultLikesUpdate(plannedDayResult: PlannedDayResultModel) {
         const likes = plannedDayResult.plannedDayResultLikes;
         if (!likes) {
             return {};
