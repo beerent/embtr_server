@@ -1,4 +1,4 @@
-import { PlannedDayResultComment, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { NotificationTargetPage, PlannedDayResultComment, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     CreatePlannedDayResultCommentResponse,
@@ -33,6 +33,7 @@ import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Response } from '@resources/types/RequestTypes';
 import { PlannedDayResultCommentController } from '@src/controller/PlannedDayResultCommentController';
+import { NotificationService, NotificationType } from './NotificationService';
 
 export class PlannedDayResultService {
     public static async create(request: CreatePlannedDayResultRequest): Promise<GetPlannedDayResultResponse> {
@@ -77,6 +78,7 @@ export class PlannedDayResultService {
 
         const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
+            await NotificationService.createNotification(plannedDayResult.plannedDay.userId, userId, NotificationType.PLANNED_DAY_RESULT, plannedDayResult.id);
             return SUCCESS;
         }
 

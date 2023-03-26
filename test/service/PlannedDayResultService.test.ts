@@ -1,4 +1,5 @@
 import { ACCOUNT, PLANNED_DAY_RESULT } from '@resources/endpoints';
+import { NotificationTargetPage } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     GetPlannedDayResultResponse,
@@ -27,6 +28,7 @@ import {
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
+import { NotificationController } from '@src/controller/NotificationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedDayResultCommentController } from '@src/controller/PlannedDayResultCommentController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
@@ -550,6 +552,32 @@ describe('DayResultServices', () => {
             expect(plannedDayResult?.plannedDayResultLikes.length).toEqual(1);
             expect(response.status).toEqual(RESOURCE_ALREADY_EXISTS.httpCode);
             expect(response.body.message).toEqual('user already liked planned day result');
+        });
+
+        describe.only('like adds notification ', () => {
+            const email = 'likeaddnotification@embtr.com';
+            let accountWithUser: TestAccountWithUser;
+            let userToken: string;
+            let plannedDayResultId: number = 0;
+
+            beforeAll(async () => {
+                await TestUtility.deleteAccountWithUser(email);
+                accountWithUser = await TestUtility.createAccountWithUser(email, 'password', Role.USER);
+                userToken = await AuthenticationController.generateValidIdToken(email, 'password');
+                const plannedDay = await PlannedDayController.create(accountWithUser.user.id, new Date('2020-01-01'), '2020-01-01');
+                plannedDayResultId = (await PlannedDayResultController.create(plannedDay.id)).id;
+            });
+
+            afterAll(async () => {
+                await TestUtility.deleteAccountWithUser(email);
+            });
+
+            test('like adds notification', async () => {
+                await request(app).post(`${PLANNED_DAY_RESULT}${plannedDayResultId}/like`).set('Authorization', `Bearer ${userToken}`).send();
+
+                const likes = await NotificationController.getAll(accountWithUser.user.id);
+                expect(likes.length).toEqual(1);
+            });
         });
     });
 });

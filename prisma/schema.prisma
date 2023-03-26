@@ -9,20 +9,22 @@ generator client {
 }
 
 model User {
-  id                      Int                       @id @default(autoincrement())
-  uid                     String                    @unique @db.VarChar(255)
-  email                   String                    @db.VarChar(255)
-  username                String?                   @db.VarChar(255)
-  displayName             String?                   @db.VarChar(255)
-  location                String?                   @db.VarChar(255)
-  bio                     String?                   @db.VarChar(255)
-  photoUrl                String?                   @db.VarChar(255)
-  bannerUrl               String?                   @db.VarChar(255)
-  createdAt               DateTime                  @default(now())
-  updatedAt               DateTime                  @updatedAt
-  PlannedDay              PlannedDay[]
-  PlannedDayResultComment PlannedDayResultComment[]
-  PlannedDayResultLike    PlannedDayResultLike[]
+  id                       Int                       @id @default(autoincrement())
+  uid                      String                    @unique @db.VarChar(255)
+  email                    String                    @db.VarChar(255)
+  username                 String?                   @db.VarChar(255)
+  displayName              String?                   @db.VarChar(255)
+  location                 String?                   @db.VarChar(255)
+  bio                      String?                   @db.VarChar(255)
+  photoUrl                 String?                   @db.VarChar(255)
+  bannerUrl                String?                   @db.VarChar(255)
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  plannedDays              PlannedDay[]
+  plannedDayResultComments PlannedDayResultComment[]
+  plannedDayResultLikes    PlannedDayResultLike[]
+  recievedNotifications    Notification[]            @relation("fromUser")
+  sendNotifications        Notification[]            @relation("toUser")
 
   @@map("user")
 }
@@ -129,4 +131,32 @@ model PlannedDayResultImage {
 
   @@index([plannedDayResultId])
   @@map("day_result_image")
+}
+
+enum NotificationTargetPage {
+  INVALID
+  GOAL_DETAILS
+  USER_PROFILE
+  CHALLENGE_DETAILS
+  USER_POST_DETAILS
+  PLANNED_DAY_RESULT
+  TODAY
+}
+
+model Notification {
+  id         Int                    @id @default(autoincrement())
+  fromUserId Int                    @db.Int
+  fromUser   User                   @relation("fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   Int                    @db.Int
+  toUser     User                   @relation("toUser", fields: [toUserId], references: [id], onDelete: Cascade)
+  read       Boolean                @default(false)
+  summary    String                 @db.VarChar(255)
+  targetPage NotificationTargetPage
+  targetId   Int                    @db.Int
+  createdAt  DateTime               @default(now())
+  updatedAt  DateTime               @updatedAt
+
+  @@index([fromUserId])
+  @@index([toUserId])
+  @@map("notification")
 }

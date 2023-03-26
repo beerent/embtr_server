@@ -10,9 +10,11 @@ export interface User {
   bannerUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
-  PlannedDay?: PlannedDay[];
-  PlannedDayResultComment?: PlannedDayResultComment[];
-  PlannedDayResultLike?: PlannedDayResultLike[];
+  plannedDays?: PlannedDay[];
+  plannedDayResultComments?: PlannedDayResultComment[];
+  plannedDayResultLikes?: PlannedDayResultLike[];
+  recievedNotifications?: Notification[];
+  sendNotifications?: Notification[];
 }
 
 export interface Task {
@@ -93,4 +95,28 @@ export interface PlannedDayResultImage {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface Notification {
+  id?: number;
+  fromUserId?: number;
+  fromUser?: User;
+  toUserId?: number;
+  toUser?: User;
+  read?: boolean;
+  summary?: string;
+  targetPage?: NotificationTargetPage;
+  targetId?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export enum NotificationTargetPage {
+  INVALID = 'INVALID',
+  GOAL_DETAILS = 'GOAL_DETAILS',
+  USER_PROFILE = 'USER_PROFILE',
+  CHALLENGE_DETAILS = 'CHALLENGE_DETAILS',
+  USER_POST_DETAILS = 'USER_POST_DETAILS',
+  PLANNED_DAY_RESULT = 'PLANNED_DAY_RESULT',
+  TODAY = 'TODAY',
 }
