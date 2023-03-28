@@ -15,6 +15,7 @@ import {
     CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED,
     CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
+    CREATE_PLANNED_DAY_RESULT_LIKE_FAILED,
     DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN,
     GENERAL_FAILURE,
@@ -78,11 +79,11 @@ export class PlannedDayResultService {
 
         const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
-            await NotificationService.createNotification(plannedDayResult.plannedDay.userId, userId, NotificationType.PLANNED_DAY_RESULT, plannedDayResult.id);
+            NotificationService.createNotification(plannedDayResult.plannedDay.userId, userId, NotificationType.PLANNED_DAY_RESULT_LIKE, plannedDayResult.id);
             return SUCCESS;
         }
 
-        return CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED;
+        return CREATE_PLANNED_DAY_RESULT_LIKE_FAILED;
     }
 
     public static async createComment(request: Request): Promise<CreatePlannedDayResultCommentResponse> {
@@ -107,6 +108,12 @@ export class PlannedDayResultService {
 
         const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
+            NotificationService.createNotification(
+                plannedDayResult.plannedDay.userId,
+                userId,
+                NotificationType.PLANNED_DAY_RESULT_COMMENT,
+                plannedDayResult.id
+            );
             return SUCCESS;
         }
 

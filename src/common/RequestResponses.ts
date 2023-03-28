@@ -371,3 +371,8 @@ export const DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreatePlannedDayResultCo
     ...RESOURCE_NOT_FOUND,
     message: 'comment not found',
 };
+
+export const CREATE_PLANNED_DAY_RESULT_LIKE_FAILED: CreatePlannedDayResultCommentResponse = {
+    ...GENERAL_FAILURE,
+    message: 'failed like request',
+};

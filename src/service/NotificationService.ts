@@ -15,8 +15,8 @@ export enum NotificationType {
     TIMELINE_LIKE,
     CHALLENGE_COMMENT,
     DAILY_RESULT_TAG,
-    DAILY_RESULT_COMMENT,
-    PLANNED_DAY_RESULT,
+    PLANNED_DAY_RESULT_COMMENT,
+    PLANNED_DAY_RESULT_LIKE,
     FAILED_DAILY_RESULT_LIKE,
     NEW_FOLLOWER,
     QUOTE_LIKE,
@@ -84,12 +84,10 @@ export class NotificationService {
                 return 'commented on your post';
             case NotificationType.TIMELINE_LIKE:
                 return 'liked your post';
-            case NotificationType.PLANNED_DAY_RESULT:
+            case NotificationType.PLANNED_DAY_RESULT_LIKE:
                 return 'liked your completed day';
-            case NotificationType.FAILED_DAILY_RESULT_LIKE:
-                return 'sent you encouragement';
-            case NotificationType.DAILY_RESULT_COMMENT:
-                return 'commented on your daily results';
+            case NotificationType.PLANNED_DAY_RESULT_COMMENT:
+                return 'commented on your completed day';
             case NotificationType.NEW_FOLLOWER:
                 return 'now follows you!';
             case NotificationType.QUOTE_LIKE:
@@ -115,9 +113,8 @@ export class NotificationService {
             case NotificationType.TIMELINE_LIKE:
                 return NotificationTargetPage.USER_POST_DETAILS;
             case NotificationType.DAILY_RESULT_TAG:
-            case NotificationType.DAILY_RESULT_COMMENT:
-            case NotificationType.FAILED_DAILY_RESULT_LIKE:
-            case NotificationType.PLANNED_DAY_RESULT:
+            case NotificationType.PLANNED_DAY_RESULT_COMMENT:
+            case NotificationType.PLANNED_DAY_RESULT_LIKE:
                 return NotificationTargetPage.PLANNED_DAY_RESULT;
             case NotificationType.NEW_FOLLOWER:
                 return NotificationTargetPage.USER_PROFILE;
