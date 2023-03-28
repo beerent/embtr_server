@@ -1,6 +1,7 @@
 import { User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
+import { PushNotificationController } from './PushNotificationController';
 
 export class UserController {
     public static async getByUid(uid: string): Promise<User | null> {
@@ -47,6 +48,7 @@ export class UserController {
         const location = user.location !== undefined ? { location: user.location } : {};
         const photoUrl = user.photoUrl !== undefined ? { photoUrl: user.photoUrl } : {};
         const bannerUrl = user.bannerUrl !== undefined ? { bannerUrl: user.bannerUrl } : {};
+        const pushNotificationTokens = await UserController.createUserPushNotification(user);
 
         const updatedUser = await prisma.user.update({
             where: {
@@ -59,9 +61,40 @@ export class UserController {
                 ...location,
                 ...photoUrl,
                 ...bannerUrl,
+                pushNotificationTokens,
             },
         });
 
         return updatedUser;
+    }
+
+    private static async createUserPushNotification(user: UserModel) {
+        const potentialTokensToAdd = user.pushNotificationTokens;
+        if (!potentialTokensToAdd) {
+            return {};
+        }
+
+        if (!user.uid) {
+            return {};
+        }
+
+        const existingUserTokens = await PushNotificationController.getByUid(user.uid);
+        const tokensToAdd = potentialTokensToAdd.filter((token) => {
+            return !existingUserTokens.some((userToken) => userToken.token === token.token);
+        });
+
+        if (tokensToAdd.length === 0) {
+            return {};
+        }
+
+        return {
+            upsert: tokensToAdd
+                ?.filter((token) => token.token !== undefined)
+                .map((token) => ({
+                    where: { id: token.id ?? -1 },
+                    create: { token: token.token! },
+                    update: { token: token.token!, active: token.active ?? true },
+                })),
+        };
     }
 }

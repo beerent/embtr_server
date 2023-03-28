@@ -20,8 +20,7 @@ userRouter.post('/', authenticate, async (req, res) => {
 });
 
 userRouter.patch('/', authenticate, authorize, async (req, res) => {
-    const body: UpdateUserRequest = req.body;
-    const response = await UserService.update(req, body);
+    const response = await UserService.update(req);
 
     res.status(response.httpCode).json(response);
 });

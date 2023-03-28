@@ -3,7 +3,7 @@ import { NotificationTargetPage } from '@prisma/client';
 import { Notification, NotificationTargetPage as NotificationTargetPageModel } from '@resources/schema';
 
 export class NotificationController {
-    public static async create(toUser: number, fromUser: number, summary: string, targetPage: NotificationTargetPageModel, targetId: number): Promise<any> {
+    public static async create(toUser: number, fromUser: number, summary: string, targetPage: NotificationTargetPageModel, targetId: number) {
         const result = await prisma.notification.create({
             data: {
                 toUser: {
@@ -20,6 +20,14 @@ export class NotificationController {
                 summary,
                 targetPage: targetPage as NotificationTargetPage,
                 targetId,
+            },
+            include: {
+                toUser: {
+                    include: {
+                        pushNotificationTokens: true,
+                    },
+                },
+                fromUser: true,
             },
         });
 

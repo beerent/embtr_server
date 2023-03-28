@@ -25,8 +25,22 @@ model User {
   plannedDayResultLikes    PlannedDayResultLike[]
   recievedNotifications    Notification[]            @relation("fromUser")
   sendNotifications        Notification[]            @relation("toUser")
+  pushNotificationTokens   PushNotificationToken[]
 
   @@map("user")
+}
+
+model PushNotificationToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @db.Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @db.VarChar(255)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, token], name: "unique_user_token")
+  @@map("user_push_notification")
 }
 
 model Task {

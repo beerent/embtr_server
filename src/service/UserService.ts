@@ -49,7 +49,9 @@ export class UserService {
         return CREATE_USER_SUCCESS;
     }
 
-    public static async update(request: Request, updateUserRequest: UpdateUserRequest): Promise<Response> {
+    public static async update(request: Request): Promise<Response> {
+        const body: UpdateUserRequest = request.body;
+
         const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
         const email = await AuthorizationController.getEmailFromToken(request.headers.authorization!);
 
@@ -57,7 +59,10 @@ export class UserService {
             return UPDATE_USER_FAILED;
         }
 
-        await UserController.update(uid, { ...updateUserRequest });
+        body.uid = uid;
+        body.email = email;
+
+        await UserController.update(uid, { ...body });
         return SUCCESS;
     }
 }

@@ -15,6 +15,17 @@ export interface User {
   plannedDayResultLikes?: PlannedDayResultLike[];
   recievedNotifications?: Notification[];
   sendNotifications?: Notification[];
+  pushNotificationTokens?: PushNotificationToken[];
+}
+
+export interface PushNotificationToken {
+  id?: number;
+  userId?: number;
+  user?: User;
+  token?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Task {

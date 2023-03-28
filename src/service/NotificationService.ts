@@ -5,6 +5,7 @@ import { Response } from '@resources/types/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { NotificationController } from '@src/controller/NotificationController';
+import { PushNotificationController } from '@src/controller/PushNotificationController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
@@ -27,7 +28,7 @@ export enum NotificationType {
 export class NotificationService {
     public static async createNotification(toUserId: number, fromUserId: number, notificationType: NotificationType, targetId: number) {
         // 1. store in database
-        return await NotificationController.create(
+        const notification = await NotificationController.create(
             toUserId,
             fromUserId,
             NotificationService.getSummary(notificationType),
@@ -35,7 +36,12 @@ export class NotificationService {
             targetId
         );
 
+        const notificationModel: NotificationModel = ModelConverter.convert(notification);
+
         // 2. send push notification
+        PushNotificationController.send(notificationModel);
+
+        return notification;
     }
 
     public static async getAll(request: Request): Promise<GetNotificationsResponse> {

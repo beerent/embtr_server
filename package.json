@@ -37,9 +37,11 @@
         "@prisma/client": "^4.10.1",
         "body-parser": "^1.20.1",
         "dotenv": "^16.0.3",
+        "expo-server-sdk": "^3.7.0",
         "express": "^4.18.2",
         "firebase-admin": "^11.5.0",
         "module-alias": "^2.2.2",
-        "winston": "^3.8.2"
+        "winston": "^3.8.2",
+        "zod": "^3.21.4"
     }
 }
