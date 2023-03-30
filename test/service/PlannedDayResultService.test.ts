@@ -30,7 +30,6 @@ import {
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { NotificationController } from '@src/controller/NotificationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedDayResultCommentController } from '@src/controller/PlannedDayResultCommentController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
@@ -117,10 +116,10 @@ describe('DayResultServices', () => {
         TEST_EXISTING_PLANNED_DAY_RESULT_ID = dayResult.id;
         TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID = dayResultToComment.id;
 
-        const comment = await PlannedDayResultCommentController.create(
+        const comment = await PlannedDayResultController.createComment(
+            TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
             'Test Comment To Delete',
-            ACCOUNT_USER_WITH_USER_ROLE.user.id,
-            TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID
+            ACCOUNT_USER_WITH_USER_ROLE.user.id
         );
         TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID = comment.id;
     });
@@ -554,7 +553,7 @@ describe('DayResultServices', () => {
             expect(response.body.message).toEqual('user already liked planned day result');
         });
 
-        describe.only('like adds notification ', () => {
+        describe('like adds notification ', () => {
             const email = 'likeaddnotification@embtr.com';
             let accountWithUser: TestAccountWithUser;
             let userToken: string;

@@ -6,13 +6,18 @@ import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
 export const PlannedDayResultInclude = {
-    plannedDayResultComments: {
+    comments: {
         where: {
-            active: true,
+            comment: {
+                active: true,
+            },
         },
         include: {
-            user: true,
-            plannedDayResult: true,
+            comment: {
+                include: {
+                    user: true,
+                },
+            },
         },
     },
     plannedDayResultImages: {
@@ -51,11 +56,72 @@ export class PlannedDayResultController {
         });
     }
 
+    public static async createComment(plannedDayResultId: number, comment: string, userId: number) {
+        return await prisma.plannedDayResultComment.create({
+            data: {
+                comment: {
+                    create: {
+                        comment,
+                        user: {
+                            connect: {
+                                id: userId,
+                            },
+                        },
+                    },
+                },
+                plannedDayResult: {
+                    connect: {
+                        id: plannedDayResultId,
+                    },
+                },
+            },
+            include: {
+                comment: {
+                    include: {
+                        user: true,
+                    },
+                },
+                plannedDayResult: true,
+            },
+        });
+    }
+
+    public static async getComment(id: number) {
+        const result = await prisma.plannedDayResultComment.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                comment: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+        });
+
+        return result;
+    }
+
+    public static async deleteComment(id: number) {
+        return await prisma.plannedDayResultComment.update({
+            where: {
+                id,
+            },
+            data: {
+                comment: {
+                    update: {
+                        active: false,
+                    },
+                },
+            },
+        });
+    }
+
     public static async update(plannedDayResult: PlannedDayResultModel) {
         const description = this.createDescriptionUpdate(plannedDayResult);
         const active = this.createActiveUpdate(plannedDayResult);
         const plannedDayResultImages = this.createPlannedDayResultImagesUpdate(plannedDayResult);
-        const plannedDayResultComments = this.createPlannedDayResultCommentsUpdate(plannedDayResult);
         const plannedDayResultLikes = this.createPlannedDayResultLikesUpdate(plannedDayResult);
 
         const result = await prisma.plannedDayResult.update({
@@ -64,7 +130,6 @@ export class PlannedDayResultController {
                 ...description,
                 ...active,
                 plannedDayResultImages,
-                plannedDayResultComments: plannedDayResultComments,
                 plannedDayResultLikes: plannedDayResultLikes,
             },
             include: PlannedDayResultInclude,
@@ -135,26 +200,6 @@ export class PlannedDayResultController {
                     where: { id: image.id ?? -1 },
                     create: { url: image.url! },
                     update: { url: image.url!, active: image.active ?? true },
-                })),
-        };
-    }
-
-    private static createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
-        const comments = plannedDayResult.plannedDayResultComments;
-        if (!comments) {
-            return {};
-        }
-
-        return {
-            create: comments
-                .filter((comment) => comment.comment && !comment.id)
-                .map((comment) => ({
-                    comment: comment.comment!,
-                    user: {
-                        connect: {
-                            id: comment.userId!,
-                        },
-                    },
                 })),
         };
     }

@@ -1,9 +1,8 @@
-import { NotificationTargetPage, PlannedDayResultComment, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { Comment as CommentModel, PlannedDayResultComment, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     CreatePlannedDayResultCommentResponse,
     CreatePlannedDayResultRequest,
-    DeletePlannedDayResultCommentRequest,
     GetPlannedDayResultRequest,
     GetPlannedDayResultResponse,
     GetPlannedDayResultsResponse,
@@ -33,7 +32,6 @@ import { AuthorizationController } from '@src/controller/AuthorizationController
 import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Response } from '@resources/types/RequestTypes';
-import { PlannedDayResultCommentController } from '@src/controller/PlannedDayResultCommentController';
 import { NotificationService, NotificationType } from './NotificationService';
 
 export class PlannedDayResultService {
@@ -74,12 +72,17 @@ export class PlannedDayResultService {
         const likeModel: PlannedDayResultLike = { userId };
 
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
-        plannedDayResultModel.plannedDayResultLikes = plannedDayResultModel.plannedDayResultComments || [];
+        plannedDayResultModel.plannedDayResultLikes = plannedDayResultModel.plannedDayResultLikes || [];
         plannedDayResultModel.plannedDayResultLikes.push(likeModel);
 
         const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
-            NotificationService.createNotification(plannedDayResult.plannedDay.userId, userId, NotificationType.PLANNED_DAY_RESULT_LIKE, plannedDayResult.id);
+            await NotificationService.createNotification(
+                plannedDayResult.plannedDay.userId,
+                userId,
+                NotificationType.PLANNED_DAY_RESULT_LIKE,
+                plannedDayResult.id
+            );
             return SUCCESS;
         }
 
@@ -100,13 +103,10 @@ export class PlannedDayResultService {
             return CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
         }
 
-        const commentModel: PlannedDayResultComment = { comment, userId };
-
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
-        plannedDayResultModel.plannedDayResultComments = plannedDayResultModel.plannedDayResultComments || [];
-        plannedDayResultModel.plannedDayResultComments.push(commentModel);
+        const commentModel: CommentModel = { comment, userId };
 
-        const result = await PlannedDayResultController.update(plannedDayResultModel);
+        const result = await PlannedDayResultController.createComment(plannedDayResultModel.id!, commentModel.comment!, userId);
         if (result) {
             NotificationService.createNotification(
                 plannedDayResult.plannedDay.userId,
@@ -127,12 +127,12 @@ export class PlannedDayResultService {
             return DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID;
         }
 
-        const comment = await PlannedDayResultCommentController.get(id);
-        if (!comment || comment.user.id !== userId) {
+        const comment = await PlannedDayResultController.getComment(id);
+        if (!comment || comment.comment.userId !== userId) {
             return DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
         }
 
-        await PlannedDayResultCommentController.delete(id);
+        await PlannedDayResultController.deleteComment(id);
         return SUCCESS;
     }
 

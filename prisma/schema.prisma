@@ -9,23 +9,23 @@ generator client {
 }
 
 model User {
-  id                       Int                       @id @default(autoincrement())
-  uid                      String                    @unique @db.VarChar(255)
-  email                    String                    @db.VarChar(255)
-  username                 String?                   @db.VarChar(255)
-  displayName              String?                   @db.VarChar(255)
-  location                 String?                   @db.VarChar(255)
-  bio                      String?                   @db.VarChar(255)
-  photoUrl                 String?                   @db.VarChar(255)
-  bannerUrl                String?                   @db.VarChar(255)
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  plannedDays              PlannedDay[]
-  plannedDayResultComments PlannedDayResultComment[]
-  plannedDayResultLikes    PlannedDayResultLike[]
-  recievedNotifications    Notification[]            @relation("fromUser")
-  sendNotifications        Notification[]            @relation("toUser")
-  pushNotificationTokens   PushNotificationToken[]
+  id                     Int                     @id @default(autoincrement())
+  uid                    String                  @unique @db.VarChar(255)
+  email                  String                  @db.VarChar(255)
+  username               String?                 @db.VarChar(255)
+  displayName            String?                 @db.VarChar(255)
+  location               String?                 @db.VarChar(255)
+  bio                    String?                 @db.VarChar(255)
+  photoUrl               String?                 @db.VarChar(255)
+  bannerUrl              String?                 @db.VarChar(255)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+  plannedDays            PlannedDay[]
+  plannedDayResultLikes  PlannedDayResultLike[]
+  recievedNotifications  Notification[]          @relation("fromUser")
+  sendNotifications      Notification[]          @relation("toUser")
+  pushNotificationTokens PushNotificationToken[]
+  comments               Comment[]
 
   @@map("user")
 }
@@ -87,16 +87,16 @@ model PlannedTask {
 }
 
 model PlannedDayResult {
-  id                       Int                       @id @default(autoincrement())
-  plannedDayId             Int                       @db.Int
-  plannedDay               PlannedDay                @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active                   Boolean                   @default(true)
-  description              String?                   @db.VarChar(255)
-  createdAt                DateTime                  @default(now())
-  updatedAt                DateTime                  @updatedAt
-  plannedDayResultImages   PlannedDayResultImage[]
-  plannedDayResultComments PlannedDayResultComment[]
-  plannedDayResultLikes    PlannedDayResultLike[]
+  id                     Int                       @id @default(autoincrement())
+  plannedDayId           Int                       @db.Int
+  plannedDay             PlannedDay                @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active                 Boolean                   @default(true)
+  description            String?                   @db.VarChar(255)
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  plannedDayResultImages PlannedDayResultImage[]
+  plannedDayResultLikes  PlannedDayResultLike[]
+  comments               PlannedDayResultComment[]
 
   @@unique([plannedDayId], name: "planned_day_id")
   @@map("day_result")
@@ -106,16 +106,27 @@ model PlannedDayResultComment {
   id                 Int              @id @default(autoincrement())
   plannedDayResultId Int              @db.Int
   plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
-  userId             Int              @db.Int
-  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comment            String           @db.VarChar(255)
-  active             Boolean          @default(true)
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+  commentId          Int              @db.Int
+  comment            Comment          @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([plannedDayResultId, commentId], name: "unique_day_result_comment_id")
+  @@index([plannedDayResultId])
+  @@index([commentId])
+  @@map("planned_day_result_comment")
+}
+
+model Comment {
+  id                      Int                       @id @default(autoincrement())
+  userId                  Int                       @db.Int
+  user                    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment                 String                    @db.VarChar(255)
+  active                  Boolean                   @default(true)
+  createdAt               DateTime                  @default(now())
+  updatedAt               DateTime                  @updatedAt
+  PlannedDayResultComment PlannedDayResultComment[]
 
   @@index([userId])
-  @@index([plannedDayResultId])
-  @@map("planned_day_result_comment")
+  @@map("comment")
 }
 
 model PlannedDayResultLike {

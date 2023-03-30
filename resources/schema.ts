@@ -11,11 +11,11 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDays?: PlannedDay[];
-  plannedDayResultComments?: PlannedDayResultComment[];
   plannedDayResultLikes?: PlannedDayResultLike[];
   recievedNotifications?: Notification[];
   sendNotifications?: Notification[];
   pushNotificationTokens?: PushNotificationToken[];
+  comments?: Comment[];
 }
 
 export interface PushNotificationToken {
@@ -71,20 +71,27 @@ export interface PlannedDayResult {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDayResultImages?: PlannedDayResultImage[];
-  plannedDayResultComments?: PlannedDayResultComment[];
   plannedDayResultLikes?: PlannedDayResultLike[];
+  comments?: PlannedDayResultComment[];
 }
 
 export interface PlannedDayResultComment {
   id?: number;
   plannedDayResultId?: number;
   plannedDayResult?: PlannedDayResult;
+  commentId?: number;
+  comment?: Comment;
+}
+
+export interface Comment {
+  id?: number;
   userId?: number;
   user?: User;
   comment?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  PlannedDayResultComment?: PlannedDayResultComment[];
 }
 
 export interface PlannedDayResultLike {
