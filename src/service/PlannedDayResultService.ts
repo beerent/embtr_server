@@ -1,4 +1,4 @@
-import { Comment as CommentModel, PlannedDayResultComment, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { Comment as CommentModel, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     CreatePlannedDayResultCommentResponse,
@@ -128,7 +128,7 @@ export class PlannedDayResultService {
         }
 
         const comment = await PlannedDayResultController.getComment(id);
-        if (!comment || comment.comment.userId !== userId) {
+        if (!comment || comment.userId !== userId) {
             return DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
         }
 

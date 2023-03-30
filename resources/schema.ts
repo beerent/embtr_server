@@ -72,15 +72,7 @@ export interface PlannedDayResult {
   updatedAt?: Date;
   plannedDayResultImages?: PlannedDayResultImage[];
   plannedDayResultLikes?: PlannedDayResultLike[];
-  comments?: PlannedDayResultComment[];
-}
-
-export interface PlannedDayResultComment {
-  id?: number;
-  plannedDayResultId?: number;
-  plannedDayResult?: PlannedDayResult;
-  commentId?: number;
-  comment?: Comment;
+  comments?: Comment[];
 }
 
 export interface Comment {
@@ -91,7 +83,7 @@ export interface Comment {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  PlannedDayResultComment?: PlannedDayResultComment[];
+  PlannedDayResultComment?: PlannedDayResult[];
 }
 
 export interface PlannedDayResultLike {

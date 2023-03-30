@@ -8,16 +8,10 @@ export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayRes
 export const PlannedDayResultInclude = {
     comments: {
         where: {
-            comment: {
-                active: true,
-            },
+            active: true,
         },
         include: {
-            comment: {
-                include: {
-                    user: true,
-                },
-            },
+            user: true,
         },
     },
     plannedDayResultImages: {
@@ -57,9 +51,12 @@ export class PlannedDayResultController {
     }
 
     public static async createComment(plannedDayResultId: number, comment: string, userId: number) {
-        return await prisma.plannedDayResultComment.create({
+        const result = await prisma.plannedDayResult.update({
+            where: {
+                id: plannedDayResultId,
+            },
             data: {
-                comment: {
+                comments: {
                     create: {
                         comment,
                         user: {
@@ -69,51 +66,41 @@ export class PlannedDayResultController {
                         },
                     },
                 },
-                plannedDayResult: {
-                    connect: {
-                        id: plannedDayResultId,
-                    },
-                },
             },
             include: {
-                comment: {
+                comments: {
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                    take: 1,
                     include: {
                         user: true,
                     },
                 },
-                plannedDayResult: true,
             },
         });
+
+        return result.comments[0];
     }
 
     public static async getComment(id: number) {
-        const result = await prisma.plannedDayResultComment.findUnique({
+        return await prisma.comment.findUnique({
             where: {
                 id,
             },
             include: {
-                comment: {
-                    include: {
-                        user: true,
-                    },
-                },
+                user: true,
             },
         });
-
-        return result;
     }
 
     public static async deleteComment(id: number) {
-        return await prisma.plannedDayResultComment.update({
+        return await prisma.comment.update({
             where: {
                 id,
             },
             data: {
-                comment: {
-                    update: {
-                        active: false,
-                    },
-                },
+                active: false,
             },
         });
     }

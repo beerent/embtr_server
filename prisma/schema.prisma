@@ -86,44 +86,43 @@ model PlannedTask {
   @@map("planned_task")
 }
 
+model UserPost {
+  id          Int       @id @default(autoincrement())
+  active      Boolean   @default(true)
+  description String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  comments    Comment[]
+
+  @@map("user_post")
+}
+
 model PlannedDayResult {
-  id                     Int                       @id @default(autoincrement())
-  plannedDayId           Int                       @db.Int
-  plannedDay             PlannedDay                @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active                 Boolean                   @default(true)
-  description            String?                   @db.VarChar(255)
-  createdAt              DateTime                  @default(now())
-  updatedAt              DateTime                  @updatedAt
+  id                     Int                     @id @default(autoincrement())
+  plannedDayId           Int                     @db.Int
+  plannedDay             PlannedDay              @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active                 Boolean                 @default(true)
+  description            String?                 @db.VarChar(255)
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
   plannedDayResultImages PlannedDayResultImage[]
   plannedDayResultLikes  PlannedDayResultLike[]
-  comments               PlannedDayResultComment[]
+  comments               Comment[]
 
   @@unique([plannedDayId], name: "planned_day_id")
   @@map("day_result")
 }
 
-model PlannedDayResultComment {
-  id                 Int              @id @default(autoincrement())
-  plannedDayResultId Int              @db.Int
-  plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
-  commentId          Int              @db.Int
-  comment            Comment          @relation(fields: [commentId], references: [id], onDelete: Cascade)
-
-  @@unique([plannedDayResultId, commentId], name: "unique_day_result_comment_id")
-  @@index([plannedDayResultId])
-  @@index([commentId])
-  @@map("planned_day_result_comment")
-}
-
 model Comment {
-  id                      Int                       @id @default(autoincrement())
-  userId                  Int                       @db.Int
-  user                    User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comment                 String                    @db.VarChar(255)
-  active                  Boolean                   @default(true)
-  createdAt               DateTime                  @default(now())
-  updatedAt               DateTime                  @updatedAt
-  PlannedDayResultComment PlannedDayResultComment[]
+  id                      Int                @id @default(autoincrement())
+  userId                  Int                @db.Int
+  user                    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment                 String             @db.VarChar(255)
+  active                  Boolean            @default(true)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  PlannedDayResultComment PlannedDayResult[]
+  UserPost                UserPost[]
 
   @@index([userId])
   @@map("comment")

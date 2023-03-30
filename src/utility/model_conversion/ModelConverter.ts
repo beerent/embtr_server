@@ -1,25 +1,6 @@
-import {
-    User,
-    Task,
-    PlannedDay,
-    PlannedTask,
-    PlannedDayResult,
-    PlannedDayResultImage,
-    PlannedDayResultComment,
-    PlannedDayResultLike,
-    Notification,
-} from '@prisma/client';
+import { User, Task, PlannedDay, PlannedTask, PlannedDayResult, PlannedDayResultImage, PlannedDayResultLike, Notification } from '@prisma/client';
 
-type PrismaModel =
-    | User
-    | Task
-    | PlannedDay
-    | PlannedTask
-    | PlannedDayResult
-    | PlannedDayResultImage
-    | PlannedDayResultComment
-    | PlannedDayResultLike
-    | Notification;
+type PrismaModel = User | Task | PlannedDay | PlannedTask | PlannedDayResult | PlannedDayResultImage | PlannedDayResultLike | Notification;
 
 export class ModelConverter {
     public static convert<T>(prismaObj: PrismaModel): T {
