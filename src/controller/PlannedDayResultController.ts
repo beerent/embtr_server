@@ -53,6 +53,8 @@ export class PlannedDayResultController {
         const description = this.createDescriptionUpdate(plannedDayResult);
         const active = this.createActiveUpdate(plannedDayResult);
         const images = this.createPlannedDayResultImagesUpdate(plannedDayResult);
+        const likes = this.createPlannedDayResultLikesUpdate(plannedDayResult);
+        const comments = this.createPlannedDayResultCommentsUpdate(plannedDayResult);
 
         const result = await prisma.plannedDayResult.update({
             where: { id: plannedDayResult.id },
@@ -60,6 +62,8 @@ export class PlannedDayResultController {
                 ...description,
                 ...active,
                 images,
+                likes,
+                comments,
             },
             include: PlannedDayResultInclude,
         });
@@ -246,5 +250,61 @@ export class PlannedDayResultController {
                     update: { url: image.url!, active: image.active ?? true },
                 })),
         };
+    }
+
+    private static createPlannedDayResultLikesUpdate(plannedDayResult: PlannedDayResultModel) {
+        const likes = plannedDayResult.likes;
+        if (!likes) {
+            return {};
+        }
+
+        const result = {
+            upsert: plannedDayResult.likes
+                ?.filter((like) => like.userId !== undefined)
+                .map((like) => ({
+                    where: { id: like.id ?? -1 },
+                    create: {
+                        user: {
+                            connect: {
+                                id: like.userId,
+                            },
+                        },
+                    },
+                    update: {
+                        active: like.active ?? true,
+                    },
+                })),
+        };
+
+        return result;
+    }
+
+    private static createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
+        const comments = plannedDayResult.comments;
+        if (!comments) {
+            return {};
+        }
+
+        const result = {
+            upsert: comments
+                ?.filter((comment) => comment.userId !== undefined)
+                .map((comment) => ({
+                    where: { id: comment.id ?? -1 },
+                    create: {
+                        comment: comment.comment,
+                        user: {
+                            connect: {
+                                id: comment.userId,
+                            },
+                        },
+                    },
+                    update: {
+                        comment: comment.comment,
+                        active: comment.active ?? true,
+                    },
+                })),
+        };
+
+        return result;
     }
 }

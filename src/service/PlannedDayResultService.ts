@@ -69,7 +69,10 @@ export class PlannedDayResultService {
             return { ...RESOURCE_ALREADY_EXISTS, message: 'user already liked planned day result' };
         }
 
-        const result = await PlannedDayResultController.createLike(plannedDayResultId, userId);
+        const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
+        const likeModel: LikeModel = { userId };
+        plannedDayResultModel.likes = plannedDayResultModel.likes ? [...plannedDayResultModel.likes, likeModel] : [likeModel];
+        const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
             await NotificationService.createNotification(
                 plannedDayResult.plannedDay.userId,
@@ -99,8 +102,9 @@ export class PlannedDayResultService {
 
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
         const commentModel: CommentModel = { comment, userId };
+        plannedDayResultModel.comments = plannedDayResultModel.comments ? [...plannedDayResultModel.comments, commentModel] : [commentModel];
 
-        const result = await PlannedDayResultController.createComment(plannedDayResultModel.id!, userId, commentModel.comment!);
+        const result = await PlannedDayResultController.update(plannedDayResultModel);
         if (result) {
             NotificationService.createNotification(
                 plannedDayResult.plannedDay.userId,
