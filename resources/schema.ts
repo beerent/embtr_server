@@ -47,7 +47,7 @@ export interface PlannedDay {
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
-  plannedDayResult?: PlannedDayResult[];
+  plannedDayResults?: PlannedDayResult[];
 }
 
 export interface PlannedTask {
@@ -79,7 +79,7 @@ export interface PlannedDayResult {
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
-  plannedDayResultImages?: PlannedDayResultImage[];
+  images?: Image[];
   likes?: Like[];
   comments?: Comment[];
 }
@@ -92,8 +92,8 @@ export interface Comment {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  PlannedDayResultComment?: PlannedDayResult[];
-  UserPost?: UserPost[];
+  plannedDayResultComments?: PlannedDayResult[];
+  userPosts?: UserPost[];
 }
 
 export interface Like {
@@ -103,17 +103,16 @@ export interface Like {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  PlannedDayResult?: PlannedDayResult[];
+  plannedDayResults?: PlannedDayResult[];
 }
 
-export interface PlannedDayResultImage {
+export interface Image {
   id?: number;
-  plannedDayResultId?: number;
-  plannedDayResult?: PlannedDayResult;
   url?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  plannedDayResults?: PlannedDayResult[];
 }
 
 export interface Notification {

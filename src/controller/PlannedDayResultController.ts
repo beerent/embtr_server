@@ -22,13 +22,12 @@ export const PlannedDayResultInclude = {
             user: true,
         },
     },
-
-    plannedDayResultImages: {
+    images: {
         where: {
             active: true,
         },
         include: {
-            plannedDayResult: true,
+            plannedDayResults: true,
         },
     },
     plannedDay: {
@@ -53,14 +52,14 @@ export class PlannedDayResultController {
     public static async update(plannedDayResult: PlannedDayResultModel) {
         const description = this.createDescriptionUpdate(plannedDayResult);
         const active = this.createActiveUpdate(plannedDayResult);
-        const plannedDayResultImages = this.createPlannedDayResultImagesUpdate(plannedDayResult);
+        const images = this.createPlannedDayResultImagesUpdate(plannedDayResult);
 
         const result = await prisma.plannedDayResult.update({
             where: { id: plannedDayResult.id },
             data: {
                 ...description,
                 ...active,
-                plannedDayResultImages,
+                images,
             },
             include: PlannedDayResultInclude,
         });
@@ -233,13 +232,13 @@ export class PlannedDayResultController {
     }
 
     private static createPlannedDayResultImagesUpdate(plannedDayResult: PlannedDayResultModel) {
-        const images = plannedDayResult.plannedDayResultImages;
+        const images = plannedDayResult.images;
         if (!images) {
             return {};
         }
 
         return {
-            upsert: plannedDayResult.plannedDayResultImages
+            upsert: plannedDayResult.images
                 ?.filter((image) => image.url !== undefined)
                 .map((image) => ({
                     where: { id: image.id ?? -1 },

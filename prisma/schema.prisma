@@ -56,15 +56,15 @@ model Task {
 }
 
 model PlannedDay {
-  id               Int                @id @default(autoincrement())
-  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId           Int                @db.Int
-  dayKey           String             @db.VarChar(10)
-  date             DateTime           @db.Date
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  plannedTasks     PlannedTask[]
-  plannedDayResult PlannedDayResult[]
+  id                Int                @id @default(autoincrement())
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            Int                @db.Int
+  dayKey            String             @db.VarChar(10)
+  date              DateTime           @db.Date
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plannedTasks      PlannedTask[]
+  plannedDayResults PlannedDayResult[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")
@@ -98,60 +98,58 @@ model UserPost {
 }
 
 model PlannedDayResult {
-  id                     Int                     @id @default(autoincrement())
-  plannedDayId           Int                     @db.Int
-  plannedDay             PlannedDay              @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active                 Boolean                 @default(true)
-  description            String?                 @db.VarChar(255)
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
-  plannedDayResultImages PlannedDayResultImage[]
-  likes                  Like[]
-  comments               Comment[]
+  id           Int        @id @default(autoincrement())
+  plannedDayId Int        @db.Int
+  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active       Boolean    @default(true)
+  description  String?    @db.VarChar(255)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  images       Image[]
+  likes        Like[]
+  comments     Comment[]
 
   @@unique([plannedDayId], name: "planned_day_id")
-  @@map("day_result")
+  @@map("planned_day_result")
 }
 
 model Comment {
-  id                      Int                @id @default(autoincrement())
-  userId                  Int                @db.Int
-  user                    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comment                 String             @db.VarChar(255)
-  active                  Boolean            @default(true)
-  createdAt               DateTime           @default(now())
-  updatedAt               DateTime           @updatedAt
-  PlannedDayResultComment PlannedDayResult[]
-  UserPost                UserPost[]
+  id                       Int                @id @default(autoincrement())
+  userId                   Int                @db.Int
+  user                     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment                  String             @db.VarChar(255)
+  active                   Boolean            @default(true)
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  plannedDayResultComments PlannedDayResult[]
+  userPosts                UserPost[]
 
   @@index([userId])
   @@map("comment")
 }
 
 model Like {
-  id               Int                @id @default(autoincrement())
-  userId           Int                @db.Int
-  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  active           Boolean            @default(true)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  PlannedDayResult PlannedDayResult[]
+  id                Int                @id @default(autoincrement())
+  userId            Int                @db.Int
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plannedDayResults PlannedDayResult[]
 
   @@index([userId])
   @@map("like")
 }
 
-model PlannedDayResultImage {
-  id                 Int              @id @default(autoincrement())
-  plannedDayResultId Int              @db.Int
-  plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
-  url                String           @db.VarChar(255)
-  active             Boolean          @default(true)
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+model Image {
+  id                Int                @id @default(autoincrement())
+  url               String             @db.VarChar(255)
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plannedDayResults PlannedDayResult[]
 
-  @@index([plannedDayResultId])
-  @@map("day_result_image")
+  @@map("image")
 }
 
 enum NotificationTargetPage {
