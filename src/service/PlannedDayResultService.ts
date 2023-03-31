@@ -1,4 +1,4 @@
-import { Comment as CommentModel, PlannedDayResultLike, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { Comment as CommentModel, Like as LikeModel, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     CreatePlannedDayResultCommentResponse,
@@ -64,18 +64,12 @@ export class PlannedDayResultService {
             return { ...RESOURCE_NOT_FOUND, message: 'planned day result not found' };
         }
 
-        const userAlreadyLiked = plannedDayResult.plannedDayResultLikes?.some((like) => like.userId === userId);
+        const userAlreadyLiked = plannedDayResult.likes?.some((like) => like.userId === userId);
         if (userAlreadyLiked) {
             return { ...RESOURCE_ALREADY_EXISTS, message: 'user already liked planned day result' };
         }
 
-        const likeModel: PlannedDayResultLike = { userId };
-
-        const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
-        plannedDayResultModel.plannedDayResultLikes = plannedDayResultModel.plannedDayResultLikes || [];
-        plannedDayResultModel.plannedDayResultLikes.push(likeModel);
-
-        const result = await PlannedDayResultController.update(plannedDayResultModel);
+        const result = await PlannedDayResultController.createLike(plannedDayResultId, userId);
         if (result) {
             await NotificationService.createNotification(
                 plannedDayResult.plannedDay.userId,
@@ -99,14 +93,14 @@ export class PlannedDayResultService {
         }
 
         const plannedDayResult = await PlannedDayResultController.getById(plannedDayResultId);
-        if (!plannedDayResult) {
+        if (!plannedDayResult?.id) {
             return CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN;
         }
 
         const plannedDayResultModel: PlannedDayResultModel = ModelConverter.convert(plannedDayResult);
         const commentModel: CommentModel = { comment, userId };
 
-        const result = await PlannedDayResultController.createComment(plannedDayResultModel.id!, commentModel.comment!, userId);
+        const result = await PlannedDayResultController.createComment(plannedDayResultModel.id!, userId, commentModel.comment!);
         if (result) {
             NotificationService.createNotification(
                 plannedDayResult.plannedDay.userId,

@@ -14,20 +14,20 @@ export const PlannedDayResultInclude = {
             user: true,
         },
     },
-    plannedDayResultImages: {
-        where: {
-            active: true,
-        },
-        include: {
-            plannedDayResult: true,
-        },
-    },
-    plannedDayResultLikes: {
+    likes: {
         where: {
             active: true,
         },
         include: {
             user: true,
+        },
+    },
+
+    plannedDayResultImages: {
+        where: {
+            active: true,
+        },
+        include: {
             plannedDayResult: true,
         },
     },
@@ -50,7 +50,59 @@ export class PlannedDayResultController {
         });
     }
 
-    public static async createComment(plannedDayResultId: number, comment: string, userId: number) {
+    public static async update(plannedDayResult: PlannedDayResultModel) {
+        const description = this.createDescriptionUpdate(plannedDayResult);
+        const active = this.createActiveUpdate(plannedDayResult);
+        const plannedDayResultImages = this.createPlannedDayResultImagesUpdate(plannedDayResult);
+
+        const result = await prisma.plannedDayResult.update({
+            where: { id: plannedDayResult.id },
+            data: {
+                ...description,
+                ...active,
+                plannedDayResultImages,
+            },
+            include: PlannedDayResultInclude,
+        });
+
+        return result;
+    }
+
+    public static async getAll() {
+        return await prisma.plannedDayResult.findMany({
+            where: {
+                active: true,
+            },
+            include: PlannedDayResultInclude,
+        });
+    }
+
+    public static async getById(id: number) {
+        return await prisma.plannedDayResult.findUnique({
+            where: {
+                id: id,
+            },
+            include: PlannedDayResultInclude,
+        });
+    }
+
+    public static async getByUserAndDayKey(userId: number, dayKey: string) {
+        return await prisma.plannedDayResult.findFirst({
+            where: {
+                active: true,
+                plannedDay: {
+                    userId,
+                    dayKey,
+                },
+            },
+            include: PlannedDayResultInclude,
+        });
+    }
+
+    /*
+     * COMMENTS
+     */
+    public static async createComment(plannedDayResultId: number, userId: number, comment: string) {
         const result = await prisma.plannedDayResult.update({
             where: {
                 id: plannedDayResultId,
@@ -105,54 +157,60 @@ export class PlannedDayResultController {
         });
     }
 
-    public static async update(plannedDayResult: PlannedDayResultModel) {
-        const description = this.createDescriptionUpdate(plannedDayResult);
-        const active = this.createActiveUpdate(plannedDayResult);
-        const plannedDayResultImages = this.createPlannedDayResultImagesUpdate(plannedDayResult);
-        const plannedDayResultLikes = this.createPlannedDayResultLikesUpdate(plannedDayResult);
-
+    /*
+     * LIKES
+     */
+    public static async createLike(plannedDayResultId: number, userId: number) {
         const result = await prisma.plannedDayResult.update({
-            where: { id: plannedDayResult.id },
+            where: {
+                id: plannedDayResultId,
+            },
             data: {
-                ...description,
-                ...active,
-                plannedDayResultImages,
-                plannedDayResultLikes: plannedDayResultLikes,
-            },
-            include: PlannedDayResultInclude,
-        });
-
-        return result;
-    }
-
-    public static async getAll() {
-        return await prisma.plannedDayResult.findMany({
-            where: {
-                active: true,
-            },
-            include: PlannedDayResultInclude,
-        });
-    }
-
-    public static async getById(id: number) {
-        return await prisma.plannedDayResult.findUnique({
-            where: {
-                id: id,
-            },
-            include: PlannedDayResultInclude,
-        });
-    }
-
-    public static async getByUserAndDayKey(userId: number, dayKey: string) {
-        return await prisma.plannedDayResult.findFirst({
-            where: {
-                active: true,
-                plannedDay: {
-                    userId,
-                    dayKey,
+                likes: {
+                    create: {
+                        user: {
+                            connect: {
+                                id: userId,
+                            },
+                        },
+                    },
                 },
             },
-            include: PlannedDayResultInclude,
+            include: {
+                likes: {
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                    take: 1,
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+        });
+
+        return result.likes[0];
+    }
+
+    public static async getLike(id: number) {
+        return await prisma.like.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                user: true,
+            },
+        });
+    }
+
+    public static async deleteLike(id: number) {
+        return await prisma.like.update({
+            where: {
+                id,
+            },
+            data: {
+                active: false,
+            },
         });
     }
 
@@ -187,25 +245,6 @@ export class PlannedDayResultController {
                     where: { id: image.id ?? -1 },
                     create: { url: image.url! },
                     update: { url: image.url!, active: image.active ?? true },
-                })),
-        };
-    }
-
-    private static createPlannedDayResultLikesUpdate(plannedDayResult: PlannedDayResultModel) {
-        const likes = plannedDayResult.plannedDayResultLikes;
-        if (!likes) {
-            return {};
-        }
-
-        return {
-            create: likes
-                .filter((like) => like.userId && !like.id)
-                .map((like) => ({
-                    user: {
-                        connect: {
-                            id: like.userId!,
-                        },
-                    },
                 })),
         };
     }

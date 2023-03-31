@@ -21,11 +21,11 @@ model User {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   plannedDays            PlannedDay[]
-  plannedDayResultLikes  PlannedDayResultLike[]
   recievedNotifications  Notification[]          @relation("fromUser")
   sendNotifications      Notification[]          @relation("toUser")
   pushNotificationTokens PushNotificationToken[]
   comments               Comment[]
+  Like                   Like[]
 
   @@map("user")
 }
@@ -106,7 +106,7 @@ model PlannedDayResult {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
   plannedDayResultImages PlannedDayResultImage[]
-  plannedDayResultLikes  PlannedDayResultLike[]
+  likes                  Like[]
   comments               Comment[]
 
   @@unique([plannedDayId], name: "planned_day_id")
@@ -128,20 +128,17 @@ model Comment {
   @@map("comment")
 }
 
-model PlannedDayResultLike {
-  id                 Int              @id @default(autoincrement())
-  plannedDayResultId Int              @db.Int
-  plannedDayResult   PlannedDayResult @relation(fields: [plannedDayResultId], references: [id], onDelete: Cascade)
-  userId             Int              @db.Int
-  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  active             Boolean          @default(true)
-  createdAt          DateTime         @default(now())
-  updatedAt          DateTime         @updatedAt
+model Like {
+  id               Int                @id @default(autoincrement())
+  userId           Int                @db.Int
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  active           Boolean            @default(true)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  PlannedDayResult PlannedDayResult[]
 
-  @@unique([userId, plannedDayResultId], name: "unique_user_day_result_id")
   @@index([userId])
-  @@index([plannedDayResultId])
-  @@map("planned_day_result_like")
+  @@map("like")
 }
 
 model PlannedDayResultImage {

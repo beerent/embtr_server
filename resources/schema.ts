@@ -11,11 +11,11 @@ export interface User {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDays?: PlannedDay[];
-  plannedDayResultLikes?: PlannedDayResultLike[];
   recievedNotifications?: Notification[];
   sendNotifications?: Notification[];
   pushNotificationTokens?: PushNotificationToken[];
   comments?: Comment[];
+  Like?: Like[];
 }
 
 export interface PushNotificationToken {
@@ -62,6 +62,15 @@ export interface PlannedTask {
   updatedAt?: Date;
 }
 
+export interface UserPost {
+  id?: number;
+  active?: boolean;
+  description?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  comments?: Comment[];
+}
+
 export interface PlannedDayResult {
   id?: number;
   plannedDayId?: number;
@@ -71,7 +80,7 @@ export interface PlannedDayResult {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDayResultImages?: PlannedDayResultImage[];
-  plannedDayResultLikes?: PlannedDayResultLike[];
+  likes?: Like[];
   comments?: Comment[];
 }
 
@@ -84,17 +93,17 @@ export interface Comment {
   createdAt?: Date;
   updatedAt?: Date;
   PlannedDayResultComment?: PlannedDayResult[];
+  UserPost?: UserPost[];
 }
 
-export interface PlannedDayResultLike {
+export interface Like {
   id?: number;
-  plannedDayResultId?: number;
-  plannedDayResult?: PlannedDayResult;
   userId?: number;
   user?: User;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  PlannedDayResult?: PlannedDayResult[];
 }
 
 export interface PlannedDayResultImage {

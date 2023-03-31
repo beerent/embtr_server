@@ -118,8 +118,8 @@ describe('DayResultServices', () => {
 
         const comment = await PlannedDayResultController.createComment(
             TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
-            'Test Comment To Delete',
-            ACCOUNT_USER_WITH_USER_ROLE.user.id
+            ACCOUNT_USER_WITH_USER_ROLE.user.id,
+            'Test Comment To Delete'
         );
         TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID = comment.id;
     });
@@ -532,7 +532,7 @@ describe('DayResultServices', () => {
 
             const plannedDayResult = await PlannedDayResultController.getById(TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID);
 
-            expect(plannedDayResult?.plannedDayResultLikes.length).toEqual(1);
+            expect(plannedDayResult?.likes.length).toEqual(1);
             expect(response.status).toEqual(SUCCESS.httpCode);
         });
 
@@ -548,7 +548,7 @@ describe('DayResultServices', () => {
 
             const plannedDayResult = await PlannedDayResultController.getById(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
 
-            expect(plannedDayResult?.plannedDayResultLikes.length).toEqual(1);
+            expect(plannedDayResult?.likes.length).toEqual(1);
             expect(response.status).toEqual(RESOURCE_ALREADY_EXISTS.httpCode);
             expect(response.body.message).toEqual('user already liked planned day result');
         });
