@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import userRouter from './endpoints/UserRouter';
 import plannedDayRouter from './endpoints/PlannedDayRouter';
 import plannedDayResultRouter from './endpoints/PlannedDayResultRouter';
+import userPostRouter from './endpoints/UserPostRouter';
 import notificationRouter from './endpoints/NotificationRouter';
 import { logger } from './common/logger/Logger';
 
@@ -26,6 +27,7 @@ app.use('/task', taskRouter);
 app.use('/account', accountRouter);
 app.use('/planned-day', plannedDayRouter);
 app.use('/planned-day-result', plannedDayResultRouter);
+app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
 
 export default app;

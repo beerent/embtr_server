@@ -92,6 +92,8 @@ model UserPost {
   description String?   @db.VarChar(255)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  images      Image[]
+  likes       Like[]
   comments    Comment[]
 
   @@map("user_post")
@@ -136,6 +138,7 @@ model Like {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   plannedDayResults PlannedDayResult[]
+  userPosts         UserPost[]
 
   @@index([userId])
   @@map("like")
@@ -148,6 +151,7 @@ model Image {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   plannedDayResults PlannedDayResult[]
+  userPosts         UserPost[]
 
   @@map("image")
 }

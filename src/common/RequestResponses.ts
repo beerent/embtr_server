@@ -79,6 +79,13 @@ export const RESOURCE_ALREADY_EXISTS: Response = {
     message: 'resource not found',
 };
 
+export const INVALID_REQUEST: Response = {
+    httpCode: HttpCode.GENERAL_FAILURE,
+    internalCode: Code.INVALID_REQUEST,
+    success: false,
+    message: 'invalid request',
+};
+
 export const GENERAL_FAILURE: Response = {
     httpCode: HttpCode.GENERAL_FAILURE,
     internalCode: Code.CREATE_PLANNED_DAY_FAILED,

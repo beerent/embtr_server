@@ -1,5 +1,4 @@
 import { ACCOUNT, PLANNED_DAY_RESULT } from '@resources/endpoints';
-import { NotificationTargetPage } from '@resources/schema';
 import {
     CreatePlannedDayResultCommentRequest,
     GetPlannedDayResultResponse,

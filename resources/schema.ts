@@ -68,6 +68,8 @@ export interface UserPost {
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  images?: Image[];
+  likes?: Like[];
   comments?: Comment[];
 }
 
@@ -104,6 +106,7 @@ export interface Like {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
+  userPosts?: UserPost[];
 }
 
 export interface Image {
@@ -113,6 +116,7 @@ export interface Image {
   createdAt?: Date;
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
+  userPosts?: UserPost[];
 }
 
 export interface Notification {
