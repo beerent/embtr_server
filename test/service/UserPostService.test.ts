@@ -1,18 +1,22 @@
 import { USER_POST } from '@resources/endpoints';
+import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse } from '@resources/types/UserPostTypes';
 import app from '@src/app';
-import { FORBIDDEN, INVALID_REQUEST, RESOURCE_NOT_FOUND, UNAUTHORIZED } from '@src/common/RequestResponses';
+import { FORBIDDEN, INVALID_REQUEST, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
+import { UserPostController } from '@src/controller/UserPostController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
 
-describe('get by id', () => {
+describe('user post service', () => {
     const ACCOUNT_WITH_NO_ROLES = 'pds_account_no_roles@embtr.com';
     let ACCOUNT_WITH_NO_ROLES_TOKEN: string;
 
     const ACCOUNT_WITH_USER_ROLE = 'pds_account_user_role@embtr.com';
     let ACCOUNT_WITH_USER_ROLE_TOKEN: string;
     let ACCOUNT_USER_WITH_USER_ROLE: TestAccountWithUser;
+
+    let TEST_POST_ID: number;
 
     beforeAll(async () => {
         //user deletes
@@ -35,44 +39,110 @@ describe('get by id', () => {
         const [token1, token2] = await Promise.all(authenticates);
         ACCOUNT_WITH_NO_ROLES_TOKEN = token1;
         ACCOUNT_WITH_USER_ROLE_TOKEN = token2;
+
+        //user posts
+        TEST_POST_ID = (await UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' })).id;
     });
 
-    test('unauthenticated', async () => {
-        const response = await request(app).get(`${USER_POST}id`).set('Authorization', 'Bearer Trash').send();
-
-        expect(response.status).toEqual(UNAUTHORIZED.httpCode);
-        expect(response.body.dayResult).toBeUndefined();
+    afterAll(async () => {
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES);
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE);
     });
 
-    test('unauthorized', async () => {
-        const response = await request(app).get(`${USER_POST}id`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+    describe('get by id', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).get(`${USER_POST}id`).set('Authorization', 'Bearer Trash').send();
 
-        expect(response.status).toEqual(FORBIDDEN.httpCode);
-        expect(response.body.dayResult).toBeUndefined();
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).get(`${USER_POST}id`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).get(`${USER_POST}invalid`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(INVALID_REQUEST.httpCode);
+            expect(response.body.userPost).toBeUndefined();
+        });
+
+        test('non-existing day result', async () => {
+            const response = await request(app).get(`${USER_POST}0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('valid', async () => {
+            const response = await request(app).get(`${USER_POST}${TEST_POST_ID}`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            const responseObject: GetUserPostResponse = response.body;
+            expect(responseObject?.userPost?.id).toEqual(TEST_POST_ID);
+        });
     });
 
-    test('invalid', async () => {
-        const response = await request(app).get(`${USER_POST}invalid`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+    describe('get all', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).get(`${USER_POST}`).set('Authorization', 'Bearer Trash').send();
 
-        expect(response.status).toEqual(INVALID_REQUEST.httpCode);
-        expect(response.body.userPost).toBeUndefined();
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).get(`${USER_POST}`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('valid', async () => {
+            const response = await request(app).get(`${USER_POST}`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            const responseObject: GetAllUserPostResponse = response.body;
+            expect(responseObject?.userPosts.length).toBeGreaterThan(0);
+        });
     });
 
-    test('non-existing day result', async () => {
-        const response = await request(app).get(`${USER_POST}0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+    describe('create', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).post(`${USER_POST}`).set('Authorization', 'Bearer Trash').send({});
 
-        expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
-        expect(response.body.dayResult).toBeUndefined();
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).post(`${USER_POST}`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).post(`${USER_POST}`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(INVALID_REQUEST.httpCode);
+            expect(response.body.userPost).toBeUndefined();
+        });
+
+        test('valid', async () => {
+            const body: CreateUserPostRequest = {
+                userPost: {
+                    title: 'test title',
+                    body: 'test body',
+                },
+            };
+            const response = await request(app).post(`${USER_POST}`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body.userPost.id).toBeGreaterThan(0);
+        });
     });
-
-    //test('valid', async () => {
-    //    const response = await request(app)
-    //        .get(`${USER_POST}${TEST_EXISTING_PLANNED_DAY_RESULT_ID}`)
-    //        .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
-    //        .send();
-
-    //            expect(response.status).toEqual(SUCCESS.httpCode);
-    //            const responseObject: GetPlannedDayResultResponse = response.body;
-    //            expect(responseObject!.plannedDayResult!.id).toEqual(TEST_EXISTING_PLANNED_DAY_RESULT_ID);
-    //        });
 });

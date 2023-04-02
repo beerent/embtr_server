@@ -2,6 +2,7 @@ import { prisma } from '@database/prisma';
 import { PlannedDayInclude } from './PlannedDayController';
 import { Prisma } from '@prisma/client';
 import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { CommonUpserts } from './common/CommonUpserts';
 
 export type PlannedDayResultFull = Prisma.PromiseReturnType<typeof PlannedDayResultController.getById>;
 
@@ -50,11 +51,11 @@ export class PlannedDayResultController {
     }
 
     public static async update(plannedDayResult: PlannedDayResultModel) {
-        const description = this.createDescriptionUpdate(plannedDayResult);
-        const active = this.createActiveUpdate(plannedDayResult);
-        const images = this.createPlannedDayResultImagesUpdate(plannedDayResult);
-        const likes = this.createPlannedDayResultLikesUpdate(plannedDayResult);
-        const comments = this.createPlannedDayResultCommentsUpdate(plannedDayResult);
+        const description = plannedDayResult.description ? { description: plannedDayResult.description } : {};
+        const active = plannedDayResult.active ? { active: plannedDayResult.active } : {};
+        const images = CommonUpserts.createImagesUpserts(plannedDayResult.images ?? []);
+        const likes = CommonUpserts.createLikesUpserts(plannedDayResult.likes ?? []);
+        const comments = CommonUpserts.createCommentsUpserts(plannedDayResult.comments ?? []);
 
         const result = await prisma.plannedDayResult.update({
             where: { id: plannedDayResult.id },
@@ -215,96 +216,5 @@ export class PlannedDayResultController {
                 active: false,
             },
         });
-    }
-
-    private static createDescriptionUpdate(plannedDayResult: PlannedDayResultModel) {
-        const description = plannedDayResult.description;
-        if (!description) {
-            return {};
-        }
-
-        return { description };
-    }
-
-    private static createActiveUpdate(plannedDayResult: PlannedDayResultModel) {
-        const active = plannedDayResult.active;
-        if (active === undefined) {
-            return {};
-        }
-
-        return { active };
-    }
-
-    private static createPlannedDayResultImagesUpdate(plannedDayResult: PlannedDayResultModel) {
-        const images = plannedDayResult.images;
-        if (!images) {
-            return {};
-        }
-
-        return {
-            upsert: plannedDayResult.images
-                ?.filter((image) => image.url !== undefined)
-                .map((image) => ({
-                    where: { id: image.id ?? -1 },
-                    create: { url: image.url! },
-                    update: { url: image.url!, active: image.active ?? true },
-                })),
-        };
-    }
-
-    private static createPlannedDayResultLikesUpdate(plannedDayResult: PlannedDayResultModel) {
-        const likes = plannedDayResult.likes;
-        if (!likes) {
-            return {};
-        }
-
-        const result = {
-            upsert: plannedDayResult.likes
-                ?.filter((like) => like.userId !== undefined)
-                .map((like) => ({
-                    where: { id: like.id ?? -1 },
-                    create: {
-                        user: {
-                            connect: {
-                                id: like.userId,
-                            },
-                        },
-                    },
-                    update: {
-                        active: like.active ?? true,
-                    },
-                })),
-        };
-
-        return result;
-    }
-
-    private static createPlannedDayResultCommentsUpdate(plannedDayResult: PlannedDayResultModel) {
-        const comments = plannedDayResult.comments;
-        if (!comments) {
-            return {};
-        }
-
-        const result = {
-            upsert: comments
-                ?.filter((comment) => comment.userId !== undefined)
-                .map((comment) => ({
-                    where: { id: comment.id ?? -1 },
-                    create: {
-                        comment: comment.comment,
-                        user: {
-                            connect: {
-                                id: comment.userId,
-                            },
-                        },
-                    },
-                    update: {
-                        comment: comment.comment,
-                        active: comment.active ?? true,
-                    },
-                })),
-        };
-
-        return result;
     }
 }

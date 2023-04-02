@@ -20,6 +20,7 @@ model User {
   bannerUrl              String?                 @db.VarChar(255)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
+  user                   UserPost[]
   plannedDays            PlannedDay[]
   recievedNotifications  Notification[]          @relation("fromUser")
   sendNotifications      Notification[]          @relation("toUser")
@@ -87,15 +88,19 @@ model PlannedTask {
 }
 
 model UserPost {
-  id          Int       @id @default(autoincrement())
-  active      Boolean   @default(true)
-  description String?   @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  images      Image[]
-  likes       Like[]
-  comments    Comment[]
+  id        Int       @id @default(autoincrement())
+  title     String?   @db.VarChar(255)
+  body      String?   @db.VarChar(255)
+  userId    Int       @db.Int
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  active    Boolean   @default(true)
+  images    Image[]
+  likes     Like[]
+  comments  Comment[]
 
+  @@index([userId])
   @@map("user_post")
 }
 
