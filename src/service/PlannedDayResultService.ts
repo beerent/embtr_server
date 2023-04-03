@@ -51,7 +51,7 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
-    public static async createLike(request: Request): Promise<CreatePlannedDayResultCommentResponse> {
+    public static async createLike(request: Request): Promise<Response> {
         const plannedDayResultId = Number(request.params.id);
 
         const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;

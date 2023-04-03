@@ -371,7 +371,7 @@ describe('DayResultServices', () => {
             expect(response.body.plannedDayResult.description).toEqual(randomString);
         });
 
-        test.skip('can upload image', async () => {
+        test('can upload image', async () => {
             const randomString = Math.random().toString(36).substring(7);
             const body: UpdatePlannedDayResultRequest = {
                 plannedDayResult: {

@@ -1,44 +1,57 @@
-import { USER_POST } from '@resources/endpoints';
-import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse } from '@resources/types/UserPostTypes';
+import { PLANNED_DAY, USER, USER_POST } from '@resources/endpoints';
+import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse, UpdateUserPostRequest } from '@resources/types/UserPostTypes';
 import app from '@src/app';
-import { FORBIDDEN, INVALID_REQUEST, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
+import { FORBIDDEN, GENERAL_FAILURE, INVALID_REQUEST, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
+import { NotificationController } from '@src/controller/NotificationController';
 import { UserPostController } from '@src/controller/UserPostController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
 
 describe('user post service', () => {
-    const ACCOUNT_WITH_NO_ROLES = 'pds_account_no_roles@embtr.com';
+    const ACCOUNT_WITH_NO_ROLES = 'up_account_no_roles@embtr.com';
     let ACCOUNT_WITH_NO_ROLES_TOKEN: string;
 
-    const ACCOUNT_WITH_USER_ROLE = 'pds_account_user_role@embtr.com';
+    const ACCOUNT_WITH_USER_ROLE = 'up_account_user_role@embtr.com';
     let ACCOUNT_WITH_USER_ROLE_TOKEN: string;
     let ACCOUNT_USER_WITH_USER_ROLE: TestAccountWithUser;
+
+    const ACCOUNT_WITH_USER_ROLE_2 = 'up_account_user_role222@embtr.com';
+    let ACCOUNT_WITH_USER_ROLE_TOKEN_2: string;
+    let ACCOUNT_USER_WITH_USER_ROLE_2: TestAccountWithUser;
 
     let TEST_POST_ID: number;
 
     beforeAll(async () => {
         //user deletes
-        const deletes = [TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES), TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE)];
+        const deletes = [
+            TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES),
+            TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE),
+            TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE_2),
+        ];
         await Promise.all(deletes);
 
         //user creates
         const creates = [
             TestUtility.createAccountWithUser(ACCOUNT_WITH_NO_ROLES, 'password', Role.INVALID),
             TestUtility.createAccountWithUser(ACCOUNT_WITH_USER_ROLE, 'password', Role.USER),
+            TestUtility.createAccountWithUser(ACCOUNT_WITH_USER_ROLE_2, 'password', Role.USER),
         ];
-        const [account1, account2] = await Promise.all(creates);
+        const [account1, account2, account3] = await Promise.all(creates);
         ACCOUNT_USER_WITH_USER_ROLE = account2;
+        ACCOUNT_USER_WITH_USER_ROLE_2 = account3;
 
         //user authenticates
         const authenticates = [
             AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password'),
             AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password'),
+            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE_2, 'password'),
         ];
-        const [token1, token2] = await Promise.all(authenticates);
+        const [token1, token2, token3] = await Promise.all(authenticates);
         ACCOUNT_WITH_NO_ROLES_TOKEN = token1;
         ACCOUNT_WITH_USER_ROLE_TOKEN = token2;
+        ACCOUNT_WITH_USER_ROLE_TOKEN_2 = token3;
 
         //user posts
         TEST_POST_ID = (await UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' })).id;
@@ -47,6 +60,7 @@ describe('user post service', () => {
     afterAll(async () => {
         await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES);
         await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE);
+        await TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE_2);
     });
 
     describe('get by id', () => {
@@ -145,4 +159,165 @@ describe('user post service', () => {
             expect(response.body.userPost.id).toBeGreaterThan(0);
         });
     });
+
+    describe('update', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).patch(USER_POST).set('Authorization', 'Bearer Trash').send({});
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body).toEqual(UNAUTHORIZED);
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).patch(USER_POST).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const response = await request(app)
+                .patch(USER_POST)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send({
+                    userPost: {
+                        id: 'invalid',
+                    },
+                });
+
+            expect(response.status).toEqual(INVALID_REQUEST.httpCode);
+        });
+
+        test('does not exist', async () => {
+            const response = await request(app)
+                .patch(USER_POST)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send({
+                    userPost: {
+                        id: 0,
+                    },
+                });
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+        });
+
+        test('does not belong to user', async () => {
+            const response = await request(app)
+                .patch(USER_POST)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN_2}`)
+                .send({
+                    userPost: {
+                        id: TEST_POST_ID,
+                    },
+                });
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+            expect(response.body.userPost).toBeUndefined();
+        });
+
+        test('valid', async () => {
+            const randomString = Math.random().toString(36).substring(7);
+            const body: UpdateUserPostRequest = {
+                userPost: {
+                    id: TEST_POST_ID,
+                    body: randomString,
+                },
+            };
+
+            const response = await request(app).patch(USER_POST).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body.userPost.body).toEqual(randomString);
+        });
+
+        test('can upload image', async () => {
+            const randomString = Math.random().toString(36).substring(7);
+            const body: UpdateUserPostRequest = {
+                userPost: {
+                    id: TEST_POST_ID,
+                    images: [{ url: randomString }],
+                },
+            };
+
+            const response = await request(app).patch(USER_POST).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body.userPost.images[0].url).toEqual(randomString);
+        });
+    });
+
+    describe('add like', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).post(`${USER_POST}id/like`).set('Authorization', 'Bearer Trash').send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body).toEqual(UNAUTHORIZED);
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).post(`${USER_POST}id/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).post(`${USER_POST}id/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(GENERAL_FAILURE.httpCode);
+        });
+
+        test('unknown', async () => {
+            const response = await request(app).post(`${USER_POST}0/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+        });
+
+        test('valid', async () => {
+            const response = await request(app).post(`${USER_POST}${TEST_POST_ID}/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            const userPost = await UserPostController.getById(TEST_POST_ID);
+
+            expect(userPost?.likes.length).toEqual(1);
+            expect(response.status).toEqual(SUCCESS.httpCode);
+        });
+
+        test('cannot like twice', async () => {
+            await request(app).post(`${USER_POST}${TEST_POST_ID}/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+            const response = await request(app).post(`${USER_POST}${TEST_POST_ID}/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            const userPost = await UserPostController.getById(TEST_POST_ID);
+
+            expect(userPost?.likes.length).toEqual(1);
+            expect(response.status).toEqual(RESOURCE_ALREADY_EXISTS.httpCode);
+        });
+
+        describe('like adds notification', () => {
+            const email = 'likeaddnotification@embtr.com';
+            let accountWithUser: TestAccountWithUser;
+            let userToken: string;
+            let userPostId: number = 0;
+
+            beforeAll(async () => {
+                await TestUtility.deleteAccountWithUser(email);
+                accountWithUser = await TestUtility.createAccountWithUser(email, 'password', Role.USER);
+                userToken = await AuthenticationController.generateValidIdToken(email, 'password');
+
+                userPostId = (await UserPostController.create({ userId: accountWithUser.user.id, body: 'test body' })).id;
+            });
+
+            afterAll(async () => {
+                await TestUtility.deleteAccountWithUser(email);
+            });
+
+            test('like adds notification', async () => {
+                await request(app).post(`${USER_POST}${userPostId}/like`).set('Authorization', `Bearer ${userToken}`).send();
+
+                const likes = await NotificationController.getAll(accountWithUser.user.id);
+                expect(likes.length).toEqual(1);
+            });
+        });
+    });
+    describe('add comment', () => {});
+    describe('delete comment', () => {});
 });

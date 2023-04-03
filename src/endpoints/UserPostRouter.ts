@@ -1,6 +1,6 @@
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
-import { validateGetById, validatePost } from '@src/middleware/user_post/UserPostValidation';
+import { validateGetById, validateLike, validatePost, validateUpdate } from '@src/middleware/user_post/UserPostValidation';
 import { UserPostService } from '@src/service/UserPostService';
 import express from 'express';
 
@@ -20,6 +20,16 @@ userPostRouter.get('/:id', authenticate, authorize, validateGetById, async (req,
     const id = Number(req.params.id);
 
     const response = await UserPostService.getById(id);
+    res.status(response.httpCode).json(response);
+});
+
+userPostRouter.patch('/', authenticate, authorize, validateUpdate, async (req, res) => {
+    const response = await UserPostService.update(req);
+    res.status(response.httpCode).json(response);
+});
+
+userPostRouter.post('/:id/like', authenticate, authorize, validateLike, async (req, res) => {
+    const response = await UserPostService.createLike(req);
     res.status(response.httpCode).json(response);
 });
 

@@ -79,15 +79,17 @@ export class UserPostController {
     }
 
     public static async update(userPost: UserPost) {
+        const title = userPost.title ? { title: userPost.title } : {};
         const body = userPost.body ? { body: userPost.body } : {};
         const active = userPost.active ? { active: userPost.active } : {};
         const images = CommonUpserts.createImagesUpserts(userPost.images ?? []);
         const likes = CommonUpserts.createLikesUpserts(userPost.likes ?? []);
         const comments = CommonUpserts.createCommentsUpserts(userPost.comments ?? []);
 
-        const result = await prisma.plannedDayResult.update({
+        const result = await prisma.userPost.update({
             where: { id: userPost.id },
             data: {
+                ...title,
                 ...body,
                 ...active,
                 images,
