@@ -29,14 +29,3 @@ export interface UpdatePlannedDayResultRequest {
 export interface UpdatePlannedDayResultResponse extends Response {
   plannedDayResult?: PlannedDayResultModel;
 }
-
-export interface CreatePlannedDayResultCommentRequest {
-  comment: string
-}
-
-export interface CreatePlannedDayResultCommentResponse extends Response {
-}
-
-export interface DeletePlannedDayResultCommentRequest {
-  commentId: number;
-}

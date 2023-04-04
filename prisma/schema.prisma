@@ -121,15 +121,15 @@ model PlannedDayResult {
 }
 
 model Comment {
-  id                       Int                @id @default(autoincrement())
-  userId                   Int                @db.Int
-  user                     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comment                  String             @db.VarChar(255)
-  active                   Boolean            @default(true)
-  createdAt                DateTime           @default(now())
-  updatedAt                DateTime           @updatedAt
-  plannedDayResultComments PlannedDayResult[]
-  userPosts                UserPost[]
+  id                Int                @id @default(autoincrement())
+  userId            Int                @db.Int
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment           String             @db.VarChar(255)
+  active            Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  plannedDayResults PlannedDayResult[]
+  userPosts         UserPost[]
 
   @@index([userId])
   @@map("comment")

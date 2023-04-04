@@ -98,7 +98,7 @@ export interface Comment {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  plannedDayResultComments?: PlannedDayResult[];
+  plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
 }
 

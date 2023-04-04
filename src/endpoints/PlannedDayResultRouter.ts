@@ -1,16 +1,19 @@
-import { CreatePlannedDayResultCommentRequest, CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
+import { CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 import { GetUserResponse } from '@resources/types/UserTypes';
+import { CommentableType } from '@src/controller/common/CommentController';
+import { LikableType, LikeController } from '@src/controller/common/LikeController';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { validateCommentDelete, validateCommentPost } from '@src/middleware/general/GeneralValidation';
 import {
-    validateCommentDelete,
-    validateCommentPost,
     validateGetById,
     validateGetByUser,
     validateLikePost,
     validatePatch,
     validatePost,
 } from '@src/middleware/planned_day_result/PlannedDayResultValidation';
+import { CommentService } from '@src/service/CommentService';
+import { LikeService } from '@src/service/LikeService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import express from 'express';
 
@@ -53,17 +56,17 @@ plannedDayResultRouter.patch('/', authenticate, authorize, validatePatch, async 
 });
 
 plannedDayResultRouter.post('/:id/comment/', authenticate, authorize, validateCommentPost, async (req, res) => {
-    const response = await PlannedDayResultService.createComment(req);
+    const response = await CommentService.create(CommentableType.PLANNED_DAY_RESULT, req);
     res.status(response.httpCode).json(response);
 });
 
 plannedDayResultRouter.delete('/comment/:id', authenticate, authorize, validateCommentDelete, async (req, res) => {
-    const response = await PlannedDayResultService.deleteComment(req);
+    const response = await CommentService.delete(req);
     res.status(response.httpCode).json(response);
 });
 
 plannedDayResultRouter.post('/:id/like/', authenticate, authorize, validateLikePost, async (req, res) => {
-    const response = await PlannedDayResultService.createLike(req);
+    const response = await LikeService.create(LikableType.PLANNED_DAY_RESULT, req);
     res.status(response.httpCode).json(response);
 });
 

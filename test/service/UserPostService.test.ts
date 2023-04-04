@@ -1,10 +1,12 @@
 import { PLANNED_DAY, USER, USER_POST } from '@resources/endpoints';
+import { CreateCommentRequest } from '@resources/types/GeneralTypes';
 import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse, UpdateUserPostRequest } from '@resources/types/UserPostTypes';
 import app from '@src/app';
 import { FORBIDDEN, GENERAL_FAILURE, INVALID_REQUEST, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { NotificationController } from '@src/controller/NotificationController';
 import { UserPostController } from '@src/controller/UserPostController';
+import { CommentController, CommentableType } from '@src/controller/common/CommentController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -293,7 +295,7 @@ describe('user post service', () => {
         });
 
         describe('like adds notification', () => {
-            const email = 'likeaddnotification@embtr.com';
+            const email = 'likeaddnotiuserpost@embtr.com';
             let accountWithUser: TestAccountWithUser;
             let userToken: string;
             let userPostId: number = 0;
@@ -318,6 +320,98 @@ describe('user post service', () => {
             });
         });
     });
-    describe('add comment', () => {});
-    describe('delete comment', () => {});
+
+    describe('add comment', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).post(`${USER_POST}0/comment`).set('Authorization', 'Bearer Trash').send({});
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body).toEqual(UNAUTHORIZED);
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).post(`${USER_POST}0/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send({});
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).post(`${USER_POST}abc/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send({});
+
+            expect(response.status).toEqual(GENERAL_FAILURE.httpCode);
+        });
+
+        test('unknown', async () => {
+            const body: CreateCommentRequest = {
+                comment: 'comment',
+            };
+
+            const response = await request(app).post(`${USER_POST}0/comment`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+        });
+
+        test('valid', async () => {
+            const body: CreateCommentRequest = {
+                comment: 'comment',
+            };
+
+            const response = await request(app)
+                .post(`${USER_POST}${TEST_POST_ID}/comment`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send(body);
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body).toEqual(SUCCESS);
+        });
+    });
+
+    describe('delete comment', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).delete(`${USER_POST}comment/0`).set('Authorization', 'Bearer Trash').send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).delete(`${USER_POST}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body).toEqual(FORBIDDEN);
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).delete(`${USER_POST}/comment/abc`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(INVALID_REQUEST.httpCode);
+        });
+
+        test('unknown', async () => {
+            const response = await request(app).delete(`${USER_POST}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+        });
+
+        test('valid', async () => {
+            const comment = await CommentController.create(CommentableType.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
+            const response = await request(app)
+                .delete(`${USER_POST}comment/${comment.id}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body).toEqual(SUCCESS);
+        });
+
+        test('wrong user', async () => {
+            const comment = await CommentController.create(CommentableType.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
+            const response = await request(app)
+                .delete(`${USER_POST}comment/${comment.id}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN_2}`)
+                .send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+        });
+    });
 });

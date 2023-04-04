@@ -5,12 +5,8 @@ import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/type
 import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
 import { UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
-import {
-    CreatePlannedDayResultCommentResponse,
-    CreatePlannedDayResultResponse,
-    GetPlannedDayResultResponse,
-    UpdatePlannedDayResultResponse,
-} from '@resources/types/PlannedDayResultTypes';
+import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse, UpdatePlannedDayResultResponse } from '@resources/types/PlannedDayResultTypes';
+import { CreateCommentResponse } from '@resources/types/GeneralTypes';
 
 export enum HttpCode {
     SUCCESS = 200,
@@ -350,36 +346,36 @@ export const CREATE_DAY_RESULT_FAILED: CreatePlannedDayResultResponse = {
     message: 'failed to create day result',
 };
 
-export const CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreatePlannedDayResultCommentResponse = {
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreateCommentResponse = {
     ...GENERAL_FAILURE,
     message: 'invalid comment request',
 };
 
-export const CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreatePlannedDayResultCommentResponse = {
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreateCommentResponse = {
     ...RESOURCE_NOT_FOUND,
     message: 'unknown planned day result',
 };
 
-export const CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED: CreatePlannedDayResultCommentResponse = {
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_FAILED: CreateCommentResponse = {
     ...GENERAL_FAILURE,
     message: 'failed comment request',
 };
 
-export const CREATE_PLANNED_DAY_RESULT_COMMENT_SUCCESS: CreatePlannedDayResultCommentResponse = {
+export const CREATE_PLANNED_DAY_RESULT_COMMENT_SUCCESS: CreateCommentResponse = {
     ...SUCCESS,
 };
 
-export const DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreatePlannedDayResultCommentResponse = {
+export const DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID: CreateCommentResponse = {
     ...GENERAL_FAILURE,
     message: 'invalid delete request',
 };
 
-export const DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreatePlannedDayResultCommentResponse = {
+export const DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN: CreateCommentResponse = {
     ...RESOURCE_NOT_FOUND,
     message: 'comment not found',
 };
 
-export const CREATE_PLANNED_DAY_RESULT_LIKE_FAILED: CreatePlannedDayResultCommentResponse = {
+export const CREATE_PLANNED_DAY_RESULT_LIKE_FAILED: CreateCommentResponse = {
     ...GENERAL_FAILURE,
     message: 'failed like request',
 };

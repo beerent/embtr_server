@@ -1,6 +1,11 @@
+import { CommentableType } from '@src/controller/common/CommentController';
+import { LikableType } from '@src/controller/common/LikeController';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { validateCommentDelete, validateCommentPost } from '@src/middleware/general/GeneralValidation';
 import { validateGetById, validateLike, validatePost, validateUpdate } from '@src/middleware/user_post/UserPostValidation';
+import { CommentService } from '@src/service/CommentService';
+import { LikeService } from '@src/service/LikeService';
 import { UserPostService } from '@src/service/UserPostService';
 import express from 'express';
 
@@ -29,7 +34,17 @@ userPostRouter.patch('/', authenticate, authorize, validateUpdate, async (req, r
 });
 
 userPostRouter.post('/:id/like', authenticate, authorize, validateLike, async (req, res) => {
-    const response = await UserPostService.createLike(req);
+    const response = await LikeService.create(LikableType.USER_POST, req);
+    res.status(response.httpCode).json(response);
+});
+
+userPostRouter.post('/:id/comment/', authenticate, authorize, validateCommentPost, async (req, res) => {
+    const response = await CommentService.create(CommentableType.USER_POST, req);
+    res.status(response.httpCode).json(response);
+});
+
+userPostRouter.delete('/comment/:id', authenticate, authorize, validateCommentDelete, async (req, res) => {
+    const response = await CommentService.delete(req);
     res.status(response.httpCode).json(response);
 });
 

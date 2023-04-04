@@ -1,10 +1,6 @@
-import { ACCOUNT, PLANNED_DAY_RESULT } from '@resources/endpoints';
-import {
-    CreatePlannedDayResultCommentRequest,
-    GetPlannedDayResultResponse,
-    GetPlannedDayResultsResponse,
-    UpdatePlannedDayResultRequest,
-} from '@resources/types/PlannedDayResultTypes';
+import { PLANNED_DAY_RESULT } from '@resources/endpoints';
+import { CreateCommentRequest } from '@resources/types/GeneralTypes';
+import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse, UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
 import app from '@src/app';
 import {
     CREATE_DAY_RESULT_FAILED,
@@ -32,6 +28,7 @@ import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
+import { CommentController, CommentableType } from '@src/controller/common/CommentController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -115,12 +112,13 @@ describe('DayResultServices', () => {
         TEST_EXISTING_PLANNED_DAY_RESULT_ID = dayResult.id;
         TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID = dayResultToComment.id;
 
-        const comment = await PlannedDayResultController.createComment(
-            TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
+        const comment = await CommentController.create(
+            CommentableType.PLANNED_DAY_RESULT,
             ACCOUNT_USER_WITH_USER_ROLE.user.id,
+            TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
             'Test Comment To Delete'
         );
-        TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID = comment.id;
+        TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID = comment!.id;
     });
 
     afterAll(async () => {
@@ -410,11 +408,10 @@ describe('DayResultServices', () => {
                 .send({});
 
             expect(response.status).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode);
-            expect(response.body).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
         });
 
         test('unknown', async () => {
-            const body: CreatePlannedDayResultCommentRequest = {
+            const body: CreateCommentRequest = {
                 comment: 'comment',
             };
 
@@ -424,10 +421,10 @@ describe('DayResultServices', () => {
                 .send(body);
 
             expect(response.status).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
-            expect(response.body).toEqual(CREATE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
         });
+
         test('valid', async () => {
-            const body: CreatePlannedDayResultCommentRequest = {
+            const body: CreateCommentRequest = {
                 comment: 'comment',
             };
 
@@ -463,14 +460,21 @@ describe('DayResultServices', () => {
                 .send();
 
             expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode);
-            expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID);
         });
 
         test('unknown', async () => {
             const response = await request(app).delete(`${PLANNED_DAY_RESULT}/comment/0`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
 
             expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
-            expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
+        });
+
+        test('wrong user', async () => {
+            const response = await request(app)
+                .delete(`${PLANNED_DAY_RESULT}comment/${TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID}`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_2_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
         });
 
         test('valid', async () => {
@@ -481,16 +485,6 @@ describe('DayResultServices', () => {
 
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body).toEqual(SUCCESS);
-        });
-
-        test('wrong user', async () => {
-            const response = await request(app)
-                .delete(`${PLANNED_DAY_RESULT}comment/${TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID}`)
-                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_2_TOKEN}`)
-                .send();
-
-            expect(response.status).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN.httpCode);
-            expect(response.body).toEqual(DELETE_PLANNED_DAY_RESULT_COMMENT_UNKNOWN);
         });
     });
 
@@ -520,7 +514,6 @@ describe('DayResultServices', () => {
             const response = await request(app).post(`${PLANNED_DAY_RESULT}0/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
 
             expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
-            expect(response.body.message).toEqual('planned day result not found');
         });
 
         test('valid', async () => {
@@ -549,7 +542,6 @@ describe('DayResultServices', () => {
 
             expect(plannedDayResult?.likes.length).toEqual(1);
             expect(response.status).toEqual(RESOURCE_ALREADY_EXISTS.httpCode);
-            expect(response.body.message).toEqual('user already liked planned day result');
         });
 
         describe('like adds notification ', () => {

@@ -82,12 +82,18 @@ export class PlannedDayResultController {
     }
 
     public static async getById(id: number) {
-        return await prisma.plannedDayResult.findUnique({
+        const result = await prisma.plannedDayResult.findUnique({
             where: {
                 id: id,
             },
             include: PlannedDayResultInclude,
         });
+
+        return result;
+    }
+
+    public static async existsById(id: number) {
+        return (await this.getById(id)) !== null;
     }
 
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
@@ -100,121 +106,6 @@ export class PlannedDayResultController {
                 },
             },
             include: PlannedDayResultInclude,
-        });
-    }
-
-    /*
-     * COMMENTS
-     */
-    public static async createComment(plannedDayResultId: number, userId: number, comment: string) {
-        const result = await prisma.plannedDayResult.update({
-            where: {
-                id: plannedDayResultId,
-            },
-            data: {
-                comments: {
-                    create: {
-                        comment,
-                        user: {
-                            connect: {
-                                id: userId,
-                            },
-                        },
-                    },
-                },
-            },
-            include: {
-                comments: {
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                    take: 1,
-                    include: {
-                        user: true,
-                    },
-                },
-            },
-        });
-
-        return result.comments[0];
-    }
-
-    public static async getComment(id: number) {
-        return await prisma.comment.findUnique({
-            where: {
-                id,
-            },
-            include: {
-                user: true,
-            },
-        });
-    }
-
-    public static async deleteComment(id: number) {
-        return await prisma.comment.update({
-            where: {
-                id,
-            },
-            data: {
-                active: false,
-            },
-        });
-    }
-
-    /*
-     * LIKES
-     */
-    public static async createLike(plannedDayResultId: number, userId: number) {
-        const result = await prisma.plannedDayResult.update({
-            where: {
-                id: plannedDayResultId,
-            },
-            data: {
-                likes: {
-                    create: {
-                        user: {
-                            connect: {
-                                id: userId,
-                            },
-                        },
-                    },
-                },
-            },
-            include: {
-                likes: {
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                    take: 1,
-                    include: {
-                        user: true,
-                    },
-                },
-            },
-        });
-
-        return result.likes[0];
-    }
-
-    public static async getLike(id: number) {
-        return await prisma.like.findUnique({
-            where: {
-                id,
-            },
-            include: {
-                user: true,
-            },
-        });
-    }
-
-    public static async deleteLike(id: number) {
-        return await prisma.like.update({
-            where: {
-                id,
-            },
-            data: {
-                active: false,
-            },
         });
     }
 }

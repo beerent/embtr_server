@@ -50,6 +50,10 @@ export class UserPostController {
         });
     }
 
+    public static async existsById(id: number) {
+        return (await this.getById(id)) !== null;
+    }
+
     public static async create(userPost: UserPost) {
         const title = userPost.title ? { title: userPost.title } : {};
         const body = userPost.body ? { body: userPost.body } : {};

@@ -65,30 +65,6 @@ export const validatePatch = (req: Request, res: Response, next: NextFunction) =
     next();
 };
 
-export const validateCommentPost = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        z.object({ comment: z.string() }).parse(req.body);
-        z.object({ id: z.coerce.number() }).parse(req.params);
-    } catch (error) {
-        return res.status(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID);
-    }
-
-    next();
-};
-
-const plannedDayResultCommentDelete = z.object({
-    id: z.coerce.number(),
-});
-export const validateCommentDelete = (req: Request, res: Response, next: NextFunction) => {
-    try {
-        plannedDayResultCommentDelete.parse(req.params);
-    } catch (error) {
-        return res.status(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID.httpCode).json(DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID);
-    }
-
-    next();
-};
-
 export const validateLikePost = (req: Request, res: Response, next: NextFunction) => {
     try {
         z.object({ id: z.coerce.number() }).parse(req.params);
