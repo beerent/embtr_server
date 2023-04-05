@@ -1,4 +1,4 @@
-import { ClearNotificationsRequest, GetNotificationsResponse } from '@resources/types/NotificationTypes';
+import { ClearNotificationsRequest, GetNotificationsResponse } from '@resources/types/requests/NotificationTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { validateClearNotifications } from '@src/middleware/notification/NotificationValidation';

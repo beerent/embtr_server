@@ -1,4 +1,4 @@
-import { PlannedDay as PlannedDayModel } from "../schema";
+import { PlannedDay as PlannedDayModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetPlannedDayRequest {

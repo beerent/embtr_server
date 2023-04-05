@@ -1,6 +1,6 @@
 import { Task } from '@prisma/client';
 import { Task as TaskModel } from '@resources/schema';
-import { SearchTasksResponse, GetTaskResponse, CreateTaskRequest, CreateTaskResponse } from '@resources/types/TaskTypes';
+import { SearchTasksResponse, GetTaskResponse, CreateTaskRequest, CreateTaskResponse } from '@resources/types/requests/TaskTypes';
 import { CREATE_TASK_FAILED_ALREADY_EXISTS, GET_TASK_FAILED_NOT_FOUND, GET_TASK_SUCCESS, SUCCESS } from '@src/common/RequestResponses';
 import { TaskController } from '@src/controller/TaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';

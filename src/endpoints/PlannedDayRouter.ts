@@ -1,4 +1,4 @@
-import { GetPlannedDayRequest } from '@resources/types/PlannedDayTypes';
+import { GetPlannedDayRequest } from '@resources/types/requests/PlannedDayTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import {

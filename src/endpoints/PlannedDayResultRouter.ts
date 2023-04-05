@@ -1,7 +1,6 @@
-import { CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
-import { GetUserResponse } from '@resources/types/UserTypes';
-import { CommentableType } from '@src/controller/common/CommentController';
-import { LikableType, LikeController } from '@src/controller/common/LikeController';
+import { Interactable } from '@resources/types/interactable/Interactable';
+import { CreatePlannedDayResultRequest, GetPlannedDayResultRequest } from '@resources/types/requests/PlannedDayResultTypes';
+import { GetUserResponse } from '@resources/types/requests/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { validateCommentDelete, validateCommentPost } from '@src/middleware/general/GeneralValidation';
@@ -56,7 +55,7 @@ plannedDayResultRouter.patch('/', authenticate, authorize, validatePatch, async 
 });
 
 plannedDayResultRouter.post('/:id/comment/', authenticate, authorize, validateCommentPost, async (req, res) => {
-    const response = await CommentService.create(CommentableType.PLANNED_DAY_RESULT, req);
+    const response = await CommentService.create(Interactable.PLANNED_DAY_RESULT, req);
     res.status(response.httpCode).json(response);
 });
 
@@ -66,7 +65,7 @@ plannedDayResultRouter.delete('/comment/:id', authenticate, authorize, validateC
 });
 
 plannedDayResultRouter.post('/:id/like/', authenticate, authorize, validateLikePost, async (req, res) => {
-    const response = await LikeService.create(LikableType.PLANNED_DAY_RESULT, req);
+    const response = await LikeService.create(Interactable.PLANNED_DAY_RESULT, req);
     res.status(response.httpCode).json(response);
 });
 

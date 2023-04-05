@@ -1,6 +1,6 @@
 import { Like as LikeModel, UserPost, UserPost as UserPostModel, Comment as CommentModel } from '@resources/schema';
-import { Response } from '@resources/types/RequestTypes';
-import { CreateUserPostRequest, CreateUserPostResponse, GetAllUserPostResponse, GetUserPostResponse } from '@resources/types/UserPostTypes';
+import { Response } from '@resources/types/requests/RequestTypes';
+import { CreateUserPostRequest, CreateUserPostResponse, GetAllUserPostResponse, GetUserPostResponse } from '@resources/types/requests/UserPostTypes';
 import { GENERAL_FAILURE, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { UserPostController } from '@src/controller/UserPostController';

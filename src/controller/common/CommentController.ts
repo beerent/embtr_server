@@ -1,13 +1,9 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
-
-export enum CommentableType {
-    PLANNED_DAY_RESULT,
-    USER_POST,
-}
+import { Interactable } from '@resources/types/interactable/Interactable';
 
 export class CommentController {
-    public static async create(type: CommentableType, userId: number, targetId: number, comment: string) {
+    public static async create(interactable: Interactable, userId: number, targetId: number, comment: string) {
         const data: Prisma.CommentCreateInput = {
             comment,
             user: {
@@ -17,13 +13,13 @@ export class CommentController {
             },
         };
 
-        if (type === CommentableType.PLANNED_DAY_RESULT) {
+        if (interactable === Interactable.PLANNED_DAY_RESULT) {
             data.plannedDayResults = {
                 connect: {
                     id: targetId,
                 },
             };
-        } else if (type === CommentableType.USER_POST) {
+        } else if (interactable === Interactable.USER_POST) {
             data.userPosts = {
                 connect: {
                     id: targetId,

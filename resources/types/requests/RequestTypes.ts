@@ -1,4 +1,4 @@
-import { Code } from "../codes";
+import { Code } from "../../codes";
 
 export interface AuthenticationRequest {
   email: string;

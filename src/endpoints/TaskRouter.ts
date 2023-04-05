@@ -1,4 +1,4 @@
-import { CreateTaskRequest } from '@resources/types/TaskTypes';
+import { CreateTaskRequest } from '@resources/types/requests/TaskTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { validateSearch as validateSearchTasks } from '@src/middleware/task/TaskValidation';

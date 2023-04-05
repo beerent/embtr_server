@@ -1,5 +1,5 @@
-import { GetUserResponse, CreateUserResponse, UpdateUserRequest } from '@resources/types/UserTypes';
-import { Response } from '@resources/types/RequestTypes';
+import { GetUserResponse, CreateUserResponse, UpdateUserRequest } from '@resources/types/requests/UserTypes';
+import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CREATE_USER_ALREADY_EXISTS,
     CREATE_USER_FAILED,

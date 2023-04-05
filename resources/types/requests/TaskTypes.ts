@@ -1,4 +1,4 @@
-import { Task as TaskModel } from "../schema";
+import { Task as TaskModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetTaskResponse extends Response {

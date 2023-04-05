@@ -1,12 +1,12 @@
 import { Code } from '@resources/codes';
 
-import { AuthenticationResponse, Response } from '@resources/types/RequestTypes';
-import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/types/PlannedDayTypes';
-import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/TaskTypes';
-import { CreateUserResponse, GetUserResponse } from '@resources/types/UserTypes';
-import { UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
-import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse, UpdatePlannedDayResultResponse } from '@resources/types/PlannedDayResultTypes';
-import { CreateCommentResponse } from '@resources/types/GeneralTypes';
+import { AuthenticationResponse, Response } from '@resources/types/requests/RequestTypes';
+import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/types/requests/PlannedDayTypes';
+import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/requests/TaskTypes';
+import { CreateUserResponse, GetUserResponse } from '@resources/types/requests/UserTypes';
+import { UpdatePlannedTaskResponse } from '@resources/types/requests/PlannedTaskTypes';
+import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse, UpdatePlannedDayResultResponse } from '@resources/types/requests/PlannedDayResultTypes';
+import { CreateCommentResponse } from '@resources/types/requests/GeneralTypes';
 
 export enum HttpCode {
     SUCCESS = 200,

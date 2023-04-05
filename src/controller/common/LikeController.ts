@@ -1,13 +1,9 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
-
-export enum LikableType {
-    PLANNED_DAY_RESULT,
-    USER_POST,
-}
+import { Interactable } from '@resources/types/interactable/Interactable';
 
 export class LikeController {
-    public static async create(type: LikableType, userId: number, id: number) {
+    public static async create(interactable: Interactable, userId: number, id: number) {
         const data: Prisma.LikeCreateInput = {
             user: {
                 connect: {
@@ -16,13 +12,13 @@ export class LikeController {
             },
         };
 
-        if (type === LikableType.PLANNED_DAY_RESULT) {
+        if (interactable === Interactable.PLANNED_DAY_RESULT) {
             data.plannedDayResults = {
                 connect: {
                     id,
                 },
             };
-        } else if (type === LikableType.USER_POST) {
+        } else if (interactable === Interactable.USER_POST) {
             data.userPosts = {
                 connect: {
                     id,
@@ -68,19 +64,19 @@ export class LikeController {
         });
     }
 
-    public static async exists(type: LikableType, userId: number, targetId: number) {
+    public static async exists(interactable: Interactable, userId: number, targetId: number) {
         const where: Prisma.LikeWhereInput = {
             userId,
             active: true,
         };
 
-        if (type === LikableType.PLANNED_DAY_RESULT) {
+        if (interactable === Interactable.PLANNED_DAY_RESULT) {
             where.plannedDayResults = {
                 some: {
                     id: targetId,
                 },
             };
-        } else if (type === LikableType.USER_POST) {
+        } else if (interactable === Interactable.USER_POST) {
             where.userPosts = {
                 some: {
                     id: targetId,

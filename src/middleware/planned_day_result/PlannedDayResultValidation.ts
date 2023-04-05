@@ -7,7 +7,7 @@ import {
     GET_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
 } from '@src/common/RequestResponses';
-import { UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
+import { UpdatePlannedDayResultRequest } from '@resources/types/requests/PlannedDayResultTypes';
 
 const dayResultGetById = z.object({
     id: z.coerce.number(),

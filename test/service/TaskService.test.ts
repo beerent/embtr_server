@@ -15,7 +15,7 @@ import { TaskController } from '@src/controller/TaskController';
 import request from 'supertest';
 import { TestUtility } from '@test/test_utility/TestUtility';
 import { Role } from '@src/roles/Roles';
-import { CreateTaskRequest, CreateTaskResponse } from '@resources/types/TaskTypes';
+import { CreateTaskRequest, CreateTaskResponse } from '@resources/types/requests/TaskTypes';
 
 describe('TaskService tests', () => {
     const ACCOUNT_WITH_NO_ROLES = 'ts_account_no_roles@embtr.com';

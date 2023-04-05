@@ -1,4 +1,4 @@
-import { UserPost} from "../schema";
+import { UserPost} from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface CreateUserPostRequest {

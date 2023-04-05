@@ -1,5 +1,5 @@
 import { USER } from '@resources/endpoints';
-import { CreateUserRequest, UpdateUserRequest } from '@resources/types/UserTypes';
+import { CreateUserRequest, UpdateUserRequest } from '@resources/types/requests/UserTypes';
 import app from '@src/app';
 import {
     CREATE_USER_ALREADY_EXISTS,

@@ -1,4 +1,4 @@
-import { GetUserResponse, UpdateUserRequest } from '@resources/types/UserTypes';
+import { GetUserResponse, UpdateUserRequest } from '@resources/types/requests/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';

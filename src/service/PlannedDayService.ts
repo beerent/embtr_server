@@ -1,6 +1,6 @@
 import { PlannedTask as PlannedTaskModel, PlannedDay as PlannedDayModel } from '@resources/schema';
-import { CreatePlannedDayResponse, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types/PlannedDayTypes';
-import { CreatePlannedTaskRequest, UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/PlannedTaskTypes';
+import { CreatePlannedDayResponse, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types/requests/PlannedDayTypes';
+import { CreatePlannedTaskRequest, UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/requests/PlannedTaskTypes';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,

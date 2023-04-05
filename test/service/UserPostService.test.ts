@@ -1,12 +1,13 @@
 import { PLANNED_DAY, USER, USER_POST } from '@resources/endpoints';
-import { CreateCommentRequest } from '@resources/types/GeneralTypes';
-import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse, UpdateUserPostRequest } from '@resources/types/UserPostTypes';
+import { Interactable } from '@resources/types/interactable/Interactable';
+import { CreateCommentRequest } from '@resources/types/requests/GeneralTypes';
+import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse, UpdateUserPostRequest } from '@resources/types/requests/UserPostTypes';
 import app from '@src/app';
 import { FORBIDDEN, GENERAL_FAILURE, INVALID_REQUEST, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { NotificationController } from '@src/controller/NotificationController';
 import { UserPostController } from '@src/controller/UserPostController';
-import { CommentController, CommentableType } from '@src/controller/common/CommentController';
+import { CommentController } from '@src/controller/common/CommentController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -394,7 +395,7 @@ describe('user post service', () => {
         });
 
         test('valid', async () => {
-            const comment = await CommentController.create(CommentableType.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
+            const comment = await CommentController.create(Interactable.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
             const response = await request(app)
                 .delete(`${USER_POST}comment/${comment.id}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
@@ -405,7 +406,7 @@ describe('user post service', () => {
         });
 
         test('wrong user', async () => {
-            const comment = await CommentController.create(CommentableType.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
+            const comment = await CommentController.create(Interactable.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
             const response = await request(app)
                 .delete(`${USER_POST}comment/${comment.id}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN_2}`)

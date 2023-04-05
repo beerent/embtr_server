@@ -1,6 +1,6 @@
 import { NOTIFICATION } from '@resources/endpoints';
 import { NotificationTargetPage } from '@resources/schema';
-import { ClearNotificationsRequest } from '@resources/types/NotificationTypes';
+import { ClearNotificationsRequest } from '@resources/types/requests/NotificationTypes';
 import app from '@src/app';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';

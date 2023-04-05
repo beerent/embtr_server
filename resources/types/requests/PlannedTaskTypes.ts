@@ -1,4 +1,4 @@
-import { PlannedTask as PlannedTaskModel } from "../schema";
+import { PlannedTask as PlannedTaskModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface CreatePlannedTaskRequest {

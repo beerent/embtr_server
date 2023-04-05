@@ -1,7 +1,7 @@
 import { Notification } from '@prisma/client';
 import { Notification as NotificationModel, NotificationTargetPage } from '@resources/schema';
-import { ClearNotificationsRequest, GetNotificationsResponse } from '@resources/types/NotificationTypes';
-import { Response } from '@resources/types/RequestTypes';
+import { ClearNotificationsRequest, GetNotificationsResponse } from '@resources/types/requests/NotificationTypes';
+import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { NotificationController } from '@src/controller/NotificationController';

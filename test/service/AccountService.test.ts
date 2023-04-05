@@ -15,8 +15,8 @@ import {
 import { EmailController } from '@src/controller/EmailController';
 import { AccountController } from '@src/controller/AccountController';
 import request from 'supertest';
-import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/AccountTypes';
-import { AuthenticationRequest } from '@resources/types/RequestTypes';
+import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/requests/AccountTypes';
+import { AuthenticationRequest } from '@resources/types/requests/RequestTypes';
 
 describe('account service tests', () => {
     const ACCOUNT_THAT_EXISTS = 'ast_email_that_exists@embtr.com';

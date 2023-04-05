@@ -1,6 +1,7 @@
 import { PLANNED_DAY_RESULT } from '@resources/endpoints';
-import { CreateCommentRequest } from '@resources/types/GeneralTypes';
-import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse, UpdatePlannedDayResultRequest } from '@resources/types/PlannedDayResultTypes';
+import { Interactable } from '@resources/types/interactable/Interactable';
+import { CreateCommentRequest } from '@resources/types/requests/GeneralTypes';
+import { GetPlannedDayResultResponse, GetPlannedDayResultsResponse, UpdatePlannedDayResultRequest } from '@resources/types/requests/PlannedDayResultTypes';
 import app from '@src/app';
 import {
     CREATE_DAY_RESULT_FAILED,
@@ -28,7 +29,7 @@ import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
-import { CommentController, CommentableType } from '@src/controller/common/CommentController';
+import { CommentController } from '@src/controller/common/CommentController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -113,7 +114,7 @@ describe('DayResultServices', () => {
         TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID = dayResultToComment.id;
 
         const comment = await CommentController.create(
-            CommentableType.PLANNED_DAY_RESULT,
+            Interactable.PLANNED_DAY_RESULT,
             ACCOUNT_USER_WITH_USER_ROLE.user.id,
             TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
             'Test Comment To Delete'

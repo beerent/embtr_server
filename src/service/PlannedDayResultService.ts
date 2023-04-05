@@ -6,7 +6,7 @@ import {
     GetPlannedDayResultsResponse,
     UpdatePlannedDayResultRequest,
     UpdatePlannedDayResultResponse,
-} from '@resources/types/PlannedDayResultTypes';
+} from '@resources/types/requests/PlannedDayResultTypes';
 import {
     CREATE_DAY_RESULT_FAILED,
     GET_DAY_RESULT_UNKNOWN,

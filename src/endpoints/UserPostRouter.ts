@@ -1,5 +1,4 @@
-import { CommentableType } from '@src/controller/common/CommentController';
-import { LikableType } from '@src/controller/common/LikeController';
+import { Interactable } from '@resources/types/interactable/Interactable';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { validateCommentDelete, validateCommentPost } from '@src/middleware/general/GeneralValidation';
@@ -34,12 +33,12 @@ userPostRouter.patch('/', authenticate, authorize, validateUpdate, async (req, r
 });
 
 userPostRouter.post('/:id/like', authenticate, authorize, validateLike, async (req, res) => {
-    const response = await LikeService.create(LikableType.USER_POST, req);
+    const response = await LikeService.create(Interactable.USER_POST, req);
     res.status(response.httpCode).json(response);
 });
 
 userPostRouter.post('/:id/comment/', authenticate, authorize, validateCommentPost, async (req, res) => {
-    const response = await CommentService.create(CommentableType.USER_POST, req);
+    const response = await CommentService.create(Interactable.USER_POST, req);
     res.status(response.httpCode).json(response);
 });
 

@@ -1,4 +1,4 @@
-import { Notification as NotificationModel} from "../schema";
+import { Notification as NotificationModel} from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetNotificationsResponse extends Response {
