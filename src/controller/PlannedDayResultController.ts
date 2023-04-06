@@ -52,7 +52,7 @@ export class PlannedDayResultController {
 
     public static async update(plannedDayResult: PlannedDayResultModel) {
         const description = plannedDayResult.description ? { description: plannedDayResult.description } : {};
-        const active = plannedDayResult.active ? { active: plannedDayResult.active } : {};
+        const active = plannedDayResult.active !== undefined ? { active: plannedDayResult.active } : {};
         const images = CommonUpserts.createImagesUpserts(plannedDayResult.images ?? []);
         const likes = CommonUpserts.createLikesUpserts(plannedDayResult.likes ?? []);
         const comments = CommonUpserts.createCommentsUpserts(plannedDayResult.comments ?? []);

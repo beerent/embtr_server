@@ -56,6 +56,8 @@ describe('DayResultServices', () => {
     let TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID: number;
     let TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID: number;
 
+    let TEST_PLANNED_DAY_TO_DELETE_ID: number;
+
     beforeAll(async () => {
         //user deletes
         const deletes = [
@@ -384,6 +386,24 @@ describe('DayResultServices', () => {
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.plannedDayResult).toBeDefined();
             expect(response.body.plannedDayResult.description).toEqual(randomString);
+        });
+    });
+
+    describe('delete', () => {
+        //TODO - convert to endpoint
+        test('valid', async () => {
+            const body: UpdatePlannedDayResultRequest = {
+                plannedDayResult: {
+                    id: TEST_PLANNED_DAY_TO_DELETE_ID,
+                    active: false,
+                },
+            };
+
+            const response = await request(app).patch(PLANNED_DAY_RESULT).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+            expect(response.status).toEqual(SUCCESS.httpCode);
+
+            const deletedPlannedDayResult = await PlannedDayResultController.getById(TEST_PLANNED_DAY_TO_DELETE_ID);
+            expect(deletedPlannedDayResult?.active).toBeFalsy();
         });
     });
 

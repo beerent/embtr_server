@@ -1,6 +1,12 @@
 import { Like as LikeModel, UserPost, UserPost as UserPostModel, Comment as CommentModel } from '@resources/schema';
 import { Response } from '@resources/types/requests/RequestTypes';
-import { CreateUserPostRequest, CreateUserPostResponse, GetAllUserPostResponse, GetUserPostResponse } from '@resources/types/requests/UserPostTypes';
+import {
+    CreateUserPostRequest,
+    CreateUserPostResponse,
+    GetAllUserPostResponse,
+    GetUserPostResponse,
+    UpdateUserPostRequest,
+} from '@resources/types/requests/UserPostTypes';
 import { GENERAL_FAILURE, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { UserPostController } from '@src/controller/UserPostController';
@@ -46,7 +52,7 @@ export class UserPostService {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const body: CreateUserPostRequest = request.body;
+        const body: UpdateUserPostRequest = request.body;
         body.userPost.userId = userId;
 
         const currentPost = await UserPostController.getById(body.userPost.id!);

@@ -25,6 +25,7 @@ describe('user post service', () => {
     let ACCOUNT_USER_WITH_USER_ROLE_2: TestAccountWithUser;
 
     let TEST_POST_ID: number;
+    let TEST_POST_TO_DELETE_ID: number;
 
     beforeAll(async () => {
         //user deletes
@@ -57,7 +58,13 @@ describe('user post service', () => {
         ACCOUNT_WITH_USER_ROLE_TOKEN_2 = token3;
 
         //user posts
-        TEST_POST_ID = (await UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' })).id;
+        const posts = [
+            UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
+            UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
+        ];
+        const [post1, post2] = await Promise.all(posts);
+        TEST_POST_ID = post1.id;
+        TEST_POST_TO_DELETE_ID = post2.id;
     });
 
     afterAll(async () => {
@@ -246,6 +253,24 @@ describe('user post service', () => {
 
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.userPost.images[0].url).toEqual(randomString);
+        });
+    });
+
+    describe('delete', () => {
+        //TODO - convert to endpoint
+        test('valid', async () => {
+            const body: UpdateUserPostRequest = {
+                userPost: {
+                    id: TEST_POST_TO_DELETE_ID,
+                    active: false,
+                },
+            };
+
+            const response = await request(app).patch(USER_POST).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
+            expect(response.status).toEqual(SUCCESS.httpCode);
+
+            const deletedPost = await UserPostController.getById(TEST_POST_TO_DELETE_ID);
+            expect(deletedPost?.active).toBeFalsy();
         });
     });
 
