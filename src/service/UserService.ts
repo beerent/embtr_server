@@ -14,12 +14,15 @@ import { AuthorizationController } from '@src/controller/AuthorizationController
 import { UserController } from '@src/controller/UserController';
 import { Role } from '@src/roles/Roles';
 import { Request } from 'express';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { User } from '@resources/schema';
 
 export class UserService {
     public static async get(uid: string): Promise<GetUserResponse> {
         const user = await UserController.getByUid(uid);
         if (user) {
-            return { ...GET_USER_SUCCESS, user: { uid: user.uid, email: user.email } };
+            const userModel: User = ModelConverter.convert(user);
+            return { ...GET_USER_SUCCESS, user: userModel };
         }
 
         return GET_USER_FAILED_NOT_FOUND;
