@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { PlannedDay, PlannedTask, Task } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel } from '@resources/schema';
+import { DailyHistory, DayResult } from '@resources/types/widget/DailyHistory';
 
 export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
 

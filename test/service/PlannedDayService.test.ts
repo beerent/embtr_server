@@ -101,7 +101,6 @@ describe('planned day service', () => {
             PlannedTaskController.update({ id: TEST_EXISTING_INACTIVE_PLANNED_TASK_ID, active: false }),
         ];
         await Promise.all(taskUpdates);
-        const x = 5;
     });
 
     afterAll(async () => {

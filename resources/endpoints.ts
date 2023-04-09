@@ -9,6 +9,7 @@ export const PLANNED_TASK = "/planned-task/";
 export const PLANNED_DAY_RESULT = "/planned-day-result/";
 export const USER_POST = "/user-post/";
 export const NOTIFICATION = "/notification/"
+export const DAILY_HISTORY = "/daily-history/"
 
 export const getInteractableEndpoint = (interactable: Interactable) => {
   switch (interactable) {

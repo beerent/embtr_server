@@ -1,4 +1,4 @@
-import { ClearNotificationsRequest, GetNotificationsResponse } from '@resources/types/requests/NotificationTypes';
+import { GetNotificationsResponse } from '@resources/types/requests/NotificationTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { validateClearNotifications } from '@src/middleware/notification/NotificationValidation';
@@ -9,7 +9,6 @@ const notificationRouter = express.Router();
 
 notificationRouter.get('/', authenticate, authorize, async (req, res) => {
     const response: GetNotificationsResponse = await NotificationService.getAll(req);
-
     res.status(response.httpCode).json(response);
 });
 

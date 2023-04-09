@@ -14,6 +14,16 @@ export class UserController {
         return user;
     }
 
+    public static async getById(id: number): Promise<User | null> {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: id,
+            },
+        });
+
+        return user;
+    }
+
     public static async create(uid: string, email: string): Promise<User | null> {
         const newUser = await prisma.user.create({
             data: {

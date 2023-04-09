@@ -2,6 +2,7 @@ export const enum Role {
     ADMIN = 'admin',
     USER = 'user',
     INVALID = 'invalid',
+    NONE = 'NONE',
 }
 
 export const enum Permission {
