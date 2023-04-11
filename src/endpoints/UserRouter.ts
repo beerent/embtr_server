@@ -1,7 +1,10 @@
+import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetUserResponse, UpdateUserRequest } from '@resources/types/requests/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
+import { validateGetDailyHistory } from '@src/middleware/daily_history/DailyHistoryValidation';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';
+import { DailyHistoryService } from '@src/service/DailyHistoryService';
 import { UserService } from '@src/service/UserService';
 import express from 'express';
 
@@ -22,6 +25,11 @@ userRouter.post('/', authenticate, async (req, res) => {
 userRouter.patch('/', authenticate, authorize, async (req, res) => {
     const response = await UserService.update(req);
 
+    res.status(response.httpCode).json(response);
+});
+
+userRouter.get('/:id/daily-history', authenticate, authorize, validateGetDailyHistory, async (req, res) => {
+    const response: GetDailyHistoryResponse = await DailyHistoryService.get(req);
     res.status(response.httpCode).json(response);
 });
 

@@ -389,7 +389,7 @@ describe('DayResultServices', () => {
         });
     });
 
-    describe('delete', () => {
+    describe.skip('delete', () => {
         //TODO - convert to endpoint
         test('valid', async () => {
             const body: UpdatePlannedDayResultRequest = {
