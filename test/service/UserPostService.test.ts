@@ -61,6 +61,7 @@ describe('user post service', () => {
         const posts = [
             UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
             UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
+            UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE_2.user.id, body: 'test body' }),
         ];
         const [post1, post2] = await Promise.all(posts);
         TEST_POST_ID = post1.id;
@@ -132,6 +133,62 @@ describe('user post service', () => {
             expect(response.status).toEqual(SUCCESS.httpCode);
             const responseObject: GetAllUserPostResponse = response.body;
             expect(responseObject?.userPosts?.length).toBeGreaterThan(0);
+        });
+    });
+
+    describe('get all for user', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).get(`/user/abc/posts`).set('Authorization', 'Bearer Trash').send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).get(`/user/abc/posts`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).get(`/user/abc/posts`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(INVALID_REQUEST.httpCode);
+            expect(response.body.userPosts).toBeUndefined();
+        });
+
+        test('unknown user', async () => {
+            const response = await request(app).get(`/user/0/posts`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+            expect(response.body.userPosts).toBeUndefined();
+        });
+
+        test('valid', async () => {
+            const response = await request(app)
+                .get(`/user/${ACCOUNT_USER_WITH_USER_ROLE.user.id}/posts`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            const responseObject: GetAllUserPostResponse = response.body;
+            expect(responseObject?.userPosts?.length).toBeGreaterThan(0);
+        });
+
+        //test doesnt return other users posts
+        test('doesnt contain other users', async () => {
+            const response = await request(app)
+                .get(`/user/${ACCOUNT_USER_WITH_USER_ROLE.user.id}/posts`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            const responseObject: GetAllUserPostResponse = response.body;
+            expect(responseObject?.userPosts?.length).toBeGreaterThan(0);
+            responseObject.userPosts?.forEach((post) => {
+                expect(post?.user?.id).toEqual(ACCOUNT_USER_WITH_USER_ROLE.user.id);
+            });
         });
     });
 
