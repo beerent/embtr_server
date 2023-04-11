@@ -176,8 +176,7 @@ describe('user post service', () => {
             expect(responseObject?.userPosts?.length).toBeGreaterThan(0);
         });
 
-        //test doesnt return other users posts
-        test('doesnt contain other users', async () => {
+        test('does not contain other users', async () => {
             const response = await request(app)
                 .get(`/user/${ACCOUNT_USER_WITH_USER_ROLE.user.id}/posts`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)

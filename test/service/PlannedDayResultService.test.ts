@@ -16,6 +16,7 @@ import {
     GET_DAY_RESULT_INVALID,
     GET_DAY_RESULT_SUCCESS,
     GET_DAY_RESULT_UNKNOWN,
+    INVALID_REQUEST,
     RESOURCE_ALREADY_EXISTS,
     RESOURCE_NOT_FOUND,
     SUCCESS,
@@ -54,6 +55,8 @@ describe('DayResultServices', () => {
 
     const TEST_PLANNED_DAY_DATE_TO_COMMENT = '0100-01-03';
     let TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID: number;
+
+    const TEST_PLANNED_DAY_DIFFERENT_USER = '0100-01-04';
     let TEST_EXISTING_PLANNED_DAY_RESULT_COMMENT_TO_DELETE_ID: number;
 
     let TEST_PLANNED_DAY_TO_DELETE_ID: number;
@@ -100,8 +103,9 @@ describe('DayResultServices', () => {
                 TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT
             ),
             PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date(TEST_PLANNED_DAY_DATE_TO_COMMENT), TEST_PLANNED_DAY_DATE_TO_COMMENT),
+            PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date(TEST_PLANNED_DAY_DIFFERENT_USER), TEST_PLANNED_DAY_DIFFERENT_USER),
         ];
-        const [plannedDay, plannedDayToCreateResult, plannedDayToComment] = await Promise.all(plannedDayCreates);
+        const [plannedDay, plannedDayToCreateResult, plannedDayToComment, plannedDayDifferentUser] = await Promise.all(plannedDayCreates);
         TEST_PLANNED_DAY_TO_CREATE_RESULT_ID = plannedDayToCreateResult.id;
 
         //tasks
@@ -109,7 +113,11 @@ describe('DayResultServices', () => {
         const task = await TaskController.create(TEST_TASK_TITLE);
         await PlannedTaskController.create(plannedDay, task!);
 
-        const plannedDayResultCreates = [PlannedDayResultController.create(plannedDay.id), PlannedDayResultController.create(plannedDayToComment.id)];
+        const plannedDayResultCreates = [
+            PlannedDayResultController.create(plannedDay.id),
+            PlannedDayResultController.create(plannedDayToComment.id),
+            PlannedDayResultController.create(plannedDayDifferentUser.id),
+        ];
         const [dayResult, dayResultToComment] = await Promise.all(plannedDayResultCreates);
 
         TEST_EXISTING_PLANNED_DAY_RESULT_ID = dayResult.id;
@@ -250,6 +258,61 @@ describe('DayResultServices', () => {
             expect(response.status).toEqual(GET_DAY_RESULTS_SUCCESS.httpCode);
             const responseObject: GetPlannedDayResultsResponse = response.body;
             expect(responseObject!.plannedDayResults!.length).toBeGreaterThan(1);
+        });
+    });
+
+    describe('get all for user', () => {
+        test('unauthenticated', async () => {
+            const response = await request(app).get(`/user/abc/day-results`).set('Authorization', 'Bearer Trash').send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app).get(`/user/abc/day-results`).set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLES_TOKEN}`).send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+            expect(response.body.dayResult).toBeUndefined();
+        });
+
+        test('invalid', async () => {
+            const response = await request(app).get(`/user/abc/day-results`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(INVALID_REQUEST.httpCode);
+            expect(response.body.userPosts).toBeUndefined();
+        });
+
+        test('unknown user', async () => {
+            const response = await request(app).get(`/user/0/day-results`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+
+            expect(response.status).toEqual(RESOURCE_NOT_FOUND.httpCode);
+            expect(response.body.userPosts).toBeUndefined();
+        });
+
+        test('valid', async () => {
+            const response = await request(app)
+                .get(`/user/${ACCOUNT_USER_WITH_USER_ROLE.user.id}/day-results`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            const responseObject: GetPlannedDayResultsResponse = response.body;
+            expect(responseObject?.plannedDayResults?.length).toBeGreaterThan(0);
+        });
+
+        test('does not contain other users', async () => {
+            const response = await request(app)
+                .get(`/user/${ACCOUNT_USER_WITH_USER_ROLE.user.id}/day-results`)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            const responseObject: GetPlannedDayResultsResponse = response.body;
+            expect(responseObject?.plannedDayResults?.length).toBeGreaterThan(0);
+            responseObject.plannedDayResults?.forEach((plannedDayResult) => {
+                expect(plannedDayResult.plannedDay?.userId).toEqual(ACCOUNT_USER_WITH_USER_ROLE.user.id);
+            });
         });
     });
 
