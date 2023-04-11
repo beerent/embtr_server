@@ -32,6 +32,18 @@ export const UserPostInclude = {
 } satisfies Prisma.UserPostInclude;
 
 export class UserPostController {
+    public static async getAllForUser(userId: number) {
+        return await prisma.userPost.findMany({
+            where: {
+                user: {
+                    id: userId,
+                },
+                active: true,
+            },
+            include: UserPostInclude,
+        });
+    }
+
     public static async getAll() {
         return await prisma.userPost.findMany({
             where: {
