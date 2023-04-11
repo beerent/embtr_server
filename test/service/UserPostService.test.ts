@@ -131,7 +131,7 @@ describe('user post service', () => {
 
             expect(response.status).toEqual(SUCCESS.httpCode);
             const responseObject: GetAllUserPostResponse = response.body;
-            expect(responseObject?.userPosts.length).toBeGreaterThan(0);
+            expect(responseObject?.userPosts?.length).toBeGreaterThan(0);
         });
     });
 

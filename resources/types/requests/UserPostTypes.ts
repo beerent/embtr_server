@@ -14,7 +14,7 @@ export interface GetUserPostResponse extends Response {
 }
 
 export interface GetAllUserPostResponse extends Response {
-  userPosts: UserPost[]
+  userPosts?: UserPost[]
 }
 
 export interface UpdateUserPostRequest {

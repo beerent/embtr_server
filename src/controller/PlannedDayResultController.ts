@@ -81,6 +81,18 @@ export class PlannedDayResultController {
         });
     }
 
+    public static async getAllForUser(userId: number) {
+        return await prisma.plannedDayResult.findMany({
+            where: {
+                plannedDay: {
+                    userId,
+                },
+                active: true,
+            },
+            include: PlannedDayResultInclude,
+        });
+    }
+
     public static async getById(id: number) {
         const result = await prisma.plannedDayResult.findUnique({
             where: {

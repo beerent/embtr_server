@@ -1,5 +1,4 @@
-import { Like as LikeModel, UserPost, UserPost as UserPostModel, Comment as CommentModel } from '@resources/schema';
-import { Response } from '@resources/types/requests/RequestTypes';
+import { UserPost, UserPost as UserPostModel } from '@resources/schema';
 import {
     CreateUserPostRequest,
     CreateUserPostResponse,
@@ -7,12 +6,12 @@ import {
     GetUserPostResponse,
     UpdateUserPostRequest,
 } from '@resources/types/requests/UserPostTypes';
-import { GENERAL_FAILURE, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
+import { GENERAL_FAILURE, RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { UserController } from '@src/controller/UserController';
 import { UserPostController } from '@src/controller/UserPostController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
-import { NotificationService, NotificationType } from './NotificationService';
 
 export class UserPostService {
     public static async create(request: Request): Promise<CreateUserPostResponse> {
@@ -27,6 +26,17 @@ export class UserPostService {
         const userPost = await UserPostController.create(body.userPost);
         const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
         return { ...SUCCESS, userPost: convertedUserPost };
+    }
+
+    public static async getAllForUser(userId: number): Promise<GetAllUserPostResponse> {
+        const user = await UserController.getById(userId);
+        if (!user) {
+            return { ...RESOURCE_NOT_FOUND, message: 'user not found' };
+        }
+
+        const userPosts = await UserPostController.getAllForUser(userId);
+        const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
+        return { ...SUCCESS, userPosts: convertedUserPostModels };
     }
 
     public static async getAll(): Promise<GetAllUserPostResponse> {

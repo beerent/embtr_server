@@ -10,6 +10,7 @@ import {
 import {
     CREATE_DAY_RESULT_FAILED,
     GET_DAY_RESULT_UNKNOWN,
+    RESOURCE_NOT_FOUND,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
@@ -20,6 +21,7 @@ import { Request } from 'express';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { UserController } from '@src/controller/UserController';
 
 export class PlannedDayResultService {
     public static async create(request: CreatePlannedDayResultRequest): Promise<GetPlannedDayResultResponse> {
@@ -62,6 +64,22 @@ export class PlannedDayResultService {
         }
 
         return UPDATE_PLANNED_DAY_RESULT_INVALID;
+    }
+
+    public static async getAllForUser(userId: number): Promise<GetPlannedDayResultsResponse> {
+        const user = await UserController.getById(userId);
+        if (!user) {
+            return { ...RESOURCE_NOT_FOUND, message: 'user not found' };
+        }
+
+        const dayResults = await PlannedDayResultController.getAllForUser(userId);
+
+        if (dayResults) {
+            const convertedDayResults: PlannedDayResultModel[] = ModelConverter.convertAll(dayResults);
+            return { ...SUCCESS, plannedDayResults: convertedDayResults };
+        }
+
+        return GET_DAY_RESULT_UNKNOWN;
     }
 
     public static async getAll(): Promise<GetPlannedDayResultsResponse> {

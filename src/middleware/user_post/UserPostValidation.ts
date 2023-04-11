@@ -41,3 +41,13 @@ export const validateLike = (req: Request, res: Response, next: NextFunction) =>
 
     next();
 };
+
+export const validateGetUserPosts = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        z.object({ userId: z.coerce.number() }).parse(req.params);
+    } catch (error) {
+        return res.status(INVALID_REQUEST.httpCode).json(INVALID_REQUEST);
+    }
+
+    next();
+};
