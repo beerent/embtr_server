@@ -452,24 +452,6 @@ describe('DayResultServices', () => {
         });
     });
 
-    describe.skip('delete', () => {
-        //TODO - convert to endpoint
-        test('valid', async () => {
-            const body: UpdatePlannedDayResultRequest = {
-                plannedDayResult: {
-                    id: TEST_PLANNED_DAY_TO_DELETE_ID,
-                    active: false,
-                },
-            };
-
-            const response = await request(app).patch(PLANNED_DAY_RESULT).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
-            expect(response.status).toEqual(SUCCESS.httpCode);
-
-            const deletedPlannedDayResult = await PlannedDayResultController.getById(TEST_PLANNED_DAY_TO_DELETE_ID);
-            expect(deletedPlannedDayResult?.active).toBeFalsy();
-        });
-    });
-
     describe('add comment', () => {
         test('unauthenticated', async () => {
             const response = await request(app).post(`${PLANNED_DAY_RESULT}0/comment`).set('Authorization', 'Bearer Trash').send({});
