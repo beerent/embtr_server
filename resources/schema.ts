@@ -16,7 +16,8 @@ export interface User {
   sendNotifications?: Notification[];
   pushNotificationTokens?: PushNotificationToken[];
   comments?: Comment[];
-  Like?: Like[];
+  likes?: Like[];
+  widgets?: Widget[];
 }
 
 export interface PushNotificationToken {
@@ -137,6 +138,17 @@ export interface Notification {
   updatedAt?: Date;
 }
 
+export interface Widget {
+  id?: number;
+  type?: WidgetType;
+  order?: number;
+  userId?: number;
+  user?: User;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export enum NotificationTargetPage {
   INVALID = 'INVALID',
   GOAL_DETAILS = 'GOAL_DETAILS',
@@ -145,4 +157,13 @@ export enum NotificationTargetPage {
   USER_POST_DETAILS = 'USER_POST_DETAILS',
   PLANNED_DAY_RESULT = 'PLANNED_DAY_RESULT',
   TODAY = 'TODAY',
+}
+
+export enum WidgetType {
+  TIME_LEFT_IN_DAY = 'TIME_LEFT_IN_DAY',
+  QUOTE_OF_THE_DAY = 'QUOTE_OF_THE_DAY',
+  TODAYS_TASKS = 'TODAYS_TASKS',
+  TODAYS_NOTES = 'TODAYS_NOTES',
+  TODAYS_PHOTOS = 'TODAYS_PHOTOS',
+  DAILY_HISTORY = 'DAILY_HISTORY',
 }

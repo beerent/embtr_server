@@ -26,7 +26,8 @@ model User {
   sendNotifications      Notification[]          @relation("toUser")
   pushNotificationTokens PushNotificationToken[]
   comments               Comment[]
-  Like                   Like[]
+  likes                  Like[]
+  widgets                Widget[]
 
   @@map("user")
 }
@@ -187,4 +188,27 @@ model Notification {
   @@index([fromUserId])
   @@index([toUserId])
   @@map("notification")
+}
+
+enum WidgetType {
+  TIME_LEFT_IN_DAY
+  QUOTE_OF_THE_DAY
+  TODAYS_TASKS
+  TODAYS_NOTES
+  TODAYS_PHOTOS
+  DAILY_HISTORY
+}
+
+model Widget {
+  id        Int        @id @default(autoincrement())
+  type      WidgetType
+  order     Int        @db.Int
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int        @db.Int
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+  @@map("widget")
 }

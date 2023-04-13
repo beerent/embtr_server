@@ -10,6 +10,7 @@ import { AuthenticationController } from '@src/controller/AuthenticationControll
 export interface TestAccountWithUser {
     account: UserRecord;
     user: User;
+    token: string;
 }
 
 export class TestUtility {
@@ -22,8 +23,10 @@ export class TestUtility {
 
         await this.sendAuthRequest(token);
 
+        const updatedToken = await AuthenticationController.generateValidIdToken(email, password);
+
         if (user !== null) {
-            return { account: account.user!, user };
+            return { account: account.user!, user, token: updatedToken };
         }
 
         throw new Error('Failed to create user');
