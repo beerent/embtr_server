@@ -1,6 +1,6 @@
-import { Widget, WidgetType, User, Task, PlannedDay, PlannedTask, PlannedDayResult, Notification, UserPost } from '@prisma/client';
+import { User, Task, PlannedDay, PlannedTask, PlannedDayResult, Notification, UserPost } from '@prisma/client';
 
-type PrismaModel = User | Task | PlannedDay | PlannedTask | PlannedDayResult | UserPost | Notification | Widget | WidgetType;
+type PrismaModel = User | Task | PlannedDay | PlannedTask | PlannedDayResult | UserPost | Notification;
 
 export class ModelConverter {
     public static convert<T>(prismaObj: PrismaModel): T {
