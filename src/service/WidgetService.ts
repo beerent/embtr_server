@@ -11,9 +11,9 @@ export class WidgetService {
     public static async getUserWidgets(request: Request): Promise<GetWidgetsResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
         const widgets = await WidgetController.getAllForUser(userId);
-        //const widgetModels: Widget[] = ModelConverter.convertAll(widgets);
+        const widgetModels: Widget[] = ModelConverter.convertAll(widgets);
 
-        return { ...SUCCESS, widgets: [] };
+        return { ...SUCCESS, widgets: widgetModels };
     }
 
     public static async updateWidgets(request: Request): Promise<Response> {
