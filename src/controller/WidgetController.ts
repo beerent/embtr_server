@@ -2,10 +2,21 @@ import { prisma } from '@database/prisma';
 import { User, Widget, WidgetType } from '@resources/schema';
 
 export class WidgetController {
+    public static async get(id: number) {
+        const widget = await prisma.widget.findUnique({
+            where: {
+                id,
+            },
+        });
+
+        return widget;
+    }
+
     public static async getAllForUser(userId: number) {
         const widgets = await prisma.widget.findMany({
             where: {
                 userId,
+                active: true,
             },
         });
 
@@ -39,10 +50,14 @@ export class WidgetController {
     }
 
     public static async update(widget: Widget) {
+        const type = widget.type ? { type: widget.type } : {};
+        const order = widget.order !== undefined ? { order: widget.order } : {};
+        const active = widget.active !== undefined ? { active: widget.active } : {};
         const updatedWidget = await prisma.widget.update({
             data: {
-                type: widget.type!,
-                order: widget.order!,
+                ...type,
+                ...order,
+                ...active,
             },
             where: {
                 id: widget.id!,
@@ -59,14 +74,24 @@ export class WidgetController {
     }
 
     public static async upsertAllForUser(userId: number, widgets: Widget[]) {
-        const creates = widgets.filter((widget) => !widget.id);
-        if (creates.length > 0) {
-            await this.createAll(userId, creates);
-        }
+        const upserts = widgets.map((widget) => {
+            return {
+                where: widget.id !== undefined ? { id: widget.id ?? 0 } : { userId_type: { type: widget.type!, userId } },
+                create: {
+                    type: widget.type!,
+                    order: widget.order!,
+                    userId,
+                },
+                update: {
+                    type: widget.type!,
+                    order: widget.order!,
+                    active: widget.active ?? true,
+                },
+            };
+        });
 
-        const updates = widgets.filter((widget) => widget.id);
-        if (updates.length > 0) {
-            await this.updateAll(updates);
+        for (const upsert of upserts) {
+            await prisma.widget.upsert(upsert);
         }
     }
 }

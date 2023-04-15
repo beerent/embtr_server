@@ -11,13 +11,19 @@ export const validateUpdateUserWidgets = (req: Request, res: Response, next: Nex
             message: 'Invalid widget type',
         });
 
+        const createSchema = z.object({
+            type: widgetTypeSchema,
+            order: z.coerce.number(),
+        });
+
+        const updateSchema = z.object({
+            id: z.string(),
+        });
+
+        const multiSchema = z.union([createSchema, updateSchema]);
+
         z.object({
-            widgets: z.array(
-                z.object({
-                    type: widgetTypeSchema,
-                    order: z.coerce.number(),
-                })
-            ),
+            widgets: z.array(multiSchema),
         }).parse(req.body);
     } catch (error) {
         return res.status(INVALID_REQUEST.httpCode).json(INVALID_REQUEST);

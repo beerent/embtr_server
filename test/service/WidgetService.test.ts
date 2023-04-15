@@ -1,4 +1,4 @@
-import { WidgetType } from '@resources/schema';
+import { Widget, WidgetType } from '@resources/schema';
 import { UpdateWidgetsRequest } from '@resources/types/requests/WidgetTypes';
 import app from '@src/app';
 import { FORBIDDEN, INVALID_REQUEST, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
@@ -40,8 +40,6 @@ describe('WidgetService', () => {
         USER_ACCOUNT_WITH_USER_ROLE = userRoleUser;
         USER_ACCOUNT_WITH_USER_ROLE_2 = userRoleUser2;
         USER_WITH_WIDGETS = userWithWidgets;
-
-        await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.DAILY_HISTORY, order: 12 });
     });
 
     afterAll(async () => {
@@ -135,9 +133,40 @@ describe('WidgetService', () => {
         });
 
         test('valid', async () => {
+            await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.DAILY_HISTORY, order: 12 });
             const response = await request(app).get('/widget').set('Authorization', `Bearer ${USER_WITH_WIDGETS.token}`).send();
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.widgets.length).toEqual(1);
+        });
+
+        test('valid does not return inactive widgets', async () => {
+            const result = await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.TIME_LEFT_IN_DAY, order: 1 });
+            await WidgetController.update({ id: result.id, active: false });
+            const response = await request(app).get('/widget').set('Authorization', `Bearer ${USER_WITH_WIDGETS.token}`).send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body.widgets.filter((widget: Widget) => widget.type === WidgetType.TIME_LEFT_IN_DAY).length).toEqual(0);
+            expect(response.body.widgets.filter((widget: Widget) => widget.active === false).length).toEqual(0);
+        });
+
+        test('update to widget with no id that already exists in database updates the existing widget', async () => {
+            const result = await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.QUOTE_OF_THE_DAY, order: 1 });
+            await WidgetController.update({ id: result.id, active: false });
+
+            const widgetToCreate: Widget = {
+                type: WidgetType.QUOTE_OF_THE_DAY,
+                order: 1,
+            };
+
+            const body: UpdateWidgetsRequest = {
+                widgets: [widgetToCreate],
+            };
+
+            const response = await request(app).post('/widget').set('Authorization', `Bearer ${USER_WITH_WIDGETS.token}`).send(body);
+            expect(response.status).toEqual(SUCCESS.httpCode);
+
+            const widgetFromDatabase = await WidgetController.get(result.id);
+            expect(widgetFromDatabase!.active).toEqual(true);
         });
     });
 });

@@ -209,6 +209,6 @@ model Widget {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  @@index([userId])
+  @@unique([userId, type])
   @@map("widget")
 }

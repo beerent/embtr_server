@@ -1,9 +1,8 @@
 import { Widget } from '@resources/schema';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { GetWidgetsResponse, UpdateWidgetsRequest } from '@resources/types/requests/WidgetTypes';
-import { RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
+import { SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { UserController } from '@src/controller/UserController';
 import { WidgetController } from '@src/controller/WidgetController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
