@@ -2,6 +2,7 @@ import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryT
 import { GetUserResponse } from '@resources/types/requests/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { validateGetDailyHistory as validateGetUserDailyHistory } from '@src/middleware/daily_history/DailyHistoryValidation';
+import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';
 import { validateGetUserPosts } from '@src/middleware/user_post/UserPostValidation';
@@ -13,23 +14,37 @@ import express from 'express';
 
 const userRouter = express.Router();
 
-userRouter.get('/:uid', authenticate, authorizeUserGet, async (req, res) => {
-    const uid = req.params.uid;
-    const response: GetUserResponse = await UserService.get(uid);
+userRouter.get(
+    '/:uid',
+    authenticate,
+    authorizeUserGet,
+    runEndpoint(async (req, res) => {
+        const uid = req.params.uid;
+        const response: GetUserResponse = await UserService.get(uid);
 
-    res.status(response.httpCode).json(response);
-});
+        res.status(response.httpCode).json(response);
+    })
+);
 
-userRouter.post('/', authenticate, async (req, res) => {
-    const response = await UserService.create(req);
-    res.status(response.httpCode).json(response);
-});
+userRouter.post(
+    '/',
+    authenticate,
+    runEndpoint(async (req, res) => {
+        const response = await UserService.create(req);
+        res.status(response.httpCode).json(response);
+    })
+);
 
-userRouter.patch('/', authenticate, authorize, async (req, res) => {
-    const response = await UserService.update(req);
+userRouter.patch(
+    '/',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const response = await UserService.update(req);
 
-    res.status(response.httpCode).json(response);
-});
+        res.status(response.httpCode).json(response);
+    })
+);
 
 /*
  * Daily History
@@ -39,10 +54,10 @@ userRouter.get(
     authenticate,
     authorize,
     validateGetUserDailyHistory,
-    async (req, res) => {
+    runEndpoint(async (req, res) => {
         const response: GetDailyHistoryResponse = await DailyHistoryService.get(req);
         res.status(response.httpCode).json(response);
-    }
+    })
 );
 
 /*
@@ -53,11 +68,11 @@ userRouter.get(
     authenticate,
     authorize,
     validateGetUserPosts,
-    async (req, res) => {
+    runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
         const response = await UserPostService.getAllForUser(userId);
         res.status(response.httpCode).json(response);
-    }
+    })
 );
 
 /*
@@ -68,11 +83,11 @@ userRouter.get(
     authenticate,
     authorize,
     validateGetUserPosts,
-    async (req, res) => {
+    runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
         const response: GetUserResponse = await PlannedDayResultService.getAllForUser(userId);
         res.status(response.httpCode).json(response);
-    }
+    })
 );
 
 export default userRouter;

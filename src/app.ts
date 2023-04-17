@@ -9,6 +9,7 @@ import userPostRouter from './endpoints/UserPostRouter';
 import notificationRouter from './endpoints/NotificationRouter';
 import widgetRouter from './endpoints/WidgetRouter';
 import { logger } from './common/logger/Logger';
+import { handleError } from './middleware/error/ErrorMiddleware';
 
 const app = express();
 
@@ -31,5 +32,7 @@ app.use('/planned-day-result', plannedDayResultRouter);
 app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
 app.use('/widget', widgetRouter);
+
+app.use(handleError);
 
 export default app;

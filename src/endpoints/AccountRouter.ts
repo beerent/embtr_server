@@ -1,37 +1,57 @@
-import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/requests/AccountTypes';
-import { AuthenticationRequest, AuthenticationResponse } from '@resources/types/requests/RequestTypes';
+import {
+    CreateAccountRequest,
+    ForgotAccountPasswordRequest,
+    VerifyAccountEmailRequest,
+} from '@resources/types/requests/AccountTypes';
+import {
+    AuthenticationRequest,
+    AuthenticationResponse,
+} from '@resources/types/requests/RequestTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
+import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { AccountService } from '@src/service/AccountService';
 import express from 'express';
 
 const accountRouter = express.Router();
 
-accountRouter.post('/create', async (req, res) => {
-    const body: CreateAccountRequest = req.body;
-    const response: Response = await AccountService.create(body);
+accountRouter.post(
+    '/create',
+    runEndpoint(async (req, res) => {
+        const body: CreateAccountRequest = req.body;
+        const response: Response = await AccountService.create(body);
 
-    res.status(response.httpCode).json(response);
-});
+        res.status(response.httpCode).json(response);
+    })
+);
 
-accountRouter.post('/forgot_password', async (req, res) => {
-    const body: ForgotAccountPasswordRequest = req.body;
-    const response: Response = await AccountService.forgotPassword(body);
+accountRouter.post(
+    '/forgot_password',
+    runEndpoint(async (req, res) => {
+        const body: ForgotAccountPasswordRequest = req.body;
+        const response: Response = await AccountService.forgotPassword(body);
 
-    res.status(response.httpCode).json(response);
-});
+        res.status(response.httpCode).json(response);
+    })
+);
 
-accountRouter.post('/send_verification_email', async (req, res) => {
-    const body: VerifyAccountEmailRequest = req.body;
-    const response: Response = await AccountService.sendVerificationEmail(body);
+accountRouter.post(
+    '/send_verification_email',
+    runEndpoint(async (req, res) => {
+        const body: VerifyAccountEmailRequest = req.body;
+        const response: Response = await AccountService.sendVerificationEmail(body);
 
-    res.status(response.httpCode).json(response);
-});
+        res.status(response.httpCode).json(response);
+    })
+);
 
-accountRouter.post('/authenticate', async (req, res) => {
-    const body: AuthenticationRequest = req.body;
-    const response: AuthenticationResponse = await AccountService.authenticate(body);
+accountRouter.post(
+    '/authenticate',
+    runEndpoint(async (req, res) => {
+        const body: AuthenticationRequest = req.body;
+        const response: AuthenticationResponse = await AccountService.authenticate(body);
 
-    res.status(response.httpCode).json(response);
-});
+        res.status(response.httpCode).json(response);
+    })
+);
 
 export default accountRouter;
