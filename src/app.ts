@@ -32,6 +32,7 @@ app.use('/planned-day-result', plannedDayResultRouter);
 app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
 app.use('/widget', widgetRouter);
+app.use('/health', (req, res) => res.send('OK'));
 
 app.use(handleError);
 
