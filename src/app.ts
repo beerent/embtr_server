@@ -11,7 +11,15 @@ import widgetRouter from './endpoints/WidgetRouter';
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
 
+const cors = require('cors');
 const app = express();
+
+const allowedOrigins = ['https://*.example.com'];
+app.use(
+    cors({
+        origin: allowedOrigins,
+    })
+);
 
 app.use(bodyParser.json());
 
