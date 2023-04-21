@@ -14,7 +14,7 @@ import { handleError } from './middleware/error/ErrorMiddleware';
 const cors = require('cors');
 const app = express();
 
-const allowedOrigins = ['https://*.embtr.com'];
+const allowedOrigins = ['https://app.embtr.com'];
 app.use(
     cors({
         origin: allowedOrigins,
