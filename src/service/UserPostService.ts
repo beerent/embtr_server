@@ -10,12 +10,15 @@ import { GENERAL_FAILURE, RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/Reques
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { UserController } from '@src/controller/UserController';
 import { UserPostController } from '@src/controller/UserPostController';
+import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class UserPostService {
     public static async create(request: Request): Promise<CreateUserPostResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
         if (!userId) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
@@ -25,7 +28,9 @@ export class UserPostService {
 
         const userPost = await UserPostController.create(body.userPost);
         const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
-        return { ...SUCCESS, userPost: convertedUserPost };
+        const sanitizedUserPost: UserPostModel = sanitizeModel(convertedUserPost);
+
+        return { ...SUCCESS, userPost: sanitizedUserPost };
     }
 
     public static async getAllForUser(userId: number): Promise<GetAllUserPostResponse> {
@@ -36,13 +41,15 @@ export class UserPostService {
 
         const userPosts = await UserPostController.getAllForUser(userId);
         const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
-        return { ...SUCCESS, userPosts: convertedUserPostModels };
+        const sanitizedUserPostModels: UserPost[] = sanitizeModel(convertedUserPostModels);
+        return { ...SUCCESS, userPosts: sanitizedUserPostModels };
     }
 
     public static async getAll(): Promise<GetAllUserPostResponse> {
         const userPosts = await UserPostController.getAll();
         const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
-        return { ...SUCCESS, userPosts: convertedUserPostModels };
+        const sanitizedUserPostModels = sanitizeModel(convertedUserPostModels);
+        return { ...SUCCESS, userPosts: sanitizedUserPostModels };
     }
 
     public static async getById(id: number): Promise<GetUserPostResponse> {
@@ -50,14 +57,17 @@ export class UserPostService {
 
         if (userPost) {
             const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
-            return { ...SUCCESS, userPost: convertedUserPost };
+            const sanitizedUserPost: UserPostModel = sanitizeModel(convertedUserPost);
+            return { ...SUCCESS, userPost: sanitizedUserPost };
         }
 
         return RESOURCE_NOT_FOUND;
     }
 
     public static async update(request: Request): Promise<CreateUserPostResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
         if (!userId) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
@@ -76,6 +86,7 @@ export class UserPostService {
 
         const userPost = await UserPostController.update(body.userPost);
         const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
-        return { ...SUCCESS, userPost: convertedUserPost };
+        const sanitizedUserPost: UserPostModel = sanitizeModel(convertedUserPost);
+        return { ...SUCCESS, userPost: sanitizedUserPost };
     }
 }

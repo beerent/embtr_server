@@ -1,4 +1,6 @@
+import { User, UserPost } from '@resources/schema';
 import { Interactable } from '@resources/types/interactable/Interactable';
+import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
@@ -35,7 +37,7 @@ userPostRouter.get(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response = await UserPostService.getAll();
+        const response: GetAllUserPostResponse = await UserPostService.getAll();
         res.status(response.httpCode).json(response);
     })
 );

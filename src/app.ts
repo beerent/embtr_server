@@ -29,6 +29,7 @@ app.use((req, res, next): void => {
         logger.info(`Response for ${req.method} ${req.baseUrl}${req.path}: ${data}`);
         return oldSend.apply(this, arguments as any);
     };
+
     next();
 });
 
