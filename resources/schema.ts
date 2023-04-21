@@ -142,8 +142,8 @@ export interface Widget {
   id?: number;
   type?: WidgetType;
   order?: number;
-  userId?: number;
   user?: User;
+  userId?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

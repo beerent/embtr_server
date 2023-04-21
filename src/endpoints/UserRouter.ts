@@ -1,6 +1,9 @@
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetUserResponse } from '@resources/types/requests/UserTypes';
-import { authenticate } from '@src/middleware/authentication';
+import {
+    authenticate,
+    authenticateCreateUser as authenticateGetCurrentUser,
+} from '@src/middleware/authentication';
 import { validateGetDailyHistory as validateGetUserDailyHistory } from '@src/middleware/daily_history/DailyHistoryValidation';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
@@ -26,9 +29,19 @@ userRouter.get(
     })
 );
 
+userRouter.get(
+    '/',
+    authenticateGetCurrentUser,
+    runEndpoint(async (req, res) => {
+        const response: GetUserResponse = await UserService.getCurrentUser(req);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
 userRouter.post(
     '/',
-    authenticate,
+    authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
         const response = await UserService.create(req);
         res.status(response.httpCode).json(response);

@@ -7,6 +7,11 @@ import { authenticate } from '@src/middleware/authentication';
 import { Request, Response } from 'express';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 
+export interface TestAccountWithoutUser {
+    account: UserRecord;
+    token: string;
+}
+
 export interface TestAccountWithUser {
     account: UserRecord;
     user: User;
@@ -14,7 +19,27 @@ export interface TestAccountWithUser {
 }
 
 export class TestUtility {
-    public static async createAccountWithUser(email: string, password: string, role: Role): Promise<TestAccountWithUser> {
+    public static async createAccountWithoutUser(
+        email: string,
+        password: string,
+        role: Role
+    ): Promise<TestAccountWithoutUser> {
+        const account = await AccountController.create(email, password);
+        await AccountController.updateAccountRoles(account.user!.uid, [role]);
+        const token = await AuthenticationController.generateValidIdToken(email, password);
+
+        await this.sendAuthRequest(token);
+
+        const updatedToken = await AuthenticationController.generateValidIdToken(email, password);
+
+        return { account: account.user!, token: updatedToken };
+    }
+
+    public static async createAccountWithUser(
+        email: string,
+        password: string,
+        role: Role
+    ): Promise<TestAccountWithUser> {
         const account = await AccountController.create(email, password);
         const user = await UserController.create(account.user!.uid, email);
 
@@ -30,6 +55,11 @@ export class TestUtility {
         }
 
         throw new Error('Failed to create user');
+    }
+
+    public static async deleteAccountWithoutUser(email: string): Promise<void> {
+        const deletes = [AccountController.delete(email)];
+        await Promise.all(deletes);
     }
 
     public static async deleteAccountWithUser(email: string): Promise<void> {

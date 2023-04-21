@@ -1,4 +1,8 @@
-import { GetUserResponse, CreateUserResponse, UpdateUserRequest } from '@resources/types/requests/UserTypes';
+import {
+    GetUserResponse,
+    CreateUserResponse,
+    UpdateUserRequest,
+} from '@resources/types/requests/UserTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CREATE_USER_ALREADY_EXISTS,
@@ -18,6 +22,15 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
 
 export class UserService {
+    public static async getCurrentUser(request: Request): Promise<GetUserResponse> {
+        const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
+        if (!uid) {
+            return GET_USER_FAILED_NOT_FOUND;
+        }
+
+        return await this.get(uid);
+    }
+
     public static async get(uid: string): Promise<GetUserResponse> {
         const user = await UserController.getByUid(uid);
         if (user) {
@@ -30,7 +43,9 @@ export class UserService {
 
     public static async create(request: Request): Promise<CreateUserResponse> {
         const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationController.getEmailFromToken(request.headers.authorization!);
+        const email = await AuthorizationController.getEmailFromToken(
+            request.headers.authorization!
+        );
 
         if (!uid || !email) {
             return CREATE_USER_FAILED;
@@ -56,7 +71,9 @@ export class UserService {
         const body: UpdateUserRequest = request.body;
 
         const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationController.getEmailFromToken(request.headers.authorization!);
+        const email = await AuthorizationController.getEmailFromToken(
+            request.headers.authorization!
+        );
 
         if (!uid || !email) {
             return UPDATE_USER_FAILED;

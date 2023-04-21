@@ -1,11 +1,22 @@
 import { Code } from '@resources/codes';
 
 import { AuthenticationResponse, Response } from '@resources/types/requests/RequestTypes';
-import { GetPlannedDayResponse, CreatePlannedDayResponse } from '@resources/types/requests/PlannedDayTypes';
-import { CreateTaskResponse, GetTaskResponse, SearchTasksResponse } from '@resources/types/requests/TaskTypes';
+import {
+    GetPlannedDayResponse,
+    CreatePlannedDayResponse,
+} from '@resources/types/requests/PlannedDayTypes';
+import {
+    CreateTaskResponse,
+    GetTaskResponse,
+    SearchTasksResponse,
+} from '@resources/types/requests/TaskTypes';
 import { CreateUserResponse, GetUserResponse } from '@resources/types/requests/UserTypes';
 import { UpdatePlannedTaskResponse } from '@resources/types/requests/PlannedTaskTypes';
-import { CreatePlannedDayResultResponse, GetPlannedDayResultResponse, UpdatePlannedDayResultResponse } from '@resources/types/requests/PlannedDayResultTypes';
+import {
+    CreatePlannedDayResultResponse,
+    GetPlannedDayResultResponse,
+    UpdatePlannedDayResultResponse,
+} from '@resources/types/requests/PlannedDayResultTypes';
 import { CreateCommentResponse } from '@resources/types/requests/GeneralTypes';
 
 export enum HttpCode {
@@ -87,6 +98,13 @@ export const GENERAL_FAILURE: Response = {
     internalCode: Code.CREATE_PLANNED_DAY_FAILED,
     success: false,
     message: 'a failure occured',
+};
+
+export const REAUTHENTICATE: Response = {
+    httpCode: HttpCode.UNAUTHORIZED,
+    internalCode: Code.REAUTHENTICATE,
+    success: false,
+    message: 'reauthenticate',
 };
 
 /*
