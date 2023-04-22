@@ -9,6 +9,7 @@ import {
     Notification,
     UserPost,
 } from '@prisma/client';
+import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
 
 type PrismaModel =
     | User
@@ -36,7 +37,9 @@ export class ModelConverter {
             return convertedObj as T;
         };
 
-        return convertObj(prismaObj);
+        const converted = convertObj(prismaObj);
+        const sanitized = sanitizeModel(converted);
+        return sanitized;
     }
 
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

@@ -1,4 +1,3 @@
-import { User, UserPost } from '@resources/schema';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
 import { authenticate } from '@src/middleware/authentication';
