@@ -11,6 +11,15 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { AccountService } from '@src/service/AccountService';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 3, // limit each IP to 100 requests per windowMs
+    onLimitReached: (req, res, options) => {
+        res.status(429).end('Too many requests, please try again later.');
+    },
+});
 
 const accountRouter = express.Router();
 
@@ -24,6 +33,7 @@ accountRouter.post(
     })
 );
 
+accountRouter.use('/forgot_password', limiter);
 accountRouter.post(
     '/forgot_password',
     runEndpoint(async (req, res) => {

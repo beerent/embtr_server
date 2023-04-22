@@ -16,8 +16,16 @@ import { CreateAccountResult, AccountController } from '@src/controller/AccountC
 import { firebase } from '@src/auth/Firebase';
 import { EmailController } from '@src/controller/EmailController';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/requests/AccountTypes';
-import { AuthenticationRequest, AuthenticationResponse, Response } from '@resources/types/requests/RequestTypes';
+import {
+    CreateAccountRequest,
+    ForgotAccountPasswordRequest,
+    VerifyAccountEmailRequest,
+} from '@resources/types/requests/AccountTypes';
+import {
+    AuthenticationRequest,
+    AuthenticationResponse,
+    Response,
+} from '@resources/types/requests/RequestTypes';
 
 interface EmailVerificationLink {
     link: string;
@@ -30,7 +38,10 @@ export class AccountService {
             return this.getInvalidRequestResponse(request);
         }
 
-        const result: CreateAccountResult = await AccountController.create(request.email, request.password);
+        const result: CreateAccountResult = await AccountController.create(
+            request.email,
+            request.password
+        );
         if (result.code !== Code.SUCCESS) {
             return this.getFailureResponse(result);
         }
@@ -58,7 +69,9 @@ export class AccountService {
         return SUCCESS;
     }
 
-    public static async sendVerificationEmail(request: VerifyAccountEmailRequest): Promise<Response> {
+    public static async sendVerificationEmail(
+        request: VerifyAccountEmailRequest
+    ): Promise<Response> {
         if (!request.email) {
             return SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL;
         }
@@ -78,12 +91,17 @@ export class AccountService {
         return SUCCESS;
     }
 
-    public static async authenticate(request: AuthenticationRequest): Promise<AuthenticationResponse> {
+    public static async authenticate(
+        request: AuthenticationRequest
+    ): Promise<AuthenticationResponse> {
         if (!request.email || !request.password) {
             return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
         }
 
-        const idToken = await AuthenticationController.generateValidIdToken(request.email, request.password);
+        const idToken = await AuthenticationController.generateValidIdToken(
+            request.email,
+            request.password
+        );
         if (!idToken) {
             return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
         }
@@ -130,7 +148,10 @@ export class AccountService {
         return { link: '', error: 'unknown error' };
     }
 
-    private static async sendEmailVerificationEmail(email: string, link: EmailVerificationLink): Promise<EmailVerificationLink> {
+    private static async sendEmailVerificationEmail(
+        email: string,
+        link: EmailVerificationLink
+    ): Promise<EmailVerificationLink> {
         const subject = 'Verify your email';
         const text = `Please click the link to verify your email: ${link.link}`;
 
@@ -142,7 +163,7 @@ export class AccountService {
     private static async sendForgotPasswordEmail(email: string): Promise<void> {
         const link = await firebase.auth().generatePasswordResetLink(email);
         const subject = 'Reset your password';
-        const text = `Please click the link to reset your password: ${link}. If you did not request a password reset, you are safe to ignore this email.`;
+        const text = `Dear ${email}\n\nPlease click the link to reset your password: ${link}. If you did not request a password reset, you are safe to ignore this email.`;
 
         await EmailController.sendEmail(email, subject, text);
     }
