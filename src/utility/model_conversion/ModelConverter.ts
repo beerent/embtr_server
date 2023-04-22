@@ -23,6 +23,10 @@ type PrismaModel =
     | WidgetType;
 
 export class ModelConverter {
+    public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
+        return prismaObj.map(ModelConverter.convert<T>);
+    }
+
     public static convert<T>(prismaObj: PrismaModel): T {
         const convertObj = (obj: PrismaModel): T => {
             const convertedObj = obj as any;
@@ -40,22 +44,5 @@ export class ModelConverter {
         const converted = convertObj(prismaObj);
         const sanitized = sanitizeModel(converted);
         return sanitized;
-    }
-
-    public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
-        const convertObj = (obj: PrismaModel): T => {
-            const convertedObj = obj as any;
-            const dateFields = ['createdAt', 'updatedAt'];
-
-            dateFields.forEach((field) => {
-                if (convertedObj[field]) {
-                    convertedObj[field] = new Date(convertedObj[field]);
-                }
-            });
-
-            return convertedObj as T;
-        };
-
-        return prismaObj.map(convertObj);
     }
 }
