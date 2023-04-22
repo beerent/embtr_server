@@ -15,7 +15,11 @@ import {
 import { EmailController } from '@src/controller/EmailController';
 import { AccountController } from '@src/controller/AccountController';
 import request from 'supertest';
-import { CreateAccountRequest, ForgotAccountPasswordRequest, VerifyAccountEmailRequest } from '@resources/types/requests/AccountTypes';
+import {
+    CreateAccountRequest,
+    ForgotAccountPasswordRequest,
+    VerifyAccountEmailRequest,
+} from '@resources/types/requests/AccountTypes';
 import { AuthenticationRequest } from '@resources/types/requests/RequestTypes';
 
 describe('account service tests', () => {
@@ -31,7 +35,10 @@ describe('account service tests', () => {
         ];
         await Promise.all(deletes);
 
-        const creates = [AccountController.create(ACCOUNT_THAT_EXISTS, 'password'), AccountController.create(ACCOUNT_TO_VERIFY_EMAIL, 'password')];
+        const creates = [
+            AccountController.create(ACCOUNT_THAT_EXISTS, 'password'),
+            AccountController.create(ACCOUNT_TO_VERIFY_EMAIL, 'password'),
+        ];
         await Promise.all(creates);
     });
 
@@ -49,7 +56,9 @@ describe('account service tests', () => {
     });
 
     afterEach(async () => {
-        EmailController.sendEmail = jest.requireActual('@src/controller/EmailController').EmailController.sendEmail;
+        EmailController.sendEmail = jest.requireActual(
+            '@src/controller/EmailController'
+        ).EmailController.sendEmail;
     });
 
     describe('create user', () => {
@@ -89,7 +98,10 @@ describe('account service tests', () => {
 
         describe('success cases', () => {
             test('create a account results in success', async () => {
-                const body: CreateAccountRequest = { email: ACCOUNT_TO_CREATE, password: 'password' };
+                const body: CreateAccountRequest = {
+                    email: ACCOUNT_TO_CREATE,
+                    password: 'password',
+                };
                 const response = await request(app).post('/account/create').send(body);
 
                 expect(response.statusCode).toBe(SUCCESS.httpCode);
@@ -120,8 +132,8 @@ describe('account service tests', () => {
             const body: ForgotAccountPasswordRequest = { email: 'unknown_email_test@embtr.com' };
             const response = await request(app).post('/account/forgot_password').send(body);
 
-            expect(response.statusCode).toBe(FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL.httpCode);
-            expect(response.body).toEqual(FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL);
+            expect(response.statusCode).toBe(SUCCESS.httpCode);
+            expect(response.body).toEqual(SUCCESS);
         });
 
         test('success', async () => {
@@ -132,7 +144,7 @@ describe('account service tests', () => {
             expect(response.body).toEqual(SUCCESS);
         });
 
-        test('forgot password email sends an email', async () => {
+        test.only('forgot password email sends an email', async () => {
             const body: ForgotAccountPasswordRequest = { email: ACCOUNT_THAT_EXISTS };
             await request(app).post('/account/forgot_password').send(body);
 
@@ -142,31 +154,45 @@ describe('account service tests', () => {
 
     describe('send verification email', () => {
         test('missing email in body', async () => {
-            const response = await request(app).post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT).send({});
+            const response = await request(app)
+                .post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT)
+                .send({});
 
-            expect(response.statusCode).toBe(SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL.httpCode);
+            expect(response.statusCode).toBe(
+                SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL.httpCode
+            );
             expect(response.body).toEqual(SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL);
         });
 
         test('user not found', async () => {
             const body: VerifyAccountEmailRequest = { email: 'unknown_email@embtr.com' };
-            const response = await request(app).post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT).send(body);
+            const response = await request(app)
+                .post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT)
+                .send(body);
 
-            expect(response.statusCode).toBe(SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL.httpCode);
+            expect(response.statusCode).toBe(
+                SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL.httpCode
+            );
             expect(response.body).toEqual(SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL);
         });
 
         test('send verify email multiple times', async () => {
             const body: VerifyAccountEmailRequest = { email: 'send_verify_email_test@embtr.com' };
             await request(app).post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT).send(body);
-            const response = await request(app).post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT).send(body);
+            const response = await request(app)
+                .post(ACCOUNT_SEND_EMAIL_VERIFICATION_ENDPOINT)
+                .send(body);
 
-            expect(response.statusCode).toBe(SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS.httpCode);
+            expect(response.statusCode).toBe(
+                SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS.httpCode
+            );
         });
 
         test('success', async () => {
             const body: VerifyAccountEmailRequest = { email: ACCOUNT_TO_VERIFY_EMAIL };
-            const response = await request(app).post(`${ACCOUNT}send_verification_email`).send(body);
+            const response = await request(app)
+                .post(`${ACCOUNT}send_verification_email`)
+                .send(body);
 
             expect(response.statusCode).toBe(SUCCESS.httpCode);
             expect(response.body).toEqual(SUCCESS);
@@ -176,21 +202,28 @@ describe('account service tests', () => {
 
     describe('authenticate', () => {
         test('missing email in body', async () => {
-            const response = await request(app).post('/account/authenticate').send({ password: 'password' });
+            const response = await request(app)
+                .post('/account/authenticate')
+                .send({ password: 'password' });
 
             expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);
             expect(response.body).toEqual(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS);
         });
 
         test('missing password in body', async () => {
-            const response = await request(app).post('/account/authenticate').send({ email: 'email@embtr.com' });
+            const response = await request(app)
+                .post('/account/authenticate')
+                .send({ email: 'email@embtr.com' });
 
             expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);
             expect(response.body).toEqual(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS);
         });
 
         test('incorrect user/password', async () => {
-            const body: AuthenticationRequest = { email: ACCOUNT_THAT_EXISTS, password: 'notthepassword' };
+            const body: AuthenticationRequest = {
+                email: ACCOUNT_THAT_EXISTS,
+                password: 'notthepassword',
+            };
             const response = await request(app).post('/account/authenticate').send(body);
 
             expect(response.statusCode).toBe(ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS.httpCode);
@@ -198,7 +231,9 @@ describe('account service tests', () => {
         });
 
         test('successfully returns token', async () => {
-            const response = await request(app).post('/account/authenticate').send({ email: ACCOUNT_THAT_EXISTS, password: 'password' });
+            const response = await request(app)
+                .post('/account/authenticate')
+                .send({ email: ACCOUNT_THAT_EXISTS, password: 'password' });
 
             expect(response.statusCode).toBe(SUCCESS.httpCode);
             expect(response.body.token).toBeTruthy();

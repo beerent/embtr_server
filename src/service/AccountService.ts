@@ -4,7 +4,6 @@ import {
     CREATE_ACCOUNT_INVALID_EMAIL,
     CREATE_ACCOUNT_INVALID_PASSWORD,
     FORGOT_ACCOUNT_PASSWORD_INVALID_EMAIL,
-    FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL,
     SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL,
     SEND_ACCOUNT_VERIFICATION_EMAIL_TOO_MANY_ATTEMPTS,
     SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
@@ -26,6 +25,7 @@ import {
     AuthenticationResponse,
     Response,
 } from '@resources/types/requests/RequestTypes';
+import { logger } from '@src/common/logger/Logger';
 
 interface EmailVerificationLink {
     link: string;
@@ -58,11 +58,6 @@ export class AccountService {
     public static async forgotPassword(request: ForgotAccountPasswordRequest): Promise<Response> {
         if (!request.email) {
             return FORGOT_ACCOUNT_PASSWORD_INVALID_EMAIL;
-        }
-
-        const user = await AccountController.get(request.email);
-        if (!user) {
-            return FORGOT_ACCOUNT_PASSWORD_UNKNOWN_EMAIL;
         }
 
         await this.sendForgotPasswordEmail(request.email);
@@ -161,10 +156,24 @@ export class AccountService {
     }
 
     private static async sendForgotPasswordEmail(email: string): Promise<void> {
-        const link = await firebase.auth().generatePasswordResetLink(email);
+        const link = await this.getForgotPasswordLink(email);
+        if (!link) {
+            return;
+        }
+
         const subject = 'Reset your password';
         const text = `Dear ${email}\n\nPlease click the link to reset your password: ${link}. If you did not request a password reset, you are safe to ignore this email.`;
 
         await EmailController.sendEmail(email, subject, text);
+    }
+
+    private static async getForgotPasswordLink(email: string): Promise<string | undefined> {
+        try {
+            return await firebase.auth().generatePasswordResetLink(email);
+        } catch (error) {
+            logger.log('info', error);
+        }
+
+        return undefined;
     }
 }
