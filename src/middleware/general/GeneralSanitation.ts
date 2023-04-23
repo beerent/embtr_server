@@ -13,12 +13,14 @@ export function sanitizeModel<T>(model: T): T {
         for (const key in model) {
             if (model.hasOwnProperty(key)) {
                 const value = model[key];
-                if (key === 'user' && value) {
-                    // Remove the email field from the User object
-                    const user = value as User;
-                    delete user.email;
-                } else {
-                    model[key] = sanitizeModel(value);
+                if (typeof value === 'object' && value !== null) {
+                    // Check if the object has an "email" property
+                    if (value.hasOwnProperty('email')) {
+                        //@ts-ignore
+                        delete value.email;
+                    } else {
+                        sanitizeModel(value);
+                    }
                 }
             }
         }
