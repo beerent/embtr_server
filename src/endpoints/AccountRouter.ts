@@ -15,7 +15,7 @@ import rateLimit from 'express-rate-limit';
 
 const limiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 3, // limit each IP to 100 requests per windowMs
+    max: 3000, // limit each IP to 100 requests per windowMs
     onLimitReached: (req, res, options) => {
         res.status(429).end('Too many requests, please try again later.');
     },
