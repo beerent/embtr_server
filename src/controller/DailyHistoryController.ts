@@ -18,6 +18,7 @@ export class DailyHistoryController {
                     select: {
                         status: true,
                     },
+                    where: { active: true },
                 },
             },
         });
@@ -31,7 +32,9 @@ export class DailyHistoryController {
         startDateUtc.setUTCHours(0, 0, 0, 0);
 
         for (let d = new Date(startDateUtc); d <= endDateUtc; d.setDate(d.getDate() + 1)) {
-            const day = plannedDays.find((plannedDay) => plannedDay.date.toDateString() === d.toDateString());
+            const day = plannedDays.find(
+                (plannedDay) => plannedDay.date.toDateString() === d.toDateString()
+            );
 
             if (!day) {
                 history.push({
@@ -40,7 +43,9 @@ export class DailyHistoryController {
                     complete: false,
                 });
             } else {
-                const complete = day.plannedTasks.length > 0 && day.plannedTasks.every((task) => task.status === 'COMPLETE');
+                const complete =
+                    day.plannedTasks.length > 0 &&
+                    day.plannedTasks.every((task) => task.status === 'COMPLETE');
                 history.push({
                     date: day.date,
                     dayKey: day.dayKey,
