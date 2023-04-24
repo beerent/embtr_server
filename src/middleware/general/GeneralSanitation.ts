@@ -1,5 +1,3 @@
-import { User } from '@resources/schema';
-
 export function sanitizeModel<T>(model: T): T {
     if (!model) {
         return model;

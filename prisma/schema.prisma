@@ -214,3 +214,13 @@ model Widget {
   @@unique([userId, type])
   @@map("widget")
 }
+
+model Metadata {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(255)
+  value     String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("metadata")
+}

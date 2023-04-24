@@ -8,6 +8,7 @@ import {
     PlannedDayResult,
     Notification,
     UserPost,
+    Metadata,
 } from '@prisma/client';
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
 
@@ -20,7 +21,8 @@ type PrismaModel =
     | UserPost
     | Notification
     | Widget
-    | WidgetType;
+    | WidgetType
+    | Metadata;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

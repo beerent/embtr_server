@@ -132,6 +132,7 @@ export interface Notification {
   toUser?: User;
   read?: boolean;
   summary?: string;
+  nonsense?: string;
   targetPage?: NotificationTargetPage;
   targetId?: number;
   createdAt?: Date;
@@ -144,7 +145,16 @@ export interface Widget {
   order?: number;
   user?: User;
   userId?: number;
+  nonsense?: string;
   active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Metadata {
+  id?: number;
+  key?: string;
+  value?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
