@@ -2,6 +2,7 @@ import {
     GetUserResponse,
     CreateUserResponse,
     UpdateUserRequest,
+    GetUsersResponse,
 } from '@resources/types/requests/UserTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import {
@@ -84,5 +85,15 @@ export class UserService {
 
         await UserController.update(uid, { ...body });
         return SUCCESS;
+    }
+
+    public static async search(query: string): Promise<GetUsersResponse> {
+        const users = await UserController.search(query);
+        if (users) {
+            const userModels: User[] = ModelConverter.convertAll(users);
+            return { ...GET_USER_SUCCESS, users: userModels };
+        }
+
+        return GET_USER_FAILED_NOT_FOUND;
     }
 }

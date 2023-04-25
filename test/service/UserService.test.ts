@@ -94,7 +94,7 @@ describe('user service tests', () => {
             expect(response.body.user).toBeUndefined();
         });
 
-        test.only('get current user without user returns resource not found', async () => {
+        test('get current user without user returns resource not found', async () => {
             const response = await request(app)
                 .get(`${USER}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITHOUT_USER.token}`)
@@ -365,6 +365,38 @@ describe('user service tests', () => {
             const user = await UserController.getByUid(USER_ACCOUNT_WITH_USER_ROLE.user.uid);
 
             expect(user?.location).toEqual(initialLocation);
+        });
+    });
+
+    describe.only('search users', () => {
+        test('unathenticated', async () => {
+            const response = await request(app)
+                .get(`${USER}search?query=test`)
+                .set('Authorization', 'Bearer Trash')
+                .send();
+
+            expect(response.status).toEqual(UNAUTHORIZED.httpCode);
+            expect(response.body.user).toBeUndefined();
+        });
+
+        test('unauthorized', async () => {
+            const response = await request(app)
+                .get(`${USER}search?query=test`)
+                .set('Authorization', `Bearer ${USER_ACCOUNT_WITH_NO_ROLES.token}`)
+                .send();
+
+            expect(response.status).toEqual(FORBIDDEN.httpCode);
+        });
+
+        test('success', async () => {
+            const response = await request(app)
+                .get(`/user/search`)
+                .query({ query: 'test' })
+                .set('Authorization', `Bearer ${USER_ACCOUNT_WITH_USER_ROLE.token}`)
+                .send();
+
+            expect(response.status).toEqual(SUCCESS.httpCode);
+            expect(response.body.users).toBeDefined();
         });
     });
 });

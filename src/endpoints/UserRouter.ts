@@ -1,5 +1,5 @@
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
-import { GetUserResponse } from '@resources/types/requests/UserTypes';
+import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
 import {
     authenticate,
     authenticateCreateUser as authenticateGetCurrentUser,
@@ -16,6 +16,18 @@ import { UserService } from '@src/service/UserService';
 import express from 'express';
 
 const userRouter = express.Router();
+
+userRouter.get(
+    '/search',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const query = req.query.query as string;
+        const response: GetUsersResponse = await UserService.search(query);
+
+        res.status(response.httpCode).json(response);
+    })
+);
 
 userRouter.get(
     '/:uid',

@@ -15,6 +15,7 @@ export class AccountController {
         try {
             user = await firebase.auth().createUser({
                 email,
+                displayName: email,
                 password,
             });
 

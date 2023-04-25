@@ -24,6 +24,27 @@ export class UserController {
         return user;
     }
 
+    public static async search(query: string): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                OR: [
+                    {
+                        username: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        displayName: {
+                            contains: query,
+                        },
+                    },
+                ],
+            },
+        });
+
+        return users;
+    }
+
     public static async create(uid: string, email: string): Promise<User | null> {
         const newUser = await prisma.user.create({
             data: {
