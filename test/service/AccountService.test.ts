@@ -144,7 +144,7 @@ describe('account service tests', () => {
             expect(response.body).toEqual(SUCCESS);
         });
 
-        test.only('forgot password email sends an email', async () => {
+        test('forgot password email sends an email', async () => {
             const body: ForgotAccountPasswordRequest = { email: ACCOUNT_THAT_EXISTS };
             await request(app).post('/account/forgot_password').send(body);
 

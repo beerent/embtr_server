@@ -64,4 +64,12 @@ accountRouter.post(
     })
 );
 
+accountRouter.post(
+    '/refresh_token',
+    runEndpoint(async (req, res) => {
+        const response: AuthenticationResponse = await AccountService.refreshToken(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
 export default accountRouter;

@@ -9,6 +9,7 @@ import {
     SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
     SUCCESS,
+    GENERAL_FAILURE,
 } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
 import { CreateAccountResult, AccountController } from '@src/controller/AccountController';
@@ -26,6 +27,10 @@ import {
     Response,
 } from '@resources/types/requests/RequestTypes';
 import { logger } from '@src/common/logger/Logger';
+import { Request } from 'express';
+import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { UserController } from '@src/controller/UserController';
+import { TokenCache } from '@src/general/auth/TokenCache';
 
 interface EmailVerificationLink {
     link: string;
@@ -102,6 +107,25 @@ export class AccountService {
         }
 
         return { ...SUCCESS, token: idToken };
+    }
+
+    public static async refreshToken(req: Request) {
+        const uid = await AuthorizationController.getUidFromToken(req.headers.authorization!);
+        if (!uid) {
+            return { ...GENERAL_FAILURE, message: 'failed to refresh token' };
+        }
+
+        await AccountController.updateCustomClaim(uid, 'userId', undefined);
+
+        const user = await UserController.getByUid(uid);
+        if (!user) {
+            return { ...GENERAL_FAILURE, message: 'failed to refresh token' };
+        }
+
+        await AccountController.updateCustomClaim(uid, 'userId', user.id);
+        await TokenCache.invalidateToken(req.headers.authorization!);
+
+        return { ...SUCCESS };
     }
 
     private static getInvalidRequestResponse(request: CreateAccountRequest): Response {

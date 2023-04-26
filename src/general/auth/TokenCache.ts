@@ -4,7 +4,9 @@ import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
 export class TokenCache {
     private static tokenCache: Map<string, DecodedIdToken> = new Map();
 
-    public static async getDecodedToken(authorizationHeader: string): Promise<DecodedIdToken | undefined> {
+    public static async getDecodedToken(
+        authorizationHeader: string
+    ): Promise<DecodedIdToken | undefined> {
         const encodedToken = this.getBearerToken(authorizationHeader);
         if (!encodedToken) {
             return undefined;
@@ -18,6 +20,15 @@ export class TokenCache {
         decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
 
         return decodedToken;
+    }
+
+    public static async invalidateToken(authorizationHeader: string): Promise<void> {
+        const encodedToken = this.getBearerToken(authorizationHeader);
+        if (!encodedToken) {
+            return;
+        }
+
+        this.tokenCache.delete(encodedToken);
     }
 
     private static getBearerToken(authorization: string) {
@@ -36,8 +47,12 @@ export class TokenCache {
         return authorization.startsWith('Bearer ');
     }
 
-    private static async decodeAndAddTokenToCache(token: string): Promise<DecodedIdToken | undefined> {
-        const decodedToken: DecodedIdToken | undefined = await this.getDecodedTokenFromFirebase(token);
+    private static async decodeAndAddTokenToCache(
+        token: string
+    ): Promise<DecodedIdToken | undefined> {
+        const decodedToken: DecodedIdToken | undefined = await this.getDecodedTokenFromFirebase(
+            token
+        );
         if (!decodedToken) {
             return undefined;
         }
