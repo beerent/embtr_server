@@ -1,9 +1,15 @@
 import { prisma } from '@database/prisma';
 import { NotificationTargetPage } from '@prisma/client';
-import { Notification, NotificationTargetPage as NotificationTargetPageModel } from '@resources/schema';
+import { NotificationTargetPage as NotificationTargetPageModel } from '@resources/schema';
 
 export class NotificationController {
-    public static async create(toUser: number, fromUser: number, summary: string, targetPage: NotificationTargetPageModel, targetId: number) {
+    public static async create(
+        toUser: number,
+        fromUser: number,
+        summary: string,
+        targetPage: NotificationTargetPageModel,
+        targetId: number
+    ) {
         const result = await prisma.notification.create({
             data: {
                 toUser: {
@@ -44,6 +50,9 @@ export class NotificationController {
             include: {
                 fromUser: true,
             },
+            orderBy: {
+                createdAt: 'desc',
+            },
         });
 
         return result;
@@ -61,6 +70,9 @@ export class NotificationController {
             },
             include: {
                 fromUser: true,
+            },
+            orderBy: {
+                createdAt: 'desc',
             },
         });
 
