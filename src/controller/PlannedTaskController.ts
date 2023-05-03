@@ -1,28 +1,40 @@
 import { prisma } from '@database/prisma';
-import { PlannedDay, PlannedTask, Task } from '@prisma/client';
+import { PlannedDay, PlannedTask, Task, Habit } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel } from '@resources/schema';
-import { DailyHistory, DayResult } from '@resources/types/widget/DailyHistory';
 
 export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
 
 export class PlannedTaskController {
-    public static async create(plannedDay: PlannedDay, task: Task): Promise<PlannedTask | null> {
-        return await prisma.plannedTask.create({
-            data: {
-                plannedDay: {
-                    connect: {
-                        id: plannedDay.id,
-                    },
+    public static async create(
+        plannedDay: PlannedDay,
+        task: Task,
+        habit?: Habit
+    ): Promise<PlannedTask | null> {
+        const data = {
+            plannedDay: {
+                connect: {
+                    id: plannedDay.id,
                 },
-                task: {
-                    connect: {
-                        id: task.id,
-                    },
-                },
-                status: 'INCOMPLETE',
-                active: true,
             },
-        });
+            task: {
+                connect: {
+                    id: task.id,
+                },
+            },
+            habit: {},
+            status: 'INCOMPLETE',
+            active: true,
+        };
+
+        if (habit !== undefined) {
+            data.habit = {
+                connect: {
+                    id: habit.id,
+                },
+            };
+        }
+
+        return await prisma.plannedTask.create({ data });
     }
 
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
@@ -58,7 +70,11 @@ export class PlannedTaskController {
         });
     }
 
-    public static async deleteByUserIdAndPlannedDayIdAndTaskId(userId: number, plannedDayId: number, taskId: number) {
+    public static async deleteByUserIdAndPlannedDayIdAndTaskId(
+        userId: number,
+        plannedDayId: number,
+        taskId: number
+    ) {
         return await prisma.plannedTask.deleteMany({
             where: {
                 plannedDay: {

@@ -9,6 +9,7 @@ import userPostRouter from './endpoints/UserPostRouter';
 import notificationRouter from './endpoints/NotificationRouter';
 import widgetRouter from './endpoints/WidgetRouter';
 import metadataRouter from './endpoints/MetadataRouter';
+import habitRouter from './endpoints/HabitRouter';
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
 
@@ -24,10 +25,15 @@ app.use(
 
 app.use(bodyParser.json());
 
-app.use((req, res, next): void => {
+app.use((req, res, next) => {
+    const startTime = Date.now();
     const oldSend = res.send;
-    res.send = function (this: Response, data: any): any {
-        logger.info(`Response for ${req.method} ${req.baseUrl}${req.path}: ${data}`);
+    res.send = function (data) {
+        const endTime = Date.now();
+        const elapsedTime = endTime - startTime;
+        logger.info(
+            `Response for ${req.method} ${req.baseUrl}${req.path} [${elapsedTime}ms]: ${data}`
+        );
         return oldSend.apply(this, arguments as any);
     };
 
@@ -43,6 +49,7 @@ app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
 app.use('/widget', widgetRouter);
 app.use('/metadata', metadataRouter);
+app.use('/habit', habitRouter);
 app.use('/health', (req, res) => res.send('OK'));
 
 app.use(handleError);

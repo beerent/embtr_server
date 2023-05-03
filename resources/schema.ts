@@ -18,6 +18,7 @@ export interface User {
   comments?: Comment[];
   likes?: Like[];
   widgets?: Widget[];
+  taskHabitPreference?: TaskHabitPreference[];
 }
 
 export interface PushNotificationToken {
@@ -38,6 +39,7 @@ export interface Task {
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
+  taskHabitPreference?: TaskHabitPreference[];
 }
 
 export interface PlannedDay {
@@ -58,7 +60,34 @@ export interface PlannedTask {
   plannedDay?: PlannedDay;
   taskId?: number;
   task?: Task;
+  habitId?: number;
+  habit?: Habit;
   status?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Habit {
+  id?: number;
+  title?: string;
+  description?: string;
+  iconSource?: string;
+  iconName?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  plannedTasks?: PlannedTask[];
+  taskHabitPreference?: TaskHabitPreference[];
+}
+
+export interface TaskHabitPreference {
+  id?: number;
+  userId?: number;
+  user?: User;
+  taskId?: number;
+  task?: Task;
+  habitId?: number;
+  habit?: Habit;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

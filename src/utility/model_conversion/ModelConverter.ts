@@ -9,6 +9,8 @@ import {
     Notification,
     UserPost,
     Metadata,
+    Habit,
+    TaskHabitPreference,
 } from '@prisma/client';
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
 
@@ -22,7 +24,9 @@ type PrismaModel =
     | Notification
     | Widget
     | WidgetType
-    | Metadata;
+    | Metadata
+    | Habit
+    | TaskHabitPreference;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

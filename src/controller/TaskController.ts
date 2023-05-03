@@ -12,7 +12,6 @@ export class TaskController {
 
         return task;
     }
-
     public static async getByTitle(title: string): Promise<Task | null> {
         const task = await prisma.task.findUnique({
             where: {
@@ -23,11 +22,21 @@ export class TaskController {
         return task;
     }
 
-    public static async getAllLikeTitle(title: string): Promise<Task[]> {
+    public static async getAllLikeTitle(userId: number, title: string): Promise<Task[]> {
         const tasks = await prisma.task.findMany({
             where: {
                 title: {
                     startsWith: title,
+                },
+            },
+            include: {
+                taskHabitPreference: {
+                    include: {
+                        habit: true,
+                    },
+                    where: {
+                        userId: userId,
+                    },
                 },
             },
         });
@@ -39,7 +48,11 @@ export class TaskController {
         return [];
     }
 
-    public static async create(title: string, description?: string, createdById?: number): Promise<Task | null> {
+    public static async create(
+        title: string,
+        description?: string,
+        createdById?: number
+    ): Promise<Task | null> {
         return prisma.task.create({
             data: {
                 title,

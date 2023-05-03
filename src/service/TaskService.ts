@@ -1,13 +1,30 @@
 import { Task } from '@prisma/client';
 import { Task as TaskModel } from '@resources/schema';
-import { SearchTasksResponse, GetTaskResponse, CreateTaskRequest, CreateTaskResponse } from '@resources/types/requests/TaskTypes';
-import { CREATE_TASK_FAILED_ALREADY_EXISTS, GET_TASK_FAILED_NOT_FOUND, GET_TASK_SUCCESS, SUCCESS } from '@src/common/RequestResponses';
+import {
+    SearchTasksResponse,
+    GetTaskResponse,
+    CreateTaskRequest,
+    CreateTaskResponse,
+} from '@resources/types/requests/TaskTypes';
+import {
+    CREATE_TASK_FAILED_ALREADY_EXISTS,
+    GET_TASK_FAILED_NOT_FOUND,
+    GET_TASK_SUCCESS,
+    SUCCESS,
+} from '@src/common/RequestResponses';
+import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { TaskController } from '@src/controller/TaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { Request } from 'express';
 
 export class TaskService {
-    public static async search(query: string): Promise<SearchTasksResponse> {
-        const tasks: Task[] = await TaskController.getAllLikeTitle(query);
+    public static async search(request: Request): Promise<SearchTasksResponse> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+        const query: string = request.query.q as string;
+
+        const tasks: Task[] = await TaskController.getAllLikeTitle(userId, query);
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };

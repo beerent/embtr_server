@@ -17,3 +17,7 @@ export interface CreateTaskRequest {
 export interface CreateTaskResponse extends Response {
   task?: TaskModel;
 }
+
+export interface UpdateTaskHabitPreferenceRequest {
+  habitId: number;
+}

@@ -1,6 +1,15 @@
+import { Habit } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel, PlannedDay as PlannedDayModel } from '@resources/schema';
-import { CreatePlannedDayResponse, GetPlannedDayRequest, GetPlannedDayResponse } from '@resources/types/requests/PlannedDayTypes';
-import { CreatePlannedTaskRequest, UpdatePlannedTaskRequest, UpdatePlannedTaskResponse } from '@resources/types/requests/PlannedTaskTypes';
+import {
+    CreatePlannedDayResponse,
+    GetPlannedDayRequest,
+    GetPlannedDayResponse,
+} from '@resources/types/requests/PlannedDayTypes';
+import {
+    CreatePlannedTaskRequest,
+    UpdatePlannedTaskRequest,
+    UpdatePlannedTaskResponse,
+} from '@resources/types/requests/PlannedTaskTypes';
 import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
@@ -10,10 +19,12 @@ import {
     CREATE_PLANNED_TASK_UNKNOWN_TASK,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
+    RESOURCE_NOT_FOUND,
     SUCCESS,
     UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { HabitController } from '@src/controller/HabitController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
@@ -33,7 +44,10 @@ export class PlannedDayService {
     }
 
     public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
-        const plannedDay = await PlannedDayController.getByUserAndDayKey(request.userId, request.dayKey);
+        const plannedDay = await PlannedDayController.getByUserAndDayKey(
+            request.userId,
+            request.dayKey
+        );
 
         if (plannedDay) {
             const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
@@ -44,7 +58,9 @@ export class PlannedDayService {
     }
 
     public static async create(request: Request): Promise<CreatePlannedDayResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
         const dayKey = request.body.dayKey;
 
         const date = new Date(dayKey);
@@ -65,7 +81,9 @@ export class PlannedDayService {
 
     public static async createPlannedTask(request: Request): Promise<CreatePlannedDayResponse> {
         const body: CreatePlannedTaskRequest = request.body;
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
 
         //todo add test for userId comparison
         const plannedDay = await PlannedDayController.get(body.plannedDayId);
@@ -78,7 +96,21 @@ export class PlannedDayService {
             return CREATE_PLANNED_TASK_UNKNOWN_TASK;
         }
 
-        const createdPlannedTask = await PlannedTaskController.create(plannedDay, task);
+        let habit = undefined;
+        if (body.habitId) {
+            habit = await HabitController.get(body.habitId);
+        }
+
+        if (body.habitId && !habit) {
+            return { ...RESOURCE_NOT_FOUND, message: 'Habit not found' };
+        }
+
+        const createdPlannedTask = await PlannedTaskController.create(
+            plannedDay,
+            task,
+            habit ?? undefined
+        );
+
         if (createdPlannedTask) {
             return SUCCESS;
         }
@@ -90,7 +122,9 @@ export class PlannedDayService {
         const updateRequest: UpdatePlannedTaskRequest = request.body;
 
         //todo validate user id
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
 
         const plannedTask = await PlannedTaskController.get(updateRequest.plannedTask!.id!);
         if (!plannedTask) {
@@ -99,7 +133,8 @@ export class PlannedDayService {
 
         const updatedPlannedTask = await PlannedTaskController.update(updateRequest.plannedTask);
         if (updatedPlannedTask) {
-            const updatedPlannedTaskModel: PlannedTaskModel = ModelConverter.convert(updatedPlannedTask);
+            const updatedPlannedTaskModel: PlannedTaskModel =
+                ModelConverter.convert(updatedPlannedTask);
             return { ...SUCCESS, plannedTask: updatedPlannedTaskModel };
         }
 
