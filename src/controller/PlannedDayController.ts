@@ -15,6 +15,7 @@ export const PlannedDayInclude = {
             habit: true,
         },
     },
+    plannedDayResults: true,
 } satisfies Prisma.PlannedDayInclude;
 
 export class PlannedDayController {
