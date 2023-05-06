@@ -85,4 +85,21 @@ export class PlannedTaskController {
             },
         });
     }
+
+    public static async getRecent(userId: number, limit: number) {
+        const result = await prisma.plannedTask.groupBy({
+            by: ['taskId', 'createdAt'],
+            where: {
+                plannedDay: {
+                    userId,
+                },
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+            take: limit,
+        });
+
+        return result;
+    }
 }

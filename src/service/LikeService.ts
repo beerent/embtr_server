@@ -46,7 +46,7 @@ export class LikeService {
                 : result.userPosts[0].userId,
             userId,
             interactable === Interactable.PLANNED_DAY_RESULT
-                ? NotificationType.PLANNED_DAY_RESULT_COMMENT
+                ? NotificationType.PLANNED_DAY_RESULT_LIKE
                 : NotificationType.TIMELINE_LIKE,
             targetId
         );

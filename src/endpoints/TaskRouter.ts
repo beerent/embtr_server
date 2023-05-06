@@ -11,12 +11,11 @@ import express from 'express';
 const taskRouter = express.Router();
 
 taskRouter.get(
-    '/',
+    '/recent',
     authenticate,
     authorize,
-    validateSearchTasks,
     runEndpoint(async (req, res) => {
-        const response = await TaskService.search(req);
+        const response = await TaskService.recent(req);
         res.status(response.httpCode).json(response);
     })
 );
@@ -29,6 +28,17 @@ taskRouter.get(
         const id = req.params.id;
 
         const response = await TaskService.get(id);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+taskRouter.get(
+    '/',
+    authenticate,
+    authorize,
+    validateSearchTasks,
+    runEndpoint(async (req, res) => {
+        const response = await TaskService.search(req);
         res.status(response.httpCode).json(response);
     })
 );

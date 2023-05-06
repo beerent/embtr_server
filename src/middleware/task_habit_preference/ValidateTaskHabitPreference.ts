@@ -9,7 +9,7 @@ export const validateTaskHabitPreference = (req: Request, res: Response, next: N
         }).parse(req.params);
 
         z.object({
-            habitId: z.coerce.number(),
+            habitId: z.coerce.number().optional(),
         }).parse(req.body);
     } catch (error) {
         return res.status(INVALID_REQUEST.httpCode).json(INVALID_REQUEST);

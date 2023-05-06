@@ -12,6 +12,30 @@ export class TaskController {
 
         return task;
     }
+
+    public static async getByIds(userId: number, ids: number[]): Promise<Task[]> {
+        const tasks = await prisma.task.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            include: {
+                taskHabitPreference: {
+                    include: {
+                        habit: true,
+                    },
+                    where: {
+                        userId: userId,
+                        active: true,
+                    },
+                },
+            },
+        });
+
+        return tasks;
+    }
+
     public static async getByTitle(title: string): Promise<Task | null> {
         const task = await prisma.task.findUnique({
             where: {
@@ -36,6 +60,7 @@ export class TaskController {
                     },
                     where: {
                         userId: userId,
+                        active: true,
                     },
                 },
             },

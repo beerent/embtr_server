@@ -368,7 +368,7 @@ describe('user service tests', () => {
         });
     });
 
-    describe.only('search users', () => {
+    describe('search users', () => {
         test('unathenticated', async () => {
             const response = await request(app)
                 .get(`${USER}search?query=test`)

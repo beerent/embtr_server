@@ -13,6 +13,7 @@ import {
     SUCCESS,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
@@ -57,5 +58,20 @@ export class TaskService {
         }
 
         return CREATE_TASK_FAILED_ALREADY_EXISTS;
+    }
+
+    public static async recent(request: Request): Promise<SearchTasksResponse> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+
+        const results = await PlannedTaskController.getRecent(userId, 5);
+        const tasks: Task[] = await TaskController.getByIds(
+            userId,
+            results.map((result) => result.taskId)
+        );
+        const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
+
+        return { ...SUCCESS, tasks: taskModels };
     }
 }
