@@ -70,6 +70,13 @@ export class TaskService {
             userId,
             results.map((result) => result.taskId)
         );
+        //sort tasks to match order of results
+        tasks.sort((a, b) => {
+            return (
+                results.findIndex((result) => result.taskId === a.id) -
+                results.findIndex((result) => result.taskId === b.id)
+            );
+        });
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };
