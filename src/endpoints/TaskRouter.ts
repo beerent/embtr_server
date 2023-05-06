@@ -21,6 +21,16 @@ taskRouter.get(
 );
 
 taskRouter.get(
+    '/recommended',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const response = await TaskService.recommended(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+taskRouter.get(
     '/:id',
     authenticate,
     authorize,

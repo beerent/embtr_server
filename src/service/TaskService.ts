@@ -13,6 +13,7 @@ import {
     SUCCESS,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { MetadataController } from '@src/controller/MetadataController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
@@ -58,6 +59,23 @@ export class TaskService {
         }
 
         return CREATE_TASK_FAILED_ALREADY_EXISTS;
+    }
+
+    public static async recommended(request: Request): Promise<SearchTasksResponse> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+
+        const recommendedIds = await MetadataController.get('RECOMMENDED_TASKS');
+        if (!recommendedIds) {
+            return { ...SUCCESS, tasks: [] };
+        }
+
+        const ids = recommendedIds.value.split(',').map((id) => Number(id));
+        const tasks: Task[] = await TaskController.getByIds(userId, ids);
+        const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
+
+        return { ...SUCCESS, tasks: taskModels };
     }
 
     public static async recent(request: Request): Promise<SearchTasksResponse> {

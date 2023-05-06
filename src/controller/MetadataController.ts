@@ -5,4 +5,13 @@ export class MetadataController {
         const allMetadata = await prisma.metadata.findMany();
         return allMetadata;
     }
+    public static async get(key: string) {
+        const metadata = await prisma.metadata.findUnique({
+            where: {
+                key,
+            },
+        });
+
+        return metadata;
+    }
 }
