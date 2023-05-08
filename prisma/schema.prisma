@@ -220,7 +220,6 @@ model Notification {
   toUser     User                   @relation("toUser", fields: [toUserId], references: [id], onDelete: Cascade)
   read       Boolean                @default(false)
   summary    String                 @db.VarChar(255)
-  nonsense   String?                @db.VarChar(255)
   targetPage NotificationTargetPage
   targetId   Int                    @db.Int
   createdAt  DateTime               @default(now())
@@ -246,7 +245,6 @@ model Widget {
   order     Int        @db.Int
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int        @db.Int
-  nonsense  String?    @db.VarChar(255)
   active    Boolean    @default(true)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
