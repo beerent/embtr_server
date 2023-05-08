@@ -1,5 +1,9 @@
 import { Habit } from '@prisma/client';
-import { PlannedTask as PlannedTaskModel, PlannedDay as PlannedDayModel } from '@resources/schema';
+import {
+    PlannedTask as PlannedTaskModel,
+    PlannedDay as PlannedDayModel,
+    PlannedTask,
+} from '@resources/schema';
 import {
     CreatePlannedDayResponse,
     GetPlannedDayRequest,
@@ -79,7 +83,7 @@ export class PlannedDayService {
         return CREATE_PLANNED_DAY_FAILED;
     }
 
-    public static async createPlannedTask(request: Request): Promise<CreatePlannedDayResponse> {
+    public static async createPlannedTask(request: Request): Promise<UpdatePlannedTaskResponse> {
         const body: CreatePlannedTaskRequest = request.body;
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
@@ -112,7 +116,8 @@ export class PlannedDayService {
         );
 
         if (createdPlannedTask) {
-            return SUCCESS;
+            const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
+            return { ...SUCCESS, plannedTask: plannedTaskModel };
         }
 
         return CREATE_PLANNED_TASK_FAILED;

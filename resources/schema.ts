@@ -62,8 +62,9 @@ export interface PlannedTask {
   task?: Task;
   habitId?: number;
   habit?: Habit;
+  count?: number;
+  completedCount?: number;
   status?: string;
-  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -1,5 +1,8 @@
 import { Comment, Image, Like } from '@resources/schema';
 
+// Debugging is hard, But every fix brings us close To perfection's goal.
+//   - itzhapp - 2021-05-07
+
 export class CommonUpserts {
     /*
      * CREATES

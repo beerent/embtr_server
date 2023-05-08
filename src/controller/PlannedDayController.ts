@@ -7,7 +7,7 @@ export const PlannedDayInclude = {
     user: true,
     plannedTasks: {
         where: {
-            active: true,
+            count: { gte: 1 },
         },
         include: {
             task: true,

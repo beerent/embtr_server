@@ -18,7 +18,11 @@ export class DailyHistoryController {
                     select: {
                         status: true,
                     },
-                    where: { active: true },
+                    where: {
+                        count: {
+                            gte: 1,
+                        },
+                    },
                 },
             },
         });

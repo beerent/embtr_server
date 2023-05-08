@@ -23,7 +23,7 @@ export class PlannedTaskController {
             },
             habit: {},
             status: 'INCOMPLETE',
-            active: true,
+            count: 1,
         };
 
         if (habit !== undefined) {
@@ -34,12 +34,27 @@ export class PlannedTaskController {
             };
         }
 
-        return await prisma.plannedTask.create({ data });
+        return await prisma.plannedTask.upsert({
+            create: data,
+            update: {
+                count: { increment: 1 },
+            },
+            where: {
+                unique_planned_day_task: {
+                    plannedDayId: plannedDay.id,
+                    taskId: task.id,
+                },
+            },
+        });
     }
 
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
         const status = plannedTask.status !== undefined ? { status: plannedTask.status } : {};
-        const active = plannedTask.active !== undefined ? { active: plannedTask.active } : {};
+        const count = plannedTask.count !== undefined ? { count: plannedTask.count } : {};
+        const completedCount =
+            plannedTask.completedCount !== undefined
+                ? { completedCount: plannedTask.completedCount }
+                : {};
 
         const result = await prisma.plannedTask.update({
             where: {
@@ -47,7 +62,8 @@ export class PlannedTaskController {
             },
             data: {
                 ...status,
-                ...active,
+                ...count,
+                ...completedCount,
             },
             include: {
                 task: true,
@@ -62,6 +78,21 @@ export class PlannedTaskController {
         return await prisma.plannedTask.findUnique({
             where: {
                 id,
+            },
+            include: {
+                task: true,
+                plannedDay: true,
+            },
+        });
+    }
+
+    public static async getByPlannedDayIdAndTaskId(plannedDayId: number, taskId: number) {
+        return await prisma.plannedTask.findUnique({
+            where: {
+                unique_planned_day_task: {
+                    plannedDayId,
+                    taskId,
+                },
             },
             include: {
                 task: true,

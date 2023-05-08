@@ -75,18 +75,20 @@ model PlannedDay {
 }
 
 model PlannedTask {
-  id           Int        @id @default(autoincrement())
-  plannedDayId Int        @db.Int
-  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  taskId       Int        @db.Int
-  task         Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  habitId      Int?       @db.Int
-  habit        Habit?     @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  status       String     @db.VarChar(225)
-  active       Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id             Int        @id @default(autoincrement())
+  plannedDayId   Int        @db.Int
+  plannedDay     PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  taskId         Int        @db.Int
+  task           Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  habitId        Int?       @db.Int
+  habit          Habit?     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  count          Int        @default(1) @db.Int
+  completedCount Int        @default(0) @db.Int
+  status         String     @db.VarChar(225)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
+  @@unique([plannedDayId, taskId], name: "unique_planned_day_task")
   @@index([plannedDayId], name: "planned_day_id")
   @@index([taskId], name: "task_id")
   @@index([habitId], name: "habit_id")

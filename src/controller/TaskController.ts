@@ -78,13 +78,15 @@ export class TaskController {
         description?: string,
         createdById?: number
     ): Promise<Task | null> {
-        return prisma.task.create({
+        const result = await prisma.task.create({
             data: {
                 title,
                 description,
                 createdById,
             },
         });
+
+        return result;
     }
 
     public static async deleteByTitle(title: string): Promise<void> {
