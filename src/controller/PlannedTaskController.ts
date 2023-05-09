@@ -38,6 +38,7 @@ export class PlannedTaskController {
             create: data,
             update: {
                 count: { increment: 1 },
+                habit: data.habit,
             },
             where: {
                 unique_planned_day_task: {
@@ -51,6 +52,10 @@ export class PlannedTaskController {
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
         const status = plannedTask.status !== undefined ? { status: plannedTask.status } : {};
         const count = plannedTask.count !== undefined ? { count: plannedTask.count } : {};
+        const habit =
+            plannedTask.habitId !== undefined
+                ? { habitId: plannedTask.habitId }
+                : { habitId: null };
         const completedCount =
             plannedTask.completedCount !== undefined
                 ? { completedCount: plannedTask.completedCount }
@@ -62,6 +67,7 @@ export class PlannedTaskController {
             },
             data: {
                 ...status,
+                ...habit,
                 ...count,
                 ...completedCount,
             },
