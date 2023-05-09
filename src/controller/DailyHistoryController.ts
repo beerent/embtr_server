@@ -17,6 +17,8 @@ export class DailyHistoryController {
                 plannedTasks: {
                     select: {
                         status: true,
+                        count: true,
+                        completedCount: true,
                     },
                     where: {
                         count: {
@@ -49,7 +51,11 @@ export class DailyHistoryController {
             } else {
                 const complete =
                     day.plannedTasks.length > 0 &&
-                    day.plannedTasks.every((task) => task.status === 'COMPLETE');
+                    (day.plannedTasks.every((task) => task.status === 'COMPLETE') ||
+                        day.plannedTasks.every(
+                            (task) =>
+                                task.status === 'INCOMPLETE' && task.count === task.completedCount
+                        ));
                 history.push({
                     date: day.date,
                     dayKey: day.dayKey,
