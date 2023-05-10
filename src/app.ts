@@ -10,6 +10,7 @@ import notificationRouter from './endpoints/NotificationRouter';
 import widgetRouter from './endpoints/WidgetRouter';
 import metadataRouter from './endpoints/MetadataRouter';
 import habitRouter from './endpoints/HabitRouter';
+import quoteOfTheDayRouter from './endpoints/QuoteOfTheDayRouter';
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
 
@@ -50,6 +51,7 @@ app.use('/notification', notificationRouter);
 app.use('/widget', widgetRouter);
 app.use('/metadata', metadataRouter);
 app.use('/habit', habitRouter);
+app.use('/quote-of-the-day', quoteOfTheDayRouter);
 app.use('/health', (req, res) => res.send('OK'));
 
 app.use(handleError);

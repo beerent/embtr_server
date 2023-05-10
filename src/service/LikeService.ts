@@ -13,6 +13,7 @@ import {
 import { LikeController } from '@src/controller/common/LikeController';
 import { UserPostController } from '@src/controller/UserPostController';
 import { Interactable } from '@resources/types/interactable/Interactable';
+import { QuoteOfTheDayController } from '@src/controller/QuoteOfTheDayController';
 
 export class LikeService {
     public static async create(interactable: Interactable, request: Request): Promise<Response> {
@@ -40,21 +41,25 @@ export class LikeService {
             return CREATE_PLANNED_DAY_RESULT_LIKE_FAILED;
         }
 
-        await NotificationService.createNotification(
-            interactable === Interactable.PLANNED_DAY_RESULT
+        const toUserId =
+            interactable === Interactable.USER_POST
+                ? result.userPosts[0].userId
+                : interactable === Interactable.PLANNED_DAY_RESULT
                 ? result.plannedDayResults[0].plannedDay.userId
-                : result.userPosts[0].userId,
-            userId,
+                : result.quoteOfTheDays[0].userId;
+        const notificationType =
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? NotificationType.PLANNED_DAY_RESULT_LIKE
-                : NotificationType.TIMELINE_LIKE,
-            targetId
-        );
+                : interactable === Interactable.USER_POST
+                ? NotificationType.TIMELINE_LIKE
+                : NotificationType.QUOTE_LIKE;
+        await NotificationService.createNotification(toUserId, userId, notificationType, targetId);
         return SUCCESS;
     }
 
     private static async exists(interactable: Interactable, targetId: number): Promise<boolean> {
         let exists = false;
+
         switch (interactable) {
             case Interactable.PLANNED_DAY_RESULT:
                 exists = await PlannedDayResultController.existsById(targetId);
@@ -62,6 +67,10 @@ export class LikeService {
 
             case Interactable.USER_POST:
                 exists = await UserPostController.existsById(targetId);
+                break;
+
+            case Interactable.QUOTE_OF_THE_DAY:
+                exists = await QuoteOfTheDayController.existsById(targetId);
                 break;
         }
 

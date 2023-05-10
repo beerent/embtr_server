@@ -24,6 +24,12 @@ export class LikeController {
                     id,
                 },
             };
+        } else if (interactable === Interactable.QUOTE_OF_THE_DAY) {
+            data.quoteOfTheDays = {
+                connect: {
+                    id,
+                },
+            };
         }
 
         const result = await prisma.like.create({
@@ -36,6 +42,7 @@ export class LikeController {
                         plannedDay: true,
                     },
                 },
+                quoteOfTheDays: true,
             },
         });
 
@@ -78,6 +85,12 @@ export class LikeController {
             };
         } else if (interactable === Interactable.USER_POST) {
             where.userPosts = {
+                some: {
+                    id: targetId,
+                },
+            };
+        } else if (interactable === Interactable.QUOTE_OF_THE_DAY) {
+            where.quoteOfTheDays = {
                 some: {
                     id: targetId,
                 },

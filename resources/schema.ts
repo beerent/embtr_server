@@ -19,6 +19,7 @@ export interface User {
   likes?: Like[];
   widgets?: Widget[];
   taskHabitPreference?: TaskHabitPreference[];
+  quoteOfTheDay?: QuoteOfTheDay[];
 }
 
 export interface PushNotificationToken {
@@ -142,6 +143,7 @@ export interface Like {
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
+  quoteOfTheDays?: QuoteOfTheDay[];
 }
 
 export interface Image {
@@ -162,7 +164,6 @@ export interface Notification {
   toUser?: User;
   read?: boolean;
   summary?: string;
-  nonsense?: string;
   targetPage?: NotificationTargetPage;
   targetId?: number;
   createdAt?: Date;
@@ -175,8 +176,19 @@ export interface Widget {
   order?: number;
   user?: User;
   userId?: number;
-  nonsense?: string;
   active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface QuoteOfTheDay {
+  id?: number;
+  quote?: string;
+  author?: string;
+  userId?: number;
+  user?: User;
+  active?: boolean;
+  likes?: Like[];
   createdAt?: Date;
   updatedAt?: Date;
 }

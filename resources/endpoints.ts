@@ -10,6 +10,7 @@ export const PLANNED_DAY_RESULT = "/planned-day-result/";
 export const USER_POST = "/user-post/";
 export const NOTIFICATION = "/notification/"
 export const DAILY_HISTORY = "/daily-history/"
+export const QUOTE_OF_THE_DAY = "/quote-of-the-day/"
 
 export const getInteractableEndpoint = (interactable: Interactable) => {
   switch (interactable) {
@@ -17,8 +18,10 @@ export const getInteractableEndpoint = (interactable: Interactable) => {
       return USER_POST;
     case Interactable.PLANNED_DAY_RESULT:
       return PLANNED_DAY_RESULT;
+    case Interactable.QUOTE_OF_THE_DAY:
+      return QUOTE_OF_THE_DAY;
     default:
-      return "";
+      return undefined;
   }
 
 }

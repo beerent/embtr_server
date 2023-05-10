@@ -17,9 +17,7 @@ import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility
 import { Role } from '@src/roles/Roles';
 import { CreateTaskRequest, CreateTaskResponse } from '@resources/types/requests/TaskTypes';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
-import { PlannedDayService } from '@src/service/PlannedDayService';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { Task } from '@prisma/client';
 
 describe('TaskService tests', () => {

@@ -1,6 +1,9 @@
 import { Notification } from '@prisma/client';
 import { Notification as NotificationModel, NotificationTargetPage } from '@resources/schema';
-import { ClearNotificationsRequest, GetNotificationsResponse } from '@resources/types/requests/NotificationTypes';
+import {
+    ClearNotificationsRequest,
+    GetNotificationsResponse,
+} from '@resources/types/requests/NotificationTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
@@ -26,7 +29,12 @@ export enum NotificationType {
 }
 
 export class NotificationService {
-    public static async createNotification(toUserId: number, fromUserId: number, notificationType: NotificationType, targetId: number) {
+    public static async createNotification(
+        toUserId: number,
+        fromUserId: number,
+        notificationType: NotificationType,
+        targetId: number
+    ) {
         // 1. store in database
         const notification = await NotificationController.create(
             toUserId,
@@ -45,7 +53,9 @@ export class NotificationService {
     }
 
     public static async getAll(request: Request): Promise<GetNotificationsResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
         if (!userId) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
@@ -62,12 +72,17 @@ export class NotificationService {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const userId: number = (await AuthorizationController.getUserIdFromToken(request.headers.authorization!)) as number;
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
         if (!userId) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const notificationsFromDatabase = await NotificationController.getAllById(body.notificationIds, userId);
+        const notificationsFromDatabase = await NotificationController.getAllById(
+            body.notificationIds,
+            userId
+        );
 
         if (notificationsFromDatabase.length !== body.notificationIds.length) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };

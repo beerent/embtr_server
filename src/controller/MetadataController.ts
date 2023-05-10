@@ -14,4 +14,31 @@ export class MetadataController {
 
         return metadata;
     }
+
+    public static async set(key: string, value: string) {
+        const metadata = await prisma.metadata.upsert({
+            where: {
+                key,
+            },
+            update: {
+                value,
+            },
+            create: {
+                key,
+                value,
+            },
+        });
+
+        return metadata;
+    }
+
+    public static async delete(key: string) {
+        const metadata = await prisma.metadata.delete({
+            where: {
+                key,
+            },
+        });
+
+        return metadata;
+    }
 }
