@@ -32,9 +32,7 @@ app.use((req, res, next) => {
     res.send = function (data) {
         const endTime = Date.now();
         const elapsedTime = endTime - startTime;
-        logger.info(
-            `Response for ${req.method} ${req.baseUrl}${req.path} [${elapsedTime}ms]: ${data}`
-        );
+        logger.info(`Response for ${req.method} ${req.baseUrl}${req.path} [${elapsedTime}ms]`);
         return oldSend.apply(this, arguments as any);
     };
 
