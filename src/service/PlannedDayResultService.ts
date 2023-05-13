@@ -96,8 +96,15 @@ export class PlannedDayResultService {
     }
 
     public static async getAll(request: Request): Promise<GetPlannedDayResultsResponse> {
-        const upperBound = new Date(request.query.upperBound as string);
-        const lowerBound = new Date(request.query.lowerBound as string);
+        let upperBound = new Date();
+        if (request.query.upperBound) {
+            upperBound = new Date(request.query.upperBound as string);
+        }
+
+        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 3));
+        if (request.query.lowerBound) {
+            lowerBound = new Date(request.query.lowerBound as string);
+        }
 
         const dayResults = await PlannedDayResultController.getAll(upperBound, lowerBound);
 

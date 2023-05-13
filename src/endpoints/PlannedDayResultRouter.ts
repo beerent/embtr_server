@@ -30,7 +30,7 @@ plannedDayResultRouter.get(
     '/',
     authenticate,
     authorize,
-    validateGetAllPlannedDayResults,
+    //validateGetAllPlannedDayResults,
     runEndpoint(async (req, res) => {
         const response: GetUserResponse = await PlannedDayResultService.getAll(req);
         res.status(response.httpCode).json(response);
