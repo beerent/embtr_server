@@ -59,7 +59,9 @@ export const validatePatch = (req: Request, res: Response, next: NextFunction) =
         const request = req.body as UpdatePlannedDayResultRequest;
         plannedDayResultPatch.parse(request);
     } catch (error) {
-        return res.status(UPDATE_PLANNED_DAY_RESULT_INVALID.httpCode).json(UPDATE_PLANNED_DAY_RESULT_INVALID);
+        return res
+            .status(UPDATE_PLANNED_DAY_RESULT_INVALID.httpCode)
+            .json(UPDATE_PLANNED_DAY_RESULT_INVALID);
     }
 
     next();
@@ -69,7 +71,25 @@ export const validateLikePost = (req: Request, res: Response, next: NextFunction
     try {
         z.object({ id: z.coerce.number() }).parse(req.params);
     } catch (error) {
-        return res.status(GENERAL_FAILURE.httpCode).json({ ...GENERAL_FAILURE, message: 'invalid like request' });
+        return res
+            .status(GENERAL_FAILURE.httpCode)
+            .json({ ...GENERAL_FAILURE, message: 'invalid like request' });
+    }
+
+    next();
+};
+
+export const validateGetAllPlannedDayResults = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        z.object({ upperBound: z.string(), lowerBound: z.string() }).parse(req.query);
+    } catch (error) {
+        return res
+            .status(GENERAL_FAILURE.httpCode)
+            .json({ ...GENERAL_FAILURE, message: 'invalid date range' });
     }
 
     next();

@@ -44,10 +44,14 @@ export class UserPostController {
         });
     }
 
-    public static async getAll() {
+    public static async getAll(upperBound: Date, lowerBound: Date) {
         return await prisma.userPost.findMany({
             where: {
                 active: true,
+                createdAt: {
+                    lte: upperBound,
+                    gte: lowerBound,
+                },
             },
             include: UserPostInclude,
         });

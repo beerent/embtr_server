@@ -95,8 +95,11 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
-    public static async getAll(): Promise<GetPlannedDayResultsResponse> {
-        const dayResults = await PlannedDayResultController.getAll();
+    public static async getAll(request: Request): Promise<GetPlannedDayResultsResponse> {
+        const upperBound = new Date(request.query.upperBound as string);
+        const lowerBound = new Date(request.query.lowerBound as string);
+
+        const dayResults = await PlannedDayResultController.getAll(upperBound, lowerBound);
 
         if (dayResults) {
             const convertedDayResults: PlannedDayResultModel[] =

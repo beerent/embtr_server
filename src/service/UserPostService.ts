@@ -42,8 +42,11 @@ export class UserPostService {
         return { ...SUCCESS, userPosts: convertedUserPostModels };
     }
 
-    public static async getAll(): Promise<GetAllUserPostResponse> {
-        const userPosts = await UserPostController.getAll();
+    public static async getAll(request: Request): Promise<GetAllUserPostResponse> {
+        const upperBound = new Date(request.query.upperBound as string);
+        const lowerBound = new Date(request.query.lowerBound as string);
+
+        const userPosts = await UserPostController.getAll(upperBound, lowerBound);
         const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
         return { ...SUCCESS, userPosts: convertedUserPostModels };
     }

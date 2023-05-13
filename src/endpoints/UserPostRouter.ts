@@ -7,6 +7,7 @@ import {
     validateCommentDelete,
     validateCommentPost,
 } from '@src/middleware/general/GeneralValidation';
+import { validateGetAllPlannedDayResults } from '@src/middleware/planned_day_result/PlannedDayResultValidation';
 import {
     validateGetById,
     validateLike,
@@ -35,8 +36,9 @@ userPostRouter.get(
     '/',
     authenticate,
     authorize,
+    validateGetAllPlannedDayResults,
     runEndpoint(async (req, res) => {
-        const response: GetAllUserPostResponse = await UserPostService.getAll();
+        const response: GetAllUserPostResponse = await UserPostService.getAll(req);
         res.status(response.httpCode).json(response);
     })
 );

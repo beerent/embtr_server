@@ -7,8 +7,6 @@ export class TokenCache {
     public static async getDecodedToken(
         authorizationHeader: string
     ): Promise<DecodedIdToken | undefined> {
-        console.log('token cache size: ' + this.tokenCache.size);
-
         const encodedToken = this.getBearerToken(authorizationHeader);
         if (!encodedToken) {
             return undefined;
