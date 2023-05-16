@@ -47,4 +47,24 @@ export class QuoteOfTheDayController {
     public static async existsById(id: number) {
         return (await this.getById(id)) !== null;
     }
+
+    public static async count() {
+        return await prisma.quoteOfTheDay.count();
+    }
+
+    public static async getRandom() {
+        const count = await this.count();
+        const random = Math.floor(Math.random() * count);
+
+        const quoteOfTheDay = await prisma.quoteOfTheDay.findMany({
+            skip: random,
+            take: 1,
+            include: {
+                user: true,
+                likes: true,
+            },
+        });
+
+        return quoteOfTheDay[0];
+    }
 }

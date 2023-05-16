@@ -36,13 +36,31 @@ export class QuoteOfTheDayService {
             return { ...GENERAL_FAILURE };
         }
 
-        const quoteOfTheDay = await QuoteOfTheDayController.getById(quoteOfTheDayId);
+        let quoteOfTheDay = await QuoteOfTheDayController.getById(quoteOfTheDayId);
         if (!quoteOfTheDay) {
             return { ...GENERAL_FAILURE };
+        }
+
+        if (this.shouldReset(quoteOfTheDay.updatedAt)) {
+            quoteOfTheDay = await this.reset();
         }
 
         const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
 
         return { ...SUCCESS, quoteOfTheDay: quoteOfTheDayModel };
+    }
+
+    private static shouldReset(updated: Date): boolean {
+        const now = new Date();
+        const hoursSinceUpdate = (now.getTime() - updated.getTime()) / 1000 / 60 / 60;
+
+        return hoursSinceUpdate > 24;
+    }
+
+    private static async reset() {
+        const quoteOfTheDay = await QuoteOfTheDayController.getRandom();
+        await MetadataController.set('QUOTE_OF_THE_DAY', quoteOfTheDay.id.toString());
+
+        return quoteOfTheDay;
     }
 }
