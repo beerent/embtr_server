@@ -53,6 +53,7 @@ export interface PlannedDay {
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
+  hiddenPlannedDayResultRecommendations?: HiddenPlannedDayResultRecommendations[];
 }
 
 export interface PlannedTask {
@@ -197,6 +198,15 @@ export interface Metadata {
   id?: number;
   key?: string;
   value?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface HiddenPlannedDayResultRecommendations {
+  id?: number;
+  plannedDayId?: number;
+  plannedDay?: PlannedDay;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

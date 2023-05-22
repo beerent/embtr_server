@@ -17,6 +17,7 @@ import {
     validateGetByUser,
     validateLikePost,
     validatePatch,
+    validatePlannedDayResultHideRecommendation,
     validatePost,
 } from '@src/middleware/planned_day_result/PlannedDayResultValidation';
 import { CommentService } from '@src/service/CommentService';
@@ -121,6 +122,17 @@ plannedDayResultRouter.post(
     validateLikePost,
     runEndpoint(async (req, res) => {
         const response = await LikeService.create(Interactable.PLANNED_DAY_RESULT, req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+plannedDayResultRouter.post(
+    '/:dayKey/hide-recommendation/',
+    authenticate,
+    authorize,
+    validatePlannedDayResultHideRecommendation,
+    runEndpoint(async (req, res) => {
+        const response = await PlannedDayResultService.hideRecommendation(req);
         res.status(response.httpCode).json(response);
     })
 );

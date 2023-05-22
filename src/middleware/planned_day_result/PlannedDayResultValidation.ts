@@ -94,3 +94,19 @@ export const validateGetAllPlannedDayResults = (
 
     next();
 };
+
+export const validatePlannedDayResultHideRecommendation = (
+    req: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    try {
+        z.object({ dayKey: z.string() }).parse(req.params);
+    } catch (error) {
+        return res
+            .status(GENERAL_FAILURE.httpCode)
+            .json({ ...GENERAL_FAILURE, message: 'invalid day key' });
+    }
+
+    next();
+};

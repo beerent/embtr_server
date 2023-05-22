@@ -61,15 +61,16 @@ model Task {
 }
 
 model PlannedDay {
-  id                Int                @id @default(autoincrement())
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            Int                @db.Int
-  dayKey            String             @db.VarChar(10)
-  date              DateTime           @db.Date
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  plannedTasks      PlannedTask[]
-  plannedDayResults PlannedDayResult[]
+  id                                    Int                                     @id @default(autoincrement())
+  user                                  User                                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                                Int                                     @db.Int
+  dayKey                                String                                  @db.VarChar(10)
+  date                                  DateTime                                @db.Date
+  createdAt                             DateTime                                @default(now())
+  updatedAt                             DateTime                                @updatedAt
+  plannedTasks                          PlannedTask[]
+  plannedDayResults                     PlannedDayResult[]
+  hiddenPlannedDayResultRecommendations HiddenPlannedDayResultRecommendations[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")
@@ -278,4 +279,16 @@ model Metadata {
   updatedAt DateTime @updatedAt
 
   @@map("metadata")
+}
+
+model HiddenPlannedDayResultRecommendations {
+  id           Int        @id @default(autoincrement())
+  plannedDayId Int        @db.Int
+  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  active       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([plannedDayId])
+  @@map("hidden_planned_day_result_recommendations")
 }

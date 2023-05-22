@@ -22,6 +22,8 @@ import { AuthorizationController } from '@src/controller/AuthorizationController
 import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { UserController } from '@src/controller/UserController';
+import { Response } from '@resources/types/requests/RequestTypes';
+import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
 
 export class PlannedDayResultService {
     public static async create(
@@ -142,5 +144,23 @@ export class PlannedDayResultService {
         }
 
         return GET_DAY_RESULT_UNKNOWN;
+    }
+
+    public static async hideRecommendation(request: Request): Promise<Response> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+        if (!userId) {
+            return { ...UPDATE_PLANNED_DAY_RESULT_INVALID, message: 'invalid user' };
+        }
+
+        const dayKey = request.params.dayKey;
+        const plannedDay = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
+        if (!plannedDay) {
+            return { ...UPDATE_PLANNED_DAY_RESULT_INVALID, message: 'invalid day' };
+        }
+
+        await HiddenPlannedDayResultRecommendationsController.create(userId, dayKey);
+        return SUCCESS;
     }
 }
