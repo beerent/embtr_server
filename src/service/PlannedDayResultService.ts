@@ -26,16 +26,30 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
 
 export class PlannedDayResultService {
-    public static async create(
-        request: CreatePlannedDayResultRequest
-    ): Promise<GetPlannedDayResultResponse> {
-        const plannedDay = await PlannedDayController.get(request.plannedDayId);
+    public static async create(request: Request): Promise<GetPlannedDayResultResponse> {
+        const body: CreatePlannedDayResultRequest = {
+            plannedDayId: request.body.plannedDayId,
+        };
+
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+
+        if (!userId) {
+            return CREATE_DAY_RESULT_FAILED;
+        }
+
+        const plannedDay = await PlannedDayController.get(body.plannedDayId);
         if (!plannedDay) {
             return CREATE_DAY_RESULT_FAILED;
         }
 
+        if (plannedDay.user.id !== userId) {
+            return CREATE_DAY_RESULT_FAILED;
+        }
+
         const createdPlannedDayResult: PlannedDayResult = await PlannedDayResultController.create(
-            request.plannedDayId
+            body.plannedDayId
         );
 
         if (createdPlannedDayResult) {

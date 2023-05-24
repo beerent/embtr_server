@@ -1,4 +1,5 @@
 import { PLANNED_DAY_RESULT } from '@resources/endpoints';
+import { PlannedDay } from '@resources/schema';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { CreateCommentRequest } from '@resources/types/requests/GeneralTypes';
 import {
@@ -331,7 +332,31 @@ describe('DayResultServices', () => {
                     PlannedDayResultController.create(p4.id),
                     PlannedDayResultController.create(p5.id),
                 ];
-                await Promise.all(plannedDayResultCreates);
+                const [pdr1, pdr2, pdr3, pdr4, pdr5] = await Promise.all(plannedDayResultCreates);
+
+                const updates = [
+                    PlannedDayResultController.update({
+                        id: pdr1.id,
+                        createdAt: new Date('2020-01-01'),
+                    }),
+                    PlannedDayResultController.update({
+                        id: pdr2.id,
+                        createdAt: new Date('2020-01-02'),
+                    }),
+                    PlannedDayResultController.update({
+                        id: pdr3.id,
+                        createdAt: new Date('2020-01-03'),
+                    }),
+                    PlannedDayResultController.update({
+                        id: pdr4.id,
+                        createdAt: new Date('2020-01-04'),
+                    }),
+                    PlannedDayResultController.update({
+                        id: pdr5.id,
+                        createdAt: new Date('2020-01-05'),
+                    }),
+                ];
+                await Promise.all(updates);
             });
 
             test('skips data outside of bounds', async () => {
@@ -471,6 +496,16 @@ describe('DayResultServices', () => {
                 .post(PLANNED_DAY_RESULT)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send({ plannedDayId: 0 });
+
+            expect(response.status).toEqual(CREATE_DAY_RESULT_FAILED.httpCode);
+            expect(response.body).toEqual(CREATE_DAY_RESULT_FAILED);
+        });
+
+        test('plannedDay does not belong to user', async () => {
+            const response = await request(app)
+                .post(PLANNED_DAY_RESULT)
+                .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_2_TOKEN}`)
+                .send({ plannedDayId: TEST_PLANNED_DAY_TO_CREATE_RESULT_ID });
 
             expect(response.status).toEqual(CREATE_DAY_RESULT_FAILED.httpCode);
             expect(response.body).toEqual(CREATE_DAY_RESULT_FAILED);

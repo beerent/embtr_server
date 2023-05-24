@@ -12,7 +12,6 @@ import {
     validateCommentPost,
 } from '@src/middleware/general/GeneralValidation';
 import {
-    validateGetAllPlannedDayResults,
     validateGetById,
     validateGetByUser,
     validateLikePost,
@@ -74,10 +73,7 @@ plannedDayResultRouter.post(
     authorize,
     validatePost,
     runEndpoint(async (req, res) => {
-        const request: CreatePlannedDayResultRequest = {
-            plannedDayId: req.body.plannedDayId,
-        };
-        const response = await PlannedDayResultService.create(request);
+        const response = await PlannedDayResultService.create(req);
         res.status(response.httpCode).json(response);
     })
 );

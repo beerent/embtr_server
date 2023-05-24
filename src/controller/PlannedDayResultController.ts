@@ -58,6 +58,10 @@ export class PlannedDayResultController {
             : {};
         const active =
             plannedDayResult.active !== undefined ? { active: plannedDayResult.active } : {};
+        const createdAt =
+            plannedDayResult.createdAt !== undefined
+                ? { createdAt: plannedDayResult.createdAt }
+                : {};
         const images = CommonUpserts.createImagesUpserts(plannedDayResult.images ?? []);
         const likes = CommonUpserts.createLikesUpserts(plannedDayResult.likes ?? []);
         const comments = CommonUpserts.createCommentsUpserts(plannedDayResult.comments ?? []);
@@ -67,6 +71,7 @@ export class PlannedDayResultController {
             data: {
                 ...description,
                 ...active,
+                ...createdAt,
                 images,
                 likes,
                 comments,
