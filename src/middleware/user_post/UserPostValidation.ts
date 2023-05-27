@@ -42,7 +42,7 @@ export const validateLike = (req: Request, res: Response, next: NextFunction) =>
     next();
 };
 
-export const validateGetUserPosts = (req: Request, res: Response, next: NextFunction) => {
+export const validateGetUserData = (req: Request, res: Response, next: NextFunction) => {
     try {
         z.object({ userId: z.coerce.number() }).parse(req.params);
     } catch (error) {

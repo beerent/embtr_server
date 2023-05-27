@@ -1,4 +1,5 @@
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
+import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
 import {
     authenticate,
@@ -8,8 +9,9 @@ import { validateGetDailyHistory as validateGetUserDailyHistory } from '@src/mid
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';
-import { validateGetUserPosts } from '@src/middleware/user_post/UserPostValidation';
+import { validateGetUserData } from '@src/middleware/user_post/UserPostValidation';
 import { DailyHistoryService } from '@src/service/DailyHistoryService';
+import { HabitJourneyService } from '@src/service/HabitJourneyService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { UserPostService } from '@src/service/UserPostService';
 import { UserService } from '@src/service/UserService';
@@ -92,7 +94,7 @@ userRouter.get(
     '/:userId/posts',
     authenticate,
     authorize,
-    validateGetUserPosts,
+    validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
         const response = await UserPostService.getAllForUser(userId);
@@ -107,10 +109,25 @@ userRouter.get(
     '/:userId/day-results',
     authenticate,
     authorize,
-    validateGetUserPosts,
+    validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
         const response: GetUserResponse = await PlannedDayResultService.getAllForUser(userId);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+/*
+ * Habit Journey
+ */
+userRouter.get(
+    '/:userId/habit-journey',
+    authenticate,
+    authorize,
+    validateGetUserData,
+    runEndpoint(async (req, res) => {
+        const userId = Number(req.params.userId);
+        const response: GetHabitJourneyResponse = await HabitJourneyService.get(userId);
         res.status(response.httpCode).json(response);
     })
 );

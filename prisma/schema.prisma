@@ -240,6 +240,7 @@ enum WidgetType {
   TODAYS_NOTES
   TODAYS_PHOTOS
   DAILY_HISTORY
+  HABIT_JOURNEY
 }
 
 model Widget {

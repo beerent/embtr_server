@@ -17,3 +17,4 @@ export interface CreatePlannedDayRequest {
 export interface CreatePlannedDayResponse extends Response {
   plannedDay?: PlannedDayModel;
 }
+
