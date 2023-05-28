@@ -136,6 +136,10 @@ export class PlannedDayService {
             return UPDATE_PLANNED_TASK_FAILED;
         }
 
+        if (plannedTask.plannedDay.userId !== userId) {
+            return UPDATE_PLANNED_TASK_FAILED;
+        }
+
         const updatedPlannedTask = await PlannedTaskController.update(updateRequest.plannedTask);
         if (updatedPlannedTask) {
             const updatedPlannedTaskModel: PlannedTaskModel =
