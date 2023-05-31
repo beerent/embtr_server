@@ -11,7 +11,7 @@ import {
     Metadata,
     Habit,
     TaskHabitPreference,
-    QuoteOfTheDay,
+    QuoteOfTheDay, Season,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -29,7 +29,8 @@ type PrismaModel =
     | Metadata
     | Habit
     | TaskHabitPreference
-    | QuoteOfTheDay;
+    | QuoteOfTheDay
+    | Season;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

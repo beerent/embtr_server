@@ -211,6 +211,13 @@ export interface HiddenPlannedDayResultRecommendations {
   updatedAt?: Date;
 }
 
+export interface Season {
+  id?: number;
+  date?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export enum NotificationTargetPage {
   INVALID = 'INVALID',
   GOAL_DETAILS = 'GOAL_DETAILS',

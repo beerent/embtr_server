@@ -293,3 +293,13 @@ model HiddenPlannedDayResultRecommendations {
   @@index([plannedDayId])
   @@map("hidden_planned_day_result_recommendations")
 }
+
+//enum table that holds dates
+model Season {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("season")
+}

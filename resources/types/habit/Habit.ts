@@ -8,10 +8,12 @@ export interface HabitJourneys {
 
 export interface HabitJourney {
 	habit: Habit,
+	level: number,
 	elements: HabitJourneyElement[]
 }
 
 export interface HabitJourneyElement {
-	season: string,
+	season: number,
+	seasonDate: Date,
 	daysInSeason: number
 }
