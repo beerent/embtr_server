@@ -7,3 +7,15 @@ coverage/
 .env.prod
 
 .env.dev
+
+.idea/codeStyles/codeStyleConfig.xml
+
+.idea/codeStyles/Project.xml
+
+.idea/embtr_server.iml
+
+.idea/modules.xml
+
+.idea/prettier.xml
+
+.idea/vcs.xml

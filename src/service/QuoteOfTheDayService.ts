@@ -14,7 +14,7 @@ import { Request } from 'express';
 export class QuoteOfTheDayService {
     public static async add(request: Request): Promise<CreateQuoteOfTheDayResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!
+            request.headers.authorization!,
         )) as number;
 
         const body: CreateQuoteOfTheDayRequest = request.body;
@@ -26,23 +26,25 @@ export class QuoteOfTheDayService {
     }
 
     public static async get(): Promise<GetQuoteOfTheDayResponse> {
-        const quoteOfTheDayIdString = await MetadataController.get('QUOTE_OF_THE_DAY');
-        if (!quoteOfTheDayIdString?.value) {
+        const quoteOfTheDayFromMetadata = await MetadataController.get('QUOTE_OF_THE_DAY');
+        if (!quoteOfTheDayFromMetadata?.value) {
             return { ...GENERAL_FAILURE };
         }
 
-        const quoteOfTheDayId = parseInt(quoteOfTheDayIdString.value);
+        const quoteOfTheDayId = parseInt(quoteOfTheDayFromMetadata.value);
         if (isNaN(quoteOfTheDayId)) {
             return { ...GENERAL_FAILURE };
         }
 
-        let quoteOfTheDay = await QuoteOfTheDayController.getById(quoteOfTheDayId);
-        if (!quoteOfTheDay) {
-            return { ...GENERAL_FAILURE };
+        let quoteOfTheDay;
+        if (this.shouldReset(quoteOfTheDayFromMetadata.updatedAt)) {
+            quoteOfTheDay = await this.reset();
+        } else {
+            quoteOfTheDay = await QuoteOfTheDayController.getById(quoteOfTheDayId);
         }
 
-        if (this.shouldReset(quoteOfTheDay.updatedAt)) {
-            quoteOfTheDay = await this.reset();
+        if (!quoteOfTheDay) {
+            return { ...GENERAL_FAILURE };
         }
 
         const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
