@@ -241,6 +241,7 @@ enum WidgetType {
   TODAYS_PHOTOS
   DAILY_HISTORY
   HABIT_JOURNEY
+  PLANNING
 }
 
 model Widget {
@@ -294,7 +295,7 @@ model HiddenPlannedDayResultRecommendations {
   @@map("hidden_planned_day_result_recommendations")
 }
 
-//enum table that holds dates
+// enum table that holds dates
 model Season {
   id        Int      @id @default(autoincrement())
   date      DateTime @db.Date
