@@ -7,12 +7,13 @@ export const PlannedDayInclude = {
     user: true,
     plannedTasks: {
         where: {
-            count: { gte: 1 },
+            active: true,
         },
         include: {
             task: true,
             plannedDay: true,
             habit: true,
+            unit: true,
         },
     },
     plannedDayResults: true,
@@ -66,6 +67,7 @@ export class PlannedDayController {
                     },
                 },
             });
-        } catch (error) {}
+        } catch (error) {
+        }
     }
 }

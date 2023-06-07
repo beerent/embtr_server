@@ -1,17 +1,21 @@
 import { prisma } from '@database/prisma';
 import { PlannedDay, PlannedTask, Task, Habit, Prisma } from '@prisma/client';
-import { PlannedTask as PlannedTaskModel } from '@resources/schema';
+import { PlannedTask as PlannedTaskModel, Unit } from '@resources/schema';
 
 export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
 export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
     typeof PlannedTaskController.getHabitJourneys
 >;
 
+// ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-02
+
 export class PlannedTaskController {
     public static async create(
         plannedDay: PlannedDay,
         task: Task,
         habit?: Habit,
+        quantity?: number,
+        unit?: Unit,
     ): Promise<PlannedTask | null> {
         const data = {
             plannedDay: {
@@ -26,7 +30,13 @@ export class PlannedTaskController {
             },
             habit: {},
             status: 'INCOMPLETE',
-            count: 1,
+            completedQuantity: 0,
+            quantity,
+            unit: {
+                connect: {
+                    id: unit?.id,
+                },
+            },
         };
 
         if (habit !== undefined) {
@@ -37,46 +47,44 @@ export class PlannedTaskController {
             };
         }
 
-        return prisma.plannedTask.upsert({
-            create: data,
-            update: {
-                count: { increment: 1 },
-                habit: data.habit,
-            },
-            where: {
-                unique_planned_day_task: {
-                    plannedDayId: plannedDay.id,
-                    taskId: task.id,
+        return prisma.plannedTask.create({
+            data,
+            include:
+                {
+                    unit: true,
+                    habit: true,
                 },
-            },
         });
+
     }
 
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
+        const active = plannedTask.active !== undefined ? { active: plannedTask.active } : {};
         const status = plannedTask.status !== undefined ? { status: plannedTask.status } : {};
-        const count = plannedTask.count !== undefined ? { count: plannedTask.count } : {};
+        const quantity = plannedTask.quantity !== undefined ? { quantity: plannedTask.quantity } : {};
+        const completedQuantity = plannedTask.completedQuantity !== undefined ? { completedQuantity: plannedTask.completedQuantity } : {};
         const habit =
             plannedTask.habitId !== undefined
                 ? { habitId: plannedTask.habitId }
                 : { habitId: null };
-        const completedCount =
-            plannedTask.completedCount !== undefined
-                ? { completedCount: plannedTask.completedCount }
-                : {};
+        const unit = plannedTask.unitId !== undefined ? { unitId: plannedTask.unitId } : {};
 
         const result = await prisma.plannedTask.update({
             where: {
                 id: plannedTask.id,
             },
             data: {
+                ...active,
                 ...status,
                 ...habit,
-                ...count,
-                ...completedCount,
+                ...quantity,
+                ...completedQuantity,
+                ...unit,
             },
             include: {
                 task: true,
                 plannedDay: true,
+                unit: true,
             },
         });
 
@@ -96,11 +104,14 @@ export class PlannedTaskController {
     }
 
     public static async getByPlannedDayIdAndTaskId(plannedDayId: number, taskId: number) {
-        return prisma.plannedTask.findUnique({
+        return prisma.plannedTask.findMany({
             where: {
-                unique_planned_day_task: {
-                    plannedDayId,
-                    taskId,
+                active: true,
+                plannedDay: {
+                    id: plannedDayId,
+                },
+                task: {
+                    id: taskId,
                 },
             },
             include: {
@@ -133,6 +144,7 @@ export class PlannedTaskController {
                 plannedDay: {
                     userId,
                 },
+                active: true,
             },
             orderBy: {
                 createdAt: 'desc',
@@ -160,11 +172,12 @@ FROM planned_task
          JOIN season on season.date = DATE(planned_day.date - INTERVAL (((WEEKDAY(planned_day.date) + 7) % 7)) DAY)
 WHERE userId = ${userId}
   AND planned_day.date >= '2023-01-01'
-  AND completedCount = count
   AND status != 'FAILED'
+  AND planned_task.active = true
 GROUP BY habit.id, seasonDate, season
 order by habitId desc, seasonDate desc;
-`);
+`,
+        );
 
         const formattedResults = result as unknown[];
         formattedResults.forEach((row: any) => {

@@ -15,6 +15,7 @@ import {
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
+import { Unit } from '@resources/schema';
 
 type PrismaModel =
     | User
@@ -30,7 +31,9 @@ type PrismaModel =
     | Habit
     | TaskHabitPreference
     | QuoteOfTheDay
-    | Season;
+    | Season
+    | Unit
+    ;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

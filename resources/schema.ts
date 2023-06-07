@@ -20,6 +20,7 @@ export interface User {
   widgets?: Widget[];
   taskHabitPreference?: TaskHabitPreference[];
   quoteOfTheDay?: QuoteOfTheDay[];
+  Challenge?: Challenge[];
 }
 
 export interface PushNotificationToken {
@@ -64,9 +65,12 @@ export interface PlannedTask {
   task?: Task;
   habitId?: number;
   habit?: Habit;
-  count?: number;
-  completedCount?: number;
+  unitId?: number;
+  unit?: Unit;
+  quantity?: number;
+  completedQuantity?: number;
   status?: string;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -216,6 +220,26 @@ export interface Season {
   date?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface Challenge {
+  id?: number;
+  name?: string;
+  creator?: User;
+  creatorId?: number;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Unit {
+  id?: number;
+  unit?: string;
+  stepSize?: number;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  PlannedTask?: PlannedTask[];
 }
 
 export enum NotificationTargetPage {

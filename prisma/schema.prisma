@@ -19,7 +19,7 @@ model User {
   photoUrl               String?                 @db.VarChar(255)
   bannerUrl              String?                 @db.VarChar(255)
   createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @updatedAt
+  updatedAt              DateTime                @default(now()) @updatedAt
   user                   UserPost[]
   plannedDays            PlannedDay[]
   recievedNotifications  Notification[]          @relation("fromUser")
@@ -30,6 +30,7 @@ model User {
   widgets                Widget[]
   taskHabitPreference    TaskHabitPreference[]
   quoteOfTheDay          QuoteOfTheDay[]
+  Challenge              Challenge[]
 
   @@map("user")
 }
@@ -41,7 +42,7 @@ model PushNotificationToken {
   token     String   @db.VarChar(255)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([userId, token], name: "unique_user_token")
   @@map("user_push_notification")
@@ -53,7 +54,7 @@ model Task {
   description         String?               @db.VarChar(255)
   createdById         Int?                  @db.Int
   createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  updatedAt           DateTime              @default(now()) @updatedAt
   plannedTasks        PlannedTask[]
   taskHabitPreference TaskHabitPreference[]
 
@@ -67,7 +68,7 @@ model PlannedDay {
   dayKey                                String                                  @db.VarChar(10)
   date                                  DateTime                                @db.Date
   createdAt                             DateTime                                @default(now())
-  updatedAt                             DateTime                                @updatedAt
+  updatedAt                             DateTime                                @default(now()) @updatedAt
   plannedTasks                          PlannedTask[]
   plannedDayResults                     PlannedDayResult[]
   hiddenPlannedDayResultRecommendations HiddenPlannedDayResultRecommendations[]
@@ -77,23 +78,26 @@ model PlannedDay {
 }
 
 model PlannedTask {
-  id             Int        @id @default(autoincrement())
-  plannedDayId   Int        @db.Int
-  plannedDay     PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  taskId         Int        @db.Int
-  task           Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  habitId        Int?       @db.Int
-  habit          Habit?     @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  count          Int        @default(1) @db.Int
-  completedCount Int        @default(0) @db.Int
-  status         String     @db.VarChar(225)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id                Int        @id @default(autoincrement())
+  plannedDayId      Int        @db.Int
+  plannedDay        PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  taskId            Int        @db.Int
+  task              Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  habitId           Int?       @db.Int
+  habit             Habit?     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  unitId            Int?
+  unit              Unit?      @relation(fields: [unitId], references: [id])
+  quantity          Float?     @db.Double
+  completedQuantity Float?     @db.Double
+  status            String     @db.VarChar(225)
+  active            Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @default(now()) @updatedAt
 
-  @@unique([plannedDayId, taskId], name: "unique_planned_day_task")
   @@index([plannedDayId], name: "planned_day_id")
   @@index([taskId], name: "task_id")
   @@index([habitId], name: "habit_id")
+  @@index([unitId], name: "unit_id")
   @@map("planned_task")
 }
 
@@ -104,7 +108,7 @@ model Habit {
   iconSource          String?               @db.VarChar(255)
   iconName            String?               @db.VarChar(255)
   createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
+  updatedAt           DateTime              @default(now()) @updatedAt
   plannedTasks        PlannedTask[]
   taskHabitPreference TaskHabitPreference[]
 
@@ -121,7 +125,7 @@ model TaskHabitPreference {
   habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([userId, taskId], name: "unique_user_task")
   @@index([userId])
@@ -137,7 +141,7 @@ model UserPost {
   userId    Int       @db.Int
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  updatedAt DateTime  @default(now()) @updatedAt
   active    Boolean   @default(true)
   images    Image[]
   likes     Like[]
@@ -154,7 +158,7 @@ model PlannedDayResult {
   active       Boolean    @default(true)
   description  String?    @db.VarChar(255)
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  updatedAt    DateTime   @default(now()) @updatedAt
   images       Image[]
   likes        Like[]
   comments     Comment[]
@@ -170,7 +174,7 @@ model Comment {
   comment           String             @db.VarChar(255)
   active            Boolean            @default(true)
   createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  updatedAt         DateTime           @default(now()) @updatedAt
   plannedDayResults PlannedDayResult[]
   userPosts         UserPost[]
 
@@ -184,7 +188,7 @@ model Like {
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   active            Boolean            @default(true)
   createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  updatedAt         DateTime           @default(now()) @updatedAt
   plannedDayResults PlannedDayResult[]
   userPosts         UserPost[]
   quoteOfTheDays    QuoteOfTheDay[]
@@ -198,7 +202,7 @@ model Image {
   url               String             @db.VarChar(255)
   active            Boolean            @default(true)
   createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
+  updatedAt         DateTime           @default(now()) @updatedAt
   plannedDayResults PlannedDayResult[]
   userPosts         UserPost[]
 
@@ -226,7 +230,7 @@ model Notification {
   targetPage NotificationTargetPage
   targetId   Int                    @db.Int
   createdAt  DateTime               @default(now())
-  updatedAt  DateTime               @updatedAt
+  updatedAt  DateTime               @default(now()) @updatedAt
 
   @@index([fromUserId])
   @@index([toUserId])
@@ -252,7 +256,7 @@ model Widget {
   userId    Int        @db.Int
   active    Boolean    @default(true)
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  updatedAt DateTime   @default(now()) @updatedAt
 
   @@unique([userId, type])
   @@map("widget")
@@ -267,7 +271,7 @@ model QuoteOfTheDay {
   active    Boolean  @default(true)
   likes     Like[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([userId])
   @@map("quote_of_the_day")
@@ -278,7 +282,7 @@ model Metadata {
   key       String   @unique @db.VarChar(255)
   value     String   @db.VarChar(255)
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("metadata")
 }
@@ -289,7 +293,7 @@ model HiddenPlannedDayResultRecommendations {
   plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
   active       Boolean    @default(true)
   createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  updatedAt    DateTime   @default(now()) @updatedAt
 
   @@index([plannedDayId])
   @@map("hidden_planned_day_result_recommendations")
@@ -300,7 +304,29 @@ model Season {
   id        Int      @id @default(autoincrement())
   date      DateTime @db.Date
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("season")
+}
+
+model Challenge {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId Int      @db.Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Unit {
+  id          Int           @id @default(autoincrement())
+  unit        String        @db.VarChar(255)
+  stepSize    Float         @db.Double
+  active      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  PlannedTask PlannedTask[]
+
+  @@map("unit")
 }
