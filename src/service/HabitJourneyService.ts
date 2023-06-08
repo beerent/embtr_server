@@ -30,7 +30,6 @@ export class HabitJourneyService {
             model.level = this.calculateHabitJourneyLevel(model);
         }
 
-
         const habitJourneys: HabitJourneys = {
             user: ModelConverter.convert(user),
             elements: backFilledModels,

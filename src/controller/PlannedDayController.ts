@@ -1,8 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 
-export type PlannedDayFull = Prisma.PromiseReturnType<typeof PlannedDayController.get>;
-
 export const PlannedDayInclude = {
     user: true,
     plannedTasks: {

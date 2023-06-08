@@ -1,5 +1,4 @@
 import { GetDailyHistoryRequest, GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
-import { GetPlannedDayResponse } from '@resources/types/requests/PlannedDayTypes';
 import app from '@src/app';
 import { FORBIDDEN, INVALID_REQUEST, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';

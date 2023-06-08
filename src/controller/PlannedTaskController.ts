@@ -174,6 +174,8 @@ WHERE userId = ${userId}
   AND planned_day.date >= '2023-01-01'
   AND status != 'FAILED'
   AND planned_task.active = true
+  AND planned_task.quantity > 0
+  AND planned_task.completedQuantity >= planned_task.quantity
 GROUP BY habit.id, seasonDate, season
 order by habitId desc, seasonDate desc;
 `,

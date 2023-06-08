@@ -15,7 +15,12 @@ export class DailyHistoryController {
                 dayKey: true,
                 date: true,
                 plannedTasks: {
+                    where: {
+                        active: true,
+                    },
                     select: {
+                        quantity: true,
+                        completedQuantity: true,
                         status: true,
                     },
                 },
@@ -44,11 +49,9 @@ export class DailyHistoryController {
             } else {
                 const complete =
                     day.plannedTasks.length > 0 &&
-                    (day.plannedTasks.every((task) => task.status === 'COMPLETE') ||
-                        day.plannedTasks.every(
-                            (task) =>
-                                task.status === 'INCOMPLETE',
-                        ));
+                    day.plannedTasks.every((task) => {
+                        return task.status !== 'FAILED' && task.quantity && task.completedQuantity && task.quantity > 0 && task.completedQuantity >= task.quantity;
+                    });
                 history.push({
                     date: day.date,
                     dayKey: day.dayKey,

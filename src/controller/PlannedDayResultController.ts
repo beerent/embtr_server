@@ -4,10 +4,6 @@ import { Prisma } from '@prisma/client';
 import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import { CommonUpserts } from './common/CommonUpserts';
 
-export type PlannedDayResultFull = Prisma.PromiseReturnType<
-    typeof PlannedDayResultController.getById
->;
-
 export const PlannedDayResultInclude = {
     comments: {
         where: {
@@ -29,12 +25,22 @@ export const PlannedDayResultInclude = {
         where: {
             active: true,
         },
-        include: {
-            plannedDayResults: true,
-        },
     },
     plannedDay: {
-        include: PlannedDayInclude,
+        include: {
+            user: true,
+            plannedTasks: {
+                where: {
+                    active: true,
+                },
+                include: {
+                    task: true,
+                    habit: true,
+                    unit: true,
+                },
+            },
+            hiddenPlannedDayResultRecommendations: true,
+        },
     },
 } satisfies Prisma.PlannedDayResultInclude;
 

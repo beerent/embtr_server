@@ -33,8 +33,9 @@ app.use((req, res, next) => {
     res.send = function(data) {
         const endTime = Date.now();
         const elapsedTime = endTime - startTime;
+        const contentLength = Buffer.byteLength(data, 'utf-8'); // Get the size of the response data
         logger.info(
-            `Response for ${req.method} ${req.baseUrl}${req.path} ${res.statusCode} [${elapsedTime}ms]`,
+            `Response for ${req.method} ${req.baseUrl}${req.path} ${res.statusCode} [${elapsedTime}ms] Content-Length: ${contentLength} bytes`,
         );
         return oldSend.apply(this, arguments as any);
     };
