@@ -31,10 +31,10 @@ export class PlannedTaskController {
             habit: {},
             status: 'INCOMPLETE',
             completedQuantity: 0,
-            quantity,
+            quantity: quantity ?? 1,
             unit: {
                 connect: {
-                    id: unit?.id,
+                    id: unit?.id ?? 9,
                 },
             },
         };

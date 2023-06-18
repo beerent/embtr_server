@@ -11,6 +11,12 @@ export class UnitController {
     }
 
     public static async getAll() {
-        return prisma.unit.findMany();
+        return prisma.unit.findMany({
+            where: {
+                id: {
+                    not: 9,
+                },
+            },
+        });
     }
 }

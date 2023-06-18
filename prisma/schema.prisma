@@ -137,7 +137,7 @@ model TaskHabitPreference {
 model UserPost {
   id        Int       @id @default(autoincrement())
   title     String?   @db.VarChar(255)
-  body      String?   @db.VarChar(255)
+  body      String?   @db.VarChar(750)
   userId    Int       @db.Int
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime  @default(now())
