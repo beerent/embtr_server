@@ -180,6 +180,7 @@ model Comment {
   updatedAt         DateTime           @default(now()) @updatedAt
   plannedDayResults PlannedDayResult[]
   userPosts         UserPost[]
+  Challenge         Challenge[]
 
   @@index([userId])
   @@map("comment")
@@ -195,6 +196,7 @@ model Like {
   plannedDayResults PlannedDayResult[]
   userPosts         UserPost[]
   quoteOfTheDays    QuoteOfTheDay[]
+  Challenge         Challenge[]
 
   @@index([userId])
   @@map("like")
@@ -208,6 +210,7 @@ model Image {
   updatedAt         DateTime           @default(now()) @updatedAt
   plannedDayResults PlannedDayResult[]
   userPosts         UserPost[]
+  Challenge         Challenge[]
 
   @@map("image")
 }
@@ -322,6 +325,9 @@ model Challenge {
   start                 DateTime               @db.Date
   end                   DateTime               @db.Date
   active                Boolean                @default(true)
+  images                Image[]
+  likes                 Like[]
+  comments              Comment[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @default(now()) @updatedAt
   ChallengeParticipant  ChallengeParticipant[]
