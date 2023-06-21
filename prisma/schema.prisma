@@ -319,7 +319,8 @@ model Challenge {
   creator               User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   creatorId             Int                    @db.Int
   challengeRequirements ChallengeRequirement[]
-  duration              Int                    @db.Int
+  start                 DateTime               @db.Date
+  end                   DateTime               @db.Date
   active                Boolean                @default(true)
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @default(now()) @updatedAt
@@ -334,6 +335,13 @@ enum ChallengeRequirementType {
   HABIT
 }
 
+enum ChallengeDurationDisplay {
+  INVALID
+  DAY
+  WEEK
+  MONTH
+}
+
 model ChallengeRequirement {
   id                       Int                      @id @default(autoincrement())
   Task                     Task?                    @relation(fields: [TaskId], references: [id], onDelete: Cascade)
@@ -344,7 +352,8 @@ model ChallengeRequirement {
   quantity                 Int                      @db.Int
   unit                     Unit                     @relation(fields: [UnitId], references: [id], onDelete: Cascade)
   UnitId                   Int                      @db.Int
-  duration                 Int                      @db.Int
+  durationDays             Int                      @db.Int
+  durationDisplay          ChallengeDurationDisplay @default(INVALID)
   active                   Boolean                  @default(true)
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @default(now()) @updatedAt
