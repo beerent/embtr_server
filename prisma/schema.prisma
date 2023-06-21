@@ -31,6 +31,7 @@ model User {
   taskHabitPreference    TaskHabitPreference[]
   quoteOfTheDay          QuoteOfTheDay[]
   Challenge              Challenge[]
+  ChallengeParticipant   ChallengeParticipant[]
 
   @@map("user")
 }
@@ -49,14 +50,15 @@ model PushNotificationToken {
 }
 
 model Task {
-  id                  Int                   @id @default(autoincrement())
-  title               String                @unique @db.VarChar(255)
-  description         String?               @db.VarChar(255)
-  createdById         Int?                  @db.Int
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now()) @updatedAt
-  plannedTasks        PlannedTask[]
-  taskHabitPreference TaskHabitPreference[]
+  id                   Int                    @id @default(autoincrement())
+  title                String                 @unique @db.VarChar(255)
+  description          String?                @db.VarChar(255)
+  createdById          Int?                   @db.Int
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  plannedTasks         PlannedTask[]
+  taskHabitPreference  TaskHabitPreference[]
+  ChallengeRequirement ChallengeRequirement[]
 
   @@map("task")
 }
@@ -102,15 +104,16 @@ model PlannedTask {
 }
 
 model Habit {
-  id                  Int                   @id @default(autoincrement())
-  title               String                @unique @db.VarChar(255)
-  description         String?               @db.VarChar(255)
-  iconSource          String?               @db.VarChar(255)
-  iconName            String?               @db.VarChar(255)
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now()) @updatedAt
-  plannedTasks        PlannedTask[]
-  taskHabitPreference TaskHabitPreference[]
+  id                   Int                    @id @default(autoincrement())
+  title                String                 @unique @db.VarChar(255)
+  description          String?                @db.VarChar(255)
+  iconSource           String?                @db.VarChar(255)
+  iconName             String?                @db.VarChar(255)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  plannedTasks         PlannedTask[]
+  taskHabitPreference  TaskHabitPreference[]
+  ChallengeRequirement ChallengeRequirement[]
 
   @@map("habit")
 }
@@ -310,23 +313,74 @@ model Season {
 }
 
 model Challenge {
-  id        Int      @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  creatorId Int      @db.Int
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id                    Int                    @id @default(autoincrement())
+  name                  String                 @db.VarChar(255)
+  description           String?                @db.VarChar(255)
+  creator               User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  creatorId             Int                    @db.Int
+  challengeRequirements ChallengeRequirement[]
+  duration              Int                    @db.Int
+  active                Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @default(now()) @updatedAt
+  ChallengeParticipant  ChallengeParticipant[]
+
+  @@index([creatorId])
+}
+
+enum ChallengeRequirementType {
+  INVALID
+  TASK
+  HABIT
+}
+
+model ChallengeRequirement {
+  id                       Int                      @id @default(autoincrement())
+  Task                     Task?                    @relation(fields: [TaskId], references: [id], onDelete: Cascade)
+  TaskId                   Int?                     @db.Int
+  Habit                    Habit?                   @relation(fields: [HabitId], references: [id], onDelete: Cascade)
+  HabitId                  Int?                     @db.Int
+  ChallengeRequirementType ChallengeRequirementType @default(INVALID)
+  quantity                 Int                      @db.Int
+  unit                     Unit                     @relation(fields: [UnitId], references: [id], onDelete: Cascade)
+  UnitId                   Int                      @db.Int
+  duration                 Int                      @db.Int
+  active                   Boolean                  @default(true)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @default(now()) @updatedAt
+  Challenge                Challenge?               @relation(fields: [challengeId], references: [id])
+  challengeId              Int?                     @db.Int
+
+  @@index([TaskId])
+  @@index([HabitId])
+  @@index([UnitId])
+  @@index([challengeId])
+}
+
+model ChallengeParticipant {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int       @db.Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId Int       @db.Int
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now()) @updatedAt
+
+  @@index([userId])
+  @@index([challengeId])
+  @@map("challenge_participant")
 }
 
 model Unit {
-  id          Int           @id @default(autoincrement())
-  unit        String        @db.VarChar(255)
-  stepSize    Float         @db.Double
-  active      Boolean       @default(true)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now()) @updatedAt
-  PlannedTask PlannedTask[]
+  id                   Int                    @id @default(autoincrement())
+  unit                 String                 @db.VarChar(255)
+  stepSize             Float                  @db.Double
+  active               Boolean                @default(true)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  PlannedTask          PlannedTask[]
+  ChallengeRequirement ChallengeRequirement[]
 
   @@map("unit")
 }
