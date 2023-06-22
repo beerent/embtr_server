@@ -333,43 +333,34 @@ model Challenge {
   ChallengeParticipant  ChallengeParticipant[]
 
   @@index([creatorId])
-}
-
-enum ChallengeRequirementType {
-  INVALID
-  TASK
-  HABIT
-}
-
-enum ChallengeDurationDisplay {
-  INVALID
-  DAY
-  WEEK
-  MONTH
+  @@map("challenge")
 }
 
 model ChallengeRequirement {
-  id                       Int                      @id @default(autoincrement())
-  Task                     Task?                    @relation(fields: [TaskId], references: [id], onDelete: Cascade)
-  TaskId                   Int?                     @db.Int
-  Habit                    Habit?                   @relation(fields: [HabitId], references: [id], onDelete: Cascade)
-  HabitId                  Int?                     @db.Int
-  ChallengeRequirementType ChallengeRequirementType @default(INVALID)
-  quantity                 Int                      @db.Int
-  unit                     Unit                     @relation(fields: [UnitId], references: [id], onDelete: Cascade)
-  UnitId                   Int                      @db.Int
-  durationDays             Int                      @db.Int
-  durationDisplay          ChallengeDurationDisplay @default(INVALID)
-  active                   Boolean                  @default(true)
-  createdAt                DateTime                 @default(now())
-  updatedAt                DateTime                 @default(now()) @updatedAt
-  Challenge                Challenge?               @relation(fields: [challengeId], references: [id])
-  challengeId              Int?                     @db.Int
+  id Int @id @default(autoincrement())
+
+  Task    Task?  @relation(fields: [TaskId], references: [id], onDelete: Cascade)
+  TaskId  Int?   @db.Int
+  Habit   Habit? @relation(fields: [HabitId], references: [id], onDelete: Cascade)
+  HabitId Int?   @db.Int
+
+  unit     Unit @relation(fields: [UnitId], references: [id], onDelete: Cascade)
+  UnitId   Int  @db.Int
+  quantity Int  @db.Int
+
+  minimumRequired Int? @db.Int
+
+  active      Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
+  Challenge   Challenge? @relation(fields: [challengeId], references: [id])
+  challengeId Int?       @db.Int
 
   @@index([TaskId])
   @@index([HabitId])
   @@index([UnitId])
   @@index([challengeId])
+  @@map("challenge_requirement")
 }
 
 model ChallengeParticipant {
