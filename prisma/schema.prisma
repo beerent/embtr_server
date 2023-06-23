@@ -330,7 +330,7 @@ model Challenge {
   comments              Comment[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @default(now()) @updatedAt
-  ChallengeParticipant  ChallengeParticipant[]
+  challengeParticipants ChallengeParticipant[]
 
   @@index([creatorId])
   @@map("challenge")
@@ -339,26 +339,23 @@ model Challenge {
 model ChallengeRequirement {
   id Int @id @default(autoincrement())
 
-  Task    Task?  @relation(fields: [TaskId], references: [id], onDelete: Cascade)
-  TaskId  Int?   @db.Int
-  Habit   Habit? @relation(fields: [HabitId], references: [id], onDelete: Cascade)
-  HabitId Int?   @db.Int
+  task            Task?     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId          Int?      @db.Int
+  habit           Habit?    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habitId         Int?      @db.Int
+  unit            Unit?     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId          Int?      @db.Int
+  quantity        Int       @db.Int
+  minimumRequired Int       @db.Int
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @default(now()) @updatedAt
+  challenge       Challenge @relation(fields: [challengeId], references: [id])
+  challengeId     Int       @db.Int
 
-  unit     Unit @relation(fields: [UnitId], references: [id], onDelete: Cascade)
-  UnitId   Int  @db.Int
-  quantity Int  @db.Int
-
-  minimumRequired Int? @db.Int
-
-  active      Boolean    @default(true)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now()) @updatedAt
-  Challenge   Challenge? @relation(fields: [challengeId], references: [id])
-  challengeId Int?       @db.Int
-
-  @@index([TaskId])
-  @@index([HabitId])
-  @@index([UnitId])
+  @@index([taskId])
+  @@index([habitId])
+  @@index([unitId])
   @@index([challengeId])
   @@map("challenge_requirement")
 }
@@ -373,6 +370,7 @@ model ChallengeParticipant {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now()) @updatedAt
 
+  @@unique([userId, challengeId], name: "unique_challenge_participant")
   @@index([userId])
   @@index([challengeId])
   @@map("challenge_participant")
@@ -386,7 +384,7 @@ model Unit {
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
   PlannedTask          PlannedTask[]
-  ChallengeRequirement ChallengeRequirement[]
+  challengeRequirement ChallengeRequirement[]
 
   @@map("unit")
 }

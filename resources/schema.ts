@@ -21,6 +21,7 @@ export interface User {
   taskHabitPreference?: TaskHabitPreference[];
   quoteOfTheDay?: QuoteOfTheDay[];
   Challenge?: Challenge[];
+  ChallengeParticipant?: ChallengeParticipant[];
 }
 
 export interface PushNotificationToken {
@@ -42,6 +43,7 @@ export interface Task {
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
   taskHabitPreference?: TaskHabitPreference[];
+  ChallengeRequirement?: ChallengeRequirement[];
 }
 
 export interface PlannedDay {
@@ -85,6 +87,7 @@ export interface Habit {
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
   taskHabitPreference?: TaskHabitPreference[];
+  ChallengeRequirement?: ChallengeRequirement[];
 }
 
 export interface TaskHabitPreference {
@@ -137,6 +140,7 @@ export interface Comment {
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
+  Challenge?: Challenge[];
 }
 
 export interface Like {
@@ -149,6 +153,7 @@ export interface Like {
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
   quoteOfTheDays?: QuoteOfTheDay[];
+  Challenge?: Challenge[];
 }
 
 export interface Image {
@@ -159,6 +164,7 @@ export interface Image {
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
+  Challenge?: Challenge[];
 }
 
 export interface Notification {
@@ -225,8 +231,44 @@ export interface Season {
 export interface Challenge {
   id?: number;
   name?: string;
+  description?: string;
   creator?: User;
   creatorId?: number;
+  challengeRequirements?: ChallengeRequirement[];
+  start?: Date;
+  end?: Date;
+  active?: boolean;
+  images?: Image[];
+  likes?: Like[];
+  comments?: Comment[];
+  createdAt?: Date;
+  updatedAt?: Date;
+  challengeParticipants?: ChallengeParticipant[];
+}
+
+export interface ChallengeRequirement {
+  id?: number;
+  task?: Task;
+  taskId?: number;
+  habit?: Habit;
+  habitId?: number;
+  unit?: Unit;
+  unitId?: number;
+  quantity?: number;
+  minimumRequired?: number;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  challenge?: Challenge;
+  challengeId?: number;
+}
+
+export interface ChallengeParticipant {
+  id?: number;
+  user?: User;
+  userId?: number;
+  challenge?: Challenge;
+  challengeId?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -240,6 +282,7 @@ export interface Unit {
   createdAt?: Date;
   updatedAt?: Date;
   PlannedTask?: PlannedTask[];
+  challengeRequirement?: ChallengeRequirement[];
 }
 
 export enum NotificationTargetPage {

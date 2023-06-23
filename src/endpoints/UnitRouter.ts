@@ -1,7 +1,5 @@
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
-import { validateUpdateUserWidgets } from '@src/middleware/widget/WidgetValidation';
-import { WidgetService } from '@src/service/WidgetService';
 import express from 'express';
 import { UnitService } from '@src/service/UnitService';
 

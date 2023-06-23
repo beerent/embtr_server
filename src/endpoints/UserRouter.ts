@@ -1,3 +1,4 @@
+import { GetChallengesResponse } from '@resources/types/requests/ChallengeTypes';
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
@@ -10,6 +11,7 @@ import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';
 import { validateGetUserData } from '@src/middleware/user_post/UserPostValidation';
+import { ChallengeService } from '@src/service/ChallengeService';
 import { DailyHistoryService } from '@src/service/DailyHistoryService';
 import { HabitJourneyService } from '@src/service/HabitJourneyService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
@@ -128,6 +130,23 @@ userRouter.get(
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
         const response: GetHabitJourneyResponse = await HabitJourneyService.get(userId);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
+/*
+ * Challenges
+ */
+userRouter.get(
+    '/:userId/challenges',
+    authenticate,
+    authorize,
+    validateGetUserData,
+    runEndpoint(async (req, res) => {
+        const userId = Number(req.params.userId);
+        const response: GetChallengesResponse = await ChallengeService.getAllForUser(userId);
+
         res.status(response.httpCode).json(response);
     })
 );
