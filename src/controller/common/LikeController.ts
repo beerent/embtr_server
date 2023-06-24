@@ -30,6 +30,12 @@ export class LikeController {
                     id,
                 },
             };
+        } else if (interactable === Interactable.CHALLENGE) {
+            data.challenges = {
+                connect: {
+                    id,
+                },
+            };
         }
 
         const result = await prisma.like.create({
@@ -43,6 +49,7 @@ export class LikeController {
                     },
                 },
                 quoteOfTheDays: true,
+                challenges: true,
             },
         });
 
@@ -91,6 +98,12 @@ export class LikeController {
             };
         } else if (interactable === Interactable.QUOTE_OF_THE_DAY) {
             where.quoteOfTheDays = {
+                some: {
+                    id: targetId,
+                },
+            };
+        } else if (interactable === Interactable.CHALLENGE) {
+            where.challenges = {
                 some: {
                     id: targetId,
                 },

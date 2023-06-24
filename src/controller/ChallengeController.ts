@@ -15,8 +15,15 @@ export class ChallengeController {
                 },
                 challengeParticipants: true,
                 creator: true,
+                likes: true,
+                comments: true,
             },
         });
+    }
+
+    public static async existsById(id: number) {
+        const result = await this.get(id);
+        return !!result;
     }
 
     public static async getAll() {
@@ -30,6 +37,8 @@ export class ChallengeController {
                 },
                 challengeParticipants: true,
                 creator: true,
+                likes: true,
+                comments: true,
             },
         });
     }
@@ -52,6 +61,8 @@ export class ChallengeController {
                 },
                 challengeParticipants: true,
                 creator: true,
+                likes: true,
+                comments: true,
             },
         });
     }

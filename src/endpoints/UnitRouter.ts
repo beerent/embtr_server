@@ -1,6 +1,6 @@
+import express from 'express';
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
-import express from 'express';
 import { UnitService } from '@src/service/UnitService';
 
 const unitRouter = express.Router();

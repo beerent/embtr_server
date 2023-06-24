@@ -1,9 +1,6 @@
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeController } from '@src/controller/ChallengeController';
-import {
-    GetChallengesResponse,
-    RegisterChallengeRequest,
-} from '@resources/types/requests/ChallengeTypes';
+import { GetChallengesResponse } from '@resources/types/requests/ChallengeTypes';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Challenge } from '@resources/schema';
 import { Response } from '@resources/types/requests/RequestTypes';

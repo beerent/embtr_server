@@ -14,6 +14,7 @@ import { LikeController } from '@src/controller/common/LikeController';
 import { UserPostController } from '@src/controller/UserPostController';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { QuoteOfTheDayController } from '@src/controller/QuoteOfTheDayController';
+import { ChallengeController } from '@src/controller/ChallengeController';
 
 export class LikeService {
     public static async create(interactable: Interactable, request: Request): Promise<Response> {
@@ -46,13 +47,18 @@ export class LikeService {
                 ? result.userPosts[0].userId
                 : interactable === Interactable.PLANNED_DAY_RESULT
                 ? result.plannedDayResults[0].plannedDay.userId
-                : result.quoteOfTheDays[0].userId;
+                : interactable === Interactable.QUOTE_OF_THE_DAY
+                ? result.quoteOfTheDays[0].userId
+                : result.challenges[0].creatorId;
+
         const notificationType =
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? NotificationType.PLANNED_DAY_RESULT_LIKE
                 : interactable === Interactable.USER_POST
                 ? NotificationType.TIMELINE_LIKE
-                : NotificationType.QUOTE_LIKE;
+                : interactable === Interactable.QUOTE_OF_THE_DAY
+                ? NotificationType.QUOTE_LIKE
+                : NotificationType.CHALLENGE_LIKE;
         await NotificationService.createNotification(toUserId, userId, notificationType, targetId);
         return SUCCESS;
     }
@@ -71,6 +77,10 @@ export class LikeService {
 
             case Interactable.QUOTE_OF_THE_DAY:
                 exists = await QuoteOfTheDayController.existsById(targetId);
+                break;
+
+            case Interactable.CHALLENGE:
+                exists = await ChallengeController.existsById(targetId);
                 break;
         }
 

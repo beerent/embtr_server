@@ -26,6 +26,7 @@ export enum NotificationType {
     QUOTE_SELECTED,
     GOAL_COMMENT,
     GOAL_LIKE,
+    CHALLENGE_LIKE,
 }
 
 export class NotificationService {
@@ -113,6 +114,8 @@ export class NotificationService {
                 return 'commented on your goal';
             case NotificationType.GOAL_LIKE:
                 return 'liked your goal';
+            case NotificationType.CHALLENGE_LIKE:
+                return 'liked your challenge';
 
             default:
                 return 'tagged you in a comment';
@@ -139,6 +142,8 @@ export class NotificationService {
             case NotificationType.GOAL_COMMENT:
             case NotificationType.GOAL_LIKE:
                 return NotificationTargetPage.GOAL_DETAILS;
+            case NotificationType.CHALLENGE_LIKE:
+                return NotificationTargetPage.CHALLENGE_DETAILS;
 
             default:
                 return NotificationTargetPage.INVALID;

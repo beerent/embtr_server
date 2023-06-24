@@ -20,7 +20,7 @@ export interface User {
   widgets?: Widget[];
   taskHabitPreference?: TaskHabitPreference[];
   quoteOfTheDay?: QuoteOfTheDay[];
-  Challenge?: Challenge[];
+  shallenges?: Challenge[];
   ChallengeParticipant?: ChallengeParticipant[];
 }
 
@@ -140,7 +140,7 @@ export interface Comment {
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
-  Challenge?: Challenge[];
+  challenges?: Challenge[];
 }
 
 export interface Like {
@@ -153,7 +153,7 @@ export interface Like {
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
   quoteOfTheDays?: QuoteOfTheDay[];
-  Challenge?: Challenge[];
+  challenges?: Challenge[];
 }
 
 export interface Image {
@@ -164,7 +164,7 @@ export interface Image {
   updatedAt?: Date;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
-  Challenge?: Challenge[];
+  challenges?: Challenge[];
 }
 
 export interface Notification {
