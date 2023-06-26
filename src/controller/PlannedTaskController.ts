@@ -15,7 +15,7 @@ export class PlannedTaskController {
         task: Task,
         habit?: Habit,
         quantity?: number,
-        unit?: Unit,
+        unit?: Unit
     ): Promise<PlannedTask | null> {
         const data = {
             plannedDay: {
@@ -29,14 +29,10 @@ export class PlannedTaskController {
                 },
             },
             habit: {},
+            unit: {},
             status: 'INCOMPLETE',
             completedQuantity: 0,
             quantity: quantity ?? 1,
-            unit: {
-                connect: {
-                    id: unit?.id ?? 9,
-                },
-            },
         };
 
         if (habit !== undefined) {
@@ -47,22 +43,32 @@ export class PlannedTaskController {
             };
         }
 
+        if (unit !== undefined) {
+            data.unit = {
+                connect: {
+                    id: unit.id,
+                },
+            };
+        }
+
         return prisma.plannedTask.create({
             data,
-            include:
-                {
-                    unit: true,
-                    habit: true,
-                },
+            include: {
+                unit: true,
+                habit: true,
+            },
         });
-
     }
 
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
         const active = plannedTask.active !== undefined ? { active: plannedTask.active } : {};
         const status = plannedTask.status !== undefined ? { status: plannedTask.status } : {};
-        const quantity = plannedTask.quantity !== undefined ? { quantity: plannedTask.quantity } : {};
-        const completedQuantity = plannedTask.completedQuantity !== undefined ? { completedQuantity: plannedTask.completedQuantity } : {};
+        const quantity =
+            plannedTask.quantity !== undefined ? { quantity: plannedTask.quantity } : {};
+        const completedQuantity =
+            plannedTask.completedQuantity !== undefined
+                ? { completedQuantity: plannedTask.completedQuantity }
+                : {};
         const habit =
             plannedTask.habitId !== undefined
                 ? { habitId: plannedTask.habitId }
@@ -124,7 +130,7 @@ export class PlannedTaskController {
     public static async deleteByUserIdAndPlannedDayIdAndTaskId(
         userId: number,
         plannedDayId: number,
-        taskId: number,
+        taskId: number
     ) {
         return prisma.plannedTask.deleteMany({
             where: {
@@ -178,7 +184,7 @@ WHERE userId = ${userId}
   AND planned_task.completedQuantity >= planned_task.quantity
 GROUP BY habit.id, seasonDate, season
 order by habitId desc, seasonDate desc;
-`,
+`
         );
 
         const formattedResults = result as unknown[];

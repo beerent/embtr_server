@@ -13,10 +13,19 @@ export class ChallengeController {
                         habit: true,
                     },
                 },
+                challengeRewards: true,
                 challengeParticipants: true,
                 creator: true,
-                likes: true,
-                comments: true,
+                likes: {
+                    include: {
+                        user: true,
+                    },
+                },
+                comments: {
+                    include: {
+                        user: true,
+                    },
+                },
             },
         });
     }
@@ -35,6 +44,7 @@ export class ChallengeController {
                         habit: true,
                     },
                 },
+                challengeRewards: true,
                 challengeParticipants: true,
                 creator: true,
                 likes: true,
@@ -59,6 +69,7 @@ export class ChallengeController {
                         habit: true,
                     },
                 },
+                challengeRewards: true,
                 challengeParticipants: true,
                 creator: true,
                 likes: true,

@@ -235,6 +235,7 @@ export interface Challenge {
   creator?: User;
   creatorId?: number;
   challengeRequirements?: ChallengeRequirement[];
+  challengeRewards?: ChallengeReward[];
   start?: Date;
   end?: Date;
   active?: boolean;
@@ -254,13 +255,24 @@ export interface ChallengeRequirement {
   habitId?: number;
   unit?: Unit;
   unitId?: number;
-  quantity?: number;
-  minimumRequired?: number;
+  required?: number;
+  challengeType?: ChallengeFrequency;
+  challenge?: Challenge;
+  challengeId?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  challenge?: Challenge;
-  challengeId?: number;
+}
+
+export interface ChallengeReward {
+  id?: number;
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+  active?: boolean;
+  challenge?: Challenge[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ChallengeParticipant {
@@ -304,4 +316,10 @@ export enum WidgetType {
   DAILY_HISTORY = 'DAILY_HISTORY',
   HABIT_JOURNEY = 'HABIT_JOURNEY',
   PLANNING = 'PLANNING',
+}
+
+export enum ChallengeFrequency {
+  INVALID = 'INVALID',
+  TOTAL = 'TOTAL',
+  DAILY = 'DAILY',
 }

@@ -1,6 +1,9 @@
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeController } from '@src/controller/ChallengeController';
-import { GetChallengesResponse } from '@resources/types/requests/ChallengeTypes';
+import {
+    GetChallengeResponse,
+    GetChallengesResponse,
+} from '@resources/types/requests/ChallengeTypes';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Challenge } from '@resources/schema';
 import { Response } from '@resources/types/requests/RequestTypes';
@@ -20,6 +23,16 @@ export class ChallengeService {
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
         return { ...SUCCESS, challenges: challengeModels };
+    }
+
+    public static async get(id: number): Promise<GetChallengeResponse> {
+        const challenge = await ChallengeController.get(id);
+        if (!challenge) {
+            return { ...GENERAL_FAILURE, message: 'challenge not found' };
+        }
+
+        const challengeModel: Challenge = ModelConverter.convert(challenge);
+        return { ...SUCCESS, challenge: challengeModel };
     }
 
     public static async register(request: Request): Promise<Response> {

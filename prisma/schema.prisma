@@ -322,6 +322,7 @@ model Challenge {
   creator               User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   creatorId             Int                    @db.Int
   challengeRequirements ChallengeRequirement[]
+  challengeRewards      ChallengeReward[]
   start                 DateTime               @db.Date
   end                   DateTime               @db.Date
   active                Boolean                @default(true)
@@ -336,28 +337,53 @@ model Challenge {
   @@map("challenge")
 }
 
+enum ChallengeCalculationType {
+  INVALID
+  TOTAL
+  UNIQUE
+}
+
 model ChallengeRequirement {
   id Int @id @default(autoincrement())
 
-  task            Task?     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  taskId          Int?      @db.Int
-  habit           Habit?    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  habitId         Int?      @db.Int
-  unit            Unit?     @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  unitId          Int?      @db.Int
-  quantity        Int       @db.Int
-  minimumRequired Int       @db.Int
-  active          Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @default(now()) @updatedAt
-  challenge       Challenge @relation(fields: [challengeId], references: [id])
-  challengeId     Int       @db.Int
+  challenge   Challenge @relation(fields: [challengeId], references: [id])
+  challengeId Int       @db.Int
+
+  task    Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  taskId  Int?   @db.Int
+  habit   Habit? @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habitId Int?   @db.Int
+  unit    Unit?  @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId  Int?   @db.Int
+
+  calculationType          ChallengeCalculationType @default(INVALID)
+  calculationIntervalDays  Int?                     @db.Int
+  requiredIntervalQuantity Int?                     @db.Int
+
+  requiredTaskQuantity Int? @db.Int
+
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@index([taskId])
   @@index([habitId])
   @@index([unitId])
   @@index([challengeId])
   @@map("challenge_requirement")
+}
+
+model ChallengeReward {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(255)
+  description String?     @db.VarChar(255)
+  imageUrl    String?     @db.VarChar(255)
+  active      Boolean     @default(true)
+  challenge   Challenge[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
+
+  @@map("challenge_reward")
 }
 
 model ChallengeParticipant {

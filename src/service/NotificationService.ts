@@ -116,6 +116,8 @@ export class NotificationService {
                 return 'liked your goal';
             case NotificationType.CHALLENGE_LIKE:
                 return 'liked your challenge';
+            case NotificationType.CHALLENGE_COMMENT:
+                return 'commented on your challenge';
 
             default:
                 return 'tagged you in a comment';
@@ -143,6 +145,7 @@ export class NotificationService {
             case NotificationType.GOAL_LIKE:
                 return NotificationTargetPage.GOAL_DETAILS;
             case NotificationType.CHALLENGE_LIKE:
+            case NotificationType.CHALLENGE_COMMENT:
                 return NotificationTargetPage.CHALLENGE_DETAILS;
 
             default:
