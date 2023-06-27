@@ -374,15 +374,17 @@ model ChallengeRequirement {
 }
 
 model ChallengeReward {
-  id          Int         @id @default(autoincrement())
-  name        String      @db.VarChar(255)
-  description String?     @db.VarChar(255)
-  imageUrl    String?     @db.VarChar(255)
-  active      Boolean     @default(true)
-  challenge   Challenge[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(255)
+  description String?    @db.VarChar(255)
+  imageUrl    String?    @db.VarChar(255)
+  active      Boolean    @default(true)
+  challengeId Int?       @db.Int
+  challenge   Challenge? @relation(fields: [challengeId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now()) @updatedAt
 
+  @@index([challengeId])
   @@map("challenge_reward")
 }
 
