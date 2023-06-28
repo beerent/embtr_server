@@ -322,6 +322,7 @@ export enum WidgetType {
   DAILY_HISTORY = 'DAILY_HISTORY',
   HABIT_JOURNEY = 'HABIT_JOURNEY',
   PLANNING = 'PLANNING',
+  ACTIVE_CHALLENGES = 'ACTIVE_CHALLENGES',
 }
 
 export enum ChallengeCalculationType {
