@@ -12,12 +12,12 @@ import { CommentService } from '@src/service/CommentService';
 const challengeRouter = express.Router();
 
 challengeRouter.get('/', authenticate, authorize, async (req, res) => {
-    const response = await ChallengeService.getAll();
+    const response = await ChallengeService.getAll(req);
     res.status(response.httpCode).json(response);
 });
 
 challengeRouter.get('/:id', authenticate, authorize, async (req, res) => {
-    const response = await ChallengeService.get(Number(req.params.id));
+    const response = await ChallengeService.get(req);
     res.status(response.httpCode).json(response);
 });
 

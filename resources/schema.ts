@@ -264,6 +264,10 @@ export interface ChallengeRequirement {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+
+  custom: {
+    percentComplete: number
+  }
 }
 
 export interface ChallengeReward {

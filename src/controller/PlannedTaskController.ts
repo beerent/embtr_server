@@ -194,4 +194,30 @@ order by habitId desc, seasonDate desc;
 
         return formattedResults;
     }
+
+    public static async getSumOfQuantityForTaskBetweenDates(
+        userId: number,
+        taskId: number,
+        start: Date,
+        end: Date
+    ) {
+        const result = await prisma.plannedTask.aggregate({
+            _sum: {
+                completedQuantity: true,
+            },
+            where: {
+                taskId,
+                plannedDay: {
+                    userId,
+                    date: {
+                        gte: start,
+                        lte: end,
+                    },
+                },
+                active: true,
+            },
+        });
+
+        return result._sum.completedQuantity;
+    }
 }
