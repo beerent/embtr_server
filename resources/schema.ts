@@ -228,7 +228,7 @@ export interface Season {
   updatedAt?: Date;
 }
 
-export interface Challenge {
+export interface Challenge extends ChallengeCustom {
   id?: number;
   name?: string;
   description?: string;
@@ -247,7 +247,7 @@ export interface Challenge {
   challengeParticipants?: ChallengeParticipant[];
 }
 
-export interface ChallengeRequirement {
+export interface ChallengeRequirement extends ChallengeRequirementCustom {
   id?: number;
   challenge?: Challenge;
   challengeId?: number;
@@ -264,10 +264,6 @@ export interface ChallengeRequirement {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-
-  custom: {
-    percentComplete: number
-  }
 }
 
 export interface ChallengeReward {
@@ -329,4 +325,22 @@ export enum ChallengeCalculationType {
   INVALID = 'INVALID',
   TOTAL = 'TOTAL',
   UNIQUE = 'UNIQUE',
+}
+
+export interface ChallengeCompletionData {
+  amountComplete: number;
+  amountRequired: number;
+  percentComplete: number;
+}
+
+export interface ChallengeRequirementCustom {
+  custom: {
+    completionData: ChallengeCompletionData;
+  };
+}
+
+export interface ChallengeCustom {
+  custom: {
+    brentWasHere: boolean;
+  };
 }

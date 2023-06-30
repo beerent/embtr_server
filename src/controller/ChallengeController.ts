@@ -11,6 +11,7 @@ export class ChallengeController {
                     include: {
                         task: true,
                         habit: true,
+                        unit: true,
                     },
                 },
                 challengeRewards: true,
@@ -42,6 +43,7 @@ export class ChallengeController {
                     include: {
                         task: true,
                         habit: true,
+                        unit: true,
                     },
                 },
                 challengeRewards: true,
@@ -67,6 +69,7 @@ export class ChallengeController {
                     include: {
                         task: true,
                         habit: true,
+                        unit: true,
                     },
                 },
                 challengeRewards: true,

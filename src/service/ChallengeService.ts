@@ -1,16 +1,20 @@
-import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { ChallengeController } from '@src/controller/ChallengeController';
+import {
+    Challenge,
+    ChallengeCalculationType,
+    ChallengeCompletionData,
+    ChallengeRequirement,
+} from '@resources/schema';
 import {
     GetChallengeResponse,
     GetChallengesResponse,
 } from '@resources/types/requests/ChallengeTypes';
-import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Challenge, ChallengeCalculationType, ChallengeRequirement } from '@resources/schema';
 import { Response } from '@resources/types/requests/RequestTypes';
-import { Request } from 'express';
+import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
+import { ChallengeController } from '@src/controller/ChallengeController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
-import { UnitController } from '@src/controller/UnitController';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { Request } from 'express';
 
 export class ChallengeService {
     public static async getAll(request: Request): Promise<GetChallengesResponse> {
@@ -82,40 +86,50 @@ export class ChallengeService {
     private static async postProcessChallengeModel(challenge: Challenge, userId: number) {
         await Promise.all(
             (challenge.challengeRequirements ?? []).map(async (requirement) => {
+                const completionData: ChallengeCompletionData =
+                    await ChallengeService.getCompletionData(userId, challenge, requirement);
+
                 requirement.custom = {
-                    percentComplete: await ChallengeService.getUserChallengeProgressPercent(
-                        userId,
-                        requirement,
-                        challenge.start ?? new Date(),
-                        challenge.end ?? new Date()
-                    ),
+                    completionData,
                 };
             })
         );
     }
 
-    private static async getUserChallengeProgressPercent(
+    public static async getCompletionData(
         userId: number,
-        requirement: ChallengeRequirement,
-        start: Date,
-        end: Date
+        challenge: Challenge,
+        requirement: ChallengeRequirement
     ) {
-        if (requirement.calculationType === ChallengeCalculationType.TOTAL) {
-            // get all tasks that match the ID of the task that fall between the start and end date-
-            const quantitySum = await PlannedTaskController.getSumOfQuantityForTaskBetweenDates(
-                userId,
-                requirement.taskId ?? 0,
-                start,
-                end
-            );
+        const start = challenge.start ?? new Date();
+        const end = challenge.end ?? new Date();
 
-            const percentComplete = quantitySum ?? 0 / (requirement.requiredTaskQuantity ?? 1);
-            return percentComplete;
+        let amountComplete = 0;
+        let amountRequired = 0;
+        let percentComplete = 0;
+
+        if (requirement.calculationType === ChallengeCalculationType.TOTAL) {
+            amountComplete =
+                (await PlannedTaskController.getSumOfQuantityForTaskBetweenDates(
+                    userId,
+                    requirement.taskId ?? 0,
+                    start,
+                    end
+                )) ?? 0;
+
+            amountRequired = requirement.requiredTaskQuantity ?? 0;
+            percentComplete = (amountComplete / amountRequired) * 100;
 
             // divide by the total quantity
         } else if (requirement.calculationType === ChallengeCalculationType.UNIQUE) {
         }
 
-        return 0;
+        const completionData: ChallengeCompletionData = {
+            amountComplete,
+            amountRequired,
+            percentComplete,
+        };
+
+        return completionData;
     }
 }
