@@ -156,7 +156,7 @@ export interface Like {
   challenges?: Challenge[];
 }
 
-export interface Image {
+export interface Image extends ImageCustom {
   id?: number;
   url?: string;
   active?: boolean;
@@ -343,4 +343,8 @@ export interface ChallengeCustom {
   custom: {
     brentWasHere: boolean;
   };
+}
+
+export interface ImageCustom {
+  thedevdadssecretvalue: number;
 }

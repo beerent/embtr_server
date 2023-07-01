@@ -15,3 +15,7 @@ export interface ChallengeCustom {
     brentWasHere: boolean;
   };
 }
+
+export interface ImageCustom {
+  thedevdadssecretvalue: number;
+}

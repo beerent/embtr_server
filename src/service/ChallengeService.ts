@@ -12,7 +12,10 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { ChallengeController } from '@src/controller/ChallengeController';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import {
+    ChallengeRequirementResults,
+    PlannedTaskController,
+} from '@src/controller/PlannedTaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
@@ -103,33 +106,42 @@ export class ChallengeService {
     ) {
         const start = challenge.start ?? new Date();
         const end = challenge.end ?? new Date();
+        const daysInDateRange = Math.floor(
+            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+        );
+        const interval = requirement.calculationIntervalDays ?? daysInDateRange;
+
+        const results: ChallengeRequirementResults[] =
+            await PlannedTaskController.getChallengeRequirementProgess(
+                userId,
+                requirement.taskId ?? 0,
+                start,
+                end,
+                interval
+            );
 
         let amountComplete = 0;
         let amountRequired = 0;
         let percentComplete = 0;
 
         if (requirement.calculationType === ChallengeCalculationType.TOTAL) {
-            amountComplete =
-                (await PlannedTaskController.getSumOfQuantityForTaskBetweenDates(
-                    userId,
-                    requirement.taskId ?? 0,
-                    start,
-                    end
-                )) ?? 0;
+            const result: ChallengeRequirementResults = results[0];
 
-            amountRequired = requirement.requiredTaskQuantity ?? 0;
-            percentComplete = (amountComplete / amountRequired) * 100;
-
-            // divide by the total quantity
+            amountComplete = result.totalCompleted;
+            amountRequired = requirement.requiredTaskQuantity ?? 1;
+            percentComplete = Math.floor((amountComplete / amountRequired) * 100);
         } else if (requirement.calculationType === ChallengeCalculationType.UNIQUE) {
+            amountComplete = results.filter(
+                (result) => result.totalCompleted >= requirement.requiredTaskQuantity!
+            ).length;
+            amountRequired = requirement.requiredIntervalQuantity ?? 1;
+            percentComplete = Math.floor((amountComplete / amountRequired) * 100);
         }
 
-        const completionData: ChallengeCompletionData = {
+        return {
             amountComplete,
             amountRequired,
             percentComplete,
         };
-
-        return completionData;
     }
 }
