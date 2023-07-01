@@ -127,7 +127,7 @@ export class ChallengeService {
         if (requirement.calculationType === ChallengeCalculationType.TOTAL) {
             const result: ChallengeRequirementResults = results[0];
 
-            amountComplete = result.totalCompleted;
+            amountComplete = result?.totalCompleted ?? 0;
             amountRequired = requirement.requiredTaskQuantity ?? 1;
             percentComplete = Math.floor((amountComplete / amountRequired) * 100);
         } else if (requirement.calculationType === ChallengeCalculationType.UNIQUE) {
