@@ -2,6 +2,7 @@ import {
     Challenge,
     ChallengeCalculationType,
     ChallengeCompletionData,
+    ChallengeCompletionState,
     ChallengeRequirement,
 } from '@resources/schema';
 import {
@@ -138,10 +139,16 @@ export class ChallengeService {
             percentComplete = Math.floor((amountComplete / amountRequired) * 100);
         }
 
+        const challengeCompletionState =
+            percentComplete >= 100
+                ? ChallengeCompletionState.COMPLETE
+                : ChallengeCompletionState.ACTIVE;
+
         return {
             amountComplete,
             amountRequired,
             percentComplete,
+            challengeCompletionState,
         };
     }
 }

@@ -2,6 +2,7 @@ export interface ChallengeCompletionData {
   amountComplete: number;
   amountRequired: number;
   percentComplete: number;
+  challengeCompletionState: ChallengeCompletionState;
 }
 
 export interface ChallengeRequirementCustom {
@@ -10,12 +11,7 @@ export interface ChallengeRequirementCustom {
   };
 }
 
-export interface ChallengeCustom {
-  custom: {
-    brentWasHere: boolean;
-  };
-}
-
-export interface ImageCustom {
-  thedevdadssecretvalue: number;
+export enum ChallengeCompletionState {
+  ACTIVE,
+  COMPLETE,
 }

@@ -156,7 +156,7 @@ export interface Like {
   challenges?: Challenge[];
 }
 
-export interface Image extends ImageCustom {
+export interface Image {
   id?: number;
   url?: string;
   active?: boolean;
@@ -228,7 +228,7 @@ export interface Season {
   updatedAt?: Date;
 }
 
-export interface Challenge extends ChallengeCustom {
+export interface Challenge {
   id?: number;
   name?: string;
   description?: string;
@@ -331,6 +331,7 @@ export interface ChallengeCompletionData {
   amountComplete: number;
   amountRequired: number;
   percentComplete: number;
+  challengeCompletionState: ChallengeCompletionState;
 }
 
 export interface ChallengeRequirementCustom {
@@ -339,12 +340,7 @@ export interface ChallengeRequirementCustom {
   };
 }
 
-export interface ChallengeCustom {
-  custom: {
-    brentWasHere: boolean;
-  };
-}
-
-export interface ImageCustom {
-  thedevdadssecretvalue: number;
+export enum ChallengeCompletionState {
+  ACTIVE,
+  COMPLETE,
 }
