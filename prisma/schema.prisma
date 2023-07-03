@@ -306,7 +306,6 @@ model HiddenPlannedDayResultRecommendations {
   @@map("hidden_planned_day_result_recommendations")
 }
 
-// enum table that holds dates
 model Season {
   id        Int      @id @default(autoincrement())
   date      DateTime @db.Date
@@ -388,19 +387,27 @@ model ChallengeReward {
 }
 
 model ChallengeParticipant {
-  id          Int       @id @default(autoincrement())
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      Int       @db.Int
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  challengeId Int       @db.Int
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  id                                  Int                                 @id @default(autoincrement())
+  user                                User                                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                              Int                                 @db.Int
+  challenge                           Challenge                           @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId                         Int                                 @db.Int
+  amountComplete                      Int                                 @default(0) @db.Int
+  challengeRequirementCompletionState ChallengeRequirementCompletionState @default(INVALID)
+  active                              Boolean                             @default(true)
+  createdAt                           DateTime                            @default(now())
+  updatedAt                           DateTime                            @default(now()) @updatedAt
 
   @@unique([userId, challengeId], name: "unique_challenge_participant")
   @@index([userId])
   @@index([challengeId])
   @@map("challenge_participant")
+}
+
+enum ChallengeRequirementCompletionState {
+  INVALID
+  IN_PROGRESS
+  COMPLETED
 }
 
 model Unit {

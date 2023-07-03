@@ -1,22 +1,24 @@
 import {
     Challenge,
     ChallengeCalculationType,
-    ChallengeCompletionData,
-    ChallengeCompletionState,
+    ChallengeParticipant,
     ChallengeRequirement,
+    ChallengeRequirementCompletionState,
+    PlannedTask,
 } from '@resources/schema';
 import {
+    GetChallengeParticipationResponse,
     GetChallengeResponse,
     GetChallengesResponse,
 } from '@resources/types/requests/ChallengeTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { ChallengeController } from '@src/controller/ChallengeController';
 import {
+    ChallengeController,
     ChallengeRequirementResults,
-    PlannedTaskController,
-} from '@src/controller/PlannedTaskController';
+} from '@src/controller/ChallengeController';
+import { ChallengeParticipantController } from '@src/controller/ChallengeParticipantController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
@@ -28,17 +30,17 @@ export class ChallengeService {
 
         const challenges = await ChallengeController.getAll();
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
-        await ChallengeService.postProcessChallengeModels(challengeModels, userId);
 
         return { ...SUCCESS, challenges: challengeModels };
     }
 
-    public static async getAllForUser(userId: number): Promise<GetChallengesResponse> {
-        const challenges = await ChallengeController.getAllForUser(userId);
-        const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
-        await ChallengeService.postProcessChallengeModels(challengeModels, userId);
+    public static async getChallengeParticipationForUser(
+        userId: number
+    ): Promise<GetChallengeParticipationResponse> {
+        const challengeParticipation = await ChallengeParticipantController.getAllForUser(userId);
+        const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
 
-        return { ...SUCCESS, challenges: challengeModels };
+        return { ...SUCCESS, challengeParticipation: models };
     }
 
     public static async get(request: Request): Promise<GetChallengeResponse> {
@@ -54,7 +56,6 @@ export class ChallengeService {
         }
 
         const challengeModel: Challenge = ModelConverter.convert(challenge);
-        await ChallengeService.postProcessChallengeModel(challengeModel, userId);
 
         return { ...SUCCESS, challenge: challengeModel };
     }
@@ -79,32 +80,60 @@ export class ChallengeService {
         return SUCCESS;
     }
 
-    private static async postProcessChallengeModels(challenges: Challenge[], userId: number) {
-        await Promise.all(
-            challenges.map((challenge) =>
-                ChallengeService.postProcessChallengeModel(challenge, userId)
-            )
+    public static async updateChallengeRequirementProgress(plannedTask: PlannedTask) {
+        const userId = plannedTask.plannedDay?.userId;
+        const taskId = plannedTask.taskId;
+        const date = plannedTask.plannedDay?.date;
+        if (!userId || !taskId || !date) {
+            return;
+        }
+
+        const participants = await ChallengeParticipantController.getAllForUserAndTaskAndDate(
+            userId,
+            taskId,
+            date
         );
+        const participantModels: ChallengeParticipant[] = ModelConverter.convertAll(participants);
+
+        const promises = [];
+        for (const participant of participantModels) {
+            if (!participant.challenge?.challengeRequirements) {
+                continue;
+            }
+
+            const challenge = participant.challenge;
+            const requirements = challenge.challengeRequirements!.filter(
+                (requirement) => requirement.taskId === taskId
+            );
+
+            for (const requirement of requirements) {
+                const amountComplete = await ChallengeService.getChallengeRequirementAmountComplete(
+                    userId,
+                    challenge,
+                    requirement
+                );
+
+                participant.amountComplete = amountComplete;
+                const reqiredAmount =
+                    requirement.calculationType === ChallengeCalculationType.TOTAL
+                        ? requirement.requiredTaskQuantity
+                        : requirement.requiredIntervalQuantity;
+                participant.challengeRequirementCompletionState =
+                    amountComplete >= (reqiredAmount ?? 0)
+                        ? ChallengeRequirementCompletionState.COMPLETED
+                        : ChallengeRequirementCompletionState.IN_PROGRESS;
+                promises.push(ChallengeParticipantController.update(participant));
+            }
+
+            await Promise.all(promises);
+        }
     }
 
-    private static async postProcessChallengeModel(challenge: Challenge, userId: number) {
-        await Promise.all(
-            (challenge.challengeRequirements ?? []).map(async (requirement) => {
-                const completionData: ChallengeCompletionData =
-                    await ChallengeService.getCompletionData(userId, challenge, requirement);
-
-                requirement.custom = {
-                    completionData,
-                };
-            })
-        );
-    }
-
-    public static async getCompletionData(
+    public static async getChallengeRequirementAmountComplete(
         userId: number,
         challenge: Challenge,
         requirement: ChallengeRequirement
-    ) {
+    ): Promise<number> {
         const start = challenge.start ?? new Date();
         const end = challenge.end ?? new Date();
         const daysInDateRange = Math.floor(
@@ -113,7 +142,7 @@ export class ChallengeService {
         const interval = requirement.calculationIntervalDays ?? daysInDateRange;
 
         const results: ChallengeRequirementResults[] =
-            await PlannedTaskController.getChallengeRequirementProgess(
+            await ChallengeController.getChallengeRequirementProgess(
                 userId,
                 requirement.taskId ?? 0,
                 start,
@@ -122,33 +151,17 @@ export class ChallengeService {
             );
 
         let amountComplete = 0;
-        let amountRequired = 0;
-        let percentComplete = 0;
 
         if (requirement.calculationType === ChallengeCalculationType.TOTAL) {
             const result: ChallengeRequirementResults = results[0];
 
             amountComplete = result?.totalCompleted ?? 0;
-            amountRequired = requirement.requiredTaskQuantity ?? 1;
-            percentComplete = Math.floor((amountComplete / amountRequired) * 100);
         } else if (requirement.calculationType === ChallengeCalculationType.UNIQUE) {
             amountComplete = results.filter(
                 (result) => result.totalCompleted >= requirement.requiredTaskQuantity!
             ).length;
-            amountRequired = requirement.requiredIntervalQuantity ?? 1;
-            percentComplete = Math.floor((amountComplete / amountRequired) * 100);
         }
 
-        const challengeCompletionState =
-            percentComplete >= 100
-                ? ChallengeCompletionState.COMPLETE
-                : ChallengeCompletionState.ACTIVE;
-
-        return {
-            amountComplete,
-            amountRequired,
-            percentComplete,
-            challengeCompletionState,
-        };
+        return amountComplete;
     }
 }

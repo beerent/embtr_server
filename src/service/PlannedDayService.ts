@@ -35,6 +35,7 @@ import { TaskController } from '@src/controller/TaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { UnitController } from '@src/controller/UnitController';
+import { ChallengeService } from './ChallengeService';
 
 export class PlannedDayService {
     public static async getById(id: number): Promise<GetPlannedDayResponse> {
@@ -51,7 +52,7 @@ export class PlannedDayService {
     public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
         const plannedDay = await PlannedDayController.getByUserAndDayKey(
             request.userId,
-            request.dayKey,
+            request.dayKey
         );
 
         if (plannedDay) {
@@ -64,7 +65,7 @@ export class PlannedDayService {
 
     public static async create(request: Request): Promise<CreatePlannedDayResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!,
+            request.headers.authorization!
         )) as number;
         const dayKey = request.body.dayKey;
 
@@ -87,7 +88,7 @@ export class PlannedDayService {
     public static async createPlannedTask(request: Request): Promise<UpdatePlannedTaskResponse> {
         const body: CreatePlannedTaskRequest = request.body;
         const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!,
+            request.headers.authorization!
         )) as number;
 
         //todo add test for userId comparison
@@ -124,7 +125,7 @@ export class PlannedDayService {
             task,
             habit ?? undefined,
             body.quantity,
-            unit ?? undefined,
+            unit ?? undefined
         );
 
         if (createdPlannedTask) {
@@ -139,7 +140,7 @@ export class PlannedDayService {
         const updateRequest: UpdatePlannedTaskRequest = request.body;
 
         const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!,
+            request.headers.authorization!
         )) as number;
 
         const plannedTask = await PlannedTaskController.get(updateRequest.plannedTask!.id!);
@@ -155,6 +156,8 @@ export class PlannedDayService {
         if (updatedPlannedTask) {
             const updatedPlannedTaskModel: PlannedTaskModel =
                 ModelConverter.convert(updatedPlannedTask);
+            await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
+
             return { ...SUCCESS, plannedTask: updatedPlannedTaskModel };
         }
 

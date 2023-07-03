@@ -1,4 +1,7 @@
-import { GetChallengesResponse } from '@resources/types/requests/ChallengeTypes';
+import {
+    GetChallengeParticipationResponse,
+    GetChallengesResponse,
+} from '@resources/types/requests/ChallengeTypes';
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
@@ -139,13 +142,14 @@ userRouter.get(
  * Challenges
  */
 userRouter.get(
-    '/:userId/challenges',
+    '/:userId/challenge-participation',
     authenticate,
     authorize,
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        const response: GetChallengesResponse = await ChallengeService.getAllForUser(userId);
+        const response: GetChallengeParticipationResponse =
+            await ChallengeService.getChallengeParticipationForUser(userId);
 
         res.status(response.httpCode).json(response);
     })
