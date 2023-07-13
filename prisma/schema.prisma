@@ -392,7 +392,7 @@ model ChallengeParticipant {
   userId                              Int                                 @db.Int
   challenge                           Challenge                           @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   challengeId                         Int                                 @db.Int
-  amountComplete                      Int                                 @default(0) @db.Int
+  amountComplete                      Float                               @default(0) @db.Double
   challengeRequirementCompletionState ChallengeRequirementCompletionState @default(INVALID)
   active                              Boolean                             @default(true)
   createdAt                           DateTime                            @default(now())

@@ -80,13 +80,17 @@ export class ChallengeService {
         return SUCCESS;
     }
 
-    public static async updateChallengeRequirementProgress(plannedTask: PlannedTask) {
+    public static async updateChallengeRequirementProgress(
+        plannedTask: PlannedTask
+    ): Promise<Challenge[]> {
         const userId = plannedTask.plannedDay?.userId;
         const taskId = plannedTask.taskId;
         const date = plannedTask.plannedDay?.date;
         if (!userId || !taskId || !date) {
-            return;
+            return [];
         }
+
+        const completedChallenges = [];
 
         const participants = await ChallengeParticipantController.getAllForUserAndTaskAndDate(
             userId,
@@ -100,6 +104,8 @@ export class ChallengeService {
             if (!participant.challenge?.challengeRequirements) {
                 continue;
             }
+
+            const previousCompletionState = participant.challengeRequirementCompletionState;
 
             const challenge = participant.challenge;
             const requirements = challenge.challengeRequirements!.filter(
@@ -118,15 +124,26 @@ export class ChallengeService {
                     requirement.calculationType === ChallengeCalculationType.TOTAL
                         ? requirement.requiredTaskQuantity
                         : requirement.requiredIntervalQuantity;
+
                 participant.challengeRequirementCompletionState =
                     amountComplete >= (reqiredAmount ?? 0)
                         ? ChallengeRequirementCompletionState.COMPLETED
                         : ChallengeRequirementCompletionState.IN_PROGRESS;
-                promises.push(ChallengeParticipantController.update(participant));
-            }
 
-            await Promise.all(promises);
+                promises.push(ChallengeParticipantController.update(participant));
+
+                if (
+                    previousCompletionState !== participant.challengeRequirementCompletionState &&
+                    participant.challengeRequirementCompletionState ===
+                        ChallengeRequirementCompletionState.COMPLETED
+                ) {
+                    completedChallenges.push(challenge);
+                }
+            }
         }
+        await Promise.all(promises);
+
+        return completedChallenges;
     }
 
     public static async getChallengeRequirementAmountComplete(

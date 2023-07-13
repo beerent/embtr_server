@@ -156,9 +156,11 @@ export class PlannedDayService {
         if (updatedPlannedTask) {
             const updatedPlannedTaskModel: PlannedTaskModel =
                 ModelConverter.convert(updatedPlannedTask);
-            await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
+            const completedChallenges = await ChallengeService.updateChallengeRequirementProgress(
+                updatedPlannedTaskModel
+            );
 
-            return { ...SUCCESS, plannedTask: updatedPlannedTaskModel };
+            return { ...SUCCESS, plannedTask: updatedPlannedTaskModel, completedChallenges };
         }
 
         return UPDATE_PLANNED_TASK_FAILED;

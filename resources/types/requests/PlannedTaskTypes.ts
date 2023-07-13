@@ -1,4 +1,4 @@
-import { PlannedTask as PlannedTaskModel } from "../../schema";
+import { Challenge, PlannedTask as PlannedTaskModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface CreatePlannedTaskRequest {
@@ -15,4 +15,5 @@ export interface UpdatePlannedTaskRequest {
 
 export interface UpdatePlannedTaskResponse extends Response {
   plannedTask?: PlannedTaskModel;
+  completedChallenges?: Challenge[];
 }

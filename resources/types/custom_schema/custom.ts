@@ -4,4 +4,3 @@ export interface ChallengeCompletionData {
   percentComplete: number;
   challengeRequirementCompletionState: ChallengeRequirementCompletionState;
 }
-
