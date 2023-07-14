@@ -125,22 +125,6 @@ export class ChallengeController {
             `
         );
 
-        console.log(
-            `
-            SELECT floor((DATEDIFF(planned_day.date, '1971-01-01') - DATEDIFF(${startDateString}, '1971-01-01')) / ${interval}) AS intervalIndex,
-            MIN(planned_day.date)                                                                 AS intervalStartDate,
-            SUM(completedQuantity)                                                                AS totalCompleted
-     FROM planned_task
-              JOIN planned_day ON plannedDayId = planned_day.id
-     WHERE userId = ${userId}
-       AND taskId = ${taskId}
-       AND planned_task.active = true
-       AND planned_day.date >= ${startDateString}
-       AND planned_day.date < ${endDateString}
-     group by intervalIndex; 
-            `
-        );
-
         return result;
     }
 }
