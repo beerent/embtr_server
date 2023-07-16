@@ -100,11 +100,42 @@ export class ChallengeController {
     }
 
     public static async getChallengeRequirementProgess(
-        userId: number,
-        taskId: number,
         startDate: Date,
         endDate: Date,
-        interval: number
+        userId: number,
+        interval: number,
+        taskId?: number,
+        habitId?: number
+    ) {
+        if (taskId) {
+            return this.getTaskBasedChallengeRequirementProgess(
+                startDate,
+                endDate,
+                userId,
+                interval,
+                taskId
+            );
+        }
+
+        if (habitId) {
+            return this.getHabitBasedChallengeRequirementProgess(
+                startDate,
+                endDate,
+                userId,
+                interval,
+                habitId
+            );
+        }
+
+        return [];
+    }
+
+    private static async getTaskBasedChallengeRequirementProgess(
+        startDate: Date,
+        endDate: Date,
+        userId: number,
+        interval: number,
+        taskId: number
     ) {
         const startDateString = startDate.toISOString().replace('T', ' ').replace('Z', '');
         const endDateString = endDate.toISOString().replace('T', ' ').replace('Z', '');
@@ -118,6 +149,35 @@ export class ChallengeController {
               JOIN planned_day ON plannedDayId = planned_day.id
      WHERE userId = ${userId}
        AND taskId = ${taskId}
+       AND planned_task.active = true
+       AND planned_day.date >= ${startDateString}
+       AND planned_day.date < ${endDateString}
+     group by intervalIndex; 
+            `
+        );
+
+        return result;
+    }
+
+    private static async getHabitBasedChallengeRequirementProgess(
+        startDate: Date,
+        endDate: Date,
+        userId: number,
+        interval: number,
+        habitId: number
+    ) {
+        const startDateString = startDate.toISOString().replace('T', ' ').replace('Z', '');
+        const endDateString = endDate.toISOString().replace('T', ' ').replace('Z', '');
+
+        const result: ChallengeRequirementResults[] = await prisma.$queryRaw(
+            Prisma.sql`
+            SELECT floor((DATEDIFF(planned_day.date, '1971-01-01') - DATEDIFF(${startDateString}, '1971-01-01')) / ${interval}) AS intervalIndex,
+            MIN(planned_day.date)                                                                 AS intervalStartDate,
+            SUM(completedQuantity)                                                                AS totalCompleted
+     FROM planned_task
+              JOIN planned_day ON plannedDayId = planned_day.id
+     WHERE userId = ${userId}
+       AND habitId = ${habitId}
        AND planned_task.active = true
        AND planned_day.date >= ${startDateString}
        AND planned_day.date < ${endDateString}

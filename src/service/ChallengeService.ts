@@ -43,6 +43,18 @@ export class ChallengeService {
         return { ...SUCCESS, challengeParticipation: models };
     }
 
+    public static async getCompletedChallengesForUser(
+        userId: number
+    ): Promise<GetChallengeParticipationResponse> {
+        const challengeParticipation = await ChallengeParticipantController.getAllForUser(
+            userId,
+            ChallengeRequirementCompletionState.COMPLETED
+        );
+        const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
+
+        return { ...SUCCESS, challengeParticipation: models };
+    }
+
     public static async get(request: Request): Promise<GetChallengeResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
@@ -85,8 +97,9 @@ export class ChallengeService {
     ): Promise<Challenge[]> {
         const userId = plannedTask.plannedDay?.userId;
         const taskId = plannedTask.taskId;
+        const habitId = plannedTask.habitId;
         const date = plannedTask.plannedDay?.date;
-        if (!userId || !taskId || !date) {
+        if (!userId || (!taskId && !habitId) || !date) {
             return [];
         }
 
@@ -94,7 +107,8 @@ export class ChallengeService {
 
         const participants = await ChallengeParticipantController.getAllForUserAndTaskAndDate(
             userId,
-            taskId,
+            taskId ?? 0,
+            habitId ?? 0,
             date
         );
         const participantModels: ChallengeParticipant[] = ModelConverter.convertAll(participants);
@@ -108,9 +122,9 @@ export class ChallengeService {
             const previousCompletionState = participant.challengeRequirementCompletionState;
 
             const challenge = participant.challenge;
-            const requirements = challenge.challengeRequirements!.filter(
-                (requirement) => requirement.taskId === taskId
-            );
+            const requirements = challenge.challengeRequirements!.filter((requirement) => {
+                return requirement.taskId === taskId || requirement.habitId === habitId;
+            });
 
             for (const requirement of requirements) {
                 const amountComplete = await ChallengeService.getChallengeRequirementAmountComplete(
@@ -158,13 +172,24 @@ export class ChallengeService {
         );
         const interval = requirement.calculationIntervalDays ?? daysInDateRange;
 
+        let taskId: number | undefined = undefined;
+        if (requirement.taskId) {
+            taskId = requirement.taskId;
+        }
+
+        let habitId: number | undefined = undefined;
+        if (requirement.habitId) {
+            habitId = requirement.habitId;
+        }
+
         const results: ChallengeRequirementResults[] =
             await ChallengeController.getChallengeRequirementProgess(
-                userId,
-                requirement.taskId ?? 0,
                 start,
                 end,
-                interval
+                userId,
+                interval,
+                taskId,
+                habitId
             );
 
         let amountComplete = 0;

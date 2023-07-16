@@ -1,8 +1,13 @@
 import { prisma } from '@database/prisma';
-import { ChallengeParticipant } from '@resources/schema';
+import { ChallengeParticipant, ChallengeRequirementCompletionState } from '@resources/schema';
 
 export class ChallengeParticipantController {
-    public static async getAllForUserAndTaskAndDate(userId: number, taskId: number, date: Date) {
+    public static async getAllForUserAndTaskAndDate(
+        userId: number,
+        taskId: number,
+        habitId: number,
+        date: Date
+    ) {
         return prisma.challengeParticipant.findMany({
             where: {
                 active: true,
@@ -16,9 +21,18 @@ export class ChallengeParticipantController {
                     },
                     challengeRequirements: {
                         some: {
-                            task: {
-                                id: taskId,
-                            },
+                            OR: [
+                                {
+                                    task: {
+                                        id: taskId,
+                                    },
+                                },
+                                {
+                                    habit: {
+                                        id: habitId,
+                                    },
+                                },
+                            ],
                         },
                     },
                 },
@@ -41,10 +55,18 @@ export class ChallengeParticipantController {
         });
     }
 
-    public static async getAllForUser(userId: number) {
+    public static async getAllForUser(
+        userId: number,
+        completionState?: ChallengeRequirementCompletionState
+    ) {
+        const completionCondition =
+            completionState !== undefined
+                ? { challengeRequirementCompletionState: completionState }
+                : {};
         return prisma.challengeParticipant.findMany({
             where: {
                 userId,
+                ...completionCondition,
             },
             include: {
                 challenge: {

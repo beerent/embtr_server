@@ -155,4 +155,18 @@ userRouter.get(
     })
 );
 
+userRouter.get(
+    '/:userId/completed-challenges',
+    authenticate,
+    authorize,
+    validateGetUserData,
+    runEndpoint(async (req, res) => {
+        const userId = Number(req.params.userId);
+        const response: GetChallengesResponse =
+            await ChallengeService.getCompletedChallengesForUser(userId);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
 export default userRouter;
