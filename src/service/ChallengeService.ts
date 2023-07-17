@@ -139,6 +139,21 @@ export class ChallengeService {
                         ? requirement.requiredTaskQuantity
                         : requirement.requiredIntervalQuantity;
 
+                const challengeIsComplete = amountComplete >= (reqiredAmount ?? 0);
+                if (challengeIsComplete) {
+                    const challengeWasNotComplete =
+                        participant.challengeRequirementCompletionState !==
+                        ChallengeRequirementCompletionState.COMPLETED;
+                    if (challengeWasNotComplete) {
+                        participant.challengeCompletionDate = new Date();
+                    }
+                    participant.challengeRequirementCompletionState =
+                        ChallengeRequirementCompletionState.COMPLETED;
+                } else {
+                    participant.challengeRequirementCompletionState =
+                        ChallengeRequirementCompletionState.IN_PROGRESS;
+                }
+
                 participant.challengeRequirementCompletionState =
                     amountComplete >= (reqiredAmount ?? 0)
                         ? ChallengeRequirementCompletionState.COMPLETED

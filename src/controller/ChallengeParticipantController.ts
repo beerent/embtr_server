@@ -94,6 +94,7 @@ export class ChallengeParticipantController {
                 amountComplete: participant.amountComplete,
                 challengeRequirementCompletionState:
                     participant.challengeRequirementCompletionState,
+                challengeCompletionDate: participant.challengeCompletionDate,
             },
         });
     }

@@ -394,6 +394,7 @@ model ChallengeParticipant {
   challengeId                         Int                                 @db.Int
   amountComplete                      Float                               @default(0) @db.Double
   challengeRequirementCompletionState ChallengeRequirementCompletionState @default(INVALID)
+  challengeCompletionDate             DateTime?
   active                              Boolean                             @default(true)
   createdAt                           DateTime                            @default(now())
   updatedAt                           DateTime                            @default(now()) @updatedAt

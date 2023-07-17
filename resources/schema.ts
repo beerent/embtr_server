@@ -285,6 +285,7 @@ export interface ChallengeParticipant {
   challengeId?: number;
   amountComplete?: number;
   challengeRequirementCompletionState?: ChallengeRequirementCompletionState;
+  challengeCompletionDate?: Date;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -341,4 +342,3 @@ export interface ChallengeCompletionData {
   percentComplete: number;
   challengeRequirementCompletionState: ChallengeRequirementCompletionState;
 }
-
