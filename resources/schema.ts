@@ -57,6 +57,7 @@ export interface PlannedDay {
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
   hiddenPlannedDayResultRecommendations?: HiddenPlannedDayResultRecommendations[];
+  challengeParticipant?: ChallengeParticipant[];
 }
 
 export interface PlannedTask {
@@ -285,7 +286,8 @@ export interface ChallengeParticipant {
   challengeId?: number;
   amountComplete?: number;
   challengeRequirementCompletionState?: ChallengeRequirementCompletionState;
-  challengeCompletionDate?: Date;
+  completedOnPlannedDayId?: number;
+  completedOnPlannedDay?: PlannedDay;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

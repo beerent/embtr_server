@@ -151,7 +151,6 @@ export class PlannedTaskController {
                 plannedDay: {
                     userId,
                 },
-                active: true,
             },
             orderBy: {
                 createdAt: 'desc',

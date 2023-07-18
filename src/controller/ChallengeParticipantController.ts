@@ -91,10 +91,10 @@ export class ChallengeParticipantController {
                 id: participant.id,
             },
             data: {
+                completedOnPlannedDayId: participant.completedOnPlannedDayId,
                 amountComplete: participant.amountComplete,
                 challengeRequirementCompletionState:
                     participant.challengeRequirementCompletionState,
-                challengeCompletionDate: participant.challengeCompletionDate,
             },
         });
     }

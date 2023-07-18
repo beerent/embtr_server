@@ -145,7 +145,7 @@ export class ChallengeService {
                         participant.challengeRequirementCompletionState !==
                         ChallengeRequirementCompletionState.COMPLETED;
                     if (challengeWasNotComplete) {
-                        participant.challengeCompletionDate = new Date();
+                        participant.completedOnPlannedDayId = plannedTask.plannedDay?.id;
                     }
                     participant.challengeRequirementCompletionState =
                         ChallengeRequirementCompletionState.COMPLETED;

@@ -28,6 +28,15 @@ export const PlannedDayResultInclude = {
     },
     plannedDay: {
         include: {
+            challengeParticipant: {
+                include: {
+                    challenge: {
+                        include: {
+                            challengeRewards: true,
+                        },
+                    },
+                },
+            },
             user: true,
             plannedTasks: {
                 where: {

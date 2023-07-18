@@ -74,6 +74,7 @@ model PlannedDay {
   plannedTasks                          PlannedTask[]
   plannedDayResults                     PlannedDayResult[]
   hiddenPlannedDayResultRecommendations HiddenPlannedDayResultRecommendations[]
+  challengeParticipant                  ChallengeParticipant[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")
@@ -394,7 +395,8 @@ model ChallengeParticipant {
   challengeId                         Int                                 @db.Int
   amountComplete                      Float                               @default(0) @db.Double
   challengeRequirementCompletionState ChallengeRequirementCompletionState @default(INVALID)
-  challengeCompletionDate             DateTime?
+  completedOnPlannedDayId             Int?                                @db.Int
+  completedOnPlannedDay               PlannedDay?                         @relation(fields: [completedOnPlannedDayId], references: [id], onDelete: Cascade)
   active                              Boolean                             @default(true)
   createdAt                           DateTime                            @default(now())
   updatedAt                           DateTime                            @default(now()) @updatedAt
@@ -402,6 +404,7 @@ model ChallengeParticipant {
   @@unique([userId, challengeId], name: "unique_challenge_participant")
   @@index([userId])
   @@index([challengeId])
+  @@index([completedOnPlannedDayId])
   @@map("challenge_participant")
 }
 
