@@ -117,7 +117,7 @@ export class PlannedDayResultService {
             upperBound = new Date(request.query.upperBound as string);
         }
 
-        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 3));
+        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
         if (request.query.lowerBound) {
             lowerBound = new Date(request.query.lowerBound as string);
         }

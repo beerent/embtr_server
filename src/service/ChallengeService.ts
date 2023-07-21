@@ -4,12 +4,14 @@ import {
     ChallengeParticipant,
     ChallengeRequirement,
     ChallengeRequirementCompletionState,
+    JoinedChallenge,
     PlannedTask,
 } from '@resources/schema';
 import {
     GetChallengeParticipationResponse,
     GetChallengeResponse,
     GetChallengesResponse,
+    GetJoinedChallengesResponse,
 } from '@resources/types/requests/ChallengeTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
@@ -23,15 +25,51 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class ChallengeService {
-    public static async getAll(request: Request): Promise<GetChallengesResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-
+    public static async getAll(): Promise<GetChallengesResponse> {
         const challenges = await ChallengeController.getAll();
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
         return { ...SUCCESS, challenges: challengeModels };
+    }
+
+    public static async getRecentJoins(request: Request): Promise<GetJoinedChallengesResponse> {
+        let upperBound = new Date();
+        if (request.query.upperBound) {
+            upperBound = new Date(request.query.upperBound as string);
+        }
+
+        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
+        if (request.query.lowerBound) {
+            lowerBound = new Date(request.query.lowerBound as string);
+        }
+
+        const challenges = await ChallengeController.getAllRecentJoins(upperBound, lowerBound);
+        const models: Challenge[] = ModelConverter.convertAll(challenges);
+
+        const joinedChallenges: JoinedChallenge[] = [];
+        for (const challenge of models) {
+            const participants: ChallengeParticipant[] = [];
+            for (const participant of challenge.challengeParticipants ?? []) {
+                if (!participant.createdAt) {
+                    continue;
+                }
+                if (
+                    participant.createdAt.getTime() >= lowerBound.getTime() &&
+                    participant.createdAt.getTime() <= upperBound.getTime()
+                ) {
+                    participants.push(participant as ChallengeParticipant);
+                }
+            }
+
+            const joinedChallenge: JoinedChallenge = {
+                challenge,
+                participants,
+            };
+
+            joinedChallenges.push(joinedChallenge);
+        }
+
+        return { ...SUCCESS, joinedChallenges };
     }
 
     public static async getChallengeParticipationForUser(

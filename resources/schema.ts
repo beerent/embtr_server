@@ -344,3 +344,8 @@ export interface ChallengeCompletionData {
   percentComplete: number;
   challengeRequirementCompletionState: ChallengeRequirementCompletionState;
 }
+
+export interface JoinedChallenge {
+  challenge: Challenge;
+  participants: ChallengeParticipant[];
+}

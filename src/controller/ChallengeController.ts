@@ -62,6 +62,36 @@ export class ChallengeController {
         });
     }
 
+    public static async getAllRecentJoins(upperBound: Date, lowerBound: Date) {
+        return prisma.challenge.findMany({
+            where: {
+                challengeParticipants: {
+                    some: {
+                        active: true,
+                        createdAt: {
+                            gte: lowerBound,
+                            lte: upperBound,
+                        },
+                    },
+                },
+            },
+            include: {
+                likes: true,
+                comments: true,
+                creator: true,
+                challengeParticipants: {
+                    where: {
+                        active: true,
+                    },
+                    include: {
+                        user: true,
+                    },
+                },
+                challengeRewards: true,
+            },
+        });
+    }
+
     public static async getAllForUser(userId: number) {
         return prisma.challenge.findMany({
             where: {

@@ -12,7 +12,12 @@ import { CommentService } from '@src/service/CommentService';
 const challengeRouter = express.Router();
 
 challengeRouter.get('/', authenticate, authorize, async (req, res) => {
-    const response = await ChallengeService.getAll(req);
+    const response = await ChallengeService.getAll();
+    res.status(response.httpCode).json(response);
+});
+
+challengeRouter.get('/recently-joined', authenticate, authorize, async (req, res) => {
+    const response = await ChallengeService.getRecentJoins(req);
     res.status(response.httpCode).json(response);
 });
 
