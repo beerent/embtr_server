@@ -12,6 +12,8 @@ import { UserController } from '@src/controller/UserController';
 import { UserPostController } from '@src/controller/UserPostController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
+import { ImageDetectionService } from './ImageService';
+import { ImageController } from '@src/controller/ImageController';
 
 export class UserPostService {
     public static async create(request: Request): Promise<CreateUserPostResponse> {
@@ -24,6 +26,13 @@ export class UserPostService {
 
         const body: CreateUserPostRequest = request.body;
         body.userPost.userId = userId;
+
+        const filteredImageResults = await ImageDetectionService.filterImages(
+            body.userPost.images ?? []
+        );
+
+        body.userPost.images = filteredImageResults.clean;
+        await ImageController.deleteImages(filteredImageResults.adult);
 
         const userPost = await UserPostController.create(body.userPost);
         const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
@@ -55,6 +64,7 @@ export class UserPostService {
 
         const userPosts = await UserPostController.getAll(upperBound, lowerBound);
         const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
+
         return { ...SUCCESS, userPosts: convertedUserPostModels };
     }
 

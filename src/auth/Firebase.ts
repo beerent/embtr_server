@@ -8,3 +8,4 @@ export const firebase = admin.initializeApp({
 });
 
 export const firestore = admin.firestore();
+export const storage = admin.storage();

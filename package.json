@@ -34,6 +34,7 @@
         "@database": "prisma/"
     },
     "dependencies": {
+        "@google-cloud/vision": "^3.1.4",
         "@prisma/client": "^4.10.1",
         "cors": "^2.8.5",
         "dotenv": "^16.0.3",
