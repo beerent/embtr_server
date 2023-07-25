@@ -55,6 +55,38 @@ export class ChallengeParticipantController {
         });
     }
 
+    public static async getAllActiveForUser(
+        userId: number,
+    ) {
+        return prisma.challengeParticipant.findMany({
+            where: {
+                userId,
+                challenge: {
+                    start: {
+                        lte: new Date()
+                    },
+                    end: {
+                        gte: new Date()
+                    }
+                }
+            },
+            include: {
+                challenge: {
+                    include: {
+                        challengeRewards: true,
+                        challengeRequirements: {
+                            include: {
+                                task: true,
+                                habit: true,
+                                unit: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
     public static async getAllForUser(
         userId: number,
         completionState?: ChallengeRequirementCompletionState

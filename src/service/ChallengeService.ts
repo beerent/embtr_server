@@ -81,6 +81,15 @@ export class ChallengeService {
         return { ...SUCCESS, challengeParticipation: models };
     }
 
+    public static async getActiveChallengeParticipationForUser(
+        userId: number
+    ): Promise<GetChallengeParticipationResponse> {
+        const challengeParticipation = await ChallengeParticipantController.getAllActiveForUser(userId);
+        const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
+
+        return { ...SUCCESS, challengeParticipation: models };
+    }
+
     public static async getCompletedChallengesForUser(
         userId: number
     ): Promise<GetChallengeParticipationResponse> {

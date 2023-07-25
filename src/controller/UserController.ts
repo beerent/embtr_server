@@ -79,10 +79,11 @@ export class UserController {
     }
 
     public static async update(uid: string, user: UserModel): Promise<User | null> {
-        const username = user.username !== undefined ? { username: user.username } : {};
-        const displayName = user.displayName !== undefined ? { displayName: user.displayName } : {};
-        const bio = user.bio !== undefined ? { bio: user.bio } : {};
-        const location = user.location !== undefined ? { location: user.location } : {};
+        const username = user.username !== undefined ? { username: user.username.trim() } : {};
+        const displayName =
+            user.displayName !== undefined ? { displayName: user.displayName.trim() } : {};
+        const bio = user.bio !== undefined ? { bio: user.bio.trim() } : {};
+        const location = user.location !== undefined ? { location: user.location.trim() } : {};
         const photoUrl = user.photoUrl !== undefined ? { photoUrl: user.photoUrl } : {};
         const bannerUrl = user.bannerUrl !== undefined ? { bannerUrl: user.bannerUrl } : {};
         const pushNotificationTokens = await UserController.createUserPushNotification(user);
