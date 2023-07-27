@@ -14,7 +14,11 @@ export const PlannedDayInclude = {
             unit: true,
         },
     },
-    plannedDayResults: true,
+    plannedDayResults: {
+        include: {
+            images: true,
+        },
+    },
     hiddenPlannedDayResultRecommendations: true,
 } satisfies Prisma.PlannedDayInclude;
 
@@ -65,7 +69,6 @@ export class PlannedDayController {
                     },
                 },
             });
-        } catch (error) {
-        }
+        } catch (error) {}
     }
 }

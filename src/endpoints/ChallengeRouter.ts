@@ -3,7 +3,11 @@ import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { ChallengeService } from '@src/service/ChallengeService';
 import { validateChallengeRegister } from '@src/middleware/challenge/ChallengeValidation';
-import { validateCommentPost, validateLikePost } from '@src/middleware/general/GeneralValidation';
+import {
+    validateCommentDelete,
+    validateCommentPost,
+    validateLikePost,
+} from '@src/middleware/general/GeneralValidation';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { LikeService } from '@src/service/LikeService';
 import { Interactable } from '@resources/types/interactable/Interactable';
@@ -55,6 +59,17 @@ challengeRouter.post(
     validateCommentPost,
     runEndpoint(async (req, res) => {
         const response = await CommentService.create(Interactable.CHALLENGE, req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+challengeRouter.delete(
+    '/comment/:id',
+    authenticate,
+    authorize,
+    validateCommentDelete,
+    runEndpoint(async (req, res) => {
+        const response = await CommentService.delete(req);
         res.status(response.httpCode).json(response);
     })
 );

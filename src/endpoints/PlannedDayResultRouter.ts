@@ -62,7 +62,6 @@ plannedDayResultRouter.get(
         };
 
         const response: GetUserResponse = await PlannedDayResultService.getByUserAndDayKey(request);
-
         res.status(response.httpCode).json(response);
     })
 );

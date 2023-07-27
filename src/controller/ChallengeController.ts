@@ -30,6 +30,9 @@ export class ChallengeController {
                     },
                 },
                 comments: {
+                    where: {
+                        active: true,
+                    },
                     include: {
                         user: true,
                     },
@@ -57,7 +60,11 @@ export class ChallengeController {
                 challengeParticipants: true,
                 creator: true,
                 likes: true,
-                comments: true,
+                comments: {
+                    where: {
+                        active: true,
+                    },
+                },
             },
         });
     }
@@ -77,7 +84,11 @@ export class ChallengeController {
             },
             include: {
                 likes: true,
-                comments: true,
+                comments: {
+                    where: {
+                        active: true,
+                    },
+                },
                 creator: true,
                 challengeParticipants: {
                     where: {
