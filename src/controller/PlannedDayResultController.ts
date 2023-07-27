@@ -140,7 +140,6 @@ export class PlannedDayResultController {
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
         return await prisma.plannedDayResult.findFirst({
             where: {
-                active: true,
                 plannedDay: {
                     userId,
                     dayKey,
