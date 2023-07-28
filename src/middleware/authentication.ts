@@ -22,12 +22,6 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
             return res.status(UNAUTHORIZED.httpCode).json(UNAUTHORIZED);
         }
 
-        const user = await UserController.getByUid(uid);
-        if (user) {
-            await AccountController.updateCustomClaim(uid, 'userId', user.id);
-            return res.status(REAUTHENTICATE.httpCode).json(REAUTHENTICATE);
-        }
-
         return res.status(UNAUTHORIZED.httpCode).json(UNAUTHORIZED);
     }
 
