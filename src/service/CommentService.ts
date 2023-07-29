@@ -11,13 +11,15 @@ import {
     SUCCESS,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { CommentController } from '@src/controller/common/CommentController';
+import { CommentController, CreateCommentResult } from '@src/controller/common/CommentController';
 import { Request } from 'express';
 import { NotificationService, NotificationType } from './NotificationService';
 import { UserPostController } from '@src/controller/UserPostController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { ChallengeController } from '@src/controller/ChallengeController';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { Comment } from '@resources/schema';
 
 export class CommentService {
     public static async create(
@@ -39,10 +41,19 @@ export class CommentService {
             return { ...RESOURCE_NOT_FOUND, message: 'target does not exist' };
         }
 
-        const result = await CommentController.create(interactable, userId, targetId, comment);
+        const result: CreateCommentResult = await CommentController.create(
+            interactable,
+            userId,
+            targetId,
+            comment
+        );
+
         if (!result) {
             return { ...GENERAL_FAILURE, message: 'unknown error' };
         }
+
+        const commentModel: Comment = ModelConverter.convert(result);
+
         NotificationService.createNotification(
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? result.plannedDayResults[0].plannedDay.userId
@@ -57,7 +68,7 @@ export class CommentService {
                 : NotificationType.CHALLENGE_COMMENT,
             targetId
         );
-        return SUCCESS;
+        return { ...SUCCESS, comment: commentModel };
     }
 
     public static async delete(request: Request): Promise<Response> {
