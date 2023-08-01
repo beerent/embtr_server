@@ -18,7 +18,7 @@ export interface User {
   comments?: Comment[];
   likes?: Like[];
   widgets?: Widget[];
-  taskHabitPreference?: TaskHabitPreference[];
+  tasktPreferences?: TaskPreference[];
   quoteOfTheDay?: QuoteOfTheDay[];
   shallenges?: Challenge[];
   ChallengeParticipant?: ChallengeParticipant[];
@@ -42,7 +42,7 @@ export interface Task {
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
-  taskHabitPreference?: TaskHabitPreference[];
+  taskPreference?: TaskPreference[];
   ChallengeRequirement?: ChallengeRequirement[];
 }
 
@@ -87,11 +87,11 @@ export interface Habit {
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
-  taskHabitPreference?: TaskHabitPreference[];
+  taskPreference?: TaskPreference[];
   ChallengeRequirement?: ChallengeRequirement[];
 }
 
-export interface TaskHabitPreference {
+export interface TaskPreference {
   id?: number;
   userId?: number;
   user?: User;
@@ -99,6 +99,9 @@ export interface TaskHabitPreference {
   task?: Task;
   habitId?: number;
   habit?: Habit;
+  unitId?: number;
+  unit?: Unit;
+  quantity?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -302,6 +305,7 @@ export interface Unit {
   updatedAt?: Date;
   PlannedTask?: PlannedTask[];
   challengeRequirement?: ChallengeRequirement[];
+  TaskPreference?: TaskPreference[];
 }
 
 export enum NotificationTargetPage {

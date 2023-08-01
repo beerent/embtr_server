@@ -1,4 +1,4 @@
-import { Task as TaskModel } from "../../schema";
+import { Task as TaskModel, TaskPreference } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetTaskResponse extends Response {
@@ -18,6 +18,12 @@ export interface CreateTaskResponse extends Response {
   task?: TaskModel;
 }
 
-export interface UpdateTaskHabitPreferenceRequest {
-  habitId: number;
+export interface TaskPreferenceRequest {
+  habitId?: number;
+  unitId?: number;
+  quantity?: number;
+}
+
+export interface TaskPreferenceResponse extends Response {
+  preference?: TaskPreference
 }

@@ -28,7 +28,7 @@ model User {
   comments               Comment[]
   likes                  Like[]
   widgets                Widget[]
-  taskHabitPreference    TaskHabitPreference[]
+  tasktPreferences       TaskPreference[]
   quoteOfTheDay          QuoteOfTheDay[]
   shallenges             Challenge[]
   ChallengeParticipant   ChallengeParticipant[]
@@ -57,7 +57,7 @@ model Task {
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
   plannedTasks         PlannedTask[]
-  taskHabitPreference  TaskHabitPreference[]
+  taskPreference       TaskPreference[]
   ChallengeRequirement ChallengeRequirement[]
 
   @@map("task")
@@ -113,20 +113,23 @@ model Habit {
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
   plannedTasks         PlannedTask[]
-  taskHabitPreference  TaskHabitPreference[]
+  taskPreference       TaskPreference[]
   ChallengeRequirement ChallengeRequirement[]
 
   @@map("habit")
 }
 
-model TaskHabitPreference {
+model TaskPreference {
   id        Int      @id @default(autoincrement())
   userId    Int      @db.Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   taskId    Int      @db.Int
   task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  habitId   Int      @db.Int
-  habit     Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  habitId   Int?     @db.Int
+  habit     Habit?   @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  unitId    Int?     @db.Int
+  unit      Unit?    @relation(fields: [unitId], references: [id])
+  quantity  Float?   @db.Double
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -134,8 +137,9 @@ model TaskHabitPreference {
   @@unique([userId, taskId], name: "unique_user_task")
   @@index([userId])
   @@index([taskId])
+  @@index([unitId])
   @@index([habitId])
-  @@map("user_task_habit_preference")
+  @@map("user_task_preference")
 }
 
 model UserPost {
@@ -423,6 +427,7 @@ model Unit {
   updatedAt            DateTime               @default(now()) @updatedAt
   PlannedTask          PlannedTask[]
   challengeRequirement ChallengeRequirement[]
+  taskPreference       TaskPreference[]
 
   @@map("unit")
 }

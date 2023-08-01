@@ -21,9 +21,10 @@ export class TaskController {
                 },
             },
             include: {
-                taskHabitPreference: {
+                taskPreference: {
                     include: {
                         habit: true,
+                        unit: true,
                     },
                     where: {
                         userId: userId,
@@ -54,9 +55,10 @@ export class TaskController {
                 },
             },
             include: {
-                taskHabitPreference: {
+                taskPreference: {
                     include: {
                         habit: true,
+                        unit: true,
                     },
                     where: {
                         userId: userId,

@@ -10,7 +10,7 @@ import {
     UserPost,
     Metadata,
     Habit,
-    TaskHabitPreference,
+    TaskPreference,
     QuoteOfTheDay,
     Season,
     Challenge,
@@ -31,7 +31,7 @@ type PrismaModel =
     | WidgetType
     | Metadata
     | Habit
-    | TaskHabitPreference
+    | TaskPreference
     | QuoteOfTheDay
     | Season
     | Unit
