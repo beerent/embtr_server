@@ -84,6 +84,7 @@ export interface Habit {
   description?: string;
   iconSource?: string;
   iconName?: string;
+  iconUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
@@ -305,7 +306,7 @@ export interface Unit {
   updatedAt?: Date;
   PlannedTask?: PlannedTask[];
   challengeRequirement?: ChallengeRequirement[];
-  TaskPreference?: TaskPreference[];
+  taskPreference?: TaskPreference[];
 }
 
 export enum NotificationTargetPage {

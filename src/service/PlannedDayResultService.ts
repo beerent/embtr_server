@@ -3,6 +3,8 @@ import {
     CreatePlannedDayResultRequest,
     GetPlannedDayResultRequest,
     GetPlannedDayResultResponse,
+    GetPlannedDayResultSummariesResponse,
+    GetPlannedDayResultSummaryResponse,
     GetPlannedDayResultsResponse,
     UpdatePlannedDayResultRequest,
     UpdatePlannedDayResultResponse,
@@ -16,7 +18,10 @@ import {
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
 } from '@src/common/RequestResponses';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
+import {
+    PlannedDayResultController,
+    PlannedDayResultType,
+} from '@src/controller/PlannedDayResultController';
 import { Request } from 'express';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayResult } from '@prisma/client';
@@ -24,6 +29,10 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { UserController } from '@src/controller/UserController';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
+import {
+    CompletedHabit,
+    PlannedDayResultSummary,
+} from '@resources/types/planned_day_result/PlannedDayResult';
 
 export class PlannedDayResultService {
     public static async create(request: Request): Promise<GetPlannedDayResultResponse> {
@@ -133,6 +142,50 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
+    public static async getAllSummaries(
+        request: Request
+    ): Promise<GetPlannedDayResultSummariesResponse> {
+        let upperBound = new Date();
+        if (request.query.upperBound) {
+            upperBound = new Date(request.query.upperBound as string);
+        }
+
+        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
+        if (request.query.lowerBound) {
+            lowerBound = new Date(request.query.lowerBound as string);
+        }
+
+        const dayResults = await PlannedDayResultController.getAll(upperBound, lowerBound);
+
+        const summaries: PlannedDayResultSummary[] = [];
+        for (const dayResult of dayResults) {
+            const completedHabits: CompletedHabit[] = this.getCompletedHabits(dayResult);
+            const summary: PlannedDayResultSummary = {
+                plannedDayResult: ModelConverter.convert(dayResult),
+                completedHabits,
+            };
+            summaries.push(summary);
+        }
+
+        return { ...SUCCESS, plannedDayResultSummaries: summaries };
+    }
+
+    public static async getSummaryById(id: number): Promise<GetPlannedDayResultSummaryResponse> {
+        const dayResult = await PlannedDayResultController.getById(id);
+
+        if (dayResult) {
+            const completedHabits: CompletedHabit[] = this.getCompletedHabits(dayResult);
+            const summary: PlannedDayResultSummary = {
+                plannedDayResult: ModelConverter.convert(dayResult),
+                completedHabits,
+            };
+
+            return { ...SUCCESS, plannedDayResultSummary: summary };
+        }
+
+        return GET_DAY_RESULT_UNKNOWN;
+    }
+
     public static async getById(id: number): Promise<GetPlannedDayResultResponse> {
         const dayResult = await PlannedDayResultController.getById(id);
 
@@ -176,5 +229,35 @@ export class PlannedDayResultService {
 
         await HiddenPlannedDayResultRecommendationsController.create(userId, dayKey);
         return SUCCESS;
+    }
+
+    private static getCompletedHabits(plannedDayResult: PlannedDayResultType): CompletedHabit[] {
+        if (!plannedDayResult?.plannedDay) {
+            return [];
+        }
+
+        const completedHabits: CompletedHabit[] = [];
+        plannedDayResult.plannedDay.plannedTasks.forEach((plannedTask) => {
+            if (plannedTask.habit) {
+                const completed =
+                    (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 0);
+
+                if (completedHabits.some((habit) => habit.habit.id === plannedTask.habit!.id)) {
+                    const habit = completedHabits.find(
+                        (habit) => habit.habit.id === plannedTask.habit!.id
+                    )!;
+                    habit.attempted += 1;
+                    habit.completed += completed ? 1 : 0;
+                } else {
+                    completedHabits.push({
+                        habit: ModelConverter.convert(plannedTask.habit),
+                        attempted: 1,
+                        completed: completed ? 1 : 0,
+                    });
+                }
+            }
+        });
+
+        return completedHabits;
     }
 }

@@ -53,6 +53,13 @@ export const PlannedDayResultInclude = {
     },
 } satisfies Prisma.PlannedDayResultInclude;
 
+export type PlannedDayResultsType = Prisma.PromiseReturnType<
+    typeof PlannedDayResultController.getAll
+>;
+export type PlannedDayResultType = Prisma.PromiseReturnType<
+    typeof PlannedDayResultController.getById
+>;
+
 export class PlannedDayResultController {
     public static async create(plannedDayId: number) {
         return await prisma.plannedDayResult.create({

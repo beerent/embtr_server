@@ -2,6 +2,8 @@ import { Interactable } from '@resources/types/interactable/Interactable';
 import {
     CreatePlannedDayResultRequest,
     GetPlannedDayResultRequest,
+    GetPlannedDayResultResponse,
+    GetPlannedDayResultSummariesResponse,
 } from '@resources/types/requests/PlannedDayResultTypes';
 import { GetUserResponse } from '@resources/types/requests/UserTypes';
 import { authenticate } from '@src/middleware/authentication';
@@ -32,7 +34,30 @@ plannedDayResultRouter.get(
     authorize,
     //validateGetAllPlannedDayResults,
     runEndpoint(async (req, res) => {
-        const response: GetUserResponse = await PlannedDayResultService.getAll(req);
+        const response: GetPlannedDayResultResponse = await PlannedDayResultService.getAll(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+plannedDayResultRouter.get(
+    '/summaries',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const response: GetPlannedDayResultSummariesResponse =
+            await PlannedDayResultService.getAllSummaries(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+plannedDayResultRouter.get(
+    '/summary/:id',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const id = Number(req.params.id);
+        const response: GetPlannedDayResultSummariesResponse =
+            await PlannedDayResultService.getSummaryById(id);
         res.status(response.httpCode).json(response);
     })
 );

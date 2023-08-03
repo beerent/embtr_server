@@ -1,5 +1,6 @@
 import { PlannedDayResult as PlannedDayResultModel } from "../../schema";
 import { Response } from "./RequestTypes";
+import { PlannedDayResultSummary } from "../planned_day_result/PlannedDayResult"
 
 export interface GetPlannedDayResultResponse extends Response {
   plannedDayResult?: PlannedDayResultModel;
@@ -28,4 +29,17 @@ export interface UpdatePlannedDayResultRequest {
 
 export interface UpdatePlannedDayResultResponse extends Response {
   plannedDayResult?: PlannedDayResultModel;
+}
+
+export interface GetPlannedDayResultSummariesResponse extends Response {
+  plannedDayResultSummaries?: PlannedDayResultSummary[];
+}
+
+export interface GetPlannedDayResultSummariesRequest {
+  userId: number;
+  dayKey: string;
+}
+
+export interface GetPlannedDayResultSummaryResponse extends Response {
+  plannedDayResultSummary?: PlannedDayResultSummary;
 }
