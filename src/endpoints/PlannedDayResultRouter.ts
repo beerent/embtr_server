@@ -1,6 +1,5 @@
 import { Interactable } from '@resources/types/interactable/Interactable';
 import {
-    CreatePlannedDayResultRequest,
     GetPlannedDayResultRequest,
     GetPlannedDayResultResponse,
     GetPlannedDayResultSummariesResponse,

@@ -61,9 +61,10 @@ export type PlannedDayResultType = Prisma.PromiseReturnType<
 >;
 
 export class PlannedDayResultController {
-    public static async create(plannedDayId: number) {
+    public static async create(plannedDayId: number, title?: string) {
         return await prisma.plannedDayResult.create({
             data: {
+                title,
                 plannedDay: {
                     connect: {
                         id: plannedDayId,
@@ -126,6 +127,9 @@ export class PlannedDayResultController {
                 active: true,
             },
             include: PlannedDayResultInclude,
+            orderBy: {
+                id: 'desc',
+            },
         });
     }
 

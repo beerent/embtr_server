@@ -4,6 +4,7 @@ import {
 } from '@resources/types/requests/ChallengeTypes';
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
+import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
 import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
 import {
     authenticate,
@@ -117,7 +118,8 @@ userRouter.get(
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        const response: GetUserResponse = await PlannedDayResultService.getAllForUser(userId);
+        const response: GetPlannedDayResultSummariesResponse =
+            await PlannedDayResultService.getAllSummariesForUser(userId);
         res.status(response.httpCode).json(response);
     })
 );

@@ -31,6 +31,7 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
 import {
     CompletedHabit,
+    CompletedHabitElement,
     PlannedDayResultSummary,
 } from '@resources/types/planned_day_result/PlannedDayResult';
 
@@ -58,7 +59,8 @@ export class PlannedDayResultService {
         }
 
         const createdPlannedDayResult: PlannedDayResult = await PlannedDayResultController.create(
-            body.plannedDayId
+            body.plannedDayId,
+            this.getRandomSuccessMessage()
         );
 
         if (createdPlannedDayResult) {
@@ -170,6 +172,24 @@ export class PlannedDayResultService {
         return { ...SUCCESS, plannedDayResultSummaries: summaries };
     }
 
+    public static async getAllSummariesForUser(
+        userId: number
+    ): Promise<GetPlannedDayResultSummariesResponse> {
+        const dayResults = await PlannedDayResultController.getAllForUser(userId);
+
+        const summaries: PlannedDayResultSummary[] = [];
+        for (const dayResult of dayResults) {
+            const completedHabits: CompletedHabit[] = this.getCompletedHabits(dayResult);
+            const summary: PlannedDayResultSummary = {
+                plannedDayResult: ModelConverter.convert(dayResult),
+                completedHabits,
+            };
+            summaries.push(summary);
+        }
+
+        return { ...SUCCESS, plannedDayResultSummaries: summaries };
+    }
+
     public static async getSummaryById(id: number): Promise<GetPlannedDayResultSummaryResponse> {
         const dayResult = await PlannedDayResultController.getById(id);
 
@@ -239,6 +259,12 @@ export class PlannedDayResultService {
         const completedHabits: CompletedHabit[] = [];
         plannedDayResult.plannedDay.plannedTasks.forEach((plannedTask) => {
             if (plannedTask.habit) {
+                const element: CompletedHabitElement = {
+                    unit: plannedTask.unit ?? undefined,
+                    quantity: plannedTask.quantity ?? 0,
+                    completedQuantity: plannedTask.completedQuantity ?? 0,
+                };
+
                 const completed =
                     (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 0);
 
@@ -248,16 +274,54 @@ export class PlannedDayResultService {
                     )!;
                     habit.attempted += 1;
                     habit.completed += completed ? 1 : 0;
+
+                    const elementIndex = habit.elements.findIndex(
+                        (element) => element.unit === element.unit
+                    );
+                    if (elementIndex !== -1) {
+                        habit.elements[elementIndex].quantity += element.quantity;
+                        habit.elements[elementIndex].completedQuantity += element.completedQuantity;
+                    } else {
+                        habit.elements.push(element);
+                    }
                 } else {
                     completedHabits.push({
                         habit: ModelConverter.convert(plannedTask.habit),
                         attempted: 1,
                         completed: completed ? 1 : 0,
+                        elements: [element],
                     });
                 }
             }
         });
 
         return completedHabits;
+    }
+
+    private static getRandomSuccessMessage(): string {
+        const variations = [
+            'Day conquered! Congrats!',
+            'Tasks nailed! Bravo!',
+            'Success! Well done!',
+            'All done! Congrats!',
+            'Daily goals crushed!',
+            'You did it! Kudos!',
+            'Productive day! Congrats!',
+            'Champion of the day!',
+            'Taskmaster! Congrats!',
+            'Victory achieved!',
+            'Goal slayer! Congrats!',
+            'Great job today!',
+            "Day's triumph! Congrats!",
+            'Mission complete!',
+            'Tasks tackled! Bravo!',
+            'Awesome work! Congrats!',
+            'Winning day! Well done!',
+            'Efficiency unlocked!',
+            'Task wizard! Congrats!',
+            'Daily success! Bravo!',
+        ];
+
+        return variations[Math.floor(Math.random() * variations.length)];
     }
 }

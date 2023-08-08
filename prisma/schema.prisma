@@ -165,6 +165,7 @@ model PlannedDayResult {
   plannedDayId Int        @db.Int
   plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
   active       Boolean    @default(true)
+  title        String?    @db.VarChar(255)
   description  String?    @db.VarChar(255)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now()) @updatedAt
@@ -422,6 +423,7 @@ enum ChallengeRequirementCompletionState {
 model Unit {
   id                   Int                    @id @default(autoincrement())
   unit                 String                 @db.VarChar(255)
+  abreveation          String                 @default("") @db.VarChar(5)
   stepSize             Float                  @db.Double
   active               Boolean                @default(true)
   createdAt            DateTime               @default(now())

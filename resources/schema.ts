@@ -127,6 +127,7 @@ export interface PlannedDayResult {
   plannedDayId?: number;
   plannedDay?: PlannedDay;
   active?: boolean;
+  title?: string;
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -300,6 +301,7 @@ export interface ChallengeParticipant {
 export interface Unit {
   id?: number;
   unit?: string;
+  abreveation?: string;
   stepSize?: number;
   active?: boolean;
   createdAt?: Date;

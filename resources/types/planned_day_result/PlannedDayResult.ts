@@ -1,7 +1,14 @@
-import { Habit, PlannedDayResult} from "../../schema";
+import { Habit, PlannedDayResult, Unit} from "../../schema";
+
+export interface CompletedHabitElement {
+    unit?: Unit 
+    quantity: number
+    completedQuantity: number
+}
 
 export interface CompletedHabit {
     habit: Habit,
+    elements: CompletedHabitElement[],
     attempted: number,
     completed: number
 }
