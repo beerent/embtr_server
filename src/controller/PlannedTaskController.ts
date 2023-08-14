@@ -1,5 +1,5 @@
 import { prisma } from '@database/prisma';
-import { PlannedDay, PlannedTask, Task, Habit, Prisma } from '@prisma/client';
+import { PlannedDay, PlannedTask, Task, Prisma } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel, Unit } from '@resources/schema';
 
 export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
@@ -14,7 +14,6 @@ export class PlannedTaskController {
     public static async create(
         plannedDay: PlannedDay,
         task: Task,
-        habit?: Habit,
         quantity?: number,
         unit?: Unit
     ): Promise<PlannedTask | null> {
@@ -29,20 +28,11 @@ export class PlannedTaskController {
                     id: task.id,
                 },
             },
-            habit: {},
             unit: {},
             status: 'INCOMPLETE',
             completedQuantity: 0,
             quantity: quantity ?? 1,
         };
-
-        if (habit !== undefined) {
-            data.habit = {
-                connect: {
-                    id: habit.id,
-                },
-            };
-        }
 
         if (unit !== undefined) {
             data.unit = {
@@ -56,7 +46,6 @@ export class PlannedTaskController {
             data,
             include: {
                 unit: true,
-                habit: true,
             },
         });
     }
@@ -70,10 +59,6 @@ export class PlannedTaskController {
             plannedTask.completedQuantity !== undefined
                 ? { completedQuantity: plannedTask.completedQuantity }
                 : {};
-        const habit =
-            plannedTask.habitId !== undefined
-                ? { habitId: plannedTask.habitId }
-                : { habitId: null };
         const unit = plannedTask.unitId !== undefined ? { unitId: plannedTask.unitId } : {};
 
         const result = await prisma.plannedTask.update({
@@ -83,7 +68,6 @@ export class PlannedTaskController {
             data: {
                 ...active,
                 ...status,
-                ...habit,
                 ...quantity,
                 ...completedQuantity,
                 ...unit,

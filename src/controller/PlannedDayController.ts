@@ -10,7 +10,6 @@ export const PlannedDayInclude = {
         include: {
             task: true,
             plannedDay: true,
-            habit: true,
             unit: true,
         },
     },

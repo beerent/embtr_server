@@ -4,7 +4,6 @@ import { Response } from "./RequestTypes";
 export interface CreatePlannedTaskRequest {
   taskId: number;
   plannedDayId: number;
-  habitId?: number;
   quantity?: number;
   unitId?: number;
 }

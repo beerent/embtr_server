@@ -22,6 +22,7 @@ export interface User {
   quoteOfTheDay?: QuoteOfTheDay[];
   shallenges?: Challenge[];
   ChallengeParticipant?: ChallengeParticipant[];
+  userAchievements?: UserAchievement[];
 }
 
 export interface PushNotificationToken {
@@ -38,6 +39,7 @@ export interface Task {
   id?: number;
   title?: string;
   description?: string;
+  iconUrl?: string;
   createdById?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -66,8 +68,6 @@ export interface PlannedTask {
   plannedDay?: PlannedDay;
   taskId?: number;
   task?: Task;
-  habitId?: number;
-  habit?: Habit;
   unitId?: number;
   unit?: Unit;
   quantity?: number;
@@ -78,28 +78,12 @@ export interface PlannedTask {
   updatedAt?: Date;
 }
 
-export interface Habit {
-  id?: number;
-  title?: string;
-  description?: string;
-  iconSource?: string;
-  iconName?: string;
-  iconUrl?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  plannedTasks?: PlannedTask[];
-  taskPreference?: TaskPreference[];
-  ChallengeRequirement?: ChallengeRequirement[];
-}
-
 export interface TaskPreference {
   id?: number;
   userId?: number;
   user?: User;
   taskId?: number;
   task?: Task;
-  habitId?: number;
-  habit?: Habit;
   unitId?: number;
   unit?: Unit;
   quantity?: number;
@@ -259,8 +243,6 @@ export interface ChallengeRequirement {
   challengeId?: number;
   task?: Task;
   taskId?: number;
-  habit?: Habit;
-  habitId?: number;
   unit?: Unit;
   unitId?: number;
   calculationType?: ChallengeCalculationType;
@@ -293,6 +275,27 @@ export interface ChallengeParticipant {
   challengeRequirementCompletionState?: ChallengeRequirementCompletionState;
   completedOnPlannedDayId?: number;
   completedOnPlannedDay?: PlannedDay;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Achievement {
+  id?: number;
+  name?: string;
+  imageUrl?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  userAchievements?: UserAchievement[];
+}
+
+export interface UserAchievement {
+  id?: number;
+  user?: User;
+  userId?: number;
+  achievement?: Achievement;
+  achievementId?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

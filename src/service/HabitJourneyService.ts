@@ -1,4 +1,3 @@
-import { Habit } from '@resources/schema';
 import { HabitJourney, HabitJourneyElement, HabitJourneys } from '@resources/types/habit/Habit';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
@@ -42,13 +41,6 @@ export class HabitJourneyService {
         const habitJourneys: HabitJourney[] = [];
 
         for (const element of habitJourneyResults as any[]) {
-            const habit: Habit = {
-                id: element.habitId,
-                title: element.habitTitle,
-                iconName: element.iconName,
-                iconSource: element.iconSource,
-            };
-
             const habitJourneyElement: HabitJourneyElement = {
                 season: element.season,
                 seasonDate: element.seasonDate,
@@ -57,11 +49,13 @@ export class HabitJourneyService {
 
             let added = false;
             for (const habitJourney of habitJourneys) {
+                /*
                 if (habitJourney.habit.id === habit.id) {
                     habitJourney.elements.push(habitJourneyElement);
                     added = true;
                     break;
                 }
+                */
             }
 
             if (added) {
@@ -69,7 +63,6 @@ export class HabitJourneyService {
             }
 
             const habitJourney: HabitJourney = {
-                habit: habit,
                 elements: [habitJourneyElement],
                 level: 0,
             };

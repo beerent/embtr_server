@@ -2,12 +2,7 @@ import { prisma } from '@database/prisma';
 import { ChallengeParticipant, ChallengeRequirementCompletionState } from '@resources/schema';
 
 export class ChallengeParticipantController {
-    public static async getAllForUserAndTaskAndDate(
-        userId: number,
-        taskId: number,
-        habitId: number,
-        date: Date
-    ) {
+    public static async getAllForUserAndTaskAndDate(userId: number, taskId: number, date: Date) {
         return prisma.challengeParticipant.findMany({
             where: {
                 active: true,
@@ -27,11 +22,6 @@ export class ChallengeParticipantController {
                                         id: taskId,
                                     },
                                 },
-                                {
-                                    habit: {
-                                        id: habitId,
-                                    },
-                                },
                             ],
                         },
                     },
@@ -45,7 +35,6 @@ export class ChallengeParticipantController {
                         challengeRequirements: {
                             include: {
                                 task: true,
-                                habit: true,
                                 unit: true,
                             },
                         },
@@ -55,20 +44,18 @@ export class ChallengeParticipantController {
         });
     }
 
-    public static async getAllActiveForUser(
-        userId: number,
-    ) {
+    public static async getAllActiveForUser(userId: number) {
         return prisma.challengeParticipant.findMany({
             where: {
                 userId,
                 challenge: {
                     start: {
-                        lte: new Date()
+                        lte: new Date(),
                     },
                     end: {
-                        gte: new Date()
-                    }
-                }
+                        gte: new Date(),
+                    },
+                },
             },
             include: {
                 challenge: {
@@ -77,7 +64,6 @@ export class ChallengeParticipantController {
                         challengeRequirements: {
                             include: {
                                 task: true,
-                                habit: true,
                                 unit: true,
                             },
                         },
@@ -107,7 +93,6 @@ export class ChallengeParticipantController {
                         challengeRequirements: {
                             include: {
                                 task: true,
-                                habit: true,
                                 unit: true,
                             },
                         },

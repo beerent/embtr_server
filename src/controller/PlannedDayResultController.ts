@@ -44,7 +44,6 @@ export const PlannedDayResultInclude = {
                 },
                 include: {
                     task: true,
-                    habit: true,
                     unit: true,
                 },
             },

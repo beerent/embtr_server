@@ -1,4 +1,3 @@
-import { Habit } from '@prisma/client';
 import {
     PlannedTask as PlannedTaskModel,
     PlannedDay as PlannedDayModel,
@@ -28,7 +27,6 @@ import {
     UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { HabitController } from '@src/controller/HabitController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
@@ -102,15 +100,6 @@ export class PlannedDayService {
             return CREATE_PLANNED_TASK_UNKNOWN_TASK;
         }
 
-        let habit = undefined;
-        if (body.habitId) {
-            habit = await HabitController.get(body.habitId);
-        }
-
-        if (body.habitId && !habit) {
-            return { ...RESOURCE_NOT_FOUND, message: 'Habit not found' };
-        }
-
         let unit = undefined;
         if (body.unitId) {
             unit = await UnitController.get(body.unitId);
@@ -123,7 +112,6 @@ export class PlannedDayService {
         const createdPlannedTask = await PlannedTaskController.create(
             plannedDay,
             task,
-            habit ?? undefined,
             body.quantity,
             unit ?? undefined
         );

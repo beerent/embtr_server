@@ -1,13 +1,7 @@
 import { prisma } from '@database/prisma';
 
 export class TaskHabitPreferenceController {
-    public static async update(
-        userId: number,
-        taskId: number,
-        habitId?: number,
-        unitId?: number,
-        quantity?: number
-    ) {
+    public static async update(userId: number, taskId: number, unitId?: number, quantity?: number) {
         const result = await prisma.taskPreference.upsert({
             where: {
                 unique_user_task: {
@@ -16,13 +10,6 @@ export class TaskHabitPreferenceController {
                 },
             },
             update: {
-                habit: habitId
-                    ? {
-                          connect: {
-                              id: habitId,
-                          },
-                      }
-                    : undefined,
                 unit: {
                     connect: unitId
                         ? {
@@ -35,7 +22,6 @@ export class TaskHabitPreferenceController {
             create: {
                 userId: userId,
                 taskId: taskId,
-                habitId: habitId,
                 unitId: unitId,
                 quantity,
 

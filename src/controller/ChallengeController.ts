@@ -17,7 +17,6 @@ export class ChallengeController {
                 challengeRequirements: {
                     include: {
                         task: true,
-                        habit: true,
                         unit: true,
                     },
                 },
@@ -52,7 +51,6 @@ export class ChallengeController {
                 challengeRequirements: {
                     include: {
                         task: true,
-                        habit: true,
                         unit: true,
                     },
                 },
@@ -116,7 +114,6 @@ export class ChallengeController {
                 challengeRequirements: {
                     include: {
                         task: true,
-                        habit: true,
                         unit: true,
                     },
                 },
@@ -145,8 +142,7 @@ export class ChallengeController {
         endDate: Date,
         userId: number,
         interval: number,
-        taskId?: number,
-        habitId?: number
+        taskId?: number
     ) {
         if (taskId) {
             return this.getTaskBasedChallengeRequirementProgess(
@@ -155,16 +151,6 @@ export class ChallengeController {
                 userId,
                 interval,
                 taskId
-            );
-        }
-
-        if (habitId) {
-            return this.getHabitBasedChallengeRequirementProgess(
-                startDate,
-                endDate,
-                userId,
-                interval,
-                habitId
             );
         }
 
@@ -204,8 +190,7 @@ export class ChallengeController {
         startDate: Date,
         endDate: Date,
         userId: number,
-        interval: number,
-        habitId: number
+        interval: number
     ) {
         const startDateString = startDate.toISOString().replace('T', ' ').replace('Z', '');
         const endDateString = endDate.toISOString().replace('T', ' ').replace('Z', '');
@@ -218,7 +203,6 @@ export class ChallengeController {
      FROM planned_task
               JOIN planned_day ON plannedDayId = planned_day.id
      WHERE userId = ${userId}
-       AND habitId = ${habitId}
        AND planned_task.active = true
        AND planned_day.date >= ${startDateString}
        AND planned_day.date < ${endDateString}

@@ -23,7 +23,6 @@ export class TaskController {
             include: {
                 taskPreference: {
                     include: {
-                        habit: true,
                         unit: true,
                     },
                     where: {
@@ -57,7 +56,6 @@ export class TaskController {
             include: {
                 taskPreference: {
                     include: {
-                        habit: true,
                         unit: true,
                     },
                     where: {

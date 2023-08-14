@@ -53,6 +53,7 @@ export class NotificationController {
             orderBy: {
                 createdAt: 'desc',
             },
+            take: 10,
         });
 
         return result;

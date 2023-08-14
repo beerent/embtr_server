@@ -19,7 +19,6 @@ export interface CreateTaskResponse extends Response {
 }
 
 export interface TaskPreferenceRequest {
-  habitId?: number;
   unitId?: number;
   quantity?: number;
 }

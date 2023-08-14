@@ -258,6 +258,7 @@ export class PlannedDayResultService {
 
         const completedHabits: CompletedHabit[] = [];
         plannedDayResult.plannedDay.plannedTasks.forEach((plannedTask) => {
+            /*
             if (plannedTask.habit) {
                 const element: CompletedHabitElement = {
                     unit: plannedTask.unit ?? undefined,
@@ -286,13 +287,13 @@ export class PlannedDayResultService {
                     }
                 } else {
                     completedHabits.push({
-                        habit: ModelConverter.convert(plannedTask.habit),
                         attempted: 1,
                         completed: completed ? 1 : 0,
                         elements: [element],
                     });
                 }
             }
+                */
         });
 
         return completedHabits;

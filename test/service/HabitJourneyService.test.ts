@@ -1,11 +1,9 @@
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import app from '@src/app';
-import { HabitController } from '@src/controller/HabitController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { Role } from '@src/roles/Roles';
-import { HabitService } from '@src/service/HabitService';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
 
@@ -42,11 +40,6 @@ describe('HabitJourneyService', () => {
 
     describe.only('get habit journey for user under threshold', () => {
         beforeAll(async () => {
-            await HabitController.deleteByTitle('habit 1');
-            await HabitController.deleteByTitle('habit 2');
-            const habit1 = await HabitController.create('habit 1');
-            const habit2 = await HabitController.create('habit 2');
-
             await TaskController.deleteByTitle('task 1');
             const task1 = await TaskController.create('task 1', 'description 1');
 
@@ -64,15 +57,9 @@ describe('HabitJourneyService', () => {
                 new Date('2023-02-12'),
                 '2023-02-12'
             );
-
-            await PlannedTaskController.create(plannedDay1, task1!, habit1);
-            await PlannedTaskController.create(plannedDay1, task2!, habit2);
-            await PlannedTaskController.create(plannedDay2, task1!, habit1);
         });
 
         afterAll(async () => {
-            await HabitController.deleteByTitle('habit 1');
-            await HabitController.deleteByTitle('habit 2');
             await TaskController.deleteByTitle('task 1');
             await TaskController.deleteByTitle('task 2');
         });

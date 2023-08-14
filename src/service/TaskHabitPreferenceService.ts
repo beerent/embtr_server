@@ -12,12 +12,11 @@ export class TaskHabitPreferenceService {
 
         const preferenceRequest: TaskPreferenceRequest = request.body;
 
-        const habitId = preferenceRequest.habitId;
         const unitId = preferenceRequest.unitId;
         const quantity = preferenceRequest.quantity;
         const taskId = Number(request.params.id);
 
-        await TaskHabitPreferenceController.update(userId, taskId, habitId, unitId, quantity);
+        await TaskHabitPreferenceController.update(userId, taskId, unitId, quantity);
         return SUCCESS;
     }
 }

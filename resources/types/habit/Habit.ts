@@ -1,4 +1,4 @@
-import { Habit, User } from "../../schema";
+import { User } from "../../schema";
 
 
 export interface HabitJourneys {
@@ -7,7 +7,6 @@ export interface HabitJourneys {
 }
 
 export interface HabitJourney {
-	habit: Habit,
 	level: number,
 	elements: HabitJourneyElement[]
 }
