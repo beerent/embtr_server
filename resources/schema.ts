@@ -314,6 +314,16 @@ export interface Unit {
   taskPreference?: TaskPreference[];
 }
 
+export interface HabitCategory {
+  id?: number;
+  name?: string;
+  description?: string;
+  imageUrl?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export enum NotificationTargetPage {
   INVALID = 'INVALID',
   GOAL_DETAILS = 'GOAL_DETAILS',

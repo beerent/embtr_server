@@ -13,6 +13,7 @@ import {
     QuoteOfTheDay,
     Season,
     Challenge,
+    HabitCategory,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -33,7 +34,8 @@ type PrismaModel =
     | QuoteOfTheDay
     | Season
     | Unit
-    | Challenge;
+    | Challenge
+    | HabitCategory;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
