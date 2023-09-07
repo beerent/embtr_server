@@ -439,3 +439,15 @@ model Unit {
 
   @@map("unit")
 }
+
+model HabitCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String?  @db.VarChar(255)
+  imageUrl    String?  @db.VarChar(255)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+
+  @@map("habit_category")
+}
