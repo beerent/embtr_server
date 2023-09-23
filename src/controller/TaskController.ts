@@ -76,13 +76,13 @@ export class TaskController {
     public static async create(
         title: string,
         description?: string,
-        createdById?: number
+        userId?: number
     ): Promise<Task | null> {
         const result = await prisma.task.create({
             data: {
                 title,
                 description,
-                createdById,
+                userId,
             },
         });
 

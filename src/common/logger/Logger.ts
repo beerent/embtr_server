@@ -2,7 +2,11 @@ import winston from 'winston';
 
 const isTestEnv = process.env.NODE_ENV === 'test';
 
-const silentInTestEnv = (transport: winston.transports.FileTransportInstance | winston.transports.ConsoleTransportInstance) => {
+const silentInTestEnv = (
+    transport:
+        | winston.transports.FileTransportInstance
+        | winston.transports.ConsoleTransportInstance
+) => {
     if (isTestEnv) {
         transport.silent = true;
     }
@@ -12,7 +16,6 @@ const silentInTestEnv = (transport: winston.transports.FileTransportInstance | w
 // Create a logger instance
 export const logger = winston.createLogger({
     level: 'info',
-    format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
     transports: [
         //
         // - Write to all logs with level `info` and below to `combined.log`
@@ -26,10 +29,10 @@ export const logger = winston.createLogger({
 // If we're not in production then log to the `console` with the format:
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
 //
-    logger.add(
-        silentInTestEnv(
-            new winston.transports.Console({
-                format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
-            })
-        )
-    );
+logger.add(
+    silentInTestEnv(
+        new winston.transports.Console({
+            format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+        })
+    )
+);

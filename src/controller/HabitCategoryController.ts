@@ -6,6 +6,9 @@ export class HabitCategoryController {
             where: {
                 active: true,
             },
+            include: {
+                tasks: true,
+            },
         });
     }
 }

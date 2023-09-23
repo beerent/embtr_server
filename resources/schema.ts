@@ -23,6 +23,7 @@ export interface User {
   shallenges?: Challenge[];
   ChallengeParticipant?: ChallengeParticipant[];
   userAchievements?: UserAchievement[];
+  tasks?: Task[];
 }
 
 export interface PushNotificationToken {
@@ -40,7 +41,10 @@ export interface Task {
   title?: string;
   description?: string;
   iconUrl?: string;
-  createdById?: number;
+  userId?: number;
+  user?: User;
+  habitCategoryId?: number;
+  habitCategory?: HabitCategory;
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
@@ -322,6 +326,7 @@ export interface HabitCategory {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  tasks?: Task[];
 }
 
 export enum NotificationTargetPage {

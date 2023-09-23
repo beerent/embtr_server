@@ -34,9 +34,13 @@ app.use((req, res, next) => {
     res.send = function (data) {
         const endTime = Date.now();
         const elapsedTime = endTime - startTime;
-        const contentLength = Buffer.byteLength(data, 'utf-8'); // Get the size of the response data
+        const contentLength = Buffer.byteLength(data, 'utf-8'); // Get the size of the response data'
+        const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        const requestPadding = ' '.repeat(5 - req.method.length);
+
         logger.info(
-            `Response for ${req.method} ${req.baseUrl}${req.path} ${res.statusCode} [${elapsedTime}ms] Content-Length: ${contentLength} bytes`
+            //add timestamp to beginning of log
+            `[${timestamp}]  ${req.method}${requestPadding}  ${res.statusCode}\t${contentLength}b\t${elapsedTime}ms\t${req.baseUrl}${req.path}`
         );
         return oldSend.apply(this, arguments as any);
     };

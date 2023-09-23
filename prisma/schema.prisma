@@ -33,6 +33,7 @@ model User {
   shallenges             Challenge[]
   ChallengeParticipant   ChallengeParticipant[]
   userAchievements       UserAchievement[]
+  tasks                  Task[]
 
   @@map("user")
 }
@@ -55,13 +56,18 @@ model Task {
   title                String                 @unique @db.VarChar(255)
   description          String?                @db.VarChar(255)
   iconUrl              String?                @db.VarChar(255)
-  createdById          Int?                   @db.Int
+  userId               Int?                   @db.Int
+  user                 User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habitCategoryId      Int?                   @db.Int
+  habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
   plannedTasks         PlannedTask[]
   taskPreference       TaskPreference[]
   ChallengeRequirement ChallengeRequirement[]
 
+  @@index([userId])
+  @@index([habitCategoryId])
   @@map("task")
 }
 
@@ -448,6 +454,7 @@ model HabitCategory {
   active      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+  tasks       Task[]
 
   @@map("habit_category")
 }
