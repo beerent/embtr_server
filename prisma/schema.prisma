@@ -34,6 +34,7 @@ model User {
   ChallengeParticipant   ChallengeParticipant[]
   userAchievements       UserAchievement[]
   tasks                  Task[]
+  Schedule               Schedule[]
 
   @@map("user")
 }
@@ -65,6 +66,7 @@ model Task {
   plannedTasks         PlannedTask[]
   taskPreference       TaskPreference[]
   ChallengeRequirement ChallengeRequirement[]
+  ScheduledHabit       ScheduledHabit[]
 
   @@index([userId])
   @@index([habitCategoryId])
@@ -442,6 +444,7 @@ model Unit {
   PlannedTask          PlannedTask[]
   challengeRequirement ChallengeRequirement[]
   taskPreference       TaskPreference[]
+  ScheduledHabit       ScheduledHabit[]
 
   @@map("unit")
 }
@@ -457,4 +460,60 @@ model HabitCategory {
   tasks       Task[]
 
   @@map("habit_category")
+}
+
+model Schedule {
+  id              Int              @id @default(autoincrement())
+  userId          Int              @db.Int
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  scheduledHabits ScheduledHabit[]
+
+  @@index([userId])
+  @@map("schedule")
+}
+
+model DayOfWeek {
+  id              Int              @id @default(autoincrement())
+  day             String           @db.VarChar(10)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  scheduledHabits ScheduledHabit[]
+
+  @@map("day_of_week")
+}
+
+model TimeOfDay {
+  id              Int              @id @default(autoincrement())
+  period          String           @db.VarChar(255)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @default(now()) @updatedAt
+  scheduledHabits ScheduledHabit[]
+
+  @@map("time_of_day")
+}
+
+model ScheduledHabit {
+  id          Int         @id @default(autoincrement())
+  scheduleId  Int         @db.Int
+  schedule    Schedule    @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  taskId      Int         @db.Int
+  task        Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  nickname    String?     @db.VarChar(255)
+  description String?     @db.VarChar(255)
+  daysOfWeek  DayOfWeek[]
+  timesOfDay  TimeOfDay[]
+  quantity    Float       @db.Double
+  unitId      Int         @db.Int
+  unit        Unit        @relation(fields: [unitId], references: [id])
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now()) @updatedAt
+
+  @@index([scheduleId])
+  @@index([taskId])
+  @@index([unitId])
+  @@map("scheduled_habit")
 }

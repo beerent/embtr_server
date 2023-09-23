@@ -24,6 +24,7 @@ export interface User {
   ChallengeParticipant?: ChallengeParticipant[];
   userAchievements?: UserAchievement[];
   tasks?: Task[];
+  Schedule?: Schedule[];
 }
 
 export interface PushNotificationToken {
@@ -50,6 +51,7 @@ export interface Task {
   plannedTasks?: PlannedTask[];
   taskPreference?: TaskPreference[];
   ChallengeRequirement?: ChallengeRequirement[];
+  ScheduledHabit?: ScheduledHabit[];
 }
 
 export interface PlannedDay {
@@ -316,6 +318,7 @@ export interface Unit {
   PlannedTask?: PlannedTask[];
   challengeRequirement?: ChallengeRequirement[];
   taskPreference?: TaskPreference[];
+  ScheduledHabit?: ScheduledHabit[];
 }
 
 export interface HabitCategory {
@@ -327,6 +330,50 @@ export interface HabitCategory {
   createdAt?: Date;
   updatedAt?: Date;
   tasks?: Task[];
+}
+
+export interface Schedule {
+  id?: number;
+  userId?: number;
+  user?: User;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  scheduledHabits?: ScheduledHabit[];
+}
+
+export interface DayOfWeek {
+  id?: number;
+  day?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  scheduledHabits?: ScheduledHabit[];
+}
+
+export interface TimeOfDay {
+  id?: number;
+  period?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  scheduledHabits?: ScheduledHabit[];
+}
+
+export interface ScheduledHabit {
+  id?: number;
+  scheduleId?: number;
+  schedule?: Schedule;
+  taskId?: number;
+  task?: Task;
+  nickname?: string;
+  description?: string;
+  daysOfWeek?: DayOfWeek[];
+  timesOfDay?: TimeOfDay[];
+  quantity?: number;
+  unitId?: number;
+  unit?: Unit;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum NotificationTargetPage {
