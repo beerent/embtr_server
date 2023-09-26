@@ -34,7 +34,7 @@ model User {
   ChallengeParticipant   ChallengeParticipant[]
   userAchievements       UserAchievement[]
   tasks                  Task[]
-  Schedule               Schedule[]
+  scheduledHabits        ScheduledHabit[]
 
   @@map("user")
 }
@@ -462,19 +462,6 @@ model HabitCategory {
   @@map("habit_category")
 }
 
-model Schedule {
-  id              Int              @id @default(autoincrement())
-  userId          Int              @db.Int
-  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  active          Boolean          @default(true)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now()) @updatedAt
-  scheduledHabits ScheduledHabit[]
-
-  @@index([userId])
-  @@map("schedule")
-}
-
 model DayOfWeek {
   id              Int              @id @default(autoincrement())
   day             String           @db.VarChar(10)
@@ -497,23 +484,22 @@ model TimeOfDay {
 
 model ScheduledHabit {
   id          Int         @id @default(autoincrement())
-  scheduleId  Int         @db.Int
-  schedule    Schedule    @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  userId      Int         @db.Int
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   taskId      Int         @db.Int
   task        Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  nickname    String?     @db.VarChar(255)
   description String?     @db.VarChar(255)
   daysOfWeek  DayOfWeek[]
   timesOfDay  TimeOfDay[]
   quantity    Float       @db.Double
-  unitId      Int         @db.Int
-  unit        Unit        @relation(fields: [unitId], references: [id])
+  unitId      Int?        @db.Int
+  unit        Unit?       @relation(fields: [unitId], references: [id])
   active      Boolean     @default(true)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @default(now()) @updatedAt
 
-  @@index([scheduleId])
   @@index([taskId])
   @@index([unitId])
+  @@index([userId])
   @@map("scheduled_habit")
 }

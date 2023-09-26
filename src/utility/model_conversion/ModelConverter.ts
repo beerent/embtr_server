@@ -14,6 +14,7 @@ import {
     Season,
     Challenge,
     HabitCategory,
+    ScheduledHabit,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -35,7 +36,8 @@ type PrismaModel =
     | Season
     | Unit
     | Challenge
-    | HabitCategory;
+    | HabitCategory
+    | ScheduledHabit;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
