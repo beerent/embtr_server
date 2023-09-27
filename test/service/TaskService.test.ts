@@ -244,7 +244,6 @@ describe('TaskService tests', () => {
         beforeAll(async () => {
             const plannedDay = await PlannedDayController.create(
                 USER_WITH_ROLE.user.id,
-                new Date('1800-01-01'),
                 '1800-01-01'
             );
             const creates = [

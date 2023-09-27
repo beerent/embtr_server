@@ -99,22 +99,18 @@ describe('DayResultServices', () => {
         const plannedDayCreates = [
             PlannedDayController.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                new Date(TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT),
                 TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT
             ),
             PlannedDayController.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                new Date(TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT),
                 TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT
             ),
             PlannedDayController.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                new Date(TEST_PLANNED_DAY_DATE_TO_COMMENT),
                 TEST_PLANNED_DAY_DATE_TO_COMMENT
             ),
             PlannedDayController.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                new Date(TEST_PLANNED_DAY_DIFFERENT_USER),
                 TEST_PLANNED_DAY_DIFFERENT_USER
             ),
         ];
@@ -297,31 +293,11 @@ describe('DayResultServices', () => {
         describe('with bounds', () => {
             beforeAll(async () => {
                 const creates = [
-                    PlannedDayController.create(
-                        ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                        new Date('2020-01-01'),
-                        '2020-01-01'
-                    ),
-                    PlannedDayController.create(
-                        ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                        new Date('2020-01-02'),
-                        '2020-01-02'
-                    ),
-                    PlannedDayController.create(
-                        ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                        new Date('2020-01-03'),
-                        '2020-01-03'
-                    ),
-                    PlannedDayController.create(
-                        ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                        new Date('2020-01-04'),
-                        '2020-01-04'
-                    ),
-                    PlannedDayController.create(
-                        ACCOUNT_USER_WITH_USER_ROLE.user.id,
-                        new Date('2020-01-05'),
-                        '2020-01-05'
-                    ),
+                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-01'),
+                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-02'),
+                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-03'),
+                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-04'),
+                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-05'),
                 ];
                 const [p1, p2, p3, p4, p5] = await Promise.all(creates);
 
@@ -835,7 +811,6 @@ describe('DayResultServices', () => {
                 userToken = await AuthenticationController.generateValidIdToken(email, 'password');
                 const plannedDay = await PlannedDayController.create(
                     accountWithUser.user.id,
-                    new Date('2020-01-01'),
                     '2020-01-01'
                 );
                 plannedDayResultId = (await PlannedDayResultController.create(plannedDay.id)).id;

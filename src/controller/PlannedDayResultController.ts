@@ -1,5 +1,4 @@
 import { prisma } from '@database/prisma';
-import { PlannedDayInclude } from './PlannedDayController';
 import { Prisma } from '@prisma/client';
 import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import { CommonUpserts } from './common/CommonUpserts';
@@ -43,7 +42,6 @@ export const PlannedDayResultInclude = {
                     active: true,
                 },
                 include: {
-                    task: true,
                     unit: true,
                 },
             },

@@ -8,7 +8,7 @@ export const PlannedDayInclude = {
             active: true,
         },
         include: {
-            task: true,
+            scheduledHabit: true,
             plannedDay: true,
             unit: true,
         },
@@ -22,7 +22,9 @@ export const PlannedDayInclude = {
 } satisfies Prisma.PlannedDayInclude;
 
 export class PlannedDayController {
-    public static async create(userId: number, date: Date, dayKey: string) {
+    public static async create(userId: number, dayKey: string) {
+        const date = new Date(dayKey);
+
         return await prisma.plannedDay.create({
             data: {
                 user: {
@@ -47,15 +49,55 @@ export class PlannedDayController {
     }
 
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
-        return await prisma.plannedDay.findUnique({
+        const date = new Date(dayKey);
+
+        const plannedDayUpsert = await prisma.plannedDay.upsert({
             where: {
                 unique_user_daykey: {
                     userId,
                     dayKey,
                 },
             },
+            update: {},
+            create: {
+                user: {
+                    connect: {
+                        id: userId,
+                    },
+                },
+                dayKey,
+                date,
+            },
             include: PlannedDayInclude,
         });
+
+        return plannedDayUpsert;
+    }
+
+    public static async getOrCreateByUserAndDayKey(userId: number, dayKey: string) {
+        const date = new Date(dayKey);
+
+        const plannedDayUpsert = await prisma.plannedDay.upsert({
+            where: {
+                unique_user_daykey: {
+                    userId,
+                    dayKey,
+                },
+            },
+            update: {},
+            create: {
+                user: {
+                    connect: {
+                        id: userId,
+                    },
+                },
+                dayKey,
+                date,
+            },
+            include: PlannedDayInclude,
+        });
+
+        return plannedDayUpsert;
     }
 
     public static async deleteByUserAndDayKey(userId: number, dayKey: string) {

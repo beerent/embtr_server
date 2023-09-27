@@ -2,7 +2,7 @@ import { prisma } from '@database/prisma';
 import { PlannedDay, PlannedTask, Task, Prisma } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel, Unit } from '@resources/schema';
 
-export type PlannedTaskFull = PlannedTask & { task: Task; plannedDay: PlannedDay };
+export type PlannedTaskFull = PlannedTask & { plannedDay: PlannedDay };
 export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
     typeof PlannedTaskController.getHabitJourneys
 >;
@@ -73,7 +73,6 @@ export class PlannedTaskController {
                 ...unit,
             },
             include: {
-                task: true,
                 plannedDay: true,
                 unit: true,
             },
@@ -88,7 +87,6 @@ export class PlannedTaskController {
                 id,
             },
             include: {
-                task: true,
                 plannedDay: true,
             },
         });
@@ -101,12 +99,8 @@ export class PlannedTaskController {
                 plannedDay: {
                     id: plannedDayId,
                 },
-                task: {
-                    id: taskId,
-                },
             },
             include: {
-                task: true,
                 plannedDay: true,
             },
         });
@@ -123,26 +117,8 @@ export class PlannedTaskController {
                     userId,
                     id: plannedDayId,
                 },
-                taskId,
             },
         });
-    }
-
-    public static async getRecent(userId: number, limit: number) {
-        const result = await prisma.plannedTask.groupBy({
-            by: ['taskId', 'createdAt'],
-            where: {
-                plannedDay: {
-                    userId,
-                },
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-            take: limit,
-        });
-
-        return result;
     }
 
     public static async getHabitJourneys(userId: number) {

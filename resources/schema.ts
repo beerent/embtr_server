@@ -48,10 +48,9 @@ export interface Task {
   habitCategory?: HabitCategory;
   createdAt?: Date;
   updatedAt?: Date;
-  plannedTasks?: PlannedTask[];
   taskPreference?: TaskPreference[];
   ChallengeRequirement?: ChallengeRequirement[];
-  ScheduledHabit?: ScheduledHabit[];
+  scheduledHabits?: ScheduledHabit[];
 }
 
 export interface PlannedDay {
@@ -72,8 +71,11 @@ export interface PlannedTask {
   id?: number;
   plannedDayId?: number;
   plannedDay?: PlannedDay;
-  taskId?: number;
-  task?: Task;
+  scheduledHabitId?: number;
+  scheduledHabit?: ScheduledHabit;
+  title?: string;
+  description?: string;
+  iconUrl?: string;
   unitId?: number;
   unit?: Unit;
   quantity?: number;
@@ -363,6 +365,7 @@ export interface ScheduledHabit {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  plannedTasks?: PlannedTask[];
 }
 
 export enum NotificationTargetPage {

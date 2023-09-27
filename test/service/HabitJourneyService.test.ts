@@ -48,13 +48,11 @@ describe('HabitJourneyService', () => {
 
             const plannedDay1 = await PlannedDayController.create(
                 USER_ACCOUNT_WITH_USER_ROLE.user.id,
-                new Date('2023-02-01'),
                 '2023-02-01'
             );
 
             const plannedDay2 = await PlannedDayController.create(
                 USER_ACCOUNT_WITH_USER_ROLE.user.id,
-                new Date('2023-02-12'),
                 '2023-02-12'
             );
         });

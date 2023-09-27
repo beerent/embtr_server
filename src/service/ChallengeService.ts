@@ -145,7 +145,7 @@ export class ChallengeService {
         plannedTask: PlannedTask
     ): Promise<Challenge[]> {
         const userId = plannedTask.plannedDay?.userId;
-        const taskId = plannedTask.taskId;
+        const taskId = 0;
         const date = plannedTask.plannedDay?.date;
         if (!userId || !taskId || !date) {
             return [];

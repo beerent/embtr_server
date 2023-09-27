@@ -63,10 +63,9 @@ model Task {
   habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
-  plannedTasks         PlannedTask[]
   taskPreference       TaskPreference[]
   ChallengeRequirement ChallengeRequirement[]
-  ScheduledHabit       ScheduledHabit[]
+  scheduledHabits      ScheduledHabit[]
 
   @@index([userId])
   @@index([habitCategoryId])
@@ -91,22 +90,25 @@ model PlannedDay {
 }
 
 model PlannedTask {
-  id                Int        @id @default(autoincrement())
-  plannedDayId      Int        @db.Int
-  plannedDay        PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  taskId            Int        @db.Int
-  task              Task       @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  unitId            Int?
-  unit              Unit?      @relation(fields: [unitId], references: [id])
-  quantity          Float?     @db.Double
-  completedQuantity Float?     @db.Double
-  status            String     @db.VarChar(225)
-  active            Boolean    @default(true)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @default(now()) @updatedAt
+  id                Int             @id @default(autoincrement())
+  plannedDayId      Int             @db.Int
+  plannedDay        PlannedDay      @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+  scheduledHabitId  Int?            @db.Int
+  scheduledHabit    ScheduledHabit? @relation(fields: [scheduledHabitId], references: [id])
+  title             String?         @db.VarChar(255)
+  description       String?         @db.VarChar(255)
+  iconUrl           String?         @db.VarChar(255)
+  unitId            Int?            @db.Int
+  unit              Unit?           @relation(fields: [unitId], references: [id])
+  quantity          Float?          @db.Double
+  completedQuantity Float?          @db.Double
+  status            String          @db.VarChar(225)
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
 
   @@index([plannedDayId], name: "planned_day_id")
-  @@index([taskId], name: "task_id")
+  @@index([scheduledHabitId], name: "scheduled_habit_id")
   @@index([unitId], name: "unit_id")
   @@map("planned_task")
 }
@@ -483,20 +485,21 @@ model TimeOfDay {
 }
 
 model ScheduledHabit {
-  id          Int         @id @default(autoincrement())
-  userId      Int         @db.Int
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  taskId      Int         @db.Int
-  task        Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  description String?     @db.VarChar(255)
-  daysOfWeek  DayOfWeek[]
-  timesOfDay  TimeOfDay[]
-  quantity    Float       @db.Double
-  unitId      Int?        @db.Int
-  unit        Unit?       @relation(fields: [unitId], references: [id])
-  active      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
+  id           Int           @id @default(autoincrement())
+  userId       Int           @db.Int
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taskId       Int           @db.Int
+  task         Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  description  String?       @db.VarChar(255)
+  daysOfWeek   DayOfWeek[]
+  timesOfDay   TimeOfDay[]
+  quantity     Float         @db.Double
+  unitId       Int?          @db.Int
+  unit         Unit?         @relation(fields: [unitId], references: [id])
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @updatedAt
+  plannedTasks PlannedTask[]
 
   @@index([taskId])
   @@index([unitId])

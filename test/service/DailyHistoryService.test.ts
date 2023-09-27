@@ -1,6 +1,15 @@
-import { GetDailyHistoryRequest, GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
+import {
+    GetDailyHistoryRequest,
+    GetDailyHistoryResponse,
+} from '@resources/types/requests/DailyHistoryTypes';
 import app from '@src/app';
-import { FORBIDDEN, INVALID_REQUEST, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
+import {
+    FORBIDDEN,
+    INVALID_REQUEST,
+    RESOURCE_NOT_FOUND,
+    SUCCESS,
+    UNAUTHORIZED,
+} from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
@@ -20,7 +29,10 @@ describe('DailyHistoryService', () => {
 
     beforeAll(async () => {
         // DELETE
-        const userAccountDeletes = [TestUtility.deleteAccountWithUser(EMAIL_WITH_NO_ROLE), TestUtility.deleteAccountWithUser(EMAIL_WITH_USER_ROLE)];
+        const userAccountDeletes = [
+            TestUtility.deleteAccountWithUser(EMAIL_WITH_NO_ROLE),
+            TestUtility.deleteAccountWithUser(EMAIL_WITH_USER_ROLE),
+        ];
         await Promise.all(userAccountDeletes);
 
         // CREATE
@@ -43,29 +55,45 @@ describe('DailyHistoryService', () => {
     });
 
     afterAll(async () => {
-        const userAccountDeletes = [TestUtility.deleteAccountWithUser(EMAIL_WITH_NO_ROLE), TestUtility.deleteAccountWithUser(EMAIL_WITH_USER_ROLE)];
+        const userAccountDeletes = [
+            TestUtility.deleteAccountWithUser(EMAIL_WITH_NO_ROLE),
+            TestUtility.deleteAccountWithUser(EMAIL_WITH_USER_ROLE),
+        ];
         await Promise.all(userAccountDeletes);
     });
 
     test('unauthenticated', async () => {
-        const response = await request(app).get('/user/0/daily-history').set('Authorization', 'Bearer Trash').send();
+        const response = await request(app)
+            .get('/user/0/daily-history')
+            .set('Authorization', 'Bearer Trash')
+            .send();
         expect(response.status).toEqual(UNAUTHORIZED.httpCode);
     });
 
     test('unauthorized', async () => {
-        const response = await request(app).get('/user/0/daily-history').set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLE_TOKEN}`).send();
+        const response = await request(app)
+            .get('/user/0/daily-history')
+            .set('Authorization', `Bearer ${ACCOUNT_WITH_NO_ROLE_TOKEN}`)
+            .send();
 
         expect(response.status).toEqual(FORBIDDEN.httpCode);
         expect(response.body).toEqual(FORBIDDEN);
     });
 
     test('invalid id', async () => {
-        const response = await request(app).get(`/user/abc/daily-history`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
+        const response = await request(app)
+            .get(`/user/abc/daily-history`)
+            .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+            .send();
         expect(response.status).toEqual(INVALID_REQUEST.httpCode);
     });
 
     test('missing dates', async () => {
-        const response = await request(app).get(`/user/0/daily-history`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).query({}).send();
+        const response = await request(app)
+            .get(`/user/0/daily-history`)
+            .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
+            .query({})
+            .send();
         expect(response.status).toEqual(INVALID_REQUEST.httpCode);
     });
 
@@ -96,8 +124,8 @@ describe('DailyHistoryService', () => {
             const task = await TaskController.create(TEST_EXISTING_TASK_TITLE);
 
             const plannedDays = [
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date('0251-01-02'), '0251-01-02'),
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date('0251-01-03'), '0251-01-03'),
+                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0251-01-02'),
+                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0251-01-03'),
             ];
 
             await Promise.all(plannedDays);
@@ -137,8 +165,8 @@ describe('DailyHistoryService', () => {
             TEST_EXISTING_TASK_ID = task!.id;
 
             const plannedDays = [
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date('0250-01-02'), '0250-01-02'),
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, new Date('0250-01-03'), '0250-01-03'),
+                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0250-01-02'),
+                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0250-01-03'),
             ];
 
             const [plannedDay, plannedDay2] = await Promise.all(plannedDays);
@@ -150,7 +178,8 @@ describe('DailyHistoryService', () => {
                 PlannedTaskController.create(plannedDay2, task!),
                 PlannedTaskController.create(plannedDay2, task!),
             ];
-            const [createdTask1, createdTask2, createdTask3, createdTask4, createdTask5] = await Promise.all(taskGenerations);
+            const [createdTask1, createdTask2, createdTask3, createdTask4, createdTask5] =
+                await Promise.all(taskGenerations);
 
             const taskUpdates = [
                 PlannedTaskController.update({ id: createdTask1!.id, status: 'COMPLETE' }),

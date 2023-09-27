@@ -94,7 +94,6 @@ describe('planned day service', () => {
 
         const plannedDay = await PlannedDayController.create(
             USER_ACCOUNT_WITH_USER_ROLE.user.id,
-            TEST_EXISTING_PLANNED_DAY_DATE,
             TEST_EXISTING_PLANNED_DAY_KEY
         );
         TEST_EXISTING_PLANNED_DAY_ID = plannedDay.id;

@@ -34,6 +34,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { UnitController } from '@src/controller/UnitController';
 import { ChallengeService } from './ChallengeService';
+import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 
 export class PlannedDayService {
     public static async getById(id: number): Promise<GetPlannedDayResponse> {
@@ -48,17 +49,53 @@ export class PlannedDayService {
     }
 
     public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
-        const plannedDay = await PlannedDayController.getByUserAndDayKey(
+        const plannedDay = await PlannedDayController.getOrCreateByUserAndDayKey(
             request.userId,
             request.dayKey
         );
 
-        if (plannedDay) {
-            const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
-            return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
+        // TODO - extract this method
+        const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
+
+        const scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeek(
+            request.userId,
+            dayOfWeek
+        );
+        const plannedTaskScheduledHabitIds = plannedDay?.plannedTasks.map(
+            (plannedTask) => plannedTask.scheduledHabitId
+        );
+        const scheduledHabitsWithoutPlannedTasks = scheduledHabits.filter((scheduledHabit) => {
+            return !plannedTaskScheduledHabitIds?.includes(scheduledHabit.id);
+        });
+
+        const placeHolderPlannedTasks: PlannedTask[] = [];
+        for (const scheduledHabit of scheduledHabitsWithoutPlannedTasks) {
+            const placeHolderPlannedTask: PlannedTask = {
+                plannedDayId: plannedDay?.id,
+                scheduledHabitId: scheduledHabit.id,
+                title: scheduledHabit.task.title,
+                description: scheduledHabit.description ?? '',
+                iconUrl: scheduledHabit.task.iconUrl ?? '',
+                unitId: scheduledHabit.unitId ?? 0,
+                quantity: scheduledHabit.quantity ?? 1,
+                completedQuantity: 0,
+                active: true,
+            };
+
+            placeHolderPlannedTasks.push(placeHolderPlannedTask);
         }
 
-        return GET_PLANNED_DAY_FAILED_NOT_FOUND;
+        if (!plannedDay) {
+            return GET_PLANNED_DAY_FAILED_NOT_FOUND;
+        }
+
+        const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
+        convertedPlannedDay.plannedTasks = [
+            ...(convertedPlannedDay.plannedTasks ?? []),
+            ...placeHolderPlannedTasks,
+        ];
+
+        return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
     }
 
     public static async create(request: Request): Promise<CreatePlannedDayResponse> {
@@ -67,14 +104,12 @@ export class PlannedDayService {
         )) as number;
         const dayKey = request.body.dayKey;
 
-        const date = new Date(dayKey);
-
         const preExistingDayKey = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
         if (preExistingDayKey) {
             return CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS;
         }
 
-        const createdPlannedDay = await PlannedDayController.create(userId, date, dayKey);
+        const createdPlannedDay = await PlannedDayController.create(userId, dayKey);
         if (createdPlannedDay) {
             const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
             return { ...CREATE_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };

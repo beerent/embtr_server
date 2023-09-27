@@ -11,16 +11,6 @@ import express from 'express';
 const taskRouter = express.Router();
 
 taskRouter.get(
-    '/recent',
-    authenticate,
-    authorize,
-    runEndpoint(async (req, res) => {
-        const response = await TaskService.recent(req);
-        res.status(response.httpCode).json(response);
-    })
-);
-
-taskRouter.get(
     '/recommended',
     authenticate,
     authorize,

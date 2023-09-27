@@ -10,15 +10,17 @@ export class ScheduledHabitController {
         daysOfWeekIds?: number[],
         timesOfDayIds?: number[]
     ) {
-        const unit = unitId
-            ? {
-                  unit: {
-                      connect: {
-                          id: unitId ?? 1,
-                      },
-                  },
-              }
-            : {};
+        let unit = {};
+        if (unitId) {
+            unit = {
+                unit: {
+                    connect: {
+                        id: unitId ?? 1,
+                    },
+                },
+            };
+        }
+
         return await prisma.scheduledHabit.create({
             data: {
                 user: {
@@ -47,6 +49,25 @@ export class ScheduledHabitController {
                             id,
                         };
                     }),
+                },
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
+    public static async getForUserAndDayOfWeek(userId: number, dayOfWeek: number) {
+        return await prisma.scheduledHabit.findMany({
+            where: {
+                userId: userId,
+                daysOfWeek: {
+                    some: {
+                        id: dayOfWeek,
+                    },
                 },
             },
             include: {
