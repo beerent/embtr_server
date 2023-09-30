@@ -55,12 +55,14 @@ plannedDayRouter.post(
 );
 
 plannedDayRouter.post(
-    '/planned-task',
+    '/:dayKey/planned-task',
     authenticate,
     authorize,
     validatePlannedTaskPost,
     runEndpoint(async (req, res) => {
-        const response = await PlannedDayService.createPlannedTask(req);
+        const dayKey = req.params.dayKey;
+        const response = await PlannedDayService.createPlannedTask(dayKey, req);
+
         res.status(response.httpCode).json(response);
     })
 );

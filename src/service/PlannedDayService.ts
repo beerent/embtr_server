@@ -54,9 +54,7 @@ export class PlannedDayService {
             request.dayKey
         );
 
-        // TODO - extract this method
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
-
         const scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeek(
             request.userId,
             dayOfWeek
@@ -118,38 +116,22 @@ export class PlannedDayService {
         return CREATE_PLANNED_DAY_FAILED;
     }
 
-    public static async createPlannedTask(request: Request): Promise<UpdatePlannedTaskResponse> {
-        const body: CreatePlannedTaskRequest = request.body;
+    public static async createPlannedTask(
+        dayKey: string,
+        request: Request
+    ): Promise<UpdatePlannedTaskResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
-        //todo add test for userId comparison
-        const plannedDay = await PlannedDayController.get(body.plannedDayId);
+        const plannedTask = request.body.plannedTask;
+        const plannedDay = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
         if (!plannedDay || plannedDay.userId !== userId) {
             return CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY;
         }
+        plannedTask.plannedDayId = plannedDay.id;
 
-        const task = await TaskController.get(body.taskId);
-        if (!task) {
-            return CREATE_PLANNED_TASK_UNKNOWN_TASK;
-        }
-
-        let unit = undefined;
-        if (body.unitId) {
-            unit = await UnitController.get(body.unitId);
-        }
-
-        if (body.unitId && !unit) {
-            return { ...RESOURCE_NOT_FOUND, message: 'Unit not found' };
-        }
-
-        const createdPlannedTask = await PlannedTaskController.create(
-            plannedDay,
-            task,
-            body.quantity,
-            unit ?? undefined
-        );
+        const createdPlannedTask = await PlannedTaskController.create(plannedTask);
 
         if (createdPlannedTask) {
             const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);

@@ -14,7 +14,9 @@ export const validateGetById = (req: Request, res: Response, next: NextFunction)
     try {
         plannedDayGetById.parse(req.params);
     } catch (error) {
-        return res.status(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode).json(GET_PLANNED_DAY_FAILED_NOT_FOUND);
+        return res
+            .status(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode)
+            .json(GET_PLANNED_DAY_FAILED_NOT_FOUND);
     }
 
     next();
@@ -28,7 +30,9 @@ export const validateGetByUser = (req: Request, res: Response, next: NextFunctio
     try {
         plannedDayGetByUser.parse(req.params);
     } catch (error) {
-        return res.status(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode).json(GET_PLANNED_DAY_FAILED_NOT_FOUND);
+        return res
+            .status(GET_PLANNED_DAY_FAILED_NOT_FOUND.httpCode)
+            .json(GET_PLANNED_DAY_FAILED_NOT_FOUND);
     }
 
     next();
@@ -47,13 +51,12 @@ export const validatePlannedDayPost = (req: Request, res: Response, next: NextFu
     next();
 };
 
-const plannedTaskPost = z.object({
-    plannedDayId: z.coerce.number(),
-    taskId: z.coerce.number(),
+const plannedTaskPostParams = z.object({
+    dayKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 export const validatePlannedTaskPost = (req: Request, res: Response, next: NextFunction) => {
     try {
-        plannedTaskPost.parse(req.body);
+        plannedTaskPostParams.parse(req.params);
     } catch (error) {
         return res.status(CREATE_PLANNED_TASK_FAILED.httpCode).json(CREATE_PLANNED_TASK_FAILED);
     }

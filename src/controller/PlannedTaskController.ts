@@ -1,6 +1,6 @@
 import { prisma } from '@database/prisma';
-import { PlannedDay, PlannedTask, Task, Prisma } from '@prisma/client';
-import { PlannedTask as PlannedTaskModel, Unit } from '@resources/schema';
+import { PlannedDay, PlannedTask, Prisma } from '@prisma/client';
+import { PlannedTask as PlannedTaskModel } from '@resources/schema';
 
 export type PlannedTaskFull = PlannedTask & { plannedDay: PlannedDay };
 export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
@@ -11,40 +11,39 @@ export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
 // ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-28
 
 export class PlannedTaskController {
-    public static async create(
-        plannedDay: PlannedDay,
-        task: Task,
-        quantity?: number,
-        unit?: Unit
-    ): Promise<PlannedTask | null> {
-        const data = {
-            plannedDay: {
-                connect: {
-                    id: plannedDay.id,
-                },
-            },
-            task: {
-                connect: {
-                    id: task.id,
-                },
-            },
-            unit: {},
-            status: 'INCOMPLETE',
-            completedQuantity: 0,
-            quantity: quantity ?? 1,
-        };
-
-        if (unit !== undefined) {
-            data.unit = {
-                connect: {
-                    id: unit.id,
-                },
-            };
-        }
+    public static async create(plannedTask: PlannedTaskModel): Promise<PlannedTask | null> {
+        const unit = plannedTask.unitId
+            ? {
+                  connect: {
+                      id: plannedTask.unitId,
+                  },
+              }
+            : {};
 
         return prisma.plannedTask.create({
-            data,
+            data: {
+                plannedDay: {
+                    connect: {
+                        id: plannedTask.plannedDayId,
+                    },
+                },
+                scheduledHabit: {
+                    connect: {
+                        id: plannedTask.scheduledHabitId,
+                    },
+                },
+                ...unit,
+                title: plannedTask.title,
+                description: plannedTask.description,
+                quantity: plannedTask.quantity ?? 1,
+                completedQuantity: plannedTask.completedQuantity ?? 0,
+                status: plannedTask.status ?? 'INCOMPLETE',
+                active: true,
+            },
+
             include: {
+                plannedDay: true,
+                scheduledHabit: true,
                 unit: true,
             },
         });

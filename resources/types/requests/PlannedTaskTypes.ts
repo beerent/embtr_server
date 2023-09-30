@@ -2,10 +2,12 @@ import { Challenge, PlannedTask as PlannedTaskModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface CreatePlannedTaskRequest {
-  taskId: number;
-  plannedDayId: number;
-  quantity?: number;
-  unitId?: number;
+  plannedTask: PlannedTaskModel;
+}
+
+export interface CreatePlannedTaskResponse extends Response {
+  plannedTask?: PlannedTaskModel;
+  completedChallenges?: Challenge[];
 }
 
 export interface UpdatePlannedTaskRequest {
