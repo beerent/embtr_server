@@ -8,6 +8,7 @@ export interface CreateScheduledHabitRequest {
   timesOfDayIds?: number[]
   quantity?: number;
   unitId?: number;
+  endDate?: Date;
 }
 
 export interface CreateScheduledHabitResponse extends Response {

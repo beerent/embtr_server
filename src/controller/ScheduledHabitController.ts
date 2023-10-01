@@ -8,7 +8,8 @@ export class ScheduledHabitController {
         quantity?: number,
         unitId?: number,
         daysOfWeekIds?: number[],
-        timesOfDayIds?: number[]
+        timesOfDayIds?: number[],
+        endDate?: Date
     ) {
         let unit = {};
         if (unitId) {
@@ -50,6 +51,7 @@ export class ScheduledHabitController {
                         };
                     }),
                 },
+                endDate: endDate,
             },
             include: {
                 task: true,

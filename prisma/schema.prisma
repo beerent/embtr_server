@@ -496,6 +496,7 @@ model ScheduledHabit {
   quantity     Float         @db.Double
   unitId       Int?          @db.Int
   unit         Unit?         @relation(fields: [unitId], references: [id])
+  endDate      DateTime?     @db.Date
   active       Boolean       @default(true)
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @default(now()) @updatedAt

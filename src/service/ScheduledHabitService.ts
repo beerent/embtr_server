@@ -26,7 +26,8 @@ export class ScheduledHabitService {
             requestBody.quantity,
             requestBody.unitId,
             requestBody.daysOfWeekIds,
-            requestBody.timesOfDayIds
+            requestBody.timesOfDayIds,
+            requestBody.endDate
         );
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);

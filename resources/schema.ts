@@ -362,6 +362,7 @@ export interface ScheduledHabit {
   quantity?: number;
   unitId?: number;
   unit?: Unit;
+  endDate?: Date;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
