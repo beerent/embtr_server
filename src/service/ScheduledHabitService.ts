@@ -27,6 +27,7 @@ export class ScheduledHabitService {
             requestBody.unitId,
             requestBody.daysOfWeekIds,
             requestBody.timesOfDayIds,
+            requestBody.startDate,
             requestBody.endDate
         );
 

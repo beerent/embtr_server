@@ -9,6 +9,7 @@ export class ScheduledHabitController {
         unitId?: number,
         daysOfWeekIds?: number[],
         timesOfDayIds?: number[],
+        startDate?: Date,
         endDate?: Date
     ) {
         let unit = {};
@@ -51,7 +52,8 @@ export class ScheduledHabitController {
                         };
                     }),
                 },
-                endDate: endDate,
+                startDate,
+                endDate,
             },
             include: {
                 task: true,
