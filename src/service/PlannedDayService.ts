@@ -9,7 +9,6 @@ import {
     GetPlannedDayResponse,
 } from '@resources/types/requests/PlannedDayTypes';
 import {
-    CreatePlannedTaskRequest,
     UpdatePlannedTaskRequest,
     UpdatePlannedTaskResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
@@ -19,20 +18,16 @@ import {
     CREATE_PLANNED_DAY_SUCCESS,
     CREATE_PLANNED_TASK_FAILED,
     CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY,
-    CREATE_PLANNED_TASK_UNKNOWN_TASK,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
-    RESOURCE_NOT_FOUND,
     SUCCESS,
     UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedTaskController } from '@src/controller/PlannedTaskController';
-import { TaskController } from '@src/controller/TaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
-import { UnitController } from '@src/controller/UnitController';
 import { ChallengeService } from './ChallengeService';
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 
@@ -54,11 +49,26 @@ export class PlannedDayService {
             request.dayKey
         );
 
+        const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
-        const scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeek(
+        let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeek(
             request.userId,
             dayOfWeek
         );
+        
+        // Filter out scheduled habits that are not activ
+        scheduledHabits = scheduledHabits.filter((scheduledHabit) => {
+            if (scheduledHabit.startDate && scheduledHabit.startDate > plannedDayDate) {
+                return false;
+            }
+
+            if (scheduledHabit.endDate && scheduledHabit.endDate < plannedDayDate) {
+                return false;
+            }
+
+            return true;
+        });
+
         const plannedTaskScheduledHabitIds = plannedDay?.plannedTasks.map(
             (plannedTask) => plannedTask.scheduledHabitId
         );
