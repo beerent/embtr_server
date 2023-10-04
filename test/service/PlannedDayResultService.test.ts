@@ -33,7 +33,7 @@ import { AuthenticationController } from '@src/controller/AuthenticationControll
 import { NotificationController } from '@src/controller/NotificationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import { PlannedHabitController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { CommentController } from '@src/controller/common/CommentController';
 import { Role } from '@src/roles/Roles';
@@ -121,7 +121,7 @@ describe('DayResultServices', () => {
         //tasks
         await TaskController.deleteByTitle(TEST_TASK_TITLE);
         const task = await TaskController.create(TEST_TASK_TITLE);
-        await PlannedTaskController.create(plannedDay, task!);
+        await PlannedHabitController.create(plannedDay, task!);
 
         const plannedDayResultCreates = [
             PlannedDayResultController.create(plannedDay.id),

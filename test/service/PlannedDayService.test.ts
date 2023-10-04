@@ -24,7 +24,7 @@ import {
     UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import { PlannedHabitController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
@@ -99,10 +99,10 @@ describe('planned day service', () => {
         TEST_EXISTING_PLANNED_DAY_ID = plannedDay.id;
 
         const taskGenerations = [
-            PlannedTaskController.create(plannedDay, task!),
-            PlannedTaskController.create(plannedDay, task2!),
-            PlannedTaskController.create(plannedDay, task3!),
-            PlannedTaskController.create(plannedDay, task4!),
+            PlannedHabitController.create(plannedDay, task!),
+            PlannedHabitController.create(plannedDay, task2!),
+            PlannedHabitController.create(plannedDay, task3!),
+            PlannedHabitController.create(plannedDay, task4!),
         ];
         const [_, createdTask2, createdTask3, inactiveTask] = await Promise.all(taskGenerations);
         TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID = createdTask2!.id;
@@ -110,11 +110,11 @@ describe('planned day service', () => {
         TEST_EXISTING_INACTIVE_PLANNED_TASK_ID = inactiveTask!.id;
 
         const taskUpdates = [
-            PlannedTaskController.update({
+            PlannedHabitController.update({
                 id: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID_2,
                 status: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_2_INITIAL_STATUS,
             }),
-            PlannedTaskController.update({
+            PlannedHabitController.update({
                 id: TEST_EXISTING_INACTIVE_PLANNED_TASK_ID,
             }),
         ];
@@ -461,7 +461,7 @@ describe('planned day service', () => {
                 .set('Authorization', `Bearer ${USER_ACCOUNT_WITH_USER_ROLE.token}`)
                 .send(body);
 
-            const plannedTask = await PlannedTaskController.getByPlannedDayIdAndTaskId(
+            const plannedTask = await PlannedHabitController.getByPlannedDayIdAndTaskId(
                 TEST_EXISTING_PLANNED_DAY_ID,
                 TEST_EXISTING_TASK_ID_3
             );

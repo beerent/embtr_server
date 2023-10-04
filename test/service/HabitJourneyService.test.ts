@@ -1,7 +1,7 @@
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import app from '@src/app';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import { PlannedHabitController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';

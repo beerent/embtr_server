@@ -25,11 +25,11 @@ import {
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { ChallengeService } from './ChallengeService';
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
+import { PlannedHabitController } from '@src/controller/PlannedHabitController';
 
 export class PlannedDayService {
     public static async getById(id: number): Promise<GetPlannedDayResponse> {
@@ -55,7 +55,7 @@ export class PlannedDayService {
             request.userId,
             dayOfWeek
         );
-        
+
         // Filter out scheduled habits that are not activ
         scheduledHabits = scheduledHabits.filter((scheduledHabit) => {
             if (scheduledHabit.startDate && scheduledHabit.startDate > plannedDayDate) {
@@ -141,7 +141,7 @@ export class PlannedDayService {
         }
         plannedTask.plannedDayId = plannedDay.id;
 
-        const createdPlannedTask = await PlannedTaskController.create(plannedTask);
+        const createdPlannedTask = await PlannedHabitController.create(plannedTask);
 
         if (createdPlannedTask) {
             const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
@@ -158,7 +158,7 @@ export class PlannedDayService {
             request.headers.authorization!
         )) as number;
 
-        const plannedTask = await PlannedTaskController.get(updateRequest.plannedTask!.id!);
+        const plannedTask = await PlannedHabitController.get(updateRequest.plannedTask!.id!);
         if (!plannedTask) {
             return UPDATE_PLANNED_TASK_FAILED;
         }
@@ -167,7 +167,7 @@ export class PlannedDayService {
             return UPDATE_PLANNED_TASK_FAILED;
         }
 
-        const updatedPlannedTask = await PlannedTaskController.update(updateRequest.plannedTask);
+        const updatedPlannedTask = await PlannedHabitController.update(updateRequest.plannedTask);
         if (updatedPlannedTask) {
             const updatedPlannedTaskModel: PlannedTaskModel =
                 ModelConverter.convert(updatedPlannedTask);

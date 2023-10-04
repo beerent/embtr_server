@@ -4,13 +4,13 @@ import { PlannedTask as PlannedTaskModel } from '@resources/schema';
 
 export type PlannedTaskFull = PlannedTask & { plannedDay: PlannedDay };
 export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
-    typeof PlannedTaskController.getHabitJourneys
+    typeof PlannedHabitController.getHabitJourneys
 >;
 
 // ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-02
 // ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-28
 
-export class PlannedTaskController {
+export class PlannedHabitController {
     public static async create(plannedTask: PlannedTaskModel): Promise<PlannedTask | null> {
         const unit = plannedTask.unitId
             ? {

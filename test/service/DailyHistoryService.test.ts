@@ -12,7 +12,7 @@ import {
 } from '@src/common/RequestResponses';
 import { AuthenticationController } from '@src/controller/AuthenticationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import { PlannedHabitController } from '@src/controller/PlannedTaskController';
 import { TaskController } from '@src/controller/TaskController';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
@@ -172,18 +172,18 @@ describe('DailyHistoryService', () => {
             const [plannedDay, plannedDay2] = await Promise.all(plannedDays);
 
             const taskGenerations = [
-                PlannedTaskController.create(plannedDay, task!),
-                PlannedTaskController.create(plannedDay, task!),
-                PlannedTaskController.create(plannedDay2, task!),
-                PlannedTaskController.create(plannedDay2, task!),
-                PlannedTaskController.create(plannedDay2, task!),
+                PlannedHabitController.create(plannedDay, task!),
+                PlannedHabitController.create(plannedDay, task!),
+                PlannedHabitController.create(plannedDay2, task!),
+                PlannedHabitController.create(plannedDay2, task!),
+                PlannedHabitController.create(plannedDay2, task!),
             ];
             const [createdTask1, createdTask2, createdTask3, createdTask4, createdTask5] =
                 await Promise.all(taskGenerations);
 
             const taskUpdates = [
-                PlannedTaskController.update({ id: createdTask1!.id, status: 'COMPLETE' }),
-                PlannedTaskController.update({ id: createdTask2!.id, status: 'COMPLETE' }),
+                PlannedHabitController.update({ id: createdTask1!.id, status: 'COMPLETE' }),
+                PlannedHabitController.update({ id: createdTask2!.id, status: 'COMPLETE' }),
             ];
             await Promise.all(taskUpdates);
         });

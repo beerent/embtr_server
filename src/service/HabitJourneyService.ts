@@ -1,14 +1,14 @@
 import { HabitJourney, HabitJourneyElement, HabitJourneys } from '@resources/types/habit/Habit';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import {
-    HabitJourneyQueryResults,
-    PlannedTaskController,
-} from '@src/controller/PlannedTaskController';
 import { UserController } from '@src/controller/UserController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { SeasonController } from '@src/controller/SeasonController';
 import { Season } from '@prisma/client';
+import {
+    HabitJourneyQueryResults,
+    PlannedHabitController,
+} from '@src/controller/PlannedHabitController';
 
 export class HabitJourneyService {
     public static async get(userId: number): Promise<GetHabitJourneyResponse> {
@@ -17,7 +17,7 @@ export class HabitJourneyService {
             return { ...GENERAL_FAILURE, message: 'User not found' };
         }
 
-        const habitJourneyElements = await PlannedTaskController.getHabitJourneys(userId);
+        const habitJourneyElements = await PlannedHabitController.getHabitJourneys(userId);
         const models: HabitJourney[] = this.createHabitJourneysFromResults(habitJourneyElements);
         const backFilledModels = await this.backFillHabitJourneys(models);
         for (const model of backFilledModels) {

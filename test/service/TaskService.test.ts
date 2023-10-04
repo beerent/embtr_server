@@ -16,7 +16,7 @@ import request from 'supertest';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import { Role } from '@src/roles/Roles';
 import { CreateTaskRequest, CreateTaskResponse } from '@resources/types/requests/TaskTypes';
-import { PlannedTaskController } from '@src/controller/PlannedTaskController';
+import { PlannedHabitController } from '@src/controller/PlannedTaskController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { Task } from '@prisma/client';
 
@@ -247,9 +247,9 @@ describe('TaskService tests', () => {
                 '1800-01-01'
             );
             const creates = [
-                PlannedTaskController.create(plannedDay, TASK1),
-                PlannedTaskController.create(plannedDay, TASK3),
-                PlannedTaskController.create(plannedDay, TASK2),
+                PlannedHabitController.create(plannedDay, TASK1),
+                PlannedHabitController.create(plannedDay, TASK3),
+                PlannedHabitController.create(plannedDay, TASK2),
             ];
             await Promise.all(creates);
         });

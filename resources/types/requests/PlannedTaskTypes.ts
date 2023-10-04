@@ -1,6 +1,10 @@
 import { Challenge, PlannedTask as PlannedTaskModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
+export interface GetPlannedHabitResponse extends Response {
+  plannedHabit?: PlannedTaskModel;
+}
+
 export interface CreatePlannedTaskRequest {
   plannedTask: PlannedTaskModel;
 }

@@ -12,7 +12,11 @@ import metadataRouter from './endpoints/MetadataRouter';
 import habitRouter from './endpoints/HabitRouter';
 import quoteOfTheDayRouter from './endpoints/QuoteOfTheDayRouter';
 import unitRouter from '@src/endpoints/UnitRouter';
+import dayOfWeekRouter from '@src/endpoints/DayOfWeekRouter';
+import timeOfDayRouter from '@src/endpoints/TimeOfDayRouter';
 import challengeRouter from '@src/endpoints/ChallengeRouter';
+import plannedHabitRouter from './endpoints/PlannedHabitRouter';
+
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
 
@@ -53,6 +57,7 @@ app.use('/task', taskRouter);
 app.use('/account', accountRouter);
 app.use('/planned-day', plannedDayRouter);
 app.use('/planned-day-result', plannedDayResultRouter);
+app.use('/planned-habit', plannedHabitRouter);
 app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
 app.use('/widget', widgetRouter);
@@ -60,6 +65,8 @@ app.use('/metadata', metadataRouter);
 app.use('/habit', habitRouter);
 app.use('/quote-of-the-day', quoteOfTheDayRouter);
 app.use('/unit', unitRouter);
+app.use('/time-of-day', timeOfDayRouter);
+app.use('/day-of-week', dayOfWeekRouter);
 app.use('/challenge', challengeRouter);
 app.use('/health', (req, res) => res.send('OK'));
 
