@@ -1,6 +1,9 @@
 import { authenticate } from '@src/middleware/authentication';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
-import { validateScheduledHabitPost } from '@src/middleware/scheduled_habit/ScheduledHabitValidation';
+import {
+    validateScheduledHabitGet,
+    validateScheduledHabitPost,
+} from '@src/middleware/scheduled_habit/ScheduledHabitValidation';
 import { HabitCategoryService } from '@src/service/HabitCategoryService';
 import { ScheduledHabitService } from '@src/service/ScheduledHabitService';
 import express from 'express';
@@ -19,6 +22,19 @@ habitRouter.post(
     validateScheduledHabitPost,
     async (req, res) => {
         const response = await ScheduledHabitService.create(req);
+        res.status(response.httpCode).json(response);
+    }
+);
+
+habitRouter.get(
+    '/schedule/:id',
+    authenticate,
+    authorize,
+    validateScheduledHabitGet,
+    async (req, res) => {
+        const id = Number(req.params.id);
+
+        const response = await ScheduledHabitService.get(id);
         res.status(response.httpCode).json(response);
     }
 );

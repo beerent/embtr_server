@@ -64,6 +64,20 @@ export class ScheduledHabitController {
         });
     }
 
+    public static async get(id: number) {
+        return await prisma.scheduledHabit.findUnique({
+            where: {
+                id: id,
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
     public static async getForUserAndDayOfWeek(userId: number, dayOfWeek: number) {
         return await prisma.scheduledHabit.findMany({
             where: {

@@ -2,6 +2,7 @@ import { ScheduledHabit } from '@resources/schema';
 import {
     CreateScheduledHabitRequest,
     CreateScheduledHabitResponse,
+    GetScheduledHabitResponse,
 } from '@resources/types/requests/ScheduledHabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
@@ -30,6 +31,16 @@ export class ScheduledHabitService {
             requestBody.startDate,
             requestBody.endDate
         );
+
+        const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
+        return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+    }
+
+    public static async get(id: number): Promise<GetScheduledHabitResponse> {
+        const scheduledHabit = await ScheduledHabitController.get(id);
+        if (!scheduledHabit) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
         return { ...SUCCESS, scheduledHabit: scheduledHabitModel };

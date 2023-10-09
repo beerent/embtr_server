@@ -25,7 +25,10 @@ export class TaskService {
         )) as number;
         const query: string = request.query.q as string;
 
-        const tasks: Task[] = await TaskController.getAllLikeTitle(userId, query);
+        const tasks: Task[] = await TaskController.getAllLikeTitle(
+            userId,
+            query
+        );
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };

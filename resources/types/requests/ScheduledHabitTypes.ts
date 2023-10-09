@@ -15,3 +15,7 @@ export interface CreateScheduledHabitRequest {
 export interface CreateScheduledHabitResponse extends Response {
   scheduledHabit?: ScheduledHabit;
 }
+
+export interface GetScheduledHabitResponse extends Response {
+  scheduledHabit?: ScheduledHabit;
+}
