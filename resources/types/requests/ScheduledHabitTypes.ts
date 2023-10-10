@@ -2,14 +2,7 @@ import { Response } from "./RequestTypes";
 import { ScheduledHabit } from "../../schema";
 
 export interface CreateScheduledHabitRequest {
-  taskId: number;
-  description?: string;
-  daysOfWeekIds?: number[];
-  timesOfDayIds?: number[]
-  quantity?: number;
-  unitId?: number;
-  startDate?: Date;
-  endDate?: Date;
+  scheduledHabit: ScheduledHabit;
 }
 
 export interface CreateScheduledHabitResponse extends Response {
@@ -18,4 +11,8 @@ export interface CreateScheduledHabitResponse extends Response {
 
 export interface GetScheduledHabitResponse extends Response {
   scheduledHabit?: ScheduledHabit;
+}
+
+export interface UpdateScheduledHabitRequest {
+  scheduledHabit: ScheduledHabit;
 }

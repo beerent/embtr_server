@@ -1,6 +1,5 @@
 import { ScheduledHabit } from '@resources/schema';
 import {
-    CreateScheduledHabitRequest,
     CreateScheduledHabitResponse,
     GetScheduledHabitResponse,
 } from '@resources/types/requests/ScheduledHabitTypes';
@@ -19,17 +18,60 @@ export class ScheduledHabitService {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const requestBody: CreateScheduledHabitRequest = request.body;
+        const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
         const scheduledHabit = await ScheduledHabitController.create(
             userId,
-            requestBody.taskId,
-            requestBody.description,
-            requestBody.quantity,
-            requestBody.unitId,
-            requestBody.daysOfWeekIds,
-            requestBody.timesOfDayIds,
-            requestBody.startDate,
-            requestBody.endDate
+            requestScheduledHabit.taskId!,
+            requestScheduledHabit.description,
+            requestScheduledHabit.quantity,
+            requestScheduledHabit.unitId,
+            requestScheduledHabit.daysOfWeek
+                ?.map((day) => day.id)
+                .filter((id) => id !== undefined) as number[],
+            requestScheduledHabit.timesOfDay
+                ?.map((time) => time.id)
+                .filter((id) => id !== undefined) as number[],
+            requestScheduledHabit.startDate,
+            requestScheduledHabit.endDate
+        );
+
+        const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
+        return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+    }
+
+    public static async update(request: Request): Promise<CreateScheduledHabitResponse> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+        if (!userId) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
+        if (!requestScheduledHabit.id) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        const existingScheduledHabit = await ScheduledHabitController.get(requestScheduledHabit.id);
+        if (!existingScheduledHabit) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        const scheduledHabit = await ScheduledHabitController.update(
+            requestScheduledHabit.id,
+            userId,
+            existingScheduledHabit.taskId,
+            requestScheduledHabit.description,
+            requestScheduledHabit.quantity,
+            requestScheduledHabit.unitId,
+            requestScheduledHabit.daysOfWeek
+                ?.map((day) => day.id)
+                .filter((id) => id !== undefined) as number[],
+            requestScheduledHabit.timesOfDay
+                ?.map((time) => time.id)
+                .filter((id) => id !== undefined) as number[],
+            requestScheduledHabit.startDate,
+            requestScheduledHabit.endDate
         );
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);

@@ -21,7 +21,13 @@ habitRouter.post(
     authorize,
     validateScheduledHabitPost,
     async (req, res) => {
-        const response = await ScheduledHabitService.create(req);
+        let response;
+        if (req.body.scheduledHabit.id) {
+            response = await ScheduledHabitService.update(req);
+        } else {
+            response = await ScheduledHabitService.create(req);
+        }
+
         res.status(response.httpCode).json(response);
     }
 );
