@@ -73,6 +73,8 @@ export interface PlannedTask {
   plannedDay?: PlannedDay;
   scheduledHabitId?: number;
   scheduledHabit?: ScheduledHabit;
+  timeOfDayId?: number;
+  timeOfDay?: TimeOfDay;
   title?: string;
   description?: string;
   iconUrl?: string;
@@ -348,6 +350,7 @@ export interface TimeOfDay {
   createdAt?: Date;
   updatedAt?: Date;
   scheduledHabits?: ScheduledHabit[];
+  plannedTasks?: PlannedTask[];
 }
 
 export interface ScheduledHabit {

@@ -14,8 +14,10 @@ export class PlannedHabitController {
     public static async create(plannedTask: PlannedTaskModel): Promise<PlannedTask | null> {
         const unit = plannedTask.unitId
             ? {
-                  connect: {
-                      id: plannedTask.unitId,
+                  unit: {
+                      connect: {
+                          id: plannedTask.unitId,
+                      },
                   },
               }
             : {};
@@ -32,13 +34,18 @@ export class PlannedHabitController {
                         id: plannedTask.scheduledHabitId,
                     },
                 },
+                timeOfDay: {
+                    connect: {
+                        id: plannedTask.timeOfDayId,
+                    },
+                },
                 ...unit,
                 title: plannedTask.title,
                 description: plannedTask.description,
                 quantity: plannedTask.quantity ?? 1,
                 completedQuantity: plannedTask.completedQuantity ?? 0,
                 status: plannedTask.status ?? 'INCOMPLETE',
-                active: true,
+                active: plannedTask.active ?? true,
             },
 
             include: {

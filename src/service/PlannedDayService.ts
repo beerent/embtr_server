@@ -2,6 +2,9 @@ import {
     PlannedTask as PlannedTaskModel,
     PlannedDay as PlannedDayModel,
     PlannedTask,
+    ScheduledHabit,
+    TimeOfDay,
+    PlannedDay,
 } from '@resources/schema';
 import {
     CreatePlannedDayResponse,
@@ -31,6 +34,11 @@ import { ChallengeService } from './ChallengeService';
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 import { PlannedHabitController } from '@src/controller/PlannedHabitController';
 
+interface ScheduledHabitTimeOfDay {
+    scheduledHabit?: ScheduledHabit;
+    timeOfDay?: TimeOfDay;
+}
+
 export class PlannedDayService {
     public static async getById(id: number): Promise<GetPlannedDayResponse> {
         const plannedDay = await PlannedDayController.get(id);
@@ -48,6 +56,7 @@ export class PlannedDayService {
             request.userId,
             request.dayKey
         );
+        const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
 
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
@@ -56,7 +65,7 @@ export class PlannedDayService {
             dayOfWeek
         );
 
-        // Filter out scheduled habits that are not activ
+        // Filter out scheduled habits that are outside of the date range
         scheduledHabits = scheduledHabits.filter((scheduledHabit) => {
             if (scheduledHabit.startDate && scheduledHabit.startDate > plannedDayDate) {
                 return false;
@@ -69,23 +78,64 @@ export class PlannedDayService {
             return true;
         });
 
-        const plannedTaskScheduledHabitIds = plannedDay?.plannedTasks.map(
-            (plannedTask) => plannedTask.scheduledHabitId
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+
+        // schedule id w/ time of day id for planned tasks
+        const plannedScheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] =
+            plannedDayModel.plannedTasks
+                ? plannedDayModel.plannedTasks?.map((plannedTask) => {
+                      return {
+                          scheduledHabit: plannedTask.scheduledHabit ?? undefined,
+                          timeOfDay: plannedTask.timeOfDay ?? undefined,
+                      };
+                  })
+                : [];
+
+        // scheduled habit id w/ time of day id for scheduled habits
+        const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = scheduledHabitModels.flatMap(
+            (scheduledHabit) => {
+                if (scheduledHabit.timesOfDay) {
+                    return scheduledHabit.timesOfDay.map((timeOfDay) => {
+                        const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
+                            scheduledHabit: scheduledHabit,
+                            timeOfDay: timeOfDay,
+                        };
+
+                        return scheduledHabitTimeOfDay;
+                    });
+                } else {
+                    // to do - create an all day task
+                    return [];
+                }
+            }
         );
-        const scheduledHabitsWithoutPlannedTasks = scheduledHabits.filter((scheduledHabit) => {
-            return !plannedTaskScheduledHabitIds?.includes(scheduledHabit.id);
-        });
+
+        // get all scheduled habits w/ time of day that do not exist in planned tasks
+        const scheduledHabitsWithoutPlannedTasks: ScheduledHabitTimeOfDay[] =
+            scheduledHabitTimeOfDays.filter((scheduledHabitTimeOfDay) => {
+                return !plannedScheduledHabitTimeOfDays.some((plannedScheduledHabitTimeOfDay) => {
+                    return (
+                        scheduledHabitTimeOfDay.scheduledHabit?.id ===
+                            plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
+                        scheduledHabitTimeOfDay.timeOfDay?.id ===
+                            plannedScheduledHabitTimeOfDay.timeOfDay?.id
+                    );
+                });
+            });
 
         const placeHolderPlannedTasks: PlannedTask[] = [];
-        for (const scheduledHabit of scheduledHabitsWithoutPlannedTasks) {
+        for (const timeOfDayScheduledHabit of scheduledHabitsWithoutPlannedTasks) {
             const placeHolderPlannedTask: PlannedTask = {
                 plannedDayId: plannedDay?.id,
-                scheduledHabitId: scheduledHabit.id,
-                title: scheduledHabit.task.title,
-                description: scheduledHabit.description ?? '',
-                iconUrl: scheduledHabit.task.iconUrl ?? '',
-                unitId: scheduledHabit.unitId ?? 0,
-                quantity: scheduledHabit.quantity ?? 1,
+                scheduledHabitId: timeOfDayScheduledHabit.scheduledHabit?.id,
+                title: timeOfDayScheduledHabit.scheduledHabit?.task?.title,
+                description: timeOfDayScheduledHabit.scheduledHabit?.description ?? '',
+                iconUrl: timeOfDayScheduledHabit.scheduledHabit?.task?.iconUrl ?? '',
+                unitId: timeOfDayScheduledHabit.scheduledHabit?.unitId ?? 0,
+                unit: timeOfDayScheduledHabit.scheduledHabit?.unit ?? undefined,
+                quantity: timeOfDayScheduledHabit.scheduledHabit?.quantity ?? 1,
+                timeOfDayId: timeOfDayScheduledHabit.timeOfDay?.id,
+                timeOfDay: timeOfDayScheduledHabit.timeOfDay,
                 completedQuantity: 0,
                 active: true,
             };
@@ -99,7 +149,8 @@ export class PlannedDayService {
 
         const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
         convertedPlannedDay.plannedTasks = [
-            ...(convertedPlannedDay.plannedTasks ?? []),
+            ...(convertedPlannedDay.plannedTasks?.filter((plannedTask) => plannedTask.active) ??
+                []),
             ...placeHolderPlannedTasks,
         ];
 
@@ -171,9 +222,8 @@ export class PlannedDayService {
         if (updatedPlannedTask) {
             const updatedPlannedTaskModel: PlannedTaskModel =
                 ModelConverter.convert(updatedPlannedTask);
-            const completedChallenges = await ChallengeService.updateChallengeRequirementProgress(
-                updatedPlannedTaskModel
-            );
+            const completedChallenges =
+                await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
 
             return { ...SUCCESS, plannedTask: updatedPlannedTaskModel, completedChallenges };
         }

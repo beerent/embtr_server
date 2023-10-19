@@ -1,6 +1,24 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 
+export const PlannedDayGetInclude = {
+    user: true,
+    plannedTasks: {
+        include: {
+            scheduledHabit: true,
+            plannedDay: true,
+            unit: true,
+            timeOfDay: true,
+        },
+    },
+    plannedDayResults: {
+        include: {
+            images: true,
+        },
+    },
+    hiddenPlannedDayResultRecommendations: true,
+} satisfies Prisma.PlannedDayInclude;
+
 export const PlannedDayInclude = {
     user: true,
     plannedTasks: {
@@ -94,7 +112,7 @@ export class PlannedDayController {
                 dayKey,
                 date,
             },
-            include: PlannedDayInclude,
+            include: PlannedDayGetInclude,
         });
 
         return plannedDayUpsert;
