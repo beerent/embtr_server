@@ -5,11 +5,11 @@ export interface GetPlannedHabitResponse extends Response {
   plannedHabit?: PlannedTaskModel;
 }
 
-export interface CreatePlannedTaskRequest {
+export interface CreateOrReplacePlannedTaskRequest {
   plannedTask: PlannedTaskModel;
 }
 
-export interface CreatePlannedTaskResponse extends Response {
+export interface CreateOrReplacePlannedTaskResponse extends Response {
   plannedTask?: PlannedTaskModel;
   completedChallenges?: Challenge[];
 }

@@ -76,14 +76,68 @@ export class ScheduledHabitController {
         startDate?: Date,
         endDate?: Date
     ) {
-        let unit = {};
+        let unitData = {};
         if (unitId) {
-            unit = {
+            unitData = {
                 unit: {
                     connect: {
                         id: unitId ?? 1,
                     },
                 },
+            };
+        }
+
+        let descriptionData = {};
+        if (description) {
+            descriptionData  = {
+                description
+            };
+        }
+
+        let quantityData = {};
+        if (quantity) {
+            quantityData = {
+                quantity
+            };
+        }
+
+        let daysOfWeekData = {};
+        if (daysOfWeekIds) {
+            daysOfWeekData = {
+                daysOfWeek: {
+                    set: daysOfWeekIds?.map((id) => {
+                        return {
+                            id,
+                        };
+                    }),
+                },
+            };
+        }
+
+        let timesOfDayData = {};
+        if (timesOfDayIds) {
+            timesOfDayData = {
+                timesOfDay: {
+                    set: timesOfDayIds?.map((id) => {
+                        return {
+                            id,
+                        };
+                    }),
+                },
+            };
+        }
+
+        let startDateData = {};
+        if (startDate) {
+            startDateData = {
+                startDate
+            };
+        }
+
+        let endDateData = {};
+        if (endDate) {
+            endDateData = {
+                endDate
             };
         }
 
@@ -102,23 +156,78 @@ export class ScheduledHabitController {
                         id: taskId,
                     },
                 },
-                ...unit,
+                ...unitData,
+                ...descriptionData,
+                ...quantityData,
+                ...daysOfWeekData,
+                ...timesOfDayData,
+                ...startDateData,
+                ...endDateData,
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
+    public static async replace(
+        id: number,
+        userId: number,
+        taskId: number,
+        description?: string,
+        quantity?: number,
+        unitId?: number,
+        daysOfWeekIds?: number[],
+        timesOfDayIds?: number[],
+        startDate?: Date,
+        endDate?: Date
+    ) {
+        return await prisma.scheduledHabit.update({
+            where: {
+                id: id,
+            },
+
+            data: {
+                user: {
+                    connect: {
+                        id: userId,
+                    },
+                },
+                task: {
+                    connect: {
+                        id: taskId,
+                    },
+                },
                 description: description,
                 quantity: quantity ?? 1,
-                daysOfWeek: {
-                    set: daysOfWeekIds?.map((id) => {
-                        return {
-                            id,
-                        };
-                    }),
-                },
-                timesOfDay: {
-                    set: timesOfDayIds?.map((id) => {
-                        return {
-                            id,
-                        };
-                    }),
-                },
+                daysOfWeek: daysOfWeekIds
+                    ? {
+                          set: daysOfWeekIds?.map((id) => {
+                              return {
+                                  id,
+                              };
+                          }),
+                      }
+                    : undefined,
+                timesOfDay: timesOfDayIds
+                    ? {
+                          set: timesOfDayIds?.map((id) => {
+                              return {
+                                  id,
+                              };
+                          }),
+                      }
+                    : undefined,
+                unit: unitId
+                    ? {
+                          connect: {
+                              id: unitId,
+                          },
+                      }
+                    : undefined,
                 startDate,
                 endDate,
             },

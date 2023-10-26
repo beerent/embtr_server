@@ -12,6 +12,8 @@ import {
     GetPlannedDayResponse,
 } from '@resources/types/requests/PlannedDayTypes';
 import {
+    CreateOrReplacePlannedTaskRequest,
+    CreateOrReplacePlannedTaskResponse,
     UpdatePlannedTaskRequest,
     UpdatePlannedTaskResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
@@ -32,7 +34,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { ChallengeService } from './ChallengeService';
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
-import { PlannedHabitController } from '@src/controller/PlannedHabitController';
+import { PlannedHabitController, PlannedTaskFull } from '@src/controller/PlannedHabitController';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -175,59 +177,5 @@ export class PlannedDayService {
         }
 
         return CREATE_PLANNED_DAY_FAILED;
-    }
-
-    public static async createPlannedTask(
-        dayKey: string,
-        request: Request
-    ): Promise<UpdatePlannedTaskResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-
-        const plannedTask = request.body.plannedTask;
-        const plannedDay = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
-        if (!plannedDay || plannedDay.userId !== userId) {
-            return CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY;
-        }
-        plannedTask.plannedDayId = plannedDay.id;
-
-        const createdPlannedTask = await PlannedHabitController.create(plannedTask);
-
-        if (createdPlannedTask) {
-            const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
-            return { ...SUCCESS, plannedTask: plannedTaskModel };
-        }
-
-        return CREATE_PLANNED_TASK_FAILED;
-    }
-
-    public static async update(request: Request): Promise<UpdatePlannedTaskResponse> {
-        const updateRequest: UpdatePlannedTaskRequest = request.body;
-
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-
-        const plannedTask = await PlannedHabitController.get(updateRequest.plannedTask!.id!);
-        if (!plannedTask) {
-            return UPDATE_PLANNED_TASK_FAILED;
-        }
-
-        if (plannedTask.plannedDay.userId !== userId) {
-            return UPDATE_PLANNED_TASK_FAILED;
-        }
-
-        const updatedPlannedTask = await PlannedHabitController.update(updateRequest.plannedTask);
-        if (updatedPlannedTask) {
-            const updatedPlannedTaskModel: PlannedTaskModel =
-                ModelConverter.convert(updatedPlannedTask);
-            const completedChallenges =
-                await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
-
-            return { ...SUCCESS, plannedTask: updatedPlannedTaskModel, completedChallenges };
-        }
-
-        return UPDATE_PLANNED_TASK_FAILED;
     }
 }

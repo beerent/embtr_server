@@ -10,6 +10,15 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class ScheduledHabitService {
+    public static async createOrReplace(request: Request): Promise<CreateScheduledHabitResponse> {
+        const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
+        if (requestScheduledHabit.id) {
+            return this.update(request);
+        }
+
+        return this.create(request);
+    }
+
     public static async create(request: Request): Promise<CreateScheduledHabitResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
@@ -76,6 +85,10 @@ export class ScheduledHabitService {
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
         return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+    }
+
+    public static async replace(request: Request): Promise<CreateScheduledHabitResponse> {
+        return this.update(request);
     }
 
     public static async get(id: number): Promise<GetScheduledHabitResponse> {

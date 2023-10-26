@@ -87,6 +87,48 @@ export class PlannedHabitController {
         return result;
     }
 
+    public static async replace(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
+        const result = await prisma.plannedTask.update({
+            where: {
+                id: plannedTask.id,
+            },
+            data: {
+                plannedDay: {
+                    connect: {
+                        id: plannedTask.plannedDayId,
+                    },
+                },
+                scheduledHabit: {
+                    connect: {
+                        id: plannedTask.scheduledHabitId,
+                    },
+                },
+                timeOfDay: plannedTask.timeOfDayId
+                    ? {
+                          connect: {
+                              id: plannedTask.timeOfDayId,
+                          },
+                      }
+                    : undefined,
+                unit: plannedTask.unitId ? { connect: { id: plannedTask.unitId } } : undefined,
+                title: plannedTask.title ?? '',
+                description: plannedTask.description ?? '',
+                quantity: plannedTask.quantity ?? 1,
+                completedQuantity: plannedTask.completedQuantity ?? 0,
+                status: plannedTask.status ?? 'INCOMPLETE',
+                active: plannedTask.active ?? true,
+            },
+
+            include: {
+                plannedDay: true,
+                scheduledHabit: true,
+                unit: true,
+            },
+        });
+
+        return result;
+    }
+
     public static async get(id: number): Promise<PlannedTaskFull | null> {
         return prisma.plannedTask.findUnique({
             where: {
@@ -94,6 +136,7 @@ export class PlannedHabitController {
             },
             include: {
                 plannedDay: true,
+                timeOfDay: true,
             },
         });
     }

@@ -10,6 +10,7 @@ import {
     validatePlannedTaskPost,
 } from '@src/middleware/planned_day/PlannedDayValidation';
 import { PlannedDayService } from '@src/service/PlannedDayService';
+import { PlannedHabitService } from '@src/service/PlannedHabitService';
 import express from 'express';
 
 const plannedDayRouter = express.Router();
@@ -61,7 +62,7 @@ plannedDayRouter.post(
     validatePlannedTaskPost,
     runEndpoint(async (req, res) => {
         const dayKey = req.params.dayKey;
-        const response = await PlannedDayService.createPlannedTask(dayKey, req);
+        const response = await PlannedHabitService.createOrReplace(dayKey, req);
 
         res.status(response.httpCode).json(response);
     })
@@ -73,7 +74,7 @@ plannedDayRouter.patch(
     authorize,
     validatePlannedTaskPatch,
     runEndpoint(async (req, res) => {
-        const response = await PlannedDayService.update(req);
+        const response = await PlannedHabitService.update(req);
         res.status(response.httpCode).json(response);
     })
 );
