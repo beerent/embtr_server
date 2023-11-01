@@ -20,11 +20,6 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ChallengeService } from './ChallengeService';
 import { Request } from 'express';
 
-enum UpdateOption {
-    UPDATE,
-    REPLACE,
-}
-
 export class PlannedHabitService {
     public static async getById(id: number): Promise<GetPlannedHabitResponse> {
         const plannedHabit = await PlannedHabitController.get(id);
@@ -36,13 +31,13 @@ export class PlannedHabitService {
         return { ...GET_PLANNED_DAY_SUCCESS, plannedHabit: convertedPlannedHabit };
     }
 
-    public static async createOrReplace(
+    public static async createOrUpdate(
         dayKey: string,
         request: Request
     ): Promise<CreateOrReplacePlannedTaskResponse> {
         const plannedTask = request.body.plannedTask;
         if (plannedTask.id) {
-            return this.replace(request);
+            return this.update(request);
         }
 
         return this.create(dayKey, request);
@@ -72,18 +67,7 @@ export class PlannedHabitService {
         return { ...SUCCESS, plannedTask: plannedTaskModel };
     }
 
-    public static async replace(request: Request): Promise<CreateOrReplacePlannedTaskResponse> {
-        return this.updateOrReplace(request, UpdateOption.REPLACE);
-    }
-
     public static async update(request: Request): Promise<UpdatePlannedTaskResponse> {
-        return this.updateOrReplace(request, UpdateOption.UPDATE);
-    }
-
-    private static async updateOrReplace(
-        request: Request,
-        updateOption: UpdateOption
-    ): Promise<UpdatePlannedTaskResponse> {
         const updateRequest: UpdatePlannedTaskRequest = request.body;
 
         const userId: number = (await AuthorizationController.getUserIdFromToken(
@@ -99,10 +83,7 @@ export class PlannedHabitService {
             return UPDATE_PLANNED_TASK_FAILED;
         }
 
-        const updatedPlannedTask =
-            updateOption == UpdateOption.UPDATE
-                ? await PlannedHabitController.update(updateRequest.plannedTask)
-                : await PlannedHabitController.replace(updateRequest.plannedTask);
+        const updatedPlannedTask = await PlannedHabitController.update(updateRequest.plannedTask);
         if (!updatedPlannedTask) {
             return UPDATE_PLANNED_TASK_FAILED;
         }

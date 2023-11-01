@@ -62,17 +62,15 @@ plannedDayRouter.post(
     validatePlannedTaskPost,
     runEndpoint(async (req, res) => {
         const dayKey = req.params.dayKey;
-        const response = await PlannedHabitService.createOrReplace(dayKey, req);
-
+        const response = await PlannedHabitService.createOrUpdate(dayKey, req);
         res.status(response.httpCode).json(response);
     })
 );
 
-plannedDayRouter.patch(
-    '/planned-task',
+plannedDayRouter.put(
+    '/planned-task/',
     authenticate,
     authorize,
-    validatePlannedTaskPatch,
     runEndpoint(async (req, res) => {
         const response = await PlannedHabitService.update(req);
         res.status(response.httpCode).json(response);

@@ -10,6 +10,13 @@ export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
 // ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-02
 // ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-28
 
+const includes = {
+    plannedDay: true,
+    scheduledHabit: true,
+    timeOfDay: true,
+    unit: true,
+};
+
 export class PlannedHabitController {
     public static async create(plannedTask: PlannedTaskModel): Promise<PlannedTask | null> {
         const unit = plannedTask.unitId
@@ -49,80 +56,65 @@ export class PlannedHabitController {
             },
 
             include: {
-                plannedDay: true,
-                scheduledHabit: true,
-                unit: true,
+                ...includes,
             },
         });
     }
 
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
-        const active = plannedTask.active !== undefined ? { active: plannedTask.active } : {};
-        const status = plannedTask.status !== undefined ? { status: plannedTask.status } : {};
-        const quantity =
-            plannedTask.quantity !== undefined ? { quantity: plannedTask.quantity } : {};
-        const completedQuantity =
-            plannedTask.completedQuantity !== undefined
-                ? { completedQuantity: plannedTask.completedQuantity }
-                : {};
-        const unit = plannedTask.unitId !== undefined ? { unitId: plannedTask.unitId } : {};
+        const {
+            active = true,
+            status = 'INCOMPLETE',
+            title = '',
+            description = '',
+            iconUrl = '',
+            quantity = 1,
+            completedQuantity = 0,
+            unitId,
+            timeOfDayId,
+        } = plannedTask;
+
+        const unit = {
+            unit: unitId
+                ? {
+                      connect: {
+                          id: unitId,
+                      },
+                  }
+                : {
+                      disconnect: true,
+                  },
+        };
+
+        const timeOfDay = {
+            timeOfDay: timeOfDayId
+                ? {
+                      connect: {
+                          id: timeOfDayId,
+                      },
+                  }
+                : {
+                      disconnect: true,
+                  },
+        };
 
         const result = await prisma.plannedTask.update({
             where: {
                 id: plannedTask.id,
             },
             data: {
-                ...active,
-                ...status,
-                ...quantity,
-                ...completedQuantity,
+                active,
+                status,
+                title,
+                description,
+                iconUrl,
+                quantity,
+                completedQuantity,
                 ...unit,
+                ...timeOfDay,
             },
             include: {
-                plannedDay: true,
-                unit: true,
-            },
-        });
-
-        return result;
-    }
-
-    public static async replace(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
-        const result = await prisma.plannedTask.update({
-            where: {
-                id: plannedTask.id,
-            },
-            data: {
-                plannedDay: {
-                    connect: {
-                        id: plannedTask.plannedDayId,
-                    },
-                },
-                scheduledHabit: {
-                    connect: {
-                        id: plannedTask.scheduledHabitId,
-                    },
-                },
-                timeOfDay: plannedTask.timeOfDayId
-                    ? {
-                          connect: {
-                              id: plannedTask.timeOfDayId,
-                          },
-                      }
-                    : undefined,
-                unit: plannedTask.unitId ? { connect: { id: plannedTask.unitId } } : undefined,
-                title: plannedTask.title ?? '',
-                description: plannedTask.description ?? '',
-                quantity: plannedTask.quantity ?? 1,
-                completedQuantity: plannedTask.completedQuantity ?? 0,
-                status: plannedTask.status ?? 'INCOMPLETE',
-                active: plannedTask.active ?? true,
-            },
-
-            include: {
-                plannedDay: true,
-                scheduledHabit: true,
-                unit: true,
+                ...includes,
             },
         });
 
@@ -135,8 +127,7 @@ export class PlannedHabitController {
                 id,
             },
             include: {
-                plannedDay: true,
-                timeOfDay: true,
+                ...includes,
             },
         });
     }
