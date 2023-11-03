@@ -9,6 +9,7 @@ export const PlannedDayGetInclude = {
             plannedDay: true,
             unit: true,
             timeOfDay: true,
+            originalTimeOfDay: true,
         },
     },
     plannedDayResults: {

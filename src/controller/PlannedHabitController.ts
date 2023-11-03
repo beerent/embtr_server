@@ -14,6 +14,7 @@ const includes = {
     plannedDay: true,
     scheduledHabit: true,
     timeOfDay: true,
+    originalTimeOfDay: true,
     unit: true,
 };
 
@@ -44,6 +45,11 @@ export class PlannedHabitController {
                 timeOfDay: {
                     connect: {
                         id: plannedTask.timeOfDayId,
+                    },
+                },
+                originalTimeOfDay: {
+                    connect: {
+                        id: plannedTask.originalTimeOfDayId,
                     },
                 },
                 ...unit,

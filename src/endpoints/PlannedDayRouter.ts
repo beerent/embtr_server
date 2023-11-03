@@ -6,7 +6,6 @@ import {
     validateGetById,
     validateGetByUser,
     validatePlannedDayPost,
-    validatePlannedTaskPatch,
     validatePlannedTaskPost,
 } from '@src/middleware/planned_day/PlannedDayValidation';
 import { PlannedDayService } from '@src/service/PlannedDayService';

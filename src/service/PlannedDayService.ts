@@ -12,29 +12,17 @@ import {
     GetPlannedDayResponse,
 } from '@resources/types/requests/PlannedDayTypes';
 import {
-    CreateOrReplacePlannedTaskRequest,
-    CreateOrReplacePlannedTaskResponse,
-    UpdatePlannedTaskRequest,
-    UpdatePlannedTaskResponse,
-} from '@resources/types/requests/PlannedTaskTypes';
-import {
     CREATE_PLANNED_DAY_FAILED,
     CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
     CREATE_PLANNED_DAY_SUCCESS,
-    CREATE_PLANNED_TASK_FAILED,
-    CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
-    SUCCESS,
-    UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
-import { ChallengeService } from './ChallengeService';
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
-import { PlannedHabitController, PlannedTaskFull } from '@src/controller/PlannedHabitController';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -82,17 +70,19 @@ export class PlannedDayService {
 
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
 
-        // schedule id w/ time of day id for planned tasks
+        // 1. find what tasks the user currently has
+        // a mapping of each scheduled habit to all of their time of days
         const plannedScheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] =
             plannedDayModel.plannedTasks
                 ? plannedDayModel.plannedTasks?.map((plannedTask) => {
                       return {
                           scheduledHabit: plannedTask.scheduledHabit ?? undefined,
-                          timeOfDay: plannedTask.timeOfDay ?? undefined,
+                          timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
                       };
                   })
                 : [];
 
+        // 2. find what tasks the user should have
         // scheduled habit id w/ time of day id for scheduled habits
         const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = scheduledHabitModels.flatMap(
             (scheduledHabit) => {
@@ -112,6 +102,7 @@ export class PlannedDayService {
             }
         );
 
+        // 3. find what tasks the user should have but does not (the diff)
         // get all scheduled habits w/ time of day that do not exist in planned tasks
         const scheduledHabitsWithoutPlannedTasks: ScheduledHabitTimeOfDay[] =
             scheduledHabitTimeOfDays.filter((scheduledHabitTimeOfDay) => {
@@ -125,6 +116,7 @@ export class PlannedDayService {
                 });
             });
 
+        // 4. create placeholder planned tasks from the diff
         const placeHolderPlannedTasks: PlannedTask[] = [];
         for (const timeOfDayScheduledHabit of scheduledHabitsWithoutPlannedTasks) {
             const placeHolderPlannedTask: PlannedTask = {
@@ -138,6 +130,8 @@ export class PlannedDayService {
                 quantity: timeOfDayScheduledHabit.scheduledHabit?.quantity ?? 1,
                 timeOfDayId: timeOfDayScheduledHabit.timeOfDay?.id,
                 timeOfDay: timeOfDayScheduledHabit.timeOfDay,
+                originalTimeOfDayId:timeOfDayScheduledHabit.timeOfDay?.id,
+                originalTimeOfDay: timeOfDayScheduledHabit.timeOfDay,
                 completedQuantity: 0,
                 active: true,
             };
