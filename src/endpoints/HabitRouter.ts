@@ -22,7 +22,18 @@ habitRouter.post(
     authorize,
     validateScheduledHabitPost,
     runEndpoint(async (req, res) => {
-        const response = await ScheduledHabitService.createOrReplace(req);
+        const response = await ScheduledHabitService.createOrUpdate(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+habitRouter.post(
+    '/schedule/:id/archive',
+    authenticate,
+    authorize,
+    validateScheduledHabitGet,
+    runEndpoint(async (req, res) => {
+        const response = await ScheduledHabitService.archive(req);
         res.status(response.httpCode).json(response);
     })
 );

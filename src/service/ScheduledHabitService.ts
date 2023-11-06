@@ -1,4 +1,5 @@
 import { ScheduledHabit } from '@resources/schema';
+import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CreateScheduledHabitResponse,
     GetScheduledHabitResponse,
@@ -10,7 +11,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class ScheduledHabitService {
-    public static async createOrReplace(request: Request): Promise<CreateScheduledHabitResponse> {
+    public static async createOrUpdate(request: Request): Promise<CreateScheduledHabitResponse> {
         const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
         if (requestScheduledHabit.id) {
             return this.update(request);
@@ -99,5 +100,21 @@ export class ScheduledHabitService {
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
         return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+    }
+
+    public static async archive(request: Request): Promise<Response> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+        if (!userId) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        const id: number = Number(request.params.id);
+
+        const now = new Date();
+        await ScheduledHabitController.archive(userId, id, now);
+
+        return { ...SUCCESS };
     }
 }

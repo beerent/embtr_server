@@ -89,15 +89,15 @@ export class ScheduledHabitController {
 
         let descriptionData = {};
         if (description) {
-            descriptionData  = {
-                description
+            descriptionData = {
+                description,
             };
         }
 
         let quantityData = {};
         if (quantity) {
             quantityData = {
-                quantity
+                quantity,
             };
         }
 
@@ -130,14 +130,14 @@ export class ScheduledHabitController {
         let startDateData = {};
         if (startDate) {
             startDateData = {
-                startDate
+                startDate,
             };
         }
 
         let endDateData = {};
         if (endDate) {
             endDateData = {
-                endDate
+                endDate,
             };
         }
 
@@ -169,6 +169,18 @@ export class ScheduledHabitController {
                 unit: true,
                 daysOfWeek: true,
                 timesOfDay: true,
+            },
+        });
+    }
+
+    public static async archive(userId: number, id: number, date: Date) {
+        return await prisma.scheduledHabit.updateMany({
+            where: {
+                id: id,
+                userId: userId,
+            },
+            data: {
+                endDate: date,
             },
         });
     }
