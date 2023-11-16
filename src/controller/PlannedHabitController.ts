@@ -59,6 +59,7 @@ export class PlannedHabitController {
                 completedQuantity: plannedTask.completedQuantity ?? 0,
                 status: plannedTask.status ?? 'INCOMPLETE',
                 active: plannedTask.active ?? true,
+                iconUrl: plannedTask.iconUrl,
             },
 
             include: {
