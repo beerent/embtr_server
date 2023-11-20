@@ -86,7 +86,7 @@ export class PlannedDayService {
         // scheduled habit id w/ time of day id for scheduled habits
         const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = scheduledHabitModels.flatMap(
             (scheduledHabit) => {
-                if (scheduledHabit.timesOfDay) {
+                if (scheduledHabit.timesOfDay && scheduledHabit.timesOfDay.length > 0) {
                     return scheduledHabit.timesOfDay.map((timeOfDay) => {
                         const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
                             scheduledHabit: scheduledHabit,
@@ -96,8 +96,12 @@ export class PlannedDayService {
                         return scheduledHabitTimeOfDay;
                     });
                 } else {
-                    // to do - create an all day task
-                    return [];
+                    const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
+                        scheduledHabit: scheduledHabit,
+                        timeOfDay: undefined,
+                    };
+
+                    return [scheduledHabitTimeOfDay];
                 }
             }
         );

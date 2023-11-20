@@ -30,6 +30,18 @@ export class PlannedHabitController {
               }
             : {};
 
+        const timeOfDay = plannedTask.timeOfDayId
+            ? {
+                  timeOfDay: {
+                      connect: {
+                          id: plannedTask.timeOfDayId,
+                      },
+                  },
+              }
+            : {};
+
+        const originalTimeOfDay = timeOfDay;
+
         return prisma.plannedTask.create({
             data: {
                 plannedDay: {
@@ -42,16 +54,8 @@ export class PlannedHabitController {
                         id: plannedTask.scheduledHabitId,
                     },
                 },
-                timeOfDay: {
-                    connect: {
-                        id: plannedTask.timeOfDayId,
-                    },
-                },
-                originalTimeOfDay: {
-                    connect: {
-                        id: plannedTask.originalTimeOfDayId,
-                    },
-                },
+                ...timeOfDay,
+                ...originalTimeOfDay,
                 ...unit,
                 title: plannedTask.title,
                 description: plannedTask.description,
