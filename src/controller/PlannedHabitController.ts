@@ -40,7 +40,15 @@ export class PlannedHabitController {
               }
             : {};
 
-        const originalTimeOfDay = timeOfDay;
+        const originalTimeOfDay = plannedTask.originalTimeOfDayId
+            ? {
+                  originalTimeOfDay: {
+                      connect: {
+                          id: plannedTask.originalTimeOfDayId,
+                      },
+                  },
+              }
+            : {};
 
         return prisma.plannedTask.create({
             data: {
