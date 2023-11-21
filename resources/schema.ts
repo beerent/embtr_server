@@ -333,6 +333,7 @@ export interface HabitCategory {
   description?: string;
   imageUrl?: string;
   active?: boolean;
+  order?: number;
   createdAt?: Date;
   updatedAt?: Date;
   tasks?: Task[];

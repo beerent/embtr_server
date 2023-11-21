@@ -463,6 +463,7 @@ model HabitCategory {
   description String?  @db.VarChar(255)
   imageUrl    String?  @db.VarChar(255)
   active      Boolean  @default(true)
+  order       Int      @db.Int @default(99)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
   tasks       Task[]
