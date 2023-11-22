@@ -48,8 +48,7 @@ taskRouter.post(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const body: CreateTaskRequest = req.body;
-        const response = await TaskService.create(body);
+        const response = await TaskService.create(req);
         res.status(response.httpCode).json(response);
     })
 );

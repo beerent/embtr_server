@@ -37,7 +37,7 @@ export class TaskController {
     }
 
     public static async getByTitle(title: string): Promise<Task | null> {
-        const task = await prisma.task.findUnique({
+        const task = await prisma.task.findFirst({
             where: {
                 title: title,
             },
@@ -73,16 +73,21 @@ export class TaskController {
         return [];
     }
 
-    public static async create(
-        title: string,
-        description?: string,
-        userId?: number
-    ): Promise<Task | null> {
+    public static async create(userId: number, title: string, description?: string) {
         const result = await prisma.task.create({
             data: {
+                habitCategory: {
+                    connect: {
+                        id: 13,
+                    },
+                },
+                user: {
+                    connect: {
+                        id: userId,
+                    },
+                },
                 title,
                 description,
-                userId,
             },
         });
 
@@ -91,7 +96,7 @@ export class TaskController {
 
     public static async deleteByTitle(title: string): Promise<void> {
         try {
-            await prisma.task.delete({
+            await prisma.task.deleteMany({
                 where: {
                     title,
                 },

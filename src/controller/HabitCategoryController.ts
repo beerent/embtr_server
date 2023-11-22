@@ -9,6 +9,9 @@ export class HabitCategoryController {
             include: {
                 tasks: true,
             },
+            orderBy: {
+                order: 'asc',
+            },
         });
     }
 }

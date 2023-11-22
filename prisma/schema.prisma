@@ -54,7 +54,7 @@ model PushNotificationToken {
 
 model Task {
   id                   Int                    @id @default(autoincrement())
-  title                String                 @unique @db.VarChar(255)
+  title                String                 @db.VarChar(255)
   description          String?                @db.VarChar(255)
   iconUrl              String?                @db.VarChar(255)
   userId               Int?                   @db.Int
@@ -67,8 +67,8 @@ model Task {
   ChallengeRequirement ChallengeRequirement[]
   scheduledHabits      ScheduledHabit[]
 
-  @@index([userId])
-  @@index([habitCategoryId])
+  @@index([userId], name: "user_id")
+  @@index([habitCategoryId], name: "habit_category_id")
   @@map("task")
 }
 

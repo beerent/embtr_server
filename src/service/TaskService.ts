@@ -8,6 +8,7 @@ import {
 } from '@resources/types/requests/TaskTypes';
 import {
     CREATE_TASK_FAILED_ALREADY_EXISTS,
+    GENERAL_FAILURE,
     GET_TASK_FAILED_NOT_FOUND,
     GET_TASK_SUCCESS,
     SUCCESS,
@@ -48,13 +49,17 @@ export class TaskService {
         return GET_TASK_FAILED_NOT_FOUND;
     }
 
-    public static async create(body: CreateTaskRequest): Promise<CreateTaskResponse> {
-        const preExistingTask = await TaskController.getByTitle(body.title);
-        if (preExistingTask) {
-            return CREATE_TASK_FAILED_ALREADY_EXISTS;
+    public static async create(request: Request): Promise<CreateTaskResponse> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+        if (!userId) {
+            return GENERAL_FAILURE;
         }
 
-        const task = await TaskController.create(body.title, body.description);
+        const body: CreateTaskRequest = request.body;
+
+        const task = await TaskController.create(userId, body.title, body.description);
         if (task) {
             const taskModel: TaskModel = ModelConverter.convert(task);
             return { ...SUCCESS, task: taskModel };
