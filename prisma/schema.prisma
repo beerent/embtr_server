@@ -56,7 +56,8 @@ model Task {
   id                   Int                    @id @default(autoincrement())
   title                String                 @db.VarChar(255)
   description          String?                @db.VarChar(255)
-  iconUrl              String?                @db.VarChar(255)
+  remoteImageUrl       String?                @db.VarChar(255)
+  localImage           String?                @db.VarChar(255)
   userId               Int?                   @db.Int
   user                 User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   habitCategoryId      Int?                   @db.Int
@@ -101,7 +102,8 @@ model PlannedTask {
   originalTimeOfDay   TimeOfDay?      @relation("original_planned_tasks", fields: [originalTimeOfDayId], references: [id])
   title               String?         @db.VarChar(255)
   description         String?         @db.VarChar(255)
-  iconUrl             String?         @db.VarChar(255)
+  remoteImageUrl      String?         @db.VarChar(255)
+  localImage          String?         @db.VarChar(255)
   unitId              Int?            @db.Int
   unit                Unit?           @relation(fields: [unitId], references: [id])
   quantity            Float?          @db.Double
@@ -374,14 +376,15 @@ model ChallengeRequirement {
 }
 
 model ChallengeReward {
-  id          Int         @id @default(autoincrement())
-  name        String      @db.VarChar(255)
-  description String?     @db.VarChar(255)
-  imageUrl    String?     @db.VarChar(255)
-  active      Boolean     @default(true)
-  challenge   Challenge[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @default(now()) @updatedAt
+  id             Int         @id @default(autoincrement())
+  name           String      @db.VarChar(255)
+  description    String?     @db.VarChar(255)
+  remoteImageUrl String?     @db.VarChar(255)
+  localImage     String?     @db.VarChar(255)
+  active         Boolean     @default(true)
+  challenge      Challenge[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @default(now()) @updatedAt
 
   @@map("challenge_reward")
 }
@@ -416,7 +419,8 @@ enum ChallengeRequirementCompletionState {
 model Achievement {
   id               Int               @id @default(autoincrement())
   name             String            @db.VarChar(255)
-  imageUrl         String?           @db.VarChar(255)
+  remoteImageUrl   String?           @db.VarChar(255)
+  localImage       String?           @db.VarChar(255)
   active           Boolean           @default(true)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now()) @updatedAt
@@ -458,15 +462,16 @@ model Unit {
 }
 
 model HabitCategory {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  description String?  @db.VarChar(255)
-  imageUrl    String?  @db.VarChar(255)
-  active      Boolean  @default(true)
-  order       Int      @db.Int @default(99)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-  tasks       Task[]
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(255)
+  description    String?  @db.VarChar(255)
+  remoteImageUrl String?  @db.VarChar(255)
+  localImage     String?  @db.VarChar(255)
+  active         Boolean  @default(true)
+  order          Int      @default(99) @db.Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now()) @updatedAt
+  tasks          Task[]
 
   @@map("habit_category")
 }

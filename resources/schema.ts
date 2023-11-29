@@ -41,7 +41,8 @@ export interface Task {
   id?: number;
   title?: string;
   description?: string;
-  iconUrl?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   userId?: number;
   user?: User;
   habitCategoryId?: number;
@@ -79,7 +80,8 @@ export interface PlannedTask {
   originalTimeOfDay?: TimeOfDay;
   title?: string;
   description?: string;
-  iconUrl?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   unitId?: number;
   unit?: Unit;
   quantity?: number;
@@ -270,7 +272,8 @@ export interface ChallengeReward {
   id?: number;
   name?: string;
   description?: string;
-  imageUrl?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   active?: boolean;
   challenge?: Challenge[];
   createdAt?: Date;
@@ -295,7 +298,8 @@ export interface ChallengeParticipant {
 export interface Achievement {
   id?: number;
   name?: string;
-  imageUrl?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -331,7 +335,8 @@ export interface HabitCategory {
   id?: number;
   name?: string;
   description?: string;
-  imageUrl?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   active?: boolean;
   order?: number;
   createdAt?: Date;
