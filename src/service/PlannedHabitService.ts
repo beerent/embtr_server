@@ -19,6 +19,7 @@ import { PlannedHabitController } from '@src/controller/PlannedHabitController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ChallengeService } from './ChallengeService';
 import { Request } from 'express';
+import { Constants } from '@resources/types/constants/constants';
 
 export class PlannedHabitService {
     public static async getById(id: number): Promise<GetPlannedHabitResponse> {
@@ -99,12 +100,14 @@ export class PlannedHabitService {
 
     private static getUpdatedStatus(plannedTask: PlannedTask): string {
         if (
-            (plannedTask.status ?? 'INCOMPLETE') === 'INCOMPLETE' &&
+            (plannedTask.status ?? Constants.HabitStatus.INCOMPLETE) === 
+            Constants.HabitStatus.INCOMPLETE
+            &&
             (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
         ) {
-            return 'COMPLETE';
+            return Constants.HabitStatus.COMPLETE;
         }
 
-        return plannedTask.status ?? 'INCOMPLETE';
+        return plannedTask.status ?? Constants.HabitStatus.INCOMPLETE;
     }
 }

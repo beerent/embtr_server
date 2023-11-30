@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { PlannedDay, PlannedTask, Prisma } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 
 export type PlannedTaskFull = PlannedTask & { plannedDay: PlannedDay };
 export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
@@ -69,7 +70,7 @@ export class PlannedHabitController {
                 description: plannedTask.description,
                 quantity: plannedTask.quantity ?? 1,
                 completedQuantity: plannedTask.completedQuantity ?? 0,
-                status: plannedTask.status ?? 'INCOMPLETE',
+                status: plannedTask.status ?? Constants.HabitStatus.INCOMPLETE,
                 active: plannedTask.active ?? true,
                 remoteImageUrl: plannedTask.remoteImageUrl,
                 localImage: plannedTask.localImage,
@@ -84,7 +85,7 @@ export class PlannedHabitController {
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
         const {
             active = true,
-            status = 'INCOMPLETE',
+            status = Constants.HabitStatus.INCOMPLETE,
             title = '',
             description = '',
             remoteImageUrl = '',

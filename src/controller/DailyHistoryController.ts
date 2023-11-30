@@ -1,4 +1,5 @@
 import { prisma } from '@database/prisma';
+import { Constants } from '@resources/types/constants/constants';
 import { DailyHistory, DayResult } from '@resources/types/widget/DailyHistory';
 
 export class DailyHistoryController {
@@ -37,7 +38,7 @@ export class DailyHistoryController {
 
         for (let d = new Date(startDateUtc); d <= endDateUtc; d.setDate(d.getDate() + 1)) {
             const day = plannedDays.find(
-                (plannedDay) => plannedDay.date.toDateString() === d.toDateString(),
+                (plannedDay) => plannedDay.date.toDateString() === d.toDateString()
             );
 
             if (!day) {
@@ -50,7 +51,13 @@ export class DailyHistoryController {
                 const complete =
                     day.plannedTasks.length > 0 &&
                     day.plannedTasks.every((task) => {
-                        return task.status !== 'FAILED' && task.quantity && task.completedQuantity && task.quantity > 0 && task.completedQuantity >= task.quantity;
+                        return (
+                            task.status !== Constants.HabitStatus.FAILED &&
+                            task.quantity &&
+                            task.completedQuantity &&
+                            task.quantity > 0 &&
+                            task.completedQuantity >= task.quantity
+                        );
                     });
                 history.push({
                     date: day.date,

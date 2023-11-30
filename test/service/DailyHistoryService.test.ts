@@ -1,3 +1,4 @@
+import { Constants } from '@resources/types/constants/constants';
 import {
     GetDailyHistoryRequest,
     GetDailyHistoryResponse,
@@ -182,8 +183,8 @@ describe('DailyHistoryService', () => {
                 await Promise.all(taskGenerations);
 
             const taskUpdates = [
-                PlannedHabitController.update({ id: createdTask1!.id, status: 'COMPLETE' }),
-                PlannedHabitController.update({ id: createdTask2!.id, status: 'COMPLETE' }),
+                PlannedHabitController.update({ id: createdTask1!.id, status: Constants.HabitStatus.COMPLETE }),
+                PlannedHabitController.update({ id: createdTask2!.id, status: Constants.HabitStatus.COMPLETE }),
             ];
             await Promise.all(taskUpdates);
         });
