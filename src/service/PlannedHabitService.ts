@@ -83,6 +83,14 @@ export class PlannedHabitService {
             return UPDATE_PLANNED_TASK_FAILED;
         }
 
+        if (
+            (updateRequest.plannedTask.status ?? 'INCOMPLETE') === 'INCOMPLETE' &&
+            (updateRequest.plannedTask.completedQuantity ?? 0) >=
+                (updateRequest.plannedTask.quantity ?? 1)
+        ) {
+            updateRequest.plannedTask.status = 'COMPLETE';
+        }
+
         const updatedPlannedTask = await PlannedHabitController.update(updateRequest.plannedTask);
         if (!updatedPlannedTask) {
             return UPDATE_PLANNED_TASK_FAILED;
