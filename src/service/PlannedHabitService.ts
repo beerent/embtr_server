@@ -83,13 +83,7 @@ export class PlannedHabitService {
             return UPDATE_PLANNED_TASK_FAILED;
         }
 
-        if (
-            (updateRequest.plannedTask.status ?? 'INCOMPLETE') === 'INCOMPLETE' &&
-            (updateRequest.plannedTask.completedQuantity ?? 0) >=
-                (updateRequest.plannedTask.quantity ?? 1)
-        ) {
-            updateRequest.plannedTask.status = 'COMPLETE';
-        }
+        updateRequest.plannedTask.status = this.getUpdatedStatus(updateRequest.plannedTask);
 
         const updatedPlannedTask = await PlannedHabitController.update(updateRequest.plannedTask);
         if (!updatedPlannedTask) {
@@ -101,5 +95,16 @@ export class PlannedHabitService {
             await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
 
         return { ...SUCCESS, plannedTask: updatedPlannedTaskModel, completedChallenges };
+    }
+
+    private static getUpdatedStatus(plannedTask: PlannedTask): string {
+        if (
+            (plannedTask.status ?? 'INCOMPLETE') === 'INCOMPLETE' &&
+            (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
+        ) {
+            return 'COMPLETE';
+        }
+
+        return plannedTask.status ?? 'INCOMPLETE';
     }
 }
