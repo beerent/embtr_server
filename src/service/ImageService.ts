@@ -1,5 +1,6 @@
 import vision from '@google-cloud/vision';
 import { Image } from '@resources/schema';
+import { EnvironmentOption } from '@src/utility/environment/EnvironmentUtility';
 
 export interface FilteredImageResults {
     clean: Image[];
@@ -27,7 +28,10 @@ export class ImageDetectionService {
     }
 
     private static async isAdult(filename: string) {
-        const client = new vision.ImageAnnotatorClient();
+        const keyFilename = EnvironmentOption.get(EnvironmentOption.SERVICE_CREDENTIALS_FILE_PATH);
+        const client = new vision.ImageAnnotatorClient({
+            keyFilename,
+        });
 
         const [result] = await client.safeSearchDetection(filename);
         const detections = result.safeSearchAnnotation;

@@ -1,7 +1,7 @@
 import { TokenCache } from '@src/general/auth/TokenCache';
-require('dotenv').config();
+import { EnvironmentOption } from '@src/utility/environment/EnvironmentUtility';
 
-const apiKey = process.env.FIREBASE_WEB_API_KEY;
+const apiKey = EnvironmentOption.get(EnvironmentOption.FIREBASE_WEB_API_KEY);
 const GENERATE_TOKEN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`;
 
 export class AuthenticationController {
