@@ -43,6 +43,22 @@ plannedDayRouter.get(
     })
 );
 
+plannedDayRouter.get(
+    '/:userId/:dayKey/isComplete',
+    authenticate,
+    authorize,
+    validateGetByUser,
+    runEndpoint(async (req, res) => {
+        const request: GetPlannedDayRequest = {
+            userId: Number(req.params.userId),
+            dayKey: req.params.dayKey,
+        };
+
+        const response = await PlannedDayService.getIsComplete(request);
+        res.status(response.httpCode).json(response);
+    })
+);
+
 plannedDayRouter.post(
     '/',
     authenticate,

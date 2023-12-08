@@ -17,12 +17,14 @@ import {
     CREATE_PLANNED_DAY_SUCCESS,
     GET_PLANNED_DAY_FAILED_NOT_FOUND,
     GET_PLANNED_DAY_SUCCESS,
+    SUCCESS,
 } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
+import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -41,6 +43,39 @@ export class PlannedDayService {
         return GET_PLANNED_DAY_FAILED_NOT_FOUND;
     }
 
+    public static async getIsComplete(request: GetPlannedDayRequest): Promise<GetBooleanResponse> {
+        const plannedDay = await PlannedDayController.getOrCreateByUserAndDayKey(
+            request.userId,
+            request.dayKey
+        );
+
+        if (!plannedDay?.plannedTasks) {
+            return { ...SUCCESS, result: false };
+        }
+
+        if (plannedDay.plannedTasks.length === 0) {
+            return { ...SUCCESS, result: false };
+        }
+
+        const plannedDayDate = plannedDay?.date ?? new Date();
+        const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
+        let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeekAndDate(
+            request.userId,
+            dayOfWeek,
+            plannedDayDate
+        );
+
+        const targetCount = scheduledHabits.reduce((acc, scheduledHabit) => {
+            return acc + (scheduledHabit.timesOfDay.length ?? 1);
+        }, 0);
+
+        const completedTasks = plannedDay.plannedTasks.filter(
+            (plannedTask) => (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
+        );
+
+        return { ...SUCCESS, result: completedTasks.length >= targetCount };
+    }
+
     public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
         const plannedDay = await PlannedDayController.getOrCreateByUserAndDayKey(
             request.userId,
@@ -50,23 +85,11 @@ export class PlannedDayService {
 
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
-        let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeek(
+        let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeekAndDate(
             request.userId,
-            dayOfWeek
+            dayOfWeek,
+            plannedDayDate
         );
-
-        // Filter out scheduled habits that are outside of the date range
-        scheduledHabits = scheduledHabits.filter((scheduledHabit) => {
-            if (scheduledHabit.startDate && scheduledHabit.startDate > plannedDayDate) {
-                return false;
-            }
-
-            if (scheduledHabit.endDate && scheduledHabit.endDate < plannedDayDate) {
-                return false;
-            }
-
-            return true;
-        });
 
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
 

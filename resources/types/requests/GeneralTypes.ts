@@ -12,3 +12,7 @@ export interface CreateCommentResponse extends Response {
 export interface DeleteCommentRequest {
   commentId: number;
 }
+
+export interface GetBooleanResponse extends Response {
+  result: boolean;
+}

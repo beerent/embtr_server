@@ -266,7 +266,11 @@ export class ScheduledHabitController {
         });
     }
 
-    public static async getForUserAndDayOfWeek(userId: number, dayOfWeek: number) {
+    public static async getForUserAndDayOfWeekAndDate(
+        userId: number,
+        dayOfWeek: number,
+        date: Date
+    ) {
         return await prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
@@ -275,6 +279,32 @@ export class ScheduledHabitController {
                         id: dayOfWeek,
                     },
                 },
+                AND: [
+                    {
+                        OR: [
+                            {
+                                startDate: null,
+                            },
+                            {
+                                startDate: {
+                                    lte: date,
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        OR: [
+                            {
+                                endDate: null,
+                            },
+                            {
+                                endDate: {
+                                    gte: date,
+                                },
+                            },
+                        ],
+                    },
+                ],
             },
             include: {
                 task: true,
