@@ -171,7 +171,7 @@ model PlannedDayResult {
   likes        Like[]
   comments     Comment[]
 
-  @@unique([plannedDayId], name: "planned_day_id")
+  @@index([plannedDayId])
   @@map("planned_day_result")
 }
 

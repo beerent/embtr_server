@@ -31,7 +31,6 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
 import {
     CompletedHabit,
-    CompletedHabitElement,
     PlannedDayResultSummary,
 } from '@resources/types/planned_day_result/PlannedDayResult';
 

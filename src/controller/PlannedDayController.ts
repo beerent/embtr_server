@@ -16,6 +16,9 @@ export const PlannedDayGetInclude = {
         include: {
             images: true,
         },
+        where: {
+            active: true,
+        },
     },
     hiddenPlannedDayResultRecommendations: true,
 } satisfies Prisma.PlannedDayInclude;
