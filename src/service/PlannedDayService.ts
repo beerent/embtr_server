@@ -66,7 +66,12 @@ export class PlannedDayService {
         );
 
         const targetCount = scheduledHabits.reduce((acc, scheduledHabit) => {
-            return acc + (scheduledHabit.timesOfDay.length ?? 1);
+            let timeOfDayCount = scheduledHabit.timesOfDay.length;
+            if (timeOfDayCount === 0) {
+                timeOfDayCount = 1;
+            }
+
+            return acc + timeOfDayCount;
         }, 0);
 
         const completedTasks = plannedDay.plannedTasks.filter(
