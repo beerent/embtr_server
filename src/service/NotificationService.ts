@@ -3,6 +3,7 @@ import { Notification as NotificationModel, NotificationTargetPage } from '@reso
 import {
     ClearNotificationsRequest,
     GetNotificationsResponse,
+    GetUnreadNotificationCountResponse,
 } from '@resources/types/requests/NotificationTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
@@ -67,12 +68,21 @@ export class NotificationService {
         return { ...SUCCESS, notifications: notificationModels };
     }
 
-    public static async clear(request: Request): Promise<Response> {
-        const body: ClearNotificationsRequest = request.body;
-        if (!body.notificationIds) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+    public static async getUnreadNotificationCount(
+        request: Request
+    ): Promise<GetUnreadNotificationCountResponse> {
+        const userId: number = (await AuthorizationController.getUserIdFromToken(
+            request.headers.authorization!
+        )) as number;
+        if (!userId) {
+            return { ...GENERAL_FAILURE, message: 'invalid request', count: 0 };
         }
 
+        const count = await NotificationController.countAllUnread(userId);
+        return { ...SUCCESS, count };
+    }
+
+    public static async clear(request: Request): Promise<Response> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
@@ -80,16 +90,7 @@ export class NotificationService {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const notificationsFromDatabase = await NotificationController.getAllById(
-            body.notificationIds,
-            userId
-        );
-
-        if (notificationsFromDatabase.length !== body.notificationIds.length) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        await NotificationController.clearAll(body.notificationIds, userId);
+        await NotificationController.clearAll(userId);
 
         return SUCCESS;
     }

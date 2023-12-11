@@ -1,10 +1,14 @@
-import { Notification as NotificationModel} from "../../schema";
+import { Notification as NotificationModel } from "../../schema";
 import { Response } from "./RequestTypes";
 
+export interface GetUnreadNotificationCountResponse extends Response {
+  count: number;
+}
+
 export interface GetNotificationsResponse extends Response {
-  notifications?: NotificationModel[]
+  notifications?: NotificationModel[];
 }
 
 export interface ClearNotificationsRequest {
-  notificationIds?: number[]
+  notificationIds?: number[];
 }

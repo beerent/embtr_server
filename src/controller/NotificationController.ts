@@ -59,6 +59,19 @@ export class NotificationController {
         return result;
     }
 
+    public static async countAllUnread(userId: number) {
+        const result = await prisma.notification.count({
+            where: {
+                toUser: {
+                    id: userId,
+                },
+                read: false,
+            },
+        });
+
+        return result;
+    }
+
     public static async getAllById(notificationIds: number[], userId: number) {
         const result = await prisma.notification.findMany({
             where: {
@@ -80,12 +93,9 @@ export class NotificationController {
         return result;
     }
 
-    public static async clearAll(notificationIds: number[], userId: number) {
+    public static async clearAll(userId: number) {
         const result = await prisma.notification.updateMany({
             where: {
-                id: {
-                    in: notificationIds,
-                },
                 toUser: {
                     id: userId,
                 },
