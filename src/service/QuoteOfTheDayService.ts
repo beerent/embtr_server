@@ -14,10 +14,11 @@ import { Request } from 'express';
 export class QuoteOfTheDayService {
     public static async add(request: Request): Promise<CreateQuoteOfTheDayResponse> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
-            request.headers.authorization!,
+            request.headers.authorization!
         )) as number;
 
-        const body: CreateQuoteOfTheDayRequest = request.body;
+        //remove all double quotes
+        const body: CreateQuoteOfTheDayRequest = request.body.replace(/"/g, '');
 
         const quoteOfTheDay = await QuoteOfTheDayController.add(userId, body.quote, body.author);
         const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
