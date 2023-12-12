@@ -21,43 +21,43 @@ export class HabitCategoryService {
         }
 
         let categoryModels: HabitCategory[] = ModelConverter.convertAll(categories);
-        categoryModels = await HabitCategoryService.setActiveHabitCategory(context, categoryModels);
+        categoryModels = await HabitCategoryService.setRecentHabitCategory(context, categoryModels);
 
         return { ...SUCCESS, habitCategories: categoryModels };
     }
 
-    private static async setActiveHabitCategory(
+    private static async setRecentHabitCategory(
         context: Context,
         categories: HabitCategory[]
     ): Promise<HabitCategory[]> {
-        // 1. find active habit category
-        const activeHabitCategory = categories.find(
-            (category) => category.name === 'Active Habits'
+        // 1. find recent habit category
+        const recentHabitCategory = categories.find(
+            (category) => category.name === 'Recent Habits'
         );
-        if (!activeHabitCategory) {
+        if (!recentHabitCategory) {
             return categories;
         }
 
-        // 2. populate active habit category
-        const populatedActiveHabitCategory = await HabitCategoryService.populateActiveHabitCategory(
+        // 2. populate recent habit category
+        const populatedRecentHabitCategory = await HabitCategoryService.populateRecentHabitCategory(
             context,
-            activeHabitCategory
+            recentHabitCategory
         );
 
         // 3. replace old with new
-        const activeIndex = categories.findIndex(
-            (category) => category.name === activeHabitCategory.name
+        const recentIndex = categories.findIndex(
+            (category) => category.name === recentHabitCategory.name
         );
-        categories[activeIndex] = populatedActiveHabitCategory;
+        categories[recentIndex] = populatedRecentHabitCategory;
 
         return categories;
     }
 
-    private static async populateActiveHabitCategory(
+    private static async populateRecentHabitCategory(
         context: Context,
         activeHabitCategory: HabitCategory
     ): Promise<HabitCategory> {
-        const scheduledHabits = await ScheduledHabitService.getActive(context.userId);
+        const scheduledHabits = await ScheduledHabitService.getRecent(context.userId);
         const uniqueTasks: Task[] = [];
         scheduledHabits.forEach((scheduledHabit) => {
             const task = scheduledHabit.task;

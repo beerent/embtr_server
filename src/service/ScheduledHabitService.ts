@@ -101,6 +101,15 @@ export class ScheduledHabitService {
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
         return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
     }
+    public static async getRecent(userId: number): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitController.getRecent(userId);
+        if (!scheduledHabits) {
+            return [];
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return scheduledHabitModels;
+    }
 
     public static async getActive(userId: number): Promise<ScheduledHabit[]> {
         const scheduledHabits = await ScheduledHabitController.getActive(userId);
