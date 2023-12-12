@@ -15,7 +15,7 @@ export class HabitCategoryService {
             return { ...GENERAL_FAILURE, habitCategories: [] };
         }
 
-        const categories = await HabitCategoryController.getAll();
+        const categories = await HabitCategoryController.getAll(context.userId);
         if (!categories) {
             return { ...SUCCESS, habitCategories: [] };
         }
