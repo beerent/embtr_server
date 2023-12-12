@@ -12,7 +12,7 @@ import express from 'express';
 const habitRouter = express.Router();
 
 habitRouter.get('/categories', authenticate, authorize, async (req, res) => {
-    const response = await HabitCategoryService.getAll();
+    const response = await HabitCategoryService.getAll(req);
     res.status(response.httpCode).json(response);
 });
 

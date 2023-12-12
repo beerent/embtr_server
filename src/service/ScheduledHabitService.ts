@@ -102,6 +102,16 @@ export class ScheduledHabitService {
         return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
     }
 
+    public static async getActive(userId: number): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitController.getActive(userId);
+        if (!scheduledHabits) {
+            return [];
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return scheduledHabitModels;
+    }
+
     public static async archive(request: Request): Promise<Response> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
