@@ -339,6 +339,7 @@ export interface HabitCategory {
   localImage?: string;
   active?: boolean;
   order?: number;
+  generic?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   tasks?: Task[];

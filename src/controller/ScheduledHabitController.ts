@@ -23,7 +23,7 @@ export class ScheduledHabitController {
             };
         }
 
-        return await prisma.scheduledHabit.create({
+        return prisma.scheduledHabit.create({
             data: {
                 user: {
                     connect: {
@@ -141,7 +141,7 @@ export class ScheduledHabitController {
             };
         }
 
-        return await prisma.scheduledHabit.update({
+        return prisma.scheduledHabit.update({
             where: {
                 id: id,
             },
@@ -174,7 +174,7 @@ export class ScheduledHabitController {
     }
 
     public static async archive(userId: number, id: number, date: Date) {
-        return await prisma.scheduledHabit.updateMany({
+        return prisma.scheduledHabit.updateMany({
             where: {
                 id: id,
                 userId: userId,
@@ -197,7 +197,7 @@ export class ScheduledHabitController {
         startDate?: Date,
         endDate?: Date
     ) {
-        return await prisma.scheduledHabit.update({
+        return prisma.scheduledHabit.update({
             where: {
                 id: id,
             },
@@ -253,7 +253,7 @@ export class ScheduledHabitController {
     }
 
     public static async get(id: number) {
-        return await prisma.scheduledHabit.findUnique({
+        return prisma.scheduledHabit.findUnique({
             where: {
                 id: id,
             },
@@ -267,7 +267,7 @@ export class ScheduledHabitController {
     }
 
     public static async getRecent(userId: number) {
-        return await prisma.scheduledHabit.findMany({
+        return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
                 OR: [
@@ -291,7 +291,7 @@ export class ScheduledHabitController {
     }
 
     public static async getActive(userId: number) {
-        return await prisma.scheduledHabit.findMany({
+        return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
                 OR: [
