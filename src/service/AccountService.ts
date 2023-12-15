@@ -139,9 +139,20 @@ export class AccountService {
             return { ...GENERAL_FAILURE, message: 'failed to delete account' };
         }
 
+        await EmailController.sendEmail(
+            'brent@embtr.com',
+            'delete account request',
+            (user.email ?? '') + ' has requested to delete their account. screw them.'
+        );
+
+        await EmailController.sendEmail(
+            user.email ?? '',
+            'delete account request',
+            'You have requested to delete your account and all of its data. We are sorry to see you go! We are processing this request ' +
+                'and will notify you when it is complete. '
+        );
+
         await AccountController.delete(user.email);
-        //todo - send email to user
-        //todo - send email to me/ add db entry to delete user data
         await TokenCache.invalidateToken(req.headers.authorization!);
 
         return { ...SUCCESS };
