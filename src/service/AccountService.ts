@@ -128,6 +128,25 @@ export class AccountService {
         return { ...SUCCESS };
     }
 
+    public static async delete(req: Request): Promise<Response> {
+        const uid = await AuthorizationController.getUidFromToken(req.headers.authorization!);
+        if (!uid) {
+            return { ...GENERAL_FAILURE, message: 'failed to delete account' };
+        }
+
+        const user = await AccountController.getByUid(uid);
+        if (!user) {
+            return { ...GENERAL_FAILURE, message: 'failed to delete account' };
+        }
+
+        await AccountController.delete(user.email);
+        //todo - send email to user
+        //todo - send email to me/ add db entry to delete user data
+        await TokenCache.invalidateToken(req.headers.authorization!);
+
+        return { ...SUCCESS };
+    }
+
     private static getInvalidRequestResponse(request: CreateAccountRequest): Response {
         if (!request.email) {
             return CREATE_ACCOUNT_INVALID_EMAIL;

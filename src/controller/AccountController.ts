@@ -60,6 +60,15 @@ export class AccountController {
         }
     }
 
+    public static async getByUid(uid: string): Promise<UserRecord | undefined> {
+        try {
+            const user = await firebase.auth().getUser(uid);
+            return user;
+        } catch (error) {
+            return undefined;
+        }
+    }
+
     public static async updateAccountRoles(uid: string, roles: Role[]): Promise<void> {
         await this.updateCustomClaim(uid, 'roles', roles);
     }
@@ -75,6 +84,14 @@ export class AccountController {
             await firebase.auth().setCustomUserClaims(uid, updatedClaims);
         } catch (error) {
             logger.error('Error updating user custom claims:', error);
+        }
+    }
+
+    public static async clearCustomClaims(uid: string): Promise<void> {
+        try {
+            await firebase.auth().setCustomUserClaims(uid, {});
+        } catch (error) {
+            logger.error('Error clearing user custom claims:', error);
         }
     }
 

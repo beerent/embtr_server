@@ -72,4 +72,13 @@ accountRouter.post(
     })
 );
 
+accountRouter.post(
+    '/delete',
+    runEndpoint(async (req, res) => {
+        const response: Response = await AccountService.delete(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+
 export default accountRouter;
