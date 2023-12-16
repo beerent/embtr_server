@@ -15,7 +15,8 @@ import unitRouter from '@src/endpoints/UnitRouter';
 import dayOfWeekRouter from '@src/endpoints/DayOfWeekRouter';
 import timeOfDayRouter from '@src/endpoints/TimeOfDayRouter';
 import challengeRouter from '@src/endpoints/ChallengeRouter';
-import plannedHabitRouter from './endpoints/PlannedHabitRouter';
+import plannedHabitRouter from '@src/endpoints/PlannedHabitRouter';
+import marketingRouter from '@src/endpoints/MarketingRouter';
 
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
@@ -68,6 +69,7 @@ app.use('/unit', unitRouter);
 app.use('/time-of-day', timeOfDayRouter);
 app.use('/day-of-week', dayOfWeekRouter);
 app.use('/challenge', challengeRouter);
+app.use('/mail-list', marketingRouter);
 app.use('/health', (req, res) => res.send('OK'));
 
 app.use(handleError);
