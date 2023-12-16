@@ -9,7 +9,7 @@ marketingRouter.use(express.urlencoded({ extended: true }));
 marketingRouter.post(
     '/',
     runEndpoint(async (req, res) => {
-        console.log(req.body);
+        console.log(req);
         res.status(200).json('OK');
     })
 );
