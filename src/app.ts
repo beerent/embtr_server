@@ -21,7 +21,15 @@ import marketingRouter from '@src/endpoints/MarketingRouter';
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
 
+const cors = require('cors');
 const app = express();
+
+const allowedOrigins = ['https://www.embtr.com', 'https://embtr.com', 'https://app.embtr.com', 'http://localhost:19006'];
+app.use(
+    cors({
+        origin: allowedOrigins,
+    })
+);
 
 app.use(bodyParser.json());
 
