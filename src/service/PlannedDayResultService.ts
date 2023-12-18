@@ -31,6 +31,7 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
 import {
     CompletedHabit,
+    CompletedHabitElement,
     PlannedDayResultSummary,
 } from '@resources/types/planned_day_result/PlannedDayResult';
 
@@ -257,42 +258,38 @@ export class PlannedDayResultService {
 
         const completedHabits: CompletedHabit[] = [];
         plannedDayResult.plannedDay.plannedTasks.forEach((plannedTask) => {
-            /*
-            if (plannedTask.habit) {
-                const element: CompletedHabitElement = {
-                    unit: plannedTask.unit ?? undefined,
-                    quantity: plannedTask.quantity ?? 0,
-                    completedQuantity: plannedTask.completedQuantity ?? 0,
-                };
+            const element: CompletedHabitElement = {
+                unit: plannedTask.unit ?? undefined,
+                quantity: plannedTask.quantity ?? 0,
+                completedQuantity: plannedTask.completedQuantity ?? 0,
+            };
 
-                const completed =
-                    (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 0);
+            const completed = (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 0);
 
-                if (completedHabits.some((habit) => habit.habit.id === plannedTask.habit!.id)) {
-                    const habit = completedHabits.find(
-                        (habit) => habit.habit.id === plannedTask.habit!.id
-                    )!;
-                    habit.attempted += 1;
-                    habit.completed += completed ? 1 : 0;
+            if (completedHabits.some((habit) => habit.scheduledHabitId === plannedTask.scheduledHabitId)) {
+                const habit = completedHabits.find(
+                    (habit) => habit.scheduledHabitId === plannedTask.scheduledHabitId
+                )!;
+                habit.attempted += 1;
+                habit.completed += completed ? 1 : 0;
 
-                    const elementIndex = habit.elements.findIndex(
-                        (element) => element.unit === element.unit
-                    );
-                    if (elementIndex !== -1) {
-                        habit.elements[elementIndex].quantity += element.quantity;
-                        habit.elements[elementIndex].completedQuantity += element.completedQuantity;
-                    } else {
-                        habit.elements.push(element);
-                    }
+                const elementIndex = habit.elements.findIndex(
+                    (element) => element.unit === element.unit
+                );
+                if (elementIndex !== -1) {
+                    habit.elements[elementIndex].quantity += element.quantity;
+                    habit.elements[elementIndex].completedQuantity += element.completedQuantity;
                 } else {
-                    completedHabits.push({
-                        attempted: 1,
-                        completed: completed ? 1 : 0,
-                        elements: [element],
-                    });
+                    habit.elements.push(element);
                 }
+            } else {
+                completedHabits.push({
+                    scheduledHabitId: plannedTask.scheduledHabitId ?? 0,
+                    attempted: 1,
+                    completed: completed ? 1 : 0,
+                    elements: [element],
+                });
             }
-                */
         });
 
         return completedHabits;

@@ -8,6 +8,7 @@ export interface CompletedHabitElement {
 
 export interface CompletedHabit {
     elements: CompletedHabitElement[],
+    scheduledHabitId: number,
     attempted: number,
     completed: number
 }
