@@ -285,6 +285,8 @@ export class PlannedDayResultService {
             } else {
                 completedHabits.push({
                     scheduledHabitId: plannedTask.scheduledHabitId ?? 0,
+                    localImage: plannedTask.localImage ?? undefined,
+                    remoteImageUrl: plannedTask.remoteImageUrl ?? undefined,
                     attempted: 1,
                     completed: completed ? 1 : 0,
                     elements: [element],

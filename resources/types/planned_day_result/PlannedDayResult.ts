@@ -9,6 +9,8 @@ export interface CompletedHabitElement {
 export interface CompletedHabit {
     elements: CompletedHabitElement[],
     scheduledHabitId: number,
+    localImage?: string,
+    remoteImageUrl?: string,
     attempted: number,
     completed: number
 }

@@ -127,8 +127,6 @@ export class NotificationService {
 
     private static getTargetPage(notificationType: NotificationType): NotificationTargetPage {
         switch (notificationType) {
-            case NotificationType.CHALLENGE_COMMENT:
-                return NotificationTargetPage.CHALLENGE_DETAILS;
             case NotificationType.TIMELINE_COMMENT:
             case NotificationType.TIMELINE_TAG:
             case NotificationType.TIMELINE_LIKE:
