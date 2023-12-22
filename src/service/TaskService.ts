@@ -26,10 +26,7 @@ export class TaskService {
         )) as number;
         const query: string = request.query.q as string;
 
-        const tasks: Task[] = await TaskController.getAllLikeTitle(
-            userId,
-            query
-        );
+        const tasks: Task[] = await TaskController.getAllLikeTitle(userId, query);
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };
@@ -59,7 +56,13 @@ export class TaskService {
 
         const body: CreateTaskRequest = request.body;
 
-        const task = await TaskController.create(userId, body.title, body.description);
+        const task = await TaskController.create(
+            userId,
+            body.title,
+            body.description,
+            body.localImage,
+            body.removeImageUrl
+        );
         if (task) {
             const taskModel: TaskModel = ModelConverter.convert(task);
             return { ...SUCCESS, task: taskModel };

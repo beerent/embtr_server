@@ -73,7 +73,13 @@ export class TaskController {
         return [];
     }
 
-    public static async create(userId: number, title: string, description?: string) {
+    public static async create(
+        userId: number,
+        title: string,
+        description?: string,
+        localImage?: string,
+        remoteImageUrl?: string
+    ) {
         const result = await prisma.task.create({
             data: {
                 habitCategory: {
@@ -88,6 +94,8 @@ export class TaskController {
                 },
                 title,
                 description,
+                localImage,
+                remoteImageUrl,
             },
         });
 

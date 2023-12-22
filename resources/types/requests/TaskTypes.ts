@@ -12,6 +12,8 @@ export interface SearchTasksResponse extends Response {
 export interface CreateTaskRequest {
   title: string;
   description?: string;
+  localImage?: string;
+  removeImageUrl?: string;
 }
 
 export interface CreateTaskResponse extends Response {
