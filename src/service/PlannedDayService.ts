@@ -57,6 +57,7 @@ export class PlannedDayService {
             return { ...SUCCESS, result: false };
         }
 
+        // 1. get what SHOULD be completed for today
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
         let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeekAndDate(
@@ -65,6 +66,7 @@ export class PlannedDayService {
             plannedDayDate
         );
 
+        // 2. get count of what SHOULD be completed for today
         const targetCount = scheduledHabits.reduce((acc, scheduledHabit) => {
             let timeOfDayCount = scheduledHabit.timesOfDay.length;
             if (timeOfDayCount === 0) {
@@ -74,11 +76,16 @@ export class PlannedDayService {
             return acc + timeOfDayCount;
         }, 0);
 
+        // 3. get count of what IS completed for today
         const completedTasks = plannedDay.plannedTasks.filter(
             (plannedTask) => (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
         );
 
-        return { ...SUCCESS, result: completedTasks.length >= targetCount };
+        const removedTasks = plannedDay.plannedTasks.filter((plannedTask) => !plannedTask.active);
+
+        const completedTaskCount = completedTasks.length + removedTasks.length;
+
+        return { ...SUCCESS, result: completedTaskCount >= targetCount };
     }
 
     public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
