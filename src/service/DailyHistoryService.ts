@@ -1,4 +1,7 @@
-import { GetDailyHistoryRequest, GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
+import {
+    GetDailyHistoryRequest,
+    GetDailyHistoryResponse,
+} from '@resources/types/requests/DailyHistoryTypes';
 import { RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
 import { DailyHistoryController } from '@src/controller/DailyHistoryController';
 import { UserController } from '@src/controller/UserController';
