@@ -28,7 +28,6 @@ import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { UserController } from '@src/controller/UserController';
 import { Response } from '@resources/types/requests/RequestTypes';
-import { HiddenPlannedDayResultRecommendationsController } from '@src/controller/HiddenPlannedDayResultRecommendationsController';
 import {
     CompletedHabit,
     CompletedHabitElement,
@@ -263,7 +262,6 @@ export class PlannedDayResultService {
             return { ...UPDATE_PLANNED_DAY_RESULT_INVALID, message: 'invalid day' };
         }
 
-        await HiddenPlannedDayResultRecommendationsController.create(userId, dayKey);
         return SUCCESS;
     }
 

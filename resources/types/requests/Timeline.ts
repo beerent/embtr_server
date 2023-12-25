@@ -24,5 +24,5 @@ export interface GetTimelineRequest {
 
 export interface GetTimelineResponse extends Response {
   results: TimelineElement[],
-  nextCursor: TimelineRequestCursor
+  nextCursor?: TimelineRequestCursor
 }

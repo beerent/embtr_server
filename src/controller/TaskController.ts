@@ -20,17 +20,6 @@ export class TaskController {
                     in: ids,
                 },
             },
-            include: {
-                taskPreference: {
-                    include: {
-                        unit: true,
-                    },
-                    where: {
-                        userId: userId,
-                        active: true,
-                    },
-                },
-            },
         });
 
         return tasks;
@@ -51,17 +40,6 @@ export class TaskController {
             where: {
                 title: {
                     startsWith: title,
-                },
-            },
-            include: {
-                taskPreference: {
-                    include: {
-                        unit: true,
-                    },
-                    where: {
-                        userId: userId,
-                        active: true,
-                    },
                 },
             },
         });

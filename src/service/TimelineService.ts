@@ -29,10 +29,13 @@ export class TimelineService {
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-        const nextCursor: TimelineRequestCursor = {
-            cursor: elements[elements.length - 1].createdAt,
-            limit: cursor.limit,
-        };
+        let nextCursor: TimelineRequestCursor | undefined = undefined;
+        if (elements.length > 0) {
+            nextCursor = {
+                cursor: elements[elements.length - 1].createdAt,
+                limit: cursor.limit,
+            };
+        }
 
         return {
             ...SUCCESS,

@@ -20,7 +20,6 @@ export const PlannedDayGetInclude = {
             active: true,
         },
     },
-    hiddenPlannedDayResultRecommendations: true,
 } satisfies Prisma.PlannedDayInclude;
 
 export const PlannedDayInclude = {
@@ -40,7 +39,6 @@ export const PlannedDayInclude = {
             images: true,
         },
     },
-    hiddenPlannedDayResultRecommendations: true,
 } satisfies Prisma.PlannedDayInclude;
 
 export class PlannedDayController {

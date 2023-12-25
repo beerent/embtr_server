@@ -45,7 +45,6 @@ export const PlannedDayResultInclude = {
                     unit: true,
                 },
             },
-            hiddenPlannedDayResultRecommendations: true,
         },
     },
 } satisfies Prisma.PlannedDayResultInclude;

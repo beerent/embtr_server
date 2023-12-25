@@ -9,7 +9,6 @@ import {
     Notification,
     UserPost,
     Metadata,
-    TaskPreference,
     QuoteOfTheDay,
     Season,
     Challenge,
@@ -33,7 +32,6 @@ type PrismaModel =
     | Widget
     | WidgetType
     | Metadata
-    | TaskPreference
     | QuoteOfTheDay
     | Season
     | Unit
