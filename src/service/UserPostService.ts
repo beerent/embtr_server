@@ -14,6 +14,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { ImageDetectionService } from './ImageService';
 import { ImageController } from '@src/controller/ImageController';
+import { TimelineRequestCursor } from '@resources/types/requests/Timeline';
 
 export class UserPostService {
     public static async create(request: Request): Promise<CreateUserPostResponse> {
@@ -51,7 +52,18 @@ export class UserPostService {
         return { ...SUCCESS, userPosts: convertedUserPostModels };
     }
 
-    public static async getAll(request: Request): Promise<GetAllUserPostResponse> {
+    public static async getAllByIds(ids: number[]): Promise<GetAllUserPostResponse> {
+        if (ids.length === 0) {
+            return { ...SUCCESS, userPosts: [] };
+        }
+
+        const userPosts = await UserPostController.getAllInIds(ids);
+        const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
+
+        return { ...SUCCESS, userPosts: convertedUserPostModels };
+    }
+
+    public static async getAllBounded(request: Request): Promise<GetAllUserPostResponse> {
         let upperBound = new Date();
         if (request.query.upperBound) {
             upperBound = new Date(request.query.upperBound as string);
@@ -62,7 +74,7 @@ export class UserPostService {
             lowerBound = new Date(request.query.lowerBound as string);
         }
 
-        const userPosts = await UserPostController.getAll(upperBound, lowerBound);
+        const userPosts = await UserPostController.getAllByBounds(upperBound, lowerBound);
         const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
 
         return { ...SUCCESS, userPosts: convertedUserPostModels };

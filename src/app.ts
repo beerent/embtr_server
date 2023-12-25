@@ -17,6 +17,8 @@ import timeOfDayRouter from '@src/endpoints/TimeOfDayRouter';
 import challengeRouter from '@src/endpoints/ChallengeRouter';
 import plannedHabitRouter from '@src/endpoints/PlannedHabitRouter';
 import marketingRouter from '@src/endpoints/MarketingRouter';
+import timelineRouter from '@src/endpoints/TimelineRouter';
+import adminRouter from './endpoints/AdminRouter';
 
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
@@ -24,7 +26,12 @@ import { handleError } from './middleware/error/ErrorMiddleware';
 const cors = require('cors');
 const app = express();
 
-const allowedOrigins = ['https://www.embtr.com', 'https://embtr.com', 'https://app.embtr.com', 'http://localhost:19006'];
+const allowedOrigins = [
+    'https://www.embtr.com',
+    'https://embtr.com',
+    'https://app.embtr.com',
+    'http://localhost:19006',
+];
 app.use(
     cors({
         origin: allowedOrigins,
@@ -70,7 +77,11 @@ app.use('/time-of-day', timeOfDayRouter);
 app.use('/day-of-week', dayOfWeekRouter);
 app.use('/challenge', challengeRouter);
 app.use('/mail-list', marketingRouter);
+app.use('/timeline', timelineRouter);
+app.use('/admin', adminRouter);
+
 app.use('/health', (req, res) => res.send('OK'));
+
 
 app.use(handleError);
 

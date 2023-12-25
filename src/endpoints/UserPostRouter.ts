@@ -38,7 +38,7 @@ userPostRouter.get(
     authorize,
     //validateGetAllPlannedDayResults,
     runEndpoint(async (req, res) => {
-        const response: GetAllUserPostResponse = await UserPostService.getAll(req);
+        const response: GetAllUserPostResponse = await UserPostService.getAllBounded(req);
         res.status(response.httpCode).json(response);
     })
 );

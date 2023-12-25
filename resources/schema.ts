@@ -18,7 +18,6 @@ export interface User {
   comments?: Comment[];
   likes?: Like[];
   widgets?: Widget[];
-  tasktPreferences?: TaskPreference[];
   quoteOfTheDay?: QuoteOfTheDay[];
   shallenges?: Challenge[];
   ChallengeParticipant?: ChallengeParticipant[];
@@ -49,7 +48,6 @@ export interface Task {
   habitCategory?: HabitCategory;
   createdAt?: Date;
   updatedAt?: Date;
-  taskPreference?: TaskPreference[];
   ChallengeRequirement?: ChallengeRequirement[];
   scheduledHabits?: ScheduledHabit[];
 }
@@ -64,7 +62,6 @@ export interface PlannedDay {
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
-  hiddenPlannedDayResultRecommendations?: HiddenPlannedDayResultRecommendations[];
   challengeParticipant?: ChallengeParticipant[];
 }
 
@@ -87,20 +84,6 @@ export interface PlannedTask {
   quantity?: number;
   completedQuantity?: number;
   status?: string;
-  active?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export interface TaskPreference {
-  id?: number;
-  userId?: number;
-  user?: User;
-  taskId?: number;
-  task?: Task;
-  unitId?: number;
-  unit?: Unit;
-  quantity?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -216,15 +199,6 @@ export interface Metadata {
   updatedAt?: Date;
 }
 
-export interface HiddenPlannedDayResultRecommendations {
-  id?: number;
-  plannedDayId?: number;
-  plannedDay?: PlannedDay;
-  active?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
 export interface Season {
   id?: number;
   date?: Date;
@@ -327,7 +301,6 @@ export interface Unit {
   updatedAt?: Date;
   PlannedTask?: PlannedTask[];
   challengeRequirement?: ChallengeRequirement[];
-  taskPreference?: TaskPreference[];
   ScheduledHabit?: ScheduledHabit[];
 }
 

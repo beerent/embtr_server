@@ -144,6 +144,22 @@ export class PlannedDayResultService {
         return GET_DAY_RESULT_UNKNOWN;
     }
 
+    public static async getAllByIds(ids: number[]): Promise<GetPlannedDayResultsResponse> {
+        if (ids.length === 0) {
+            return { ...SUCCESS, plannedDayResults: [] };
+        }
+
+        const dayResults = await PlannedDayResultController.getAllByIds(ids);
+
+        if (dayResults) {
+            const convertedDayResults: PlannedDayResultModel[] =
+                ModelConverter.convertAll(dayResults);
+            return { ...SUCCESS, plannedDayResults: convertedDayResults };
+        }
+
+        return GET_DAY_RESULT_UNKNOWN;
+    }
+
     public static async getAllSummaries(
         request: Request
     ): Promise<GetPlannedDayResultSummariesResponse> {
@@ -266,7 +282,11 @@ export class PlannedDayResultService {
 
             const completed = (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 0);
 
-            if (completedHabits.some((habit) => habit.scheduledHabitId === plannedTask.scheduledHabitId)) {
+            if (
+                completedHabits.some(
+                    (habit) => habit.scheduledHabitId === plannedTask.scheduledHabitId
+                )
+            ) {
                 const habit = completedHabits.find(
                     (habit) => habit.scheduledHabitId === plannedTask.scheduledHabitId
                 )!;

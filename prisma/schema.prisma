@@ -28,7 +28,6 @@ model User {
   comments               Comment[]
   likes                  Like[]
   widgets                Widget[]
-  tasktPreferences       TaskPreference[]
   quoteOfTheDay          QuoteOfTheDay[]
   shallenges             Challenge[]
   ChallengeParticipant   ChallengeParticipant[]
@@ -64,7 +63,6 @@ model Task {
   habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
-  taskPreference       TaskPreference[]
   ChallengeRequirement ChallengeRequirement[]
   scheduledHabits      ScheduledHabit[]
 
@@ -83,7 +81,6 @@ model PlannedDay {
   updatedAt                             DateTime                                @default(now()) @updatedAt
   plannedTasks                          PlannedTask[]
   plannedDayResults                     PlannedDayResult[]
-  hiddenPlannedDayResultRecommendations HiddenPlannedDayResultRecommendations[]
   challengeParticipant                  ChallengeParticipant[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
@@ -119,26 +116,6 @@ model PlannedTask {
   @@index([timeOfDayId], name: "time_of_day_id")
   @@index([originalTimeOfDayId], name: "original_time_of_day_id")
   @@map("planned_task")
-}
-
-model TaskPreference {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @db.Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  taskId    Int      @db.Int
-  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  unitId    Int?     @db.Int
-  unit      Unit?    @relation(fields: [unitId], references: [id])
-  quantity  Float?   @db.Double
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([userId, taskId], name: "unique_user_task")
-  @@index([userId])
-  @@index([taskId])
-  @@index([unitId])
-  @@map("user_task_preference")
 }
 
 model UserPost {
@@ -299,18 +276,6 @@ model Metadata {
   @@map("metadata")
 }
 
-model HiddenPlannedDayResultRecommendations {
-  id           Int        @id @default(autoincrement())
-  plannedDayId Int        @db.Int
-  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active       Boolean    @default(true)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
-
-  @@index([plannedDayId])
-  @@map("hidden_planned_day_result_recommendations")
-}
-
 model Season {
   id        Int      @id @default(autoincrement())
   date      DateTime @db.Date
@@ -455,7 +420,6 @@ model Unit {
   updatedAt            DateTime               @default(now()) @updatedAt
   PlannedTask          PlannedTask[]
   challengeRequirement ChallengeRequirement[]
-  taskPreference       TaskPreference[]
   ScheduledHabit       ScheduledHabit[]
 
   @@map("unit")

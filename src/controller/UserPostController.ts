@@ -44,7 +44,19 @@ export class UserPostController {
         });
     }
 
-    public static async getAll(upperBound: Date, lowerBound: Date) {
+    public static async getAllInIds(ids: number[]) {
+        return prisma.userPost.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+                active: true,
+            },
+            include: UserPostInclude,
+        });
+    }
+
+    public static async getAllByBounds(upperBound: Date, lowerBound: Date) {
         return await prisma.userPost.findMany({
             where: {
                 active: true,
