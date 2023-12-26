@@ -1,5 +1,6 @@
 import { ChallengeRequirement } from "../../schema";
 
+
 export interface ChallengeCompletionData {
   amountComplete: number;
   amountRequired: number;
