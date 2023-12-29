@@ -38,6 +38,19 @@ userRouter.get(
 );
 
 userRouter.get(
+    '/exists',
+    authenticate,
+    authorize,
+    // todo - add validation
+    runEndpoint(async (req, res) => {
+        const username = req.query.username as string;
+        const response: GetUsersResponse = await UserService.exists(username);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
+userRouter.get(
     '/:uid',
     authenticate,
     authorizeUserGet,

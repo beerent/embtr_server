@@ -24,6 +24,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
+import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 
 export class UserService {
     public static async getCurrentUser(request: Request): Promise<GetUserResponse> {
@@ -134,6 +135,13 @@ export class UserService {
         }
 
         return GET_USER_FAILED_NOT_FOUND;
+    }
+
+    public static async exists(username: string): Promise<GetBooleanResponse> {
+        const user = await this.getByUsername(username);
+        const exists = !!user;
+
+        return { ...SUCCESS, result: exists };
     }
 
     private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {
