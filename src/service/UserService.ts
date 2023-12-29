@@ -5,7 +5,6 @@ import {
     GetUsersResponse,
     UpdateUserResponse,
 } from '@resources/types/requests/UserTypes';
-import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CREATE_USER_ALREADY_EXISTS,
     CREATE_USER_FAILED,
@@ -14,6 +13,7 @@ import {
     GET_USER_SUCCESS,
     SUCCESS,
     UPDATE_USER_FAILED,
+    USERNAME_ALREADY_EXISTS,
 } from '@src/common/RequestResponses';
 import { AccountController } from '@src/controller/AccountController';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
@@ -22,6 +22,8 @@ import { Role } from '@src/roles/Roles';
 import { Request } from 'express';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
+import { Prisma } from '@prisma/client';
+import { logger } from '@src/common/logger/Logger';
 
 export class UserService {
     public static async getCurrentUser(request: Request): Promise<GetUserResponse> {
@@ -100,7 +102,22 @@ export class UserService {
         body.email = email;
         delete body.accountSetup;
 
-        const updatedUser = await UserController.update(uid, { ...body });
+        if (body.username) {
+            const usernameIsAvailable = await this.usernameIsAvailable(body.username, uid);
+            if (!usernameIsAvailable) {
+                return USERNAME_ALREADY_EXISTS;
+            }
+        }
+
+        let updatedUser = undefined;
+        try {
+            updatedUser = await UserController.update(uid, { ...body });
+        } catch (error) {
+            if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+                logger.info(`username ${body.username} already exists`);
+                return USERNAME_ALREADY_EXISTS;
+            }
+        }
         if (!updatedUser) {
             return UPDATE_USER_FAILED;
         }
@@ -117,6 +134,34 @@ export class UserService {
         }
 
         return GET_USER_FAILED_NOT_FOUND;
+    }
+
+    private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {
+        const requests = [UserController.getByUid(uid), this.getByUsername(username)];
+        const [currentUser, targetUser] = await Promise.all(requests);
+        if (!currentUser) {
+            return false;
+        }
+
+        if (!targetUser) {
+            return true;
+        }
+
+        if (currentUser.username === targetUser.username) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static async getByUsername(username: string): Promise<User | null> {
+        const user = await UserController.getByUsername(username);
+        if (!user) {
+            return null;
+        }
+
+        const userModel: User = ModelConverter.convert(user);
+        return userModel;
     }
 
     private static async markUserAsSetupComplete(user: User) {

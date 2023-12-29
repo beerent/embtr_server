@@ -220,6 +220,13 @@ export const CREATE_USER_ALREADY_EXISTS: Response = {
     message: 'user already exists',
 };
 
+export const USERNAME_ALREADY_EXISTS: Response = {
+    httpCode: HttpCode.RESOURCE_ALREADY_EXISTS,
+    internalCode: Code.USERNAME_IN_USE,
+    success: false,
+    message: 'username in use',
+};
+
 export const CREATE_USER_SUCCESS: CreateUserResponse = {
     ...SUCCESS,
 };

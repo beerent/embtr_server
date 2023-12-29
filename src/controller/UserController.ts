@@ -24,6 +24,16 @@ export class UserController {
         return user;
     }
 
+    public static async getByUsername(username: string): Promise<User | null> {
+        const user = await prisma.user.findUnique({
+            where: {
+                username: username,
+            },
+        });
+
+        return user;
+    }
+
     public static async search(query: string): Promise<User[]> {
         const users = await prisma.user.findMany({
             where: {
@@ -139,3 +149,10 @@ export class UserController {
         };
     }
 }
+
+// SHOULD BE:
+/*
+ * Router - fields a call
+ * Service - handles business logic
+ * Dao - handles database calls
+ */
