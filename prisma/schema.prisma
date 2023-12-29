@@ -18,6 +18,7 @@ model User {
   bio                    String?                 @db.VarChar(255)
   photoUrl               String?                 @db.VarChar(255)
   bannerUrl              String?                 @db.VarChar(255)
+  accountSetup           Boolean                 @default(false)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @default(now()) @updatedAt
   user                   UserPost[]
@@ -72,16 +73,16 @@ model Task {
 }
 
 model PlannedDay {
-  id                                    Int                                     @id @default(autoincrement())
-  user                                  User                                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                                Int                                     @db.Int
-  dayKey                                String                                  @db.VarChar(10)
-  date                                  DateTime                                @db.Date
-  createdAt                             DateTime                                @default(now())
-  updatedAt                             DateTime                                @default(now()) @updatedAt
-  plannedTasks                          PlannedTask[]
-  plannedDayResults                     PlannedDayResult[]
-  challengeParticipant                  ChallengeParticipant[]
+  id                   Int                    @id @default(autoincrement())
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId               Int                    @db.Int
+  dayKey               String                 @db.VarChar(10)
+  date                 DateTime               @db.Date
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @default(now()) @updatedAt
+  plannedTasks         PlannedTask[]
+  plannedDayResults    PlannedDayResult[]
+  challengeParticipant ChallengeParticipant[]
 
   @@unique([userId, dayKey], name: "unique_user_daykey")
   @@map("planned_day")

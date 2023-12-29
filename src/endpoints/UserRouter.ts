@@ -69,6 +69,17 @@ userRouter.post(
 );
 
 userRouter.patch(
+    '/setup',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const response = await UserService.setup(req);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
+userRouter.patch(
     '/',
     authenticate,
     authorize,

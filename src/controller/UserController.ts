@@ -87,6 +87,8 @@ export class UserController {
         const photoUrl = user.photoUrl !== undefined ? { photoUrl: user.photoUrl } : {};
         const bannerUrl = user.bannerUrl !== undefined ? { bannerUrl: user.bannerUrl } : {};
         const pushNotificationTokens = await UserController.createUserPushNotification(user);
+        const accountSetup =
+            user.accountSetup !== undefined ? { accountSetup: user.accountSetup } : {};
 
         const updatedUser = await prisma.user.update({
             where: {
@@ -99,6 +101,7 @@ export class UserController {
                 ...location,
                 ...photoUrl,
                 ...bannerUrl,
+                ...accountSetup,
                 pushNotificationTokens,
             },
         });

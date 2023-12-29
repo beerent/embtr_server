@@ -8,6 +8,7 @@ export interface User {
   bio?: string;
   photoUrl?: string;
   bannerUrl?: string;
+  accountSetup?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   user?: UserPost[];

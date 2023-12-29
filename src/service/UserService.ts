@@ -3,6 +3,7 @@ import {
     CreateUserResponse,
     UpdateUserRequest,
     GetUsersResponse,
+    UpdateUserResponse,
 } from '@resources/types/requests/UserTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import {
@@ -68,7 +69,22 @@ export class UserService {
         return CREATE_USER_SUCCESS;
     }
 
-    public static async update(request: Request): Promise<Response> {
+    public static async setup(request: Request): Promise<UpdateUserResponse> {
+        const response = await this.update(request);
+        if (response.httpCode !== 200) {
+            return response;
+        }
+
+        const user = response.user;
+        if (!user) {
+            return UPDATE_USER_FAILED;
+        }
+
+        await this.markUserAsSetupComplete(user);
+        return response;
+    }
+
+    public static async update(request: Request): Promise<UpdateUserResponse> {
         const body: UpdateUserRequest = request.body;
 
         const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
@@ -82,9 +98,15 @@ export class UserService {
 
         body.uid = uid;
         body.email = email;
+        delete body.accountSetup;
 
-        await UserController.update(uid, { ...body });
-        return SUCCESS;
+        const updatedUser = await UserController.update(uid, { ...body });
+        if (!updatedUser) {
+            return UPDATE_USER_FAILED;
+        }
+
+        const updatedUserModel: User = ModelConverter.convert(updatedUser);
+        return { ...SUCCESS, user: updatedUserModel };
     }
 
     public static async search(query: string): Promise<GetUsersResponse> {
@@ -95,5 +117,13 @@ export class UserService {
         }
 
         return GET_USER_FAILED_NOT_FOUND;
+    }
+
+    private static async markUserAsSetupComplete(user: User) {
+        const updatedUser = await UserController.update(user.uid!, {
+            accountSetup: true,
+        });
+
+        return updatedUser;
     }
 }
