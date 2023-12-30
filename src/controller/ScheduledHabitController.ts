@@ -291,6 +291,9 @@ export class ScheduledHabitController {
     }
 
     public static async getActive(userId: number) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+
         return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
@@ -300,7 +303,7 @@ export class ScheduledHabitController {
                     },
                     {
                         startDate: {
-                            gte: new Date(), // this may need to be yesterday
+                            gte: yesterday,
                         },
                     },
                 ],
