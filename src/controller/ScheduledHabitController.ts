@@ -319,7 +319,7 @@ export class ScheduledHabitController {
         dayOfWeek: number,
         date: Date
     ) {
-        return await prisma.scheduledHabit.findMany({
+        return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
                 daysOfWeek: {
