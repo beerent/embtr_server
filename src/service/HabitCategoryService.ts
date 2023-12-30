@@ -64,7 +64,7 @@ export class HabitCategoryService {
         }
 
         const myHabitCategoryModel: HabitCategory = ModelConverter.convert(myHabitCategory);
-        return HabitCategoryService.populateRecentHabitCategory(context, myHabitCategoryModel);
+        return HabitCategoryService.populateMyHabitCategory(context, myHabitCategoryModel);
     }
 
     private static async populateRecentHabitCategory(

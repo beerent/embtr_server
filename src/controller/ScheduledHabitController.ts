@@ -300,7 +300,7 @@ export class ScheduledHabitController {
                     },
                     {
                         startDate: {
-                            lte: new Date(), // this may need to be yesterday
+                            gte: new Date(), // this may need to be yesterday
                         },
                     },
                 ],
