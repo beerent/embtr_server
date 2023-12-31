@@ -8,6 +8,9 @@ import {
 import { HabitCategoryService } from '@src/service/HabitCategoryService';
 import { ScheduledHabitService } from '@src/service/ScheduledHabitService';
 import express from 'express';
+import { ContextService } from '@src/service/ContextService';
+import { HabitCategoryValidation } from '@src/middleware/habit_category/HabitCategoryValidation';
+import { PureDate } from '@resources/types/custom_schema/DayKey';
 
 const habitRouter = express.Router();
 
@@ -21,10 +24,19 @@ habitRouter.get('/categories/custom', authenticate, authorize, async (req, res) 
     res.status(response.httpCode).json(response);
 });
 
-habitRouter.get('/categories/active', authenticate, authorize, async (req, res) => {
-    const response = await HabitCategoryService.getActive(req);
-    res.status(response.httpCode).json(response);
-});
+habitRouter.get(
+    '/categories/active',
+    authenticate,
+    authorize,
+    HabitCategoryValidation.validateGetActiveHabitsCategory,
+    async (req, res) => {
+        const context = await ContextService.get(req);
+        const date: PureDate = req.query.date as PureDate;
+
+        const response = await HabitCategoryService.getActive(context, date);
+        res.status(response.httpCode).json(response);
+    }
+);
 
 habitRouter.get('/categories/recent', authenticate, authorize, async (req, res) => {
     const response = await HabitCategoryService.getRecent(req);

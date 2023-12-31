@@ -4,15 +4,13 @@ import {
     GetHabitCategoryResponse,
 } from '@resources/types/requests/HabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import {
-    HabitCategoryController,
-    HabitCategoryPrisma,
-} from '@src/controller/HabitCategoryController';
+import { HabitCategoryController } from '@src/controller/HabitCategoryController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { Request } from 'express';
 import { ContextService } from './ContextService';
 import { Context } from '@src/general/auth/Context';
+import { PureDate } from '@resources/types/custom_schema/DayKey';
 
 export class HabitCategoryService {
     public static async getAllGeneric(request: Request): Promise<GetHabitCategoriesResponse> {
@@ -65,20 +63,23 @@ export class HabitCategoryService {
         return { ...SUCCESS, habitCategory: populatedRecentHabitsCategory };
     }
 
-    public static async getActive(request: Request): Promise<GetHabitCategoryResponse> {
-        const context = await ContextService.get(request);
-        if (!context) {
-            return { ...GENERAL_FAILURE };
-        }
-
+    public static async getActive(
+        context: Context,
+        date: PureDate
+    ): Promise<GetHabitCategoryResponse> {
         const activeHabitsCategory = await HabitCategoryController.getActive();
         if (!activeHabitsCategory) {
             return { ...GENERAL_FAILURE };
         }
+
         const activeHabitsCategoryModel: HabitCategory =
             ModelConverter.convert(activeHabitsCategory);
         const populatedActiveHabitsCategoryModel =
-            await HabitCategoryService.populateMyHabitCategory(context, activeHabitsCategoryModel);
+            await HabitCategoryService.populateMyHabitCategory(
+                context,
+                activeHabitsCategoryModel,
+                date
+            );
 
         return { ...SUCCESS, habitCategory: populatedActiveHabitsCategoryModel };
     }
@@ -95,9 +96,10 @@ export class HabitCategoryService {
     //TODO get active habits based on the current daykey the user passes in
     private static async populateMyHabitCategory(
         context: Context,
-        activeHabitCategory: HabitCategory
+        activeHabitCategory: HabitCategory,
+        date: PureDate
     ): Promise<HabitCategory> {
-        const scheduledHabits = await ScheduledHabitService.getActive(context.userId);
+        const scheduledHabits = await ScheduledHabitService.getActive(context.userId, date);
         activeHabitCategory.tasks = this.populateHabitCategoryTasks(scheduledHabits);
         return activeHabitCategory;
     }

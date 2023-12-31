@@ -3,13 +3,13 @@ import { Context } from '@src/general/auth/Context';
 import { Request } from 'express';
 
 export class ContextService {
-    public static async get(request: Request): Promise<Context | undefined> {
+    public static async get(request: Request): Promise<Context> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
         if (!userId) {
-            return undefined;
+            throw new Error('ContextService: invalid state');
         }
 
         return {

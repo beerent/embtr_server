@@ -9,6 +9,7 @@ import { AuthorizationController } from '@src/controller/AuthorizationController
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
+import { PureDate } from '@resources/types/custom_schema/DayKey';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(request: Request): Promise<CreateScheduledHabitResponse> {
@@ -101,6 +102,7 @@ export class ScheduledHabitService {
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
         return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
     }
+
     public static async getRecent(userId: number): Promise<ScheduledHabit[]> {
         const scheduledHabits = await ScheduledHabitController.getRecent(userId);
         if (!scheduledHabits) {
@@ -111,8 +113,8 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
-    public static async getActive(userId: number): Promise<ScheduledHabit[]> {
-        const scheduledHabits = await ScheduledHabitController.getActive(userId);
+    public static async getActive(userId: number, date: PureDate): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitController.getActive(userId, date);
         if (!scheduledHabits) {
             return [];
         }
