@@ -1,5 +1,8 @@
 import { HabitCategory, ScheduledHabit, Task } from '@resources/schema';
-import { GetHabitCategoriesResponse } from '@resources/types/requests/HabitTypes';
+import {
+    GetHabitCategoriesResponse,
+    GetHabitCategoryResponse,
+} from '@resources/types/requests/HabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import {
     HabitCategoryController,
@@ -11,60 +14,73 @@ import { Request } from 'express';
 import { ContextService } from './ContextService';
 import { Context } from '@src/general/auth/Context';
 
-export const RECENT_HABIT_CATEGORY_ID = 14;
-export const MY_HABIT_CATEGORY_ID = 15;
-
 export class HabitCategoryService {
-    public static async getAll(request: Request): Promise<GetHabitCategoriesResponse> {
+    public static async getAllGeneric(request: Request): Promise<GetHabitCategoriesResponse> {
         const context = await ContextService.get(request);
         if (!context) {
             return { ...GENERAL_FAILURE, habitCategories: [] };
         }
 
-        let categoryModels: HabitCategory[] = [];
-        const getGenericHabits = HabitCategoryController.getGenericHabits();
-        const getCustomHabits = HabitCategoryController.getCustomHabits(context.userId);
-        const getRecentHabits = HabitCategoryService.getRecentHabitsCategory(context);
-        const getMyHabits = HabitCategoryService.getMyHabitsCategory(context);
+        const genericHabitCategories = await HabitCategoryController.getAllGeneric();
+        const genericHabitCategoriesModels =
+            ModelConverter.convertAll<HabitCategory>(genericHabitCategories);
 
-        await Promise.all([getGenericHabits, getCustomHabits, getRecentHabits, getMyHabits]).then(
-            (values) => {
-                const allCategories: HabitCategoryPrisma = [...values[0], ...values[1]];
-                categoryModels = ModelConverter.convertAll<HabitCategory>(allCategories);
-                if (values[2]) {
-                    categoryModels.push(values[2]);
-                }
-                if (values[3]) {
-                    categoryModels.push(values[3]);
-                }
-
-                categoryModels.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-            }
-        );
-
-        return { ...SUCCESS, habitCategories: categoryModels };
+        return { ...SUCCESS, habitCategories: genericHabitCategoriesModels };
     }
 
-    private static async getRecentHabitsCategory(
-        context: Context
-    ): Promise<HabitCategory | undefined> {
-        const recentHabitCategory = await HabitCategoryController.getById(RECENT_HABIT_CATEGORY_ID);
-        if (!recentHabitCategory) {
-            return undefined;
+    public static async getCustom(request: Request): Promise<GetHabitCategoryResponse> {
+        const context = await ContextService.get(request);
+        if (!context) {
+            return { ...GENERAL_FAILURE };
         }
 
-        const recentHabitCategoryModel: HabitCategory = ModelConverter.convert(recentHabitCategory);
-        return HabitCategoryService.populateRecentHabitCategory(context, recentHabitCategoryModel);
+        const customHabitsCategory = await HabitCategoryController.getCustom(context.userId);
+        if (!customHabitsCategory) {
+            return { ...GENERAL_FAILURE };
+        }
+
+        const customHabitModels = ModelConverter.convert<HabitCategory>(customHabitsCategory);
+        return { ...SUCCESS, habitCategory: customHabitModels };
     }
 
-    private static async getMyHabitsCategory(context: Context): Promise<HabitCategory | undefined> {
-        const myHabitCategory = await HabitCategoryController.getById(MY_HABIT_CATEGORY_ID);
-        if (!myHabitCategory) {
-            return undefined;
+    public static async getRecent(request: Request): Promise<GetHabitCategoryResponse> {
+        const context = await ContextService.get(request);
+        if (!context) {
+            return { ...GENERAL_FAILURE };
         }
 
-        const myHabitCategoryModel: HabitCategory = ModelConverter.convert(myHabitCategory);
-        return HabitCategoryService.populateMyHabitCategory(context, myHabitCategoryModel);
+        const recentHabitsCategory = await HabitCategoryController.getRecent();
+        if (!recentHabitsCategory) {
+            return { ...GENERAL_FAILURE };
+        }
+
+        const recentHabitCategoryModel: HabitCategory =
+            ModelConverter.convert(recentHabitsCategory);
+        const populatedRecentHabitsCategory =
+            await HabitCategoryService.populateRecentHabitCategory(
+                context,
+                recentHabitCategoryModel
+            );
+
+        return { ...SUCCESS, habitCategory: populatedRecentHabitsCategory };
+    }
+
+    public static async getActive(request: Request): Promise<GetHabitCategoryResponse> {
+        const context = await ContextService.get(request);
+        if (!context) {
+            return { ...GENERAL_FAILURE };
+        }
+
+        const activeHabitsCategory = await HabitCategoryController.getActive();
+        if (!activeHabitsCategory) {
+            return { ...GENERAL_FAILURE };
+        }
+        const activeHabitsCategoryModel: HabitCategory =
+            ModelConverter.convert(activeHabitsCategory);
+        const populatedActiveHabitsCategoryModel =
+            await HabitCategoryService.populateMyHabitCategory(context, activeHabitsCategoryModel);
+
+        return { ...SUCCESS, habitCategory: populatedActiveHabitsCategoryModel };
     }
 
     private static async populateRecentHabitCategory(
@@ -76,6 +92,7 @@ export class HabitCategoryService {
         return activeHabitCategory;
     }
 
+    //TODO get active habits based on the current daykey the user passes in
     private static async populateMyHabitCategory(
         context: Context,
         activeHabitCategory: HabitCategory

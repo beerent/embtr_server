@@ -1,4 +1,5 @@
 import { prisma } from '@database/prisma';
+import { DateUtility } from '@src/utility/date/DateUtility';
 
 export class ScheduledHabitController {
     public static async create(
@@ -291,8 +292,7 @@ export class ScheduledHabitController {
     }
 
     public static async getActive(userId: number) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterday = DateUtility.getYesterday();
 
         return prisma.scheduledHabit.findMany({
             where: {

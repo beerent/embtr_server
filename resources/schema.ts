@@ -47,6 +47,7 @@ export interface Task {
   user?: User;
   habitCategoryId?: number;
   habitCategory?: HabitCategory;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   ChallengeRequirement?: ChallengeRequirement[];

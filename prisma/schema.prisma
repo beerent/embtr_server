@@ -63,6 +63,7 @@ model Task {
   user                 User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   habitCategoryId      Int?                   @db.Int
   habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
+  active               Boolean                @default(true)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @default(now()) @updatedAt
   ChallengeRequirement ChallengeRequirement[]

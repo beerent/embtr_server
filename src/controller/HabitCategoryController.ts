@@ -2,11 +2,15 @@ import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 
 export type HabitCategoryPrisma = Prisma.PromiseReturnType<
-    typeof HabitCategoryController.getGenericHabits
+    typeof HabitCategoryController.getAllGeneric
 >;
 
+const CUSTOM_HABITS_CATEGORY_ID = 13;
+const RECENT_HABITS_CATEGORY_ID = 14;
+const ACTIVE_HABITS_CATEGORY_ID = 15;
+
 export class HabitCategoryController {
-    public static async getGenericHabits() {
+    public static async getAllGeneric() {
         return prisma.habitCategory.findMany({
             where: {
                 active: true,
@@ -19,7 +23,7 @@ export class HabitCategoryController {
     }
 
     public static async getById(id: number) {
-        return prisma.habitCategory.findFirst({
+        return prisma.habitCategory.findUnique({
             where: {
                 id: id,
             },
@@ -29,30 +33,27 @@ export class HabitCategoryController {
         });
     }
 
-    public static async getByName(name: string) {
-        return prisma.habitCategory.findFirst({
+    public static async getCustom(userId: number) {
+        return prisma.habitCategory.findUnique({
             where: {
-                name: name,
-            },
-            include: {
-                tasks: true,
-            },
-        });
-    }
-
-    public static async getCustomHabits(userId: number) {
-        return prisma.habitCategory.findMany({
-            where: {
-                active: true,
-                name: 'Custom Habits',
+                id: CUSTOM_HABITS_CATEGORY_ID,
             },
             include: {
                 tasks: {
                     where: {
                         userId: userId,
+                        active: true,
                     },
                 },
             },
         });
+    }
+
+    public static async getRecent() {
+        return this.getById(RECENT_HABITS_CATEGORY_ID);
+    }
+
+    public static async getActive() {
+        return this.getById(ACTIVE_HABITS_CATEGORY_ID);
     }
 }

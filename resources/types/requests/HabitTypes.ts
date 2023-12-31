@@ -12,3 +12,7 @@ export interface GetHabitJourneyResponse extends Response {
 export interface GetHabitCategoriesResponse extends Response {
   habitCategories?: HabitCategory[];
 }
+
+export interface GetHabitCategoryResponse extends Response {
+  habitCategory?: HabitCategory;
+}

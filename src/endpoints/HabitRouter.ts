@@ -11,8 +11,23 @@ import express from 'express';
 
 const habitRouter = express.Router();
 
-habitRouter.get('/categories', authenticate, authorize, async (req, res) => {
-    const response = await HabitCategoryService.getAll(req);
+habitRouter.get('/categories/generic', authenticate, authorize, async (req, res) => {
+    const response = await HabitCategoryService.getAllGeneric(req);
+    res.status(response.httpCode).json(response);
+});
+
+habitRouter.get('/categories/custom', authenticate, authorize, async (req, res) => {
+    const response = await HabitCategoryService.getCustom(req);
+    res.status(response.httpCode).json(response);
+});
+
+habitRouter.get('/categories/active', authenticate, authorize, async (req, res) => {
+    const response = await HabitCategoryService.getActive(req);
+    res.status(response.httpCode).json(response);
+});
+
+habitRouter.get('/categories/recent', authenticate, authorize, async (req, res) => {
+    const response = await HabitCategoryService.getRecent(req);
     res.status(response.httpCode).json(response);
 });
 
