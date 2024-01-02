@@ -49,8 +49,9 @@ export class PureDate {
     public daysApart(other: PureDate): number {
         const thisDate = new Date(this.year, this.month - 1, this.day);
         const otherDate = new Date(other.year, other.month - 1, other.day);
+        const diffTime = Math.abs(thisDate.getTime() - otherDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        const timeDiff = Math.abs(thisDate.getTime() - otherDate.getTime());
-        return Math.abs(Math.ceil(timeDiff / (1000 * 3600 * 24)));
+        return diffDays;
     }
 }

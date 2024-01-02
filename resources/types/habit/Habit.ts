@@ -1,5 +1,4 @@
 import { Task, User } from "../../schema";
-import { PureDate } from "../date/PureDate";
 
 export interface HabitJourneys {
     user: User,
@@ -20,6 +19,7 @@ export interface HabitJourneyElement {
 export interface HabitSummary {
     task: Task,
     activeScheduledCount: number,
-    nextActiveDays?: number,
+    lastHabitDays?: number,
+    nextHabitDays?: number,
     currentStreak: number,
 }

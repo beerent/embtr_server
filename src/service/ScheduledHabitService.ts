@@ -138,6 +138,18 @@ export class ScheduledHabitService {
         const taskToScheduledHabitMap = this.buildTaskToScheduledHabitMap(scheduledHabitModels);
         const habitSummaries = this.buildHabitSummaries(taskToScheduledHabitMap, cutoffDate);
 
+        habitSummaries.sort((a, b) => {
+            if (a.nextHabitDays || b.nextHabitDays) {
+                return (a.nextHabitDays || 0) - (b.nextHabitDays || 0);
+            }
+
+            if (a.lastHabitDays || b.lastHabitDays) {
+                return -1 * (a.lastHabitDays || 0) - -1 * (b.lastHabitDays || 0);
+            }
+
+            return 0;
+        });
+
         return { ...SUCCESS, habitSummaries: habitSummaries };
     }
 
@@ -178,28 +190,33 @@ export class ScheduledHabitService {
         for (const task of taskToScheduledHabitMap.keys()) {
             const scheduledHabits = taskToScheduledHabitMap.get(task)!;
 
-            const nextScheduledHabitDate = this.getNextScheduledHabitDate(
-                scheduledHabits,
-                cutoffDate
-            );
+            const recentHabitDates = this.getRecentHabitDates(scheduledHabits, cutoffDate);
 
-            let daysApart: number | undefined = undefined;
-            if (nextScheduledHabitDate) {
-                daysApart = cutoffDate.daysApart(nextScheduledHabitDate);
+            let previousDaysApart: number | undefined = undefined;
+            if (recentHabitDates.lastScheduledHabitDate) {
+                previousDaysApart = cutoffDate.daysApart(recentHabitDates.lastScheduledHabitDate);
             }
 
-            const activeScheduledCount = scheduledHabits.filter(
-                (scheduledHabit) => scheduledHabit.startDate ?? new Date() > new Date() // needs to get PureDate from user
-            ).length;
+            let upcomingDaysApart: number | undefined = undefined;
+            if (recentHabitDates.nextScheduledHabitDate) {
+                upcomingDaysApart = cutoffDate.daysApart(recentHabitDates.nextScheduledHabitDate);
+            }
+
+            const activeScheduledCount = scheduledHabits.filter((scheduledHabit) => {
+                const startPureDate = PureDate.fromDate(scheduledHabit.startDate!);
+                return startPureDate >= cutoffDate;
+            }).length;
 
             const habitSummary: HabitSummary = {
                 task: task,
-                nextActiveDays: daysApart,
+                lastHabitDays: previousDaysApart,
+                nextHabitDays: upcomingDaysApart,
                 activeScheduledCount: activeScheduledCount,
                 currentStreak: 0,
             };
             habitSummaries.push(habitSummary);
         }
+
         return habitSummaries;
     }
 
@@ -227,10 +244,8 @@ export class ScheduledHabitService {
         return taskToScheduledHabitMap;
     }
 
-    private static getNextScheduledHabitDate(
-        scheduledHabits: ScheduledHabit[],
-        cutoffDate: PureDate
-    ): PureDate | undefined {
+    private static getRecentHabitDates(scheduledHabits: ScheduledHabit[], cutoffDate: PureDate) {
+        let foundLastScheduledHabit: ScheduledHabit | undefined;
         let foundNextScheduledHabit: ScheduledHabit | undefined;
 
         for (const currentScheduledHabit of scheduledHabits) {
@@ -242,23 +257,39 @@ export class ScheduledHabitService {
             const currentStartDate = PureDate.fromDate(startDate);
 
             if (currentStartDate < cutoffDate) {
-                continue;
-            }
+                if (!foundLastScheduledHabit || !foundLastScheduledHabit.startDate) {
+                    foundLastScheduledHabit = currentScheduledHabit;
+                    continue;
+                }
 
-            if (!foundNextScheduledHabit || !foundNextScheduledHabit.startDate) {
-                foundNextScheduledHabit = currentScheduledHabit;
-                continue;
-            }
+                const lastStartDate = PureDate.fromDate(foundLastScheduledHabit.startDate);
 
-            const foundNextStartDate = PureDate.fromDate(foundNextScheduledHabit.startDate);
+                if (currentStartDate > lastStartDate) {
+                    foundLastScheduledHabit = currentScheduledHabit;
+                }
+            } else {
+                if (!foundNextScheduledHabit || !foundNextScheduledHabit.startDate) {
+                    foundNextScheduledHabit = currentScheduledHabit;
+                    continue;
+                }
 
-            if (currentStartDate < foundNextStartDate) {
-                foundNextScheduledHabit = currentScheduledHabit;
+                const foundNextStartDate = PureDate.fromDate(foundNextScheduledHabit.startDate);
+
+                if (currentStartDate < foundNextStartDate) {
+                    foundNextScheduledHabit = currentScheduledHabit;
+                }
             }
         }
 
-        return foundNextScheduledHabit
-            ? PureDate.fromDate(foundNextScheduledHabit.startDate!)
-            : undefined;
+        const result = {
+            lastScheduledHabitDate: foundLastScheduledHabit?.startDate
+                ? PureDate.fromDate(foundLastScheduledHabit.startDate)
+                : undefined,
+            nextScheduledHabitDate: foundNextScheduledHabit?.startDate
+                ? PureDate.fromDate(foundNextScheduledHabit.startDate)
+                : undefined,
+        };
+
+        return result;
     }
 }
