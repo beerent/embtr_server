@@ -1,9 +1,6 @@
 import { Response } from "./RequestTypes";
-import {HabitJourneys} from '../habit/Habit'
+import { HabitJourneys, HabitSummary } from "../habit/Habit";
 import { HabitCategory } from "../../schema";
-
-export interface GetAllHabitResonse extends Response {
-}
 
 export interface GetHabitJourneyResponse extends Response {
   habitJourneys?: HabitJourneys;
@@ -15,4 +12,8 @@ export interface GetHabitCategoriesResponse extends Response {
 
 export interface GetHabitCategoryResponse extends Response {
   habitCategory?: HabitCategory;
+}
+
+export interface GetHabitSummariesResponse extends Response {
+  habitSummaries?: HabitSummary[];
 }

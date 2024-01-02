@@ -1,5 +1,5 @@
 import { prisma } from '@database/prisma';
-import { PureDate } from '@resources/types/custom_schema/DayKey';
+import { PureDate } from '@resources/types/date/PureDate';
 
 export class ScheduledHabitController {
     public static async create(
@@ -263,6 +263,41 @@ export class ScheduledHabitController {
                 unit: true,
                 daysOfWeek: true,
                 timesOfDay: true,
+            },
+        });
+    }
+
+    public static async getAll(userId: number) {
+        return prisma.scheduledHabit.findMany({
+            where: {
+                userId: userId,
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
+    public static async getSummaries(userId: number) {
+        return prisma.scheduledHabit.groupBy({
+            by: ['taskId'],
+            where: {
+                userId: userId,
+            },
+            _count: {
+                taskId: true,
+            },
+            _sum: {
+                quantity: true,
+            },
+            _min: {
+                startDate: true,
+            },
+            _max: {
+                endDate: true,
             },
         });
     }

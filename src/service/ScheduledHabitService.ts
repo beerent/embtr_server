@@ -1,4 +1,4 @@
-import { ScheduledHabit } from '@resources/schema';
+import { ScheduledHabit, Task } from '@resources/schema';
 import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CreateScheduledHabitResponse,
@@ -9,7 +9,10 @@ import { AuthorizationController } from '@src/controller/AuthorizationController
 import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
-import { PureDate } from '@resources/types/custom_schema/DayKey';
+import { Context } from '@src/general/auth/Context';
+import { HabitSummary } from '@resources/types/habit/Habit';
+import { GetHabitSummariesResponse } from '@resources/types/requests/HabitTypes';
+import { PureDate } from '@resources/types/date/PureDate';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(request: Request): Promise<CreateScheduledHabitResponse> {
@@ -123,6 +126,34 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
+    public static async getSummaries(
+        context: Context,
+        cutoffDate: PureDate
+    ): Promise<GetHabitSummariesResponse> {
+        // 1. get all the scheduled habits
+        const scheduledHabits = await ScheduledHabitController.getAll(context.userId);
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+
+        // 2. group by task
+        const taskToScheduledHabitMap = this.buildTaskToScheduledHabitMap(scheduledHabitModels);
+        const habitSummaries = this.buildHabitSummaries(taskToScheduledHabitMap, cutoffDate);
+
+        return { ...SUCCESS, habitSummaries: habitSummaries };
+    }
+
+    public static async getHabitSummary(context: Context, habitId: number) {
+        // get all scheduled habits
+        // what does a scheduled habit summary
+        /*
+        {
+            * task
+            * list of active scheduled habits
+            * list of inactive scheduled habits
+            * history
+        }
+         */
+    }
+
     public static async archive(request: Request): Promise<Response> {
         const userId: number = (await AuthorizationController.getUserIdFromToken(
             request.headers.authorization!
@@ -137,5 +168,97 @@ export class ScheduledHabitService {
         await ScheduledHabitController.archive(userId, id, now);
 
         return { ...SUCCESS };
+    }
+
+    private static buildHabitSummaries(
+        taskToScheduledHabitMap: Map<Task, ScheduledHabit[]>,
+        cutoffDate: PureDate
+    ) {
+        const habitSummaries: HabitSummary[] = [];
+        for (const task of taskToScheduledHabitMap.keys()) {
+            const scheduledHabits = taskToScheduledHabitMap.get(task)!;
+
+            const nextScheduledHabitDate = this.getNextScheduledHabitDate(
+                scheduledHabits,
+                cutoffDate
+            );
+
+            let daysApart: number | undefined = undefined;
+            if (nextScheduledHabitDate) {
+                daysApart = cutoffDate.daysApart(nextScheduledHabitDate);
+            }
+
+            const activeScheduledCount = scheduledHabits.filter(
+                (scheduledHabit) => scheduledHabit.startDate ?? new Date() > new Date() // needs to get PureDate from user
+            ).length;
+
+            const habitSummary: HabitSummary = {
+                task: task,
+                nextActiveDays: daysApart,
+                activeScheduledCount: activeScheduledCount,
+                currentStreak: 0,
+            };
+            habitSummaries.push(habitSummary);
+        }
+        return habitSummaries;
+    }
+
+    private static buildTaskToScheduledHabitMap(scheduledHabitModels: ScheduledHabit[]) {
+        const taskToScheduledHabitMap: Map<Task, ScheduledHabit[]> = new Map();
+        for (const scheduledHabitModel of scheduledHabitModels) {
+            if (!scheduledHabitModel.task) {
+                continue;
+            }
+
+            let found = false;
+            for (const key of taskToScheduledHabitMap.keys()) {
+                if (key.id === scheduledHabitModel.task.id) {
+                    taskToScheduledHabitMap.get(key)?.push(scheduledHabitModel);
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                continue;
+            }
+
+            taskToScheduledHabitMap.set(scheduledHabitModel.task, [scheduledHabitModel]);
+        }
+        return taskToScheduledHabitMap;
+    }
+
+    private static getNextScheduledHabitDate(
+        scheduledHabits: ScheduledHabit[],
+        cutoffDate: PureDate
+    ): PureDate | undefined {
+        let foundNextScheduledHabit: ScheduledHabit | undefined;
+
+        for (const currentScheduledHabit of scheduledHabits) {
+            const startDate = currentScheduledHabit.startDate;
+            if (!startDate) {
+                continue;
+            }
+
+            const currentStartDate = PureDate.fromDate(startDate);
+
+            if (currentStartDate < cutoffDate) {
+                continue;
+            }
+
+            if (!foundNextScheduledHabit || !foundNextScheduledHabit.startDate) {
+                foundNextScheduledHabit = currentScheduledHabit;
+                continue;
+            }
+
+            const foundNextStartDate = PureDate.fromDate(foundNextScheduledHabit.startDate);
+
+            if (currentStartDate < foundNextStartDate) {
+                foundNextScheduledHabit = currentScheduledHabit;
+            }
+        }
+
+        return foundNextScheduledHabit
+            ? PureDate.fromDate(foundNextScheduledHabit.startDate!)
+            : undefined;
     }
 }

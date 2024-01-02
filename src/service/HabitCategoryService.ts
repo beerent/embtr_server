@@ -10,7 +10,7 @@ import { ScheduledHabitService } from './ScheduledHabitService';
 import { Request } from 'express';
 import { ContextService } from './ContextService';
 import { Context } from '@src/general/auth/Context';
-import { PureDate } from '@resources/types/custom_schema/DayKey';
+import { PureDate } from '@resources/types/date/PureDate';
 
 export class HabitCategoryService {
     public static async getAllGeneric(request: Request): Promise<GetHabitCategoriesResponse> {
@@ -93,7 +93,6 @@ export class HabitCategoryService {
         return activeHabitCategory;
     }
 
-    //TODO get active habits based on the current daykey the user passes in
     private static async populateMyHabitCategory(
         context: Context,
         activeHabitCategory: HabitCategory,

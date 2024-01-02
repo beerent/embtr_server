@@ -82,7 +82,6 @@ app.use('/admin', adminRouter);
 
 app.use('/health', (req, res) => res.send('OK'));
 
-
 app.use(handleError);
 
 export default app;
