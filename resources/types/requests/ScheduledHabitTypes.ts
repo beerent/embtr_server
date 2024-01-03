@@ -13,6 +13,10 @@ export interface GetScheduledHabitResponse extends Response {
   scheduledHabit?: ScheduledHabit;
 }
 
+export interface GetScheduledHabitsResponse extends Response {
+  scheduledHabits?: ScheduledHabit[];
+}
+
 export interface UpdateScheduledHabitRequest {
   scheduledHabit: ScheduledHabit;
 }

@@ -267,6 +267,21 @@ export class ScheduledHabitController {
         });
     }
 
+    public static async getAllByHabitIdAndUserId(habitId: number, userId: number) {
+        return prisma.scheduledHabit.findMany({
+            where: {
+                taskId: habitId,
+                userId: userId,
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
     public static async getAll(userId: number) {
         return prisma.scheduledHabit.findMany({
             where: {

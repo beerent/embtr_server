@@ -11,6 +11,7 @@ import express from 'express';
 import { ContextService } from '@src/service/ContextService';
 import { HabitCategoryValidation } from '@src/middleware/habit_category/HabitCategoryValidation';
 import { PureDate } from '@resources/types/date/PureDate';
+import taskRouter from '@src/endpoints/TaskRouter';
 
 const habitRouter = express.Router();
 
@@ -47,20 +48,30 @@ habitRouter.get(
     '/summary',
     authenticate,
     authorize,
-    HabitCategoryValidation.validateGetHabitSummary,
+    HabitCategoryValidation.validateGetHabitSummaries,
     async (req, res) => {
         const context = await ContextService.get(req);
         const cutoffDate: PureDate = PureDate.fromString(req.query.cutoffDate as string);
-        const response = await ScheduledHabitService.getSummaries(context, cutoffDate);
+        const response = await ScheduledHabitService.getHabitSummaries(context, cutoffDate);
 
         res.status(response.httpCode).json(response);
     }
 );
 
-habitRouter.get('/summary/:id', authenticate, authorize, async (req, res) => {
-    //const response = await ScheduledHabitService.getHabitSummary(req);
-    //res.status(response.httpCode).json(response);
-});
+habitRouter.get(
+    '/summary/:id',
+    authenticate,
+    authorize,
+    HabitCategoryValidation.validateGetHabitSummary,
+    async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+        const cutoffDate: PureDate = PureDate.fromString(req.query.cutoffDate as string);
+        const response = await ScheduledHabitService.getHabitSummary(context, id, cutoffDate);
+
+        res.status(response.httpCode).json(response);
+    }
+);
 
 habitRouter.post(
     '/schedule',
@@ -80,6 +91,20 @@ habitRouter.post(
     validateScheduledHabitGet,
     runEndpoint(async (req, res) => {
         const response = await ScheduledHabitService.archive(req);
+        res.status(response.httpCode).json(response);
+    })
+);
+
+habitRouter.get(
+    '/:id/schedules',
+    authenticate,
+    authorize,
+    validateScheduledHabitGet,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const response = await ScheduledHabitService.getAllByHabit(context, id);
         res.status(response.httpCode).json(response);
     })
 );

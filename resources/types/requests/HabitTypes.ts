@@ -3,17 +3,21 @@ import { HabitJourneys, HabitSummary } from "../habit/Habit";
 import { HabitCategory } from "../../schema";
 
 export interface GetHabitJourneyResponse extends Response {
-  habitJourneys?: HabitJourneys;
+    habitJourneys?: HabitJourneys;
 }
 
 export interface GetHabitCategoriesResponse extends Response {
-  habitCategories?: HabitCategory[];
+    habitCategories?: HabitCategory[];
 }
 
 export interface GetHabitCategoryResponse extends Response {
-  habitCategory?: HabitCategory;
+    habitCategory?: HabitCategory;
 }
 
 export interface GetHabitSummariesResponse extends Response {
-  habitSummaries?: HabitSummary[];
+    habitSummaries?: HabitSummary[];
+}
+
+export interface GetHabitSummaryResponse extends Response {
+    habitSummary?: HabitSummary;
 }

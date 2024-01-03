@@ -3,6 +3,7 @@ import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CreateScheduledHabitResponse,
     GetScheduledHabitResponse,
+    GetScheduledHabitsResponse,
 } from '@resources/types/requests/ScheduledHabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationController } from '@src/controller/AuthorizationController';
@@ -11,8 +12,12 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { Context } from '@src/general/auth/Context';
 import { HabitSummary } from '@resources/types/habit/Habit';
-import { GetHabitSummariesResponse } from '@resources/types/requests/HabitTypes';
+import {
+    GetHabitSummariesResponse,
+    GetHabitSummaryResponse,
+} from '@resources/types/requests/HabitTypes';
 import { PureDate } from '@resources/types/date/PureDate';
+import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSummaryProvider';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(request: Request): Promise<CreateScheduledHabitResponse> {
@@ -96,6 +101,22 @@ export class ScheduledHabitService {
         return this.update(request);
     }
 
+    public static async getAllByHabit(
+        context: Context,
+        habitId: number
+    ): Promise<GetScheduledHabitsResponse> {
+        const scheduledHabits = await ScheduledHabitController.getAllByHabitIdAndUserId(
+            habitId,
+            context.userId
+        );
+        if (!scheduledHabits) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return { ...SUCCESS, scheduledHabits: scheduledHabitModels };
+    }
+
     public static async get(id: number): Promise<GetScheduledHabitResponse> {
         const scheduledHabit = await ScheduledHabitController.get(id);
         if (!scheduledHabit) {
@@ -126,44 +147,44 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
-    public static async getSummaries(
+    public static async getHabitSummaries(
         context: Context,
         cutoffDate: PureDate
     ): Promise<GetHabitSummariesResponse> {
-        // 1. get all the scheduled habits
         const scheduledHabits = await ScheduledHabitController.getAll(context.userId);
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
-
-        // 2. group by task
-        const taskToScheduledHabitMap = this.buildTaskToScheduledHabitMap(scheduledHabitModels);
-        const habitSummaries = this.buildHabitSummaries(taskToScheduledHabitMap, cutoffDate);
-
-        habitSummaries.sort((a, b) => {
-            if (a.nextHabitDays || b.nextHabitDays) {
-                return (a.nextHabitDays || 0) - (b.nextHabitDays || 0);
-            }
-
-            if (a.lastHabitDays || b.lastHabitDays) {
-                return -1 * (a.lastHabitDays || 0) - -1 * (b.lastHabitDays || 0);
-            }
-
-            return 0;
-        });
+        const habitSummaries = ScheduledHabitSummaryProvider.createSummaries(
+            scheduledHabitModels,
+            cutoffDate
+        );
 
         return { ...SUCCESS, habitSummaries: habitSummaries };
     }
 
-    public static async getHabitSummary(context: Context, habitId: number) {
-        // get all scheduled habits
-        // what does a scheduled habit summary
-        /*
-        {
-            * task
-            * list of active scheduled habits
-            * list of inactive scheduled habits
-            * history
+    public static async getHabitSummary(
+        context: Context,
+        habitId: number,
+        cutoffDate: PureDate
+    ): Promise<GetHabitSummaryResponse> {
+        const scheduledHabits = await ScheduledHabitController.getAllByHabitIdAndUserId(
+            habitId,
+            context.userId
+        );
+        if (!scheduledHabits) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
-         */
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        const habitSummaries = ScheduledHabitSummaryProvider.createSummaries(
+            scheduledHabitModels,
+            cutoffDate
+        );
+
+        if (habitSummaries.length !== 1) {
+            return { ...GENERAL_FAILURE, message: 'invalid request' };
+        }
+
+        return { ...SUCCESS, habitSummary: habitSummaries[0] };
     }
 
     public static async archive(request: Request): Promise<Response> {
@@ -180,116 +201,5 @@ export class ScheduledHabitService {
         await ScheduledHabitController.archive(userId, id, now);
 
         return { ...SUCCESS };
-    }
-
-    private static buildHabitSummaries(
-        taskToScheduledHabitMap: Map<Task, ScheduledHabit[]>,
-        cutoffDate: PureDate
-    ) {
-        const habitSummaries: HabitSummary[] = [];
-        for (const task of taskToScheduledHabitMap.keys()) {
-            const scheduledHabits = taskToScheduledHabitMap.get(task)!;
-
-            const recentHabitDates = this.getRecentHabitDates(scheduledHabits, cutoffDate);
-
-            let previousDaysApart: number | undefined = undefined;
-            if (recentHabitDates.lastScheduledHabitDate) {
-                previousDaysApart = cutoffDate.daysApart(recentHabitDates.lastScheduledHabitDate);
-            }
-
-            let upcomingDaysApart: number | undefined = undefined;
-            if (recentHabitDates.nextScheduledHabitDate) {
-                upcomingDaysApart = cutoffDate.daysApart(recentHabitDates.nextScheduledHabitDate);
-            }
-
-            const activeScheduledCount = scheduledHabits.filter((scheduledHabit) => {
-                const startPureDate = PureDate.fromDate(scheduledHabit.startDate!);
-                return startPureDate >= cutoffDate;
-            }).length;
-
-            const habitSummary: HabitSummary = {
-                task: task,
-                lastHabitDays: previousDaysApart,
-                nextHabitDays: upcomingDaysApart,
-                activeScheduledCount: activeScheduledCount,
-                currentStreak: 0,
-            };
-            habitSummaries.push(habitSummary);
-        }
-
-        return habitSummaries;
-    }
-
-    private static buildTaskToScheduledHabitMap(scheduledHabitModels: ScheduledHabit[]) {
-        const taskToScheduledHabitMap: Map<Task, ScheduledHabit[]> = new Map();
-        for (const scheduledHabitModel of scheduledHabitModels) {
-            if (!scheduledHabitModel.task) {
-                continue;
-            }
-
-            let found = false;
-            for (const key of taskToScheduledHabitMap.keys()) {
-                if (key.id === scheduledHabitModel.task.id) {
-                    taskToScheduledHabitMap.get(key)?.push(scheduledHabitModel);
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
-                continue;
-            }
-
-            taskToScheduledHabitMap.set(scheduledHabitModel.task, [scheduledHabitModel]);
-        }
-        return taskToScheduledHabitMap;
-    }
-
-    private static getRecentHabitDates(scheduledHabits: ScheduledHabit[], cutoffDate: PureDate) {
-        let foundLastScheduledHabit: ScheduledHabit | undefined;
-        let foundNextScheduledHabit: ScheduledHabit | undefined;
-
-        for (const currentScheduledHabit of scheduledHabits) {
-            const startDate = currentScheduledHabit.startDate;
-            if (!startDate) {
-                continue;
-            }
-
-            const currentStartDate = PureDate.fromDate(startDate);
-
-            if (currentStartDate < cutoffDate) {
-                if (!foundLastScheduledHabit || !foundLastScheduledHabit.startDate) {
-                    foundLastScheduledHabit = currentScheduledHabit;
-                    continue;
-                }
-
-                const lastStartDate = PureDate.fromDate(foundLastScheduledHabit.startDate);
-
-                if (currentStartDate > lastStartDate) {
-                    foundLastScheduledHabit = currentScheduledHabit;
-                }
-            } else {
-                if (!foundNextScheduledHabit || !foundNextScheduledHabit.startDate) {
-                    foundNextScheduledHabit = currentScheduledHabit;
-                    continue;
-                }
-
-                const foundNextStartDate = PureDate.fromDate(foundNextScheduledHabit.startDate);
-
-                if (currentStartDate < foundNextStartDate) {
-                    foundNextScheduledHabit = currentScheduledHabit;
-                }
-            }
-        }
-
-        const result = {
-            lastScheduledHabitDate: foundLastScheduledHabit?.startDate
-                ? PureDate.fromDate(foundLastScheduledHabit.startDate)
-                : undefined,
-            nextScheduledHabitDate: foundNextScheduledHabit?.startDate
-                ? PureDate.fromDate(foundNextScheduledHabit.startDate)
-                : undefined,
-        };
-
-        return result;
     }
 }

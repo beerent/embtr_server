@@ -18,12 +18,11 @@ export const validateScheduledHabitPost = (req: Request, res: Response, next: Ne
     next();
 };
 
-const sheduledHabitGet = z.object({
-    id: z.coerce.number(),
-});
 export const validateScheduledHabitGet = (req: Request, res: Response, next: NextFunction) => {
     try {
-        sheduledHabitGet.parse(req.params);
+        z.object({
+            id: z.coerce.number(),
+        }).parse(req.params);
     } catch (error) {
         return res.status(CREATE_PLANNED_DAY_FAILED.httpCode).json(CREATE_PLANNED_DAY_FAILED);
     }
