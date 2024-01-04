@@ -12,8 +12,6 @@ import {
     SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL,
     SUCCESS,
 } from '@src/common/RequestResponses';
-import { EmailController } from '@src/controller/EmailController';
-import { AccountController } from '@src/controller/AccountController';
 import request from 'supertest';
 import {
     CreateAccountRequest,
@@ -21,6 +19,8 @@ import {
     VerifyAccountEmailRequest,
 } from '@resources/types/requests/AccountTypes';
 import { AuthenticationRequest } from '@resources/types/requests/RequestTypes';
+import { AccountDao } from '@src/database/AccountDao';
+import { EmailDao } from '@src/database/EmailDao';
 
 describe('account service tests', () => {
     const ACCOUNT_THAT_EXISTS = 'ast_email_that_exists@embtr.com';
@@ -29,36 +29,36 @@ describe('account service tests', () => {
 
     beforeAll(async () => {
         const deletes = [
-            AccountController.delete(ACCOUNT_THAT_EXISTS),
-            AccountController.delete(ACCOUNT_TO_CREATE),
-            AccountController.delete(ACCOUNT_TO_VERIFY_EMAIL),
+            AccountDao.delete(ACCOUNT_THAT_EXISTS),
+            AccountDao.delete(ACCOUNT_TO_CREATE),
+            AccountDao.delete(ACCOUNT_TO_VERIFY_EMAIL),
         ];
         await Promise.all(deletes);
 
         const creates = [
-            AccountController.create(ACCOUNT_THAT_EXISTS, 'password'),
-            AccountController.create(ACCOUNT_TO_VERIFY_EMAIL, 'password'),
+            AccountDao.create(ACCOUNT_THAT_EXISTS, 'password'),
+            AccountDao.create(ACCOUNT_TO_VERIFY_EMAIL, 'password'),
         ];
         await Promise.all(creates);
     });
 
     afterAll(async () => {
         const deletes = [
-            AccountController.delete(ACCOUNT_THAT_EXISTS),
-            AccountController.delete(ACCOUNT_TO_CREATE),
-            AccountController.delete(ACCOUNT_TO_VERIFY_EMAIL),
+            AccountDao.delete(ACCOUNT_THAT_EXISTS),
+            AccountDao.delete(ACCOUNT_TO_CREATE),
+            AccountDao.delete(ACCOUNT_TO_VERIFY_EMAIL),
         ];
         await Promise.all(deletes);
     });
 
     beforeEach(async () => {
-        EmailController.sendEmail = jest.fn();
+        EmailDao.sendEmail = jest.fn();
     });
 
     afterEach(async () => {
-        EmailController.sendEmail = jest.requireActual(
-            '@src/controller/EmailController'
-        ).EmailController.sendEmail;
+        EmailDao.sendEmail = jest.requireActual(
+            '@src/Dao/EmailDao'
+        ).EmailDao.sendEmail;
     });
 
     describe('create user', () => {
@@ -111,11 +111,11 @@ describe('account service tests', () => {
             test('create a account sends a verification email', async () => {
                 const email = 'create_a_user2@embtr.com';
 
-                await AccountController.delete(email);
+                await AccountDao.delete(email);
                 const body: CreateAccountRequest = { email: email, password: 'password' };
                 await request(app).post('/account/create').send(body);
 
-                expect(EmailController.sendEmail).toHaveBeenCalled();
+                expect(EmailDao.sendEmail).toHaveBeenCalled();
             });
         });
     });
@@ -148,7 +148,7 @@ describe('account service tests', () => {
             const body: ForgotAccountPasswordRequest = { email: ACCOUNT_THAT_EXISTS };
             await request(app).post('/account/forgot_password').send(body);
 
-            expect(EmailController.sendEmail).toHaveBeenCalled();
+            expect(EmailDao.sendEmail).toHaveBeenCalled();
         });
     });
 
@@ -196,7 +196,7 @@ describe('account service tests', () => {
 
             expect(response.statusCode).toBe(SUCCESS.httpCode);
             expect(response.body).toEqual(SUCCESS);
-            expect(EmailController.sendEmail).toHaveBeenCalled();
+            expect(EmailDao.sendEmail).toHaveBeenCalled();
         });
     });
 

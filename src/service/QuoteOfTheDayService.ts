@@ -5,29 +5,29 @@ import {
     GetQuoteOfTheDayResponse,
 } from '@resources/types/requests/QuoteOfTheDayTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { MetadataController } from '@src/controller/MetadataController';
-import { QuoteOfTheDayController } from '@src/controller/QuoteOfTheDayController';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { MetadataDao } from '@src/database/MetadataDao';
+import { QuoteOfTheDayDao } from '@src/database/QuoteOfTheDayDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class QuoteOfTheDayService {
     public static async add(request: Request): Promise<CreateQuoteOfTheDayResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
         //remove all double quotes
         const body: CreateQuoteOfTheDayRequest = request.body.replace(/"/g, '');
 
-        const quoteOfTheDay = await QuoteOfTheDayController.add(userId, body.quote, body.author);
+        const quoteOfTheDay = await QuoteOfTheDayDao.add(userId, body.quote, body.author);
         const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
 
         return { ...SUCCESS, quoteOfTheDay: quoteOfTheDayModel };
     }
 
     public static async get(): Promise<GetQuoteOfTheDayResponse> {
-        const quoteOfTheDayFromMetadata = await MetadataController.get('QUOTE_OF_THE_DAY');
+        const quoteOfTheDayFromMetadata = await MetadataDao.get('QUOTE_OF_THE_DAY');
         if (!quoteOfTheDayFromMetadata?.value) {
             return { ...GENERAL_FAILURE };
         }
@@ -41,7 +41,7 @@ export class QuoteOfTheDayService {
         if (this.shouldReset(quoteOfTheDayFromMetadata.updatedAt)) {
             quoteOfTheDay = await this.reset();
         } else {
-            quoteOfTheDay = await QuoteOfTheDayController.getById(quoteOfTheDayId);
+            quoteOfTheDay = await QuoteOfTheDayDao.getById(quoteOfTheDayId);
         }
 
         if (!quoteOfTheDay) {
@@ -61,8 +61,8 @@ export class QuoteOfTheDayService {
     }
 
     private static async reset() {
-        const quoteOfTheDay = await QuoteOfTheDayController.getRandom();
-        await MetadataController.set('QUOTE_OF_THE_DAY', quoteOfTheDay.id.toString());
+        const quoteOfTheDay = await QuoteOfTheDayDao.getRandom();
+        await MetadataDao.set('QUOTE_OF_THE_DAY', quoteOfTheDay.id.toString());
 
         return quoteOfTheDay;
     }

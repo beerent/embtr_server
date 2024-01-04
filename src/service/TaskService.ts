@@ -13,20 +13,20 @@ import {
     GET_TASK_SUCCESS,
     SUCCESS,
 } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { MetadataController } from '@src/controller/MetadataController';
-import { TaskController } from '@src/controller/TaskController';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { MetadataDao } from '@src/database/MetadataDao';
+import { TaskDao } from '@src/database/TaskDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class TaskService {
     public static async search(request: Request): Promise<SearchTasksResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         const query: string = request.query.q as string;
 
-        const tasks: Task[] = await TaskController.getAllLikeTitle(userId, query);
+        const tasks: Task[] = await TaskDao.getAllLikeTitle(userId, query);
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };
@@ -37,7 +37,7 @@ export class TaskService {
             return GET_TASK_FAILED_NOT_FOUND;
         }
 
-        const task = await TaskController.get(Number(id));
+        const task = await TaskDao.get(Number(id));
         if (task) {
             const taskModel: TaskModel = ModelConverter.convert(task);
             return { ...GET_TASK_SUCCESS, task: taskModel };
@@ -47,7 +47,7 @@ export class TaskService {
     }
 
     public static async create(request: Request): Promise<CreateTaskResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -56,7 +56,7 @@ export class TaskService {
 
         const body: CreateTaskRequest = request.body;
 
-        const task = await TaskController.create(
+        const task = await TaskDao.create(
             userId,
             body.title,
             body.description,
@@ -72,17 +72,17 @@ export class TaskService {
     }
 
     public static async recommended(request: Request): Promise<SearchTasksResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
-        const recommendedIds = await MetadataController.get('RECOMMENDED_TASKS');
+        const recommendedIds = await MetadataDao.get('RECOMMENDED_TASKS');
         if (!recommendedIds) {
             return { ...SUCCESS, tasks: [] };
         }
 
         const ids = recommendedIds.value.split(',').map((id) => Number(id));
-        const tasks: Task[] = await TaskController.getByIds(userId, ids);
+        const tasks: Task[] = await TaskDao.getByIds(userId, ids);
         const taskModels: TaskModel[] = ModelConverter.convertAll(tasks);
 
         return { ...SUCCESS, tasks: taskModels };

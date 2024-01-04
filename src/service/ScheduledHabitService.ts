@@ -6,8 +6,6 @@ import {
     GetScheduledHabitsResponse,
 } from '@resources/types/requests/ScheduledHabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { Context } from '@src/general/auth/Context';
@@ -18,6 +16,8 @@ import {
 } from '@resources/types/requests/HabitTypes';
 import { PureDate } from '@resources/types/date/PureDate';
 import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSummaryProvider';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(request: Request): Promise<CreateScheduledHabitResponse> {
@@ -30,7 +30,7 @@ export class ScheduledHabitService {
     }
 
     public static async create(request: Request): Promise<CreateScheduledHabitResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -38,7 +38,7 @@ export class ScheduledHabitService {
         }
 
         const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
-        const scheduledHabit = await ScheduledHabitController.create(
+        const scheduledHabit = await ScheduledHabitDao.create(
             userId,
             requestScheduledHabit.taskId!,
             requestScheduledHabit.description,
@@ -59,7 +59,7 @@ export class ScheduledHabitService {
     }
 
     public static async update(request: Request): Promise<CreateScheduledHabitResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -71,12 +71,12 @@ export class ScheduledHabitService {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const existingScheduledHabit = await ScheduledHabitController.get(requestScheduledHabit.id);
+        const existingScheduledHabit = await ScheduledHabitDao.get(requestScheduledHabit.id);
         if (!existingScheduledHabit) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
 
-        const scheduledHabit = await ScheduledHabitController.update(
+        const scheduledHabit = await ScheduledHabitDao.update(
             requestScheduledHabit.id,
             userId,
             existingScheduledHabit.taskId,
@@ -105,7 +105,7 @@ export class ScheduledHabitService {
         context: Context,
         habitId: number
     ): Promise<GetScheduledHabitsResponse> {
-        const scheduledHabits = await ScheduledHabitController.getAllByHabitIdAndUserId(
+        const scheduledHabits = await ScheduledHabitDao.getAllByHabitIdAndUserId(
             habitId,
             context.userId
         );
@@ -118,7 +118,7 @@ export class ScheduledHabitService {
     }
 
     public static async get(id: number): Promise<GetScheduledHabitResponse> {
-        const scheduledHabit = await ScheduledHabitController.get(id);
+        const scheduledHabit = await ScheduledHabitDao.get(id);
         if (!scheduledHabit) {
             return { ...GENERAL_FAILURE, message: 'invalid request' };
         }
@@ -128,7 +128,7 @@ export class ScheduledHabitService {
     }
 
     public static async getRecent(userId: number): Promise<ScheduledHabit[]> {
-        const scheduledHabits = await ScheduledHabitController.getRecent(userId);
+        const scheduledHabits = await ScheduledHabitDao.getRecent(userId);
         if (!scheduledHabits) {
             return [];
         }
@@ -138,7 +138,7 @@ export class ScheduledHabitService {
     }
 
     public static async getActive(userId: number, date: PureDate): Promise<ScheduledHabit[]> {
-        const scheduledHabits = await ScheduledHabitController.getActive(userId, date);
+        const scheduledHabits = await ScheduledHabitDao.getActive(userId, date);
         if (!scheduledHabits) {
             return [];
         }
@@ -151,7 +151,7 @@ export class ScheduledHabitService {
         context: Context,
         cutoffDate: PureDate
     ): Promise<GetHabitSummariesResponse> {
-        const scheduledHabits = await ScheduledHabitController.getAll(context.userId);
+        const scheduledHabits = await ScheduledHabitDao.getAll(context.userId);
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
         const habitSummaries = ScheduledHabitSummaryProvider.createSummaries(
             scheduledHabitModels,
@@ -166,7 +166,7 @@ export class ScheduledHabitService {
         habitId: number,
         cutoffDate: PureDate
     ): Promise<GetHabitSummaryResponse> {
-        const scheduledHabits = await ScheduledHabitController.getAllByHabitIdAndUserId(
+        const scheduledHabits = await ScheduledHabitDao.getAllByHabitIdAndUserId(
             habitId,
             context.userId
         );
@@ -188,7 +188,7 @@ export class ScheduledHabitService {
     }
 
     public static async archive(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -198,7 +198,7 @@ export class ScheduledHabitService {
         const id: number = Number(request.params.id);
 
         const now = new Date();
-        await ScheduledHabitController.archive(userId, id, now);
+        await ScheduledHabitDao.archive(userId, id, now);
 
         return { ...SUCCESS };
     }

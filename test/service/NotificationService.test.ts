@@ -3,8 +3,8 @@ import { NotificationTargetPage } from '@resources/schema';
 import { ClearNotificationsRequest } from '@resources/types/requests/NotificationTypes';
 import app from '@src/app';
 import { SUCCESS } from '@src/common/RequestResponses';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { NotificationController } from '@src/controller/NotificationController';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { NotificationDao } from '@src/database/NotificationDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -18,7 +18,7 @@ describe('notification', () => {
         beforeAll(async () => {
             await TestUtility.deleteAccountWithUser(email);
             accountWithUser = await TestUtility.createAccountWithUser(email, 'password', Role.USER);
-            userToken = await AuthenticationController.generateValidIdToken(email, 'password');
+            userToken = await AuthenticationDao.generateValidIdToken(email, 'password');
         });
 
         afterAll(async () => {
@@ -27,9 +27,9 @@ describe('notification', () => {
 
         test('valid', async () => {
             const notifications = [
-                NotificationController.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
-                NotificationController.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
-                NotificationController.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
+                NotificationDao.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
+                NotificationDao.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
+                NotificationDao.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
             ];
             await Promise.all(notifications);
 
@@ -48,11 +48,11 @@ describe('notification', () => {
         beforeAll(async () => {
             await TestUtility.deleteAccountWithUser(email);
             accountWithUser = await TestUtility.createAccountWithUser(email, 'password', Role.USER);
-            userToken = await AuthenticationController.generateValidIdToken(email, 'password');
+            userToken = await AuthenticationDao.generateValidIdToken(email, 'password');
             const notifications = [
-                NotificationController.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
-                NotificationController.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
-                NotificationController.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
+                NotificationDao.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
+                NotificationDao.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
+                NotificationDao.create(accountWithUser.user.id, accountWithUser.user.id, 'I am a noti', NotificationTargetPage.INVALID, 0),
             ];
             const [notification1, notification2, notification3] = await Promise.all(notifications);
             notificationIds = [notification1.id, notification2.id, notification3.id];
@@ -70,7 +70,7 @@ describe('notification', () => {
             const response = await request(app).post(`${NOTIFICATION}clear`).set('Authorization', `Bearer ${userToken}`).send(body);
             expect(response.status).toEqual(SUCCESS.httpCode);
 
-            const notifications = await NotificationController.getAll(accountWithUser.user.id);
+            const notifications = await NotificationDao.getAll(accountWithUser.user.id);
             for (const notification of notifications) {
                 expect(notification.read).toBeTruthy();
             }

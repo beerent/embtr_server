@@ -1,7 +1,7 @@
 import { Image } from '@resources/schema';
 import { storage } from '@src/auth/Firebase';
 
-export class ImageController {
+export class ImageDao {
     public static async deleteImages(image: Image[]) {
         for (const imageToDelete of image) {
             await this.deleteImage(imageToDelete);

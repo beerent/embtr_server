@@ -13,17 +13,17 @@ import {
     SUCCESS,
     UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedHabitController } from '@src/controller/PlannedHabitController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ChallengeService } from './ChallengeService';
 import { Request } from 'express';
 import { Constants } from '@resources/types/constants/constants';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 
 export class PlannedHabitService {
     public static async getById(id: number): Promise<GetPlannedHabitResponse> {
-        const plannedHabit = await PlannedHabitController.get(id);
+        const plannedHabit = await PlannedHabitDao.get(id);
         if (!plannedHabit) {
             return GET_PLANNED_DAY_FAILED_NOT_FOUND;
         }
@@ -48,18 +48,18 @@ export class PlannedHabitService {
         dayKey: string,
         request: Request
     ): Promise<CreateOrReplacePlannedTaskResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
         const plannedTask = request.body.plannedTask;
-        const plannedDay = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (!plannedDay || plannedDay.userId !== userId) {
             return CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY;
         }
         plannedTask.plannedDayId = plannedDay.id;
 
-        const createdPlannedTask = await PlannedHabitController.create(plannedTask);
+        const createdPlannedTask = await PlannedHabitDao.create(plannedTask);
         if (!createdPlannedTask) {
             return CREATE_PLANNED_TASK_FAILED;
         }
@@ -71,11 +71,11 @@ export class PlannedHabitService {
     public static async update(request: Request): Promise<UpdatePlannedTaskResponse> {
         const updateRequest: UpdatePlannedTaskRequest = request.body;
 
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
-        const plannedTask = await PlannedHabitController.get(updateRequest.plannedTask!.id!);
+        const plannedTask = await PlannedHabitDao.get(updateRequest.plannedTask!.id!);
         if (!plannedTask) {
             return UPDATE_PLANNED_TASK_FAILED;
         }
@@ -86,7 +86,7 @@ export class PlannedHabitService {
 
         updateRequest.plannedTask.status = this.getUpdatedStatus(updateRequest.plannedTask);
 
-        const updatedPlannedTask = await PlannedHabitController.update(updateRequest.plannedTask);
+        const updatedPlannedTask = await PlannedHabitDao.update(updateRequest.plannedTask);
         if (!updatedPlannedTask) {
             return UPDATE_PLANNED_TASK_FAILED;
         }

@@ -1,11 +1,11 @@
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetUnitsResponse } from '@resources/types/requests/UnitTypes';
-import { UnitController } from '@src/controller/UnitController';
 import { Unit } from '@resources/schema';
+import { UnitDao } from '@src/database/UnitDao';
 
 export class UnitService {
     public static async getAll(): Promise<GetUnitsResponse> {
-        const units = await UnitController.getAll();
+        const units = await UnitDao.getAll();
         return { ...SUCCESS, units };
     }
 

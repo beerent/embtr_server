@@ -11,10 +11,10 @@ import {
     SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedHabitController } from '@src/controller/PlannedTaskController';
-import { TaskController } from '@src/controller/TaskController';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
+import { TaskDao } from '@src/database/TaskDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -47,8 +47,8 @@ describe('DailyHistoryService', () => {
 
         // AUTHENTICATE
         const tokenGenerations = [
-            AuthenticationController.generateValidIdToken(EMAIL_WITH_NO_ROLE, 'password'),
-            AuthenticationController.generateValidIdToken(EMAIL_WITH_USER_ROLE, 'password'),
+            AuthenticationDao.generateValidIdToken(EMAIL_WITH_NO_ROLE, 'password'),
+            AuthenticationDao.generateValidIdToken(EMAIL_WITH_USER_ROLE, 'password'),
         ];
         const [t1, t2] = await Promise.all(tokenGenerations);
         ACCOUNT_WITH_NO_ROLE_TOKEN = t1;
@@ -120,20 +120,20 @@ describe('DailyHistoryService', () => {
         const TEST_EXISTING_TASK_TITLE = 'dhs test task 1';
 
         beforeAll(async () => {
-            await TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE);
+            await TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE);
 
-            const task = await TaskController.create(TEST_EXISTING_TASK_TITLE);
+            const task = await TaskDao.create(TEST_EXISTING_TASK_TITLE);
 
             const plannedDays = [
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0251-01-02'),
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0251-01-03'),
+                PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0251-01-02'),
+                PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0251-01-03'),
             ];
 
             await Promise.all(plannedDays);
         });
 
         afterAll(async () => {
-            await TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE);
+            await TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE);
         });
 
         test('incomplete day', async () => {
@@ -160,37 +160,37 @@ describe('DailyHistoryService', () => {
         let TEST_EXISTING_TASK_ID: number;
 
         beforeAll(async () => {
-            await TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE);
+            await TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE);
 
-            const task = await TaskController.create(TEST_EXISTING_TASK_TITLE);
+            const task = await TaskDao.create(TEST_EXISTING_TASK_TITLE);
             TEST_EXISTING_TASK_ID = task!.id;
 
             const plannedDays = [
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0250-01-02'),
-                PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0250-01-03'),
+                PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0250-01-02'),
+                PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '0250-01-03'),
             ];
 
             const [plannedDay, plannedDay2] = await Promise.all(plannedDays);
 
             const taskGenerations = [
-                PlannedHabitController.create(plannedDay, task!),
-                PlannedHabitController.create(plannedDay, task!),
-                PlannedHabitController.create(plannedDay2, task!),
-                PlannedHabitController.create(plannedDay2, task!),
-                PlannedHabitController.create(plannedDay2, task!),
+                PlannedHabitDao.create(plannedDay, task!),
+                PlannedHabitDao.create(plannedDay, task!),
+                PlannedHabitDao.create(plannedDay2, task!),
+                PlannedHabitDao.create(plannedDay2, task!),
+                PlannedHabitDao.create(plannedDay2, task!),
             ];
             const [createdTask1, createdTask2, createdTask3, createdTask4, createdTask5] =
                 await Promise.all(taskGenerations);
 
             const taskUpdates = [
-                PlannedHabitController.update({ id: createdTask1!.id, status: Constants.HabitStatus.COMPLETE }),
-                PlannedHabitController.update({ id: createdTask2!.id, status: Constants.HabitStatus.COMPLETE }),
+                PlannedHabitDao.update({ id: createdTask1!.id, status: Constants.HabitStatus.COMPLETE }),
+                PlannedHabitDao.update({ id: createdTask2!.id, status: Constants.HabitStatus.COMPLETE }),
             ];
             await Promise.all(taskUpdates);
         });
 
         afterAll(async () => {
-            await TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE);
+            await TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE);
         });
 
         test('valid', async () => {

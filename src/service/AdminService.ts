@@ -1,6 +1,6 @@
 import { Response } from "@resources/types/requests/RequestTypes";
 import { SUCCESS } from "@src/common/RequestResponses";
-import { MetadataController } from "@src/controller/MetadataController";
+import { MetadataDao } from "@src/database/MetadataDao";
 
 export class AdminService {
     public static async ping(): Promise<Response> {
@@ -8,7 +8,7 @@ export class AdminService {
     }
 
     public static async databasePing(): Promise<Response> {
-        await MetadataController.getAll();
+        await MetadataDao.getAll();
         return { ...SUCCESS };
     }
 }

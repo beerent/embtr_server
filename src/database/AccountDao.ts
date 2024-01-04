@@ -9,7 +9,7 @@ export interface CreateAccountResult {
     code: Code;
 }
 
-export class AccountController {
+export class AccountDao {
     public static async create(email: string, password: string): Promise<CreateAccountResult> {
         let user: UserRecord | undefined = undefined;
         try {

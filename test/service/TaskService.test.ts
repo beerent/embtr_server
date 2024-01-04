@@ -11,14 +11,14 @@ import {
     SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
-import { TaskController } from '@src/controller/TaskController';
 import request from 'supertest';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import { Role } from '@src/roles/Roles';
 import { CreateTaskRequest, CreateTaskResponse } from '@resources/types/requests/TaskTypes';
-import { PlannedHabitController } from '@src/controller/PlannedTaskController';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { Task } from '@prisma/client';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
+import { TaskDao } from '@src/database/TaskDao';
 
 describe('TaskService tests', () => {
     let USER_WITHOUT_ROLE: TestAccountWithUser;
@@ -55,18 +55,18 @@ describe('TaskService tests', () => {
 
         // create test tasks
         const taskDeletes = [
-            TaskController.deleteAllLikeTitle(TEST_TASK_SEARCH_PREFIX),
-            TaskController.deleteAllLikeTitle('ts_test_'),
+            TaskDao.deleteAllLikeTitle(TEST_TASK_SEARCH_PREFIX),
+            TaskDao.deleteAllLikeTitle('ts_test_'),
         ];
         await Promise.all(taskDeletes);
 
-        const task = await TaskController.create(TEST_TASK_TITLE);
+        const task = await TaskDao.create(TEST_TASK_TITLE);
         TEST_TASK_ID = task!.id;
 
         const taskSearches = [
-            TaskController.create(TEST_TASK_SEARCH_TITLE_1),
-            TaskController.create(TEST_TASK_SEARCH_TITLE_2),
-            TaskController.create(TEST_TASK_SEARCH_TITLE_3),
+            TaskDao.create(TEST_TASK_SEARCH_TITLE_1),
+            TaskDao.create(TEST_TASK_SEARCH_TITLE_2),
+            TaskDao.create(TEST_TASK_SEARCH_TITLE_3),
         ];
         const [task1, task2, task3] = await Promise.all(taskSearches);
         TASK1 = task1!;
@@ -77,8 +77,8 @@ describe('TaskService tests', () => {
     afterAll(async () => {
         await TestUtility.deleteAccountWithUser('ts_no_role@embtr.com');
         await TestUtility.deleteAccountWithUser('ts_user_role@embtr.com');
-        await TaskController.deleteAllLikeTitle(TEST_TASK_SEARCH_PREFIX);
-        await TaskController.deleteAllLikeTitle('ts_test_');
+        await TaskDao.deleteAllLikeTitle(TEST_TASK_SEARCH_PREFIX);
+        await TaskDao.deleteAllLikeTitle('ts_test_');
     });
 
     describe('get task', () => {
@@ -242,14 +242,14 @@ describe('TaskService tests', () => {
 
     describe('get recent', () => {
         beforeAll(async () => {
-            const plannedDay = await PlannedDayController.create(
+            const plannedDay = await PlannedDayDao.create(
                 USER_WITH_ROLE.user.id,
                 '1800-01-01'
             );
             const creates = [
-                PlannedHabitController.create(plannedDay, TASK1),
-                PlannedHabitController.create(plannedDay, TASK3),
-                PlannedHabitController.create(plannedDay, TASK2),
+                PlannedHabitDao.create(plannedDay, TASK1),
+                PlannedHabitDao.create(plannedDay, TASK3),
+                PlannedHabitDao.create(plannedDay, TASK2),
             ];
             await Promise.all(creates);
         });

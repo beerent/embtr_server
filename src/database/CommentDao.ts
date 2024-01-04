@@ -2,9 +2,9 @@ import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Interactable } from '@resources/types/interactable/Interactable';
 
-export type CreateCommentResult = Prisma.PromiseReturnType<typeof CommentController.create>;
+export type CreateCommentResult = Prisma.PromiseReturnType<typeof CommentDao.create>;
 
-export class CommentController {
+export class CommentDao {
     public static async create(
         interactable: Interactable,
         userId: number,

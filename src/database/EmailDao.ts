@@ -1,7 +1,7 @@
 import { firestore } from '@src/auth/Firebase';
 import { logger } from '@src/common/logger/Logger';
 
-export class EmailController {
+export class EmailDao {
     public static async sendEmail(
         recipient: string,
         subject: string,

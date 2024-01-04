@@ -7,8 +7,8 @@ import {
     SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
-import { MetadataController } from '@src/controller/MetadataController';
-import { QuoteOfTheDayController } from '@src/controller/QuoteOfTheDayController';
+import { MetadataDao } from '@src/database/MetadataDao';
+import { QuoteOfTheDayDao } from '@src/database/QuoteOfTheDayDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -116,17 +116,17 @@ describe('QuoteOfTheDayService', () => {
             const quote = 'automated test quote of the day';
 
             beforeAll(async () => {
-                const createdQuote = await QuoteOfTheDayController.add(
+                const createdQuote = await QuoteOfTheDayDao.add(
                     USER_ACCOUNT_WITH_USER_ROLE.user.id,
                     quote,
                     undefined
                 );
-                await MetadataController.set('QUOTE_OF_THE_DAY', createdQuote.id.toString());
+                await MetadataDao.set('QUOTE_OF_THE_DAY', createdQuote.id.toString());
             });
 
             afterAll(async () => {
-                await QuoteOfTheDayController.deleteByQuote(quote);
-                await MetadataController.delete('QUOTE_OF_THE_DAY');
+                await QuoteOfTheDayDao.deleteByQuote(quote);
+                await MetadataDao.delete('QUOTE_OF_THE_DAY');
             });
 
             test('success', async () => {
@@ -147,17 +147,17 @@ describe('QuoteOfTheDayService', () => {
         const quote = 'automated test quote of the day to like';
         let id: string;
         beforeAll(async () => {
-            const createdQuote = await QuoteOfTheDayController.add(
+            const createdQuote = await QuoteOfTheDayDao.add(
                 USER_ACCOUNT_WITH_USER_ROLE.user.id,
                 quote,
                 undefined
             );
             id = createdQuote.id.toString();
-            await MetadataController.set('QUOTE_OF_THE_DAY', createdQuote.id.toString());
+            await MetadataDao.set('QUOTE_OF_THE_DAY', createdQuote.id.toString());
         });
 
         afterAll(async () => {
-            await MetadataController.delete('QUOTE_OF_THE_DAY');
+            await MetadataDao.delete('QUOTE_OF_THE_DAY');
         });
 
         test('unauthenticated', async () => {

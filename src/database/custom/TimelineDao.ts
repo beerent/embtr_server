@@ -13,7 +13,7 @@ interface QueryResults {
     createdAt: Date;
 }
 
-export class TimelineController {
+export class TimelineDao {
     public static async getByDateAndLimit(date: Date, limit: number): Promise<TimelineQueryData> {
         const result = await prisma.$queryRaw(
             Prisma.sql`

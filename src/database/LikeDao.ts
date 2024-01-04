@@ -2,7 +2,7 @@ import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Interactable } from '@resources/types/interactable/Interactable';
 
-export class LikeController {
+export class LikeDao {
     public static async create(interactable: Interactable, userId: number, id: number) {
         const data: Prisma.LikeCreateInput = {
             user: {

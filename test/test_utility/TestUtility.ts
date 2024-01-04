@@ -1,11 +1,11 @@
 import { User } from '@prisma/client';
-import { AccountController } from '@src/controller/AccountController';
-import { UserController } from '@src/controller/UserController';
 import { Role } from '@src/roles/Roles';
 import { UserRecord } from 'firebase-admin/lib/auth/user-record';
 import { authenticate } from '@src/middleware/authentication';
 import { Request, Response } from 'express';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
+import { AccountDao } from '@src/database/AccountDao';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { UserDao } from '@src/database/UserDao';
 
 export interface TestAccountWithoutUser {
     account: UserRecord;
@@ -24,13 +24,13 @@ export class TestUtility {
         password: string,
         role: Role
     ): Promise<TestAccountWithoutUser> {
-        const account = await AccountController.create(email, password);
-        await AccountController.updateAccountRoles(account.user!.uid, [role]);
-        const token = await AuthenticationController.generateValidIdToken(email, password);
+        const account = await AccountDao.create(email, password);
+        await AccountDao.updateAccountRoles(account.user!.uid, [role]);
+        const token = await AuthenticationDao.generateValidIdToken(email, password);
 
         await this.sendAuthRequest(token);
 
-        const updatedToken = await AuthenticationController.generateValidIdToken(email, password);
+        const updatedToken = await AuthenticationDao.generateValidIdToken(email, password);
 
         return { account: account.user!, token: updatedToken };
     }
@@ -40,15 +40,15 @@ export class TestUtility {
         password: string,
         role: Role
     ): Promise<TestAccountWithUser> {
-        const account = await AccountController.create(email, password);
-        const user = await UserController.create(account.user!.uid, email);
+        const account = await AccountDao.create(email, password);
+        const user = await UserDao.create(account.user!.uid, email);
 
-        await AccountController.updateAccountRoles(account.user!.uid, [role]);
-        const token = await AuthenticationController.generateValidIdToken(email, password);
+        await AccountDao.updateAccountRoles(account.user!.uid, [role]);
+        const token = await AuthenticationDao.generateValidIdToken(email, password);
 
         await this.sendAuthRequest(token);
 
-        const updatedToken = await AuthenticationController.generateValidIdToken(email, password);
+        const updatedToken = await AuthenticationDao.generateValidIdToken(email, password);
 
         if (user !== null) {
             return { account: account.user!, user, token: updatedToken };
@@ -58,12 +58,12 @@ export class TestUtility {
     }
 
     public static async deleteAccountWithoutUser(email: string): Promise<void> {
-        const deletes = [AccountController.delete(email)];
+        const deletes = [AccountDao.delete(email)];
         await Promise.all(deletes);
     }
 
     public static async deleteAccountWithUser(email: string): Promise<void> {
-        const deletes = [AccountController.delete(email), UserController.deleteByEmail(email)];
+        const deletes = [AccountDao.delete(email), UserDao.deleteByEmail(email)];
         await Promise.all(deletes);
     }
 

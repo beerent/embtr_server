@@ -1,8 +1,7 @@
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import app from '@src/app';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedHabitController } from '@src/controller/PlannedTaskController';
-import { TaskController } from '@src/controller/TaskController';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { TaskDao } from '@src/database/TaskDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -40,26 +39,26 @@ describe('HabitJourneyService', () => {
 
     describe.only('get habit journey for user under threshold', () => {
         beforeAll(async () => {
-            await TaskController.deleteByTitle('task 1');
-            const task1 = await TaskController.create('task 1', 'description 1');
+            await TaskDao.deleteByTitle('task 1');
+            const task1 = await TaskDao.create('task 1', 'description 1');
 
-            await TaskController.deleteByTitle('task 2');
-            const task2 = await TaskController.create('task 2', 'description 2');
+            await TaskDao.deleteByTitle('task 2');
+            const task2 = await TaskDao.create('task 2', 'description 2');
 
-            const plannedDay1 = await PlannedDayController.create(
+            const plannedDay1 = await PlannedDayDao.create(
                 USER_ACCOUNT_WITH_USER_ROLE.user.id,
                 '2023-02-01'
             );
 
-            const plannedDay2 = await PlannedDayController.create(
+            const plannedDay2 = await PlannedDayDao.create(
                 USER_ACCOUNT_WITH_USER_ROLE.user.id,
                 '2023-02-12'
             );
         });
 
         afterAll(async () => {
-            await TaskController.deleteByTitle('task 1');
-            await TaskController.deleteByTitle('task 2');
+            await TaskDao.deleteByTitle('task 1');
+            await TaskDao.deleteByTitle('task 2');
         });
 
         test('get', async () => {

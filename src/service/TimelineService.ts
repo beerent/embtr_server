@@ -6,15 +6,15 @@ import {
     TimelineRequestCursor,
 } from '@resources/types/requests/Timeline';
 import { UserPostService } from '@src/service/UserPostService';
-import { TimelineController } from '@src/controller/custom/TimelineController';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { PlannedDayResult, UserPost } from '@resources/schema';
+import { TimelineDao } from '@src/database/custom/TimelineDao';
 
 export class TimelineService {
     public static async get(request: Request): Promise<GetTimelineResponse> {
         const cursor: TimelineRequestCursor = TimelineService.getCursor(request);
-        const queryData = await TimelineController.getByDateAndLimit(cursor.cursor, cursor.limit);
+        const queryData = await TimelineDao.getByDateAndLimit(cursor.cursor, cursor.limit);
 
         const [userPosts, plannedDayResults] = await Promise.all([
             UserPostService.getAllByIds(queryData.userPostIds),

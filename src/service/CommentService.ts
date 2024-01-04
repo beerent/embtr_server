@@ -10,16 +10,16 @@ import {
     RESOURCE_NOT_FOUND,
     SUCCESS,
 } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { CommentController, CreateCommentResult } from '@src/controller/common/CommentController';
 import { Request } from 'express';
 import { NotificationService, NotificationType } from './NotificationService';
-import { UserPostController } from '@src/controller/UserPostController';
-import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import { Interactable } from '@resources/types/interactable/Interactable';
-import { ChallengeController } from '@src/controller/ChallengeController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Comment } from '@resources/schema';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { ChallengeDao } from '@src/database/ChallengeDao';
+import { CreateCommentResult, CommentDao } from '@src/database/CommentDao';
+import { PlannedDayResultDao } from '@src/database/PlannedDayResultDao';
+import { UserPostDao } from '@src/database/UserPostDao';
 
 export class CommentService {
     public static async create(
@@ -29,7 +29,7 @@ export class CommentService {
         const targetId = Number(request.params.id);
         const comment = (request.body as CreateCommentRequest).comment;
 
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -41,7 +41,7 @@ export class CommentService {
             return { ...RESOURCE_NOT_FOUND, message: 'target does not exist' };
         }
 
-        const result: CreateCommentResult = await CommentController.create(
+        const result: CreateCommentResult = await CommentDao.create(
             interactable,
             userId,
             targetId,
@@ -73,19 +73,19 @@ export class CommentService {
 
     public static async delete(request: Request): Promise<Response> {
         const id = Number(request.params.id);
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
             return { ...INVALID_REQUEST, message: 'invalid request' };
         }
 
-        const comment = await CommentController.get(id);
+        const comment = await CommentDao.get(id);
         if (!comment || comment.userId !== userId) {
             return { ...RESOURCE_NOT_FOUND, message: 'comment does not exist' };
         }
 
-        await CommentController.delete(id);
+        await CommentDao.delete(id);
         return SUCCESS;
     }
 
@@ -93,15 +93,15 @@ export class CommentService {
         let exists = false;
         switch (interactable) {
             case Interactable.PLANNED_DAY_RESULT:
-                exists = await PlannedDayResultController.existsById(targetId);
+                exists = await PlannedDayResultDao.existsById(targetId);
                 break;
 
             case Interactable.USER_POST:
-                exists = await UserPostController.existsById(targetId);
+                exists = await UserPostDao.existsById(targetId);
                 break;
 
             case Interactable.CHALLENGE:
-                exists = await ChallengeController.existsById(targetId);
+                exists = await ChallengeDao.existsById(targetId);
                 break;
         }
 

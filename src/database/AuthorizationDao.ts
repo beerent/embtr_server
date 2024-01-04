@@ -2,7 +2,7 @@ import { Role } from '@src/roles/Roles';
 import { TokenCache } from '@src/general/auth/TokenCache';
 require('dotenv').config();
 
-export class AuthorizationController {
+export class AuthorizationDao {
     public static async getUserIdFromToken(authorizationHeader: string): Promise<number | undefined> {
         const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
 

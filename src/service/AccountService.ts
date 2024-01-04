@@ -12,10 +12,7 @@ import {
     GENERAL_FAILURE,
 } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
-import { CreateAccountResult, AccountController } from '@src/controller/AccountController';
 import { firebase } from '@src/auth/Firebase';
-import { EmailController } from '@src/controller/EmailController';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
 import {
     CreateAccountRequest,
     ForgotAccountPasswordRequest,
@@ -28,9 +25,12 @@ import {
 } from '@resources/types/requests/RequestTypes';
 import { logger } from '@src/common/logger/Logger';
 import { Request } from 'express';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { UserController } from '@src/controller/UserController';
 import { TokenCache } from '@src/general/auth/TokenCache';
+import { CreateAccountResult, AccountDao } from '@src/database/AccountDao';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { EmailDao } from '@src/database/EmailDao';
+import { UserDao } from '@src/database/UserDao';
 
 interface EmailVerificationLink {
     link: string;
@@ -43,7 +43,7 @@ export class AccountService {
             return this.getInvalidRequestResponse(request);
         }
 
-        const result: CreateAccountResult = await AccountController.create(
+        const result: CreateAccountResult = await AccountDao.create(
             request.email,
             request.password
         );
@@ -76,7 +76,7 @@ export class AccountService {
             return SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL;
         }
 
-        const user = await AccountController.get(request.email);
+        const user = await AccountDao.get(request.email);
         if (!user) {
             return SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL;
         }
@@ -98,7 +98,7 @@ export class AccountService {
             return ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS;
         }
 
-        const idToken = await AuthenticationController.generateValidIdToken(
+        const idToken = await AuthenticationDao.generateValidIdToken(
             request.email,
             request.password
         );
@@ -110,49 +110,49 @@ export class AccountService {
     }
 
     public static async refreshToken(req: Request) {
-        const uid = await AuthorizationController.getUidFromToken(req.headers.authorization!);
+        const uid = await AuthorizationDao.getUidFromToken(req.headers.authorization!);
         if (!uid) {
             return { ...GENERAL_FAILURE, message: 'failed to refresh token' };
         }
 
-        await AccountController.updateCustomClaim(uid, 'userId', undefined);
+        await AccountDao.updateCustomClaim(uid, 'userId', undefined);
 
-        const user = await UserController.getByUid(uid);
+        const user = await UserDao.getByUid(uid);
         if (!user) {
             return { ...GENERAL_FAILURE, message: 'failed to refresh token' };
         }
 
-        await AccountController.updateCustomClaim(uid, 'userId', user.id);
+        await AccountDao.updateCustomClaim(uid, 'userId', user.id);
         await TokenCache.invalidateToken(req.headers.authorization!);
 
         return { ...SUCCESS };
     }
 
     public static async delete(req: Request): Promise<Response> {
-        const uid = await AuthorizationController.getUidFromToken(req.headers.authorization!);
+        const uid = await AuthorizationDao.getUidFromToken(req.headers.authorization!);
         if (!uid) {
             return { ...GENERAL_FAILURE, message: 'failed to delete account' };
         }
 
-        const user = await AccountController.getByUid(uid);
+        const user = await AccountDao.getByUid(uid);
         if (!user) {
             return { ...GENERAL_FAILURE, message: 'failed to delete account' };
         }
 
-        await EmailController.sendEmail(
+        await EmailDao.sendEmail(
             'brent@embtr.com',
             'delete account request',
             (user.email ?? '') + ' has requested to delete their account. screw them.'
         );
 
-        await EmailController.sendEmail(
+        await EmailDao.sendEmail(
             user.email ?? '',
             'delete account request',
             'You have requested to delete your account and all of its data. We are sorry to see you go! We are processing this request ' +
                 'and will notify you when it is complete. '
         );
 
-        await AccountController.delete(user.email);
+        await AccountDao.delete(user.email);
         await TokenCache.invalidateToken(req.headers.authorization!);
 
         return { ...SUCCESS };
@@ -204,7 +204,7 @@ export class AccountService {
         const subject = 'Verify your email';
         const text = `Please click the link to verify your email: ${link.link}`;
 
-        await EmailController.sendEmail(email, subject, text);
+        await EmailDao.sendEmail(email, subject, text);
 
         return link;
     }
@@ -218,7 +218,7 @@ export class AccountService {
         const subject = 'Reset your password';
         const text = `Dear ${email}\n\nPlease click the link to reset your password: ${link}. If you did not request a password reset, you are safe to ignore this email.`;
 
-        await EmailController.sendEmail(email, subject, text);
+        await EmailDao.sendEmail(email, subject, text);
     }
 
     private static async getForgotPasswordLink(email: string): Promise<string | undefined> {

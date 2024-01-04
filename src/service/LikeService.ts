@@ -1,8 +1,6 @@
 import { Response } from '@resources/types/requests/RequestTypes';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { Request } from 'express';
 import { NotificationService, NotificationType } from './NotificationService';
-import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
 import {
     CREATE_PLANNED_DAY_RESULT_LIKE_FAILED,
     GENERAL_FAILURE,
@@ -10,17 +8,19 @@ import {
     RESOURCE_NOT_FOUND,
     SUCCESS,
 } from '@src/common/RequestResponses';
-import { LikeController } from '@src/controller/common/LikeController';
-import { UserPostController } from '@src/controller/UserPostController';
 import { Interactable } from '@resources/types/interactable/Interactable';
-import { QuoteOfTheDayController } from '@src/controller/QuoteOfTheDayController';
-import { ChallengeController } from '@src/controller/ChallengeController';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { ChallengeDao } from '@src/database/ChallengeDao';
+import { LikeDao } from '@src/database/LikeDao';
+import { PlannedDayResultDao } from '@src/database/PlannedDayResultDao';
+import { QuoteOfTheDayDao } from '@src/database/QuoteOfTheDayDao';
+import { UserPostDao } from '@src/database/UserPostDao';
 
 export class LikeService {
     public static async create(interactable: Interactable, request: Request): Promise<Response> {
         const targetId = Number(request.params.id);
 
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -32,12 +32,12 @@ export class LikeService {
             return { ...RESOURCE_NOT_FOUND, message: 'not found' };
         }
 
-        const alreadyLiked = await LikeController.exists(interactable, userId, targetId);
+        const alreadyLiked = await LikeDao.exists(interactable, userId, targetId);
         if (alreadyLiked) {
             return { ...RESOURCE_ALREADY_EXISTS, message: 'already liked' };
         }
 
-        const result = await LikeController.create(interactable, userId, targetId);
+        const result = await LikeDao.create(interactable, userId, targetId);
         if (!result) {
             return CREATE_PLANNED_DAY_RESULT_LIKE_FAILED;
         }
@@ -68,19 +68,19 @@ export class LikeService {
 
         switch (interactable) {
             case Interactable.PLANNED_DAY_RESULT:
-                exists = await PlannedDayResultController.existsById(targetId);
+                exists = await PlannedDayResultDao.existsById(targetId);
                 break;
 
             case Interactable.USER_POST:
-                exists = await UserPostController.existsById(targetId);
+                exists = await UserPostDao.existsById(targetId);
                 break;
 
             case Interactable.QUOTE_OF_THE_DAY:
-                exists = await QuoteOfTheDayController.existsById(targetId);
+                exists = await QuoteOfTheDayDao.existsById(targetId);
                 break;
 
             case Interactable.CHALLENGE:
-                exists = await ChallengeController.existsById(targetId);
+                exists = await ChallengeDao.existsById(targetId);
                 break;
         }
 

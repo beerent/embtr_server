@@ -1,23 +1,20 @@
 import { HabitJourney, HabitJourneyElement, HabitJourneys } from '@resources/types/habit/Habit';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { UserController } from '@src/controller/UserController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { SeasonController } from '@src/controller/SeasonController';
 import { Season } from '@prisma/client';
-import {
-    HabitJourneyQueryResults,
-    PlannedHabitController,
-} from '@src/controller/PlannedHabitController';
+import { PlannedHabitDao, HabitJourneyQueryResults } from '@src/database/PlannedHabitDao';
+import { SeasonDao } from '@src/database/SeasonDao';
+import { UserDao } from '@src/database/UserDao';
 
 export class HabitJourneyService {
     public static async get(userId: number): Promise<GetHabitJourneyResponse> {
-        const user = await UserController.getById(userId);
+        const user = await UserDao.getById(userId);
         if (!user) {
             return { ...GENERAL_FAILURE, message: 'User not found' };
         }
 
-        const habitJourneyElements = await PlannedHabitController.getHabitJourneys(userId);
+        const habitJourneyElements = await PlannedHabitDao.getHabitJourneys(userId);
         const models: HabitJourney[] = this.createHabitJourneysFromResults(habitJourneyElements);
         const backFilledModels = await this.backFillHabitJourneys(models);
         for (const model of backFilledModels) {
@@ -73,7 +70,7 @@ export class HabitJourneyService {
     }
 
     private static async backFillHabitJourneys(habitJourneys: HabitJourney[]) {
-        const seasons: Season[] = await SeasonController.getLastNSeasonsFromDay(12, new Date());
+        const seasons: Season[] = await SeasonDao.getLastNSeasonsFromDay(12, new Date());
         if (!seasons) {
             return habitJourneys;
         }

@@ -1,7 +1,7 @@
 import { prisma } from '@database/prisma';
 import { PureDate } from '@resources/types/date/PureDate';
 
-export class ScheduledHabitController {
+export class ScheduledHabitDao {
     public static async create(
         userId: number,
         taskId: number,

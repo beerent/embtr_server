@@ -4,10 +4,10 @@ import { CreateCommentRequest } from '@resources/types/requests/GeneralTypes';
 import { CreateUserPostRequest, GetAllUserPostResponse, GetUserPostResponse, UpdateUserPostRequest } from '@resources/types/requests/UserPostTypes';
 import app from '@src/app';
 import { FORBIDDEN, GENERAL_FAILURE, INVALID_REQUEST, RESOURCE_ALREADY_EXISTS, RESOURCE_NOT_FOUND, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { NotificationController } from '@src/controller/NotificationController';
-import { UserPostController } from '@src/controller/UserPostController';
-import { CommentController } from '@src/controller/common/CommentController';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { CommentDao } from '@src/database/CommentDao';
+import { NotificationDao } from '@src/database/NotificationDao';
+import { UserPostDao } from '@src/database/UserPostDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -48,9 +48,9 @@ describe('user post service', () => {
 
         //user authenticates
         const authenticates = [
-            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password'),
-            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password'),
-            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE_2, 'password'),
+            AuthenticationDao.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password'),
+            AuthenticationDao.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password'),
+            AuthenticationDao.generateValidIdToken(ACCOUNT_WITH_USER_ROLE_2, 'password'),
         ];
         const [token1, token2, token3] = await Promise.all(authenticates);
         ACCOUNT_WITH_NO_ROLES_TOKEN = token1;
@@ -59,9 +59,9 @@ describe('user post service', () => {
 
         //user posts
         const posts = [
-            UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
-            UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
-            UserPostController.create({ userId: ACCOUNT_USER_WITH_USER_ROLE_2.user.id, body: 'test body' }),
+            UserPostDao.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
+            UserPostDao.create({ userId: ACCOUNT_USER_WITH_USER_ROLE.user.id, body: 'test body' }),
+            UserPostDao.create({ userId: ACCOUNT_USER_WITH_USER_ROLE_2.user.id, body: 'test body' }),
         ];
         const [post1, post2] = await Promise.all(posts);
         TEST_POST_ID = post1.id;
@@ -325,7 +325,7 @@ describe('user post service', () => {
             const response = await request(app).patch(USER_POST).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send(body);
             expect(response.status).toEqual(SUCCESS.httpCode);
 
-            const deletedPost = await UserPostController.getById(TEST_POST_TO_DELETE_ID);
+            const deletedPost = await UserPostDao.getById(TEST_POST_TO_DELETE_ID);
             expect(deletedPost?.active).toBeFalsy();
         });
     });
@@ -360,7 +360,7 @@ describe('user post service', () => {
         test('valid', async () => {
             const response = await request(app).post(`${USER_POST}${TEST_POST_ID}/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
 
-            const userPost = await UserPostController.getById(TEST_POST_ID);
+            const userPost = await UserPostDao.getById(TEST_POST_ID);
 
             expect(userPost?.likes.length).toEqual(1);
             expect(response.status).toEqual(SUCCESS.httpCode);
@@ -370,7 +370,7 @@ describe('user post service', () => {
             await request(app).post(`${USER_POST}${TEST_POST_ID}/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
             const response = await request(app).post(`${USER_POST}${TEST_POST_ID}/like`).set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`).send();
 
-            const userPost = await UserPostController.getById(TEST_POST_ID);
+            const userPost = await UserPostDao.getById(TEST_POST_ID);
 
             expect(userPost?.likes.length).toEqual(1);
             expect(response.status).toEqual(RESOURCE_ALREADY_EXISTS.httpCode);
@@ -385,9 +385,9 @@ describe('user post service', () => {
             beforeAll(async () => {
                 await TestUtility.deleteAccountWithUser(email);
                 accountWithUser = await TestUtility.createAccountWithUser(email, 'password', Role.USER);
-                userToken = await AuthenticationController.generateValidIdToken(email, 'password');
+                userToken = await AuthenticationDao.generateValidIdToken(email, 'password');
 
-                userPostId = (await UserPostController.create({ userId: accountWithUser.user.id, body: 'test body' })).id;
+                userPostId = (await UserPostDao.create({ userId: accountWithUser.user.id, body: 'test body' })).id;
             });
 
             afterAll(async () => {
@@ -397,7 +397,7 @@ describe('user post service', () => {
             test('like adds notification', async () => {
                 await request(app).post(`${USER_POST}${userPostId}/like`).set('Authorization', `Bearer ${userToken}`).send();
 
-                const likes = await NotificationController.getAll(accountWithUser.user.id);
+                const likes = await NotificationDao.getAll(accountWithUser.user.id);
                 expect(likes.length).toEqual(1);
             });
         });
@@ -476,7 +476,7 @@ describe('user post service', () => {
         });
 
         test('valid', async () => {
-            const comment = await CommentController.create(Interactable.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
+            const comment = await CommentDao.create(Interactable.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
             const response = await request(app)
                 .delete(`${USER_POST}comment/${comment.id}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
@@ -487,7 +487,7 @@ describe('user post service', () => {
         });
 
         test('wrong user', async () => {
-            const comment = await CommentController.create(Interactable.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
+            const comment = await CommentDao.create(Interactable.USER_POST, ACCOUNT_USER_WITH_USER_ROLE.user.id, TEST_POST_ID, 'test comment');
             const response = await request(app)
                 .delete(`${USER_POST}comment/${comment.id}`)
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN_2}`)

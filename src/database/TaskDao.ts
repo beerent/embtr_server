@@ -2,7 +2,7 @@ import { prisma } from '@database/prisma';
 import { Task } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
 
-export class TaskController {
+export class TaskDao {
     public static async get(id: number): Promise<Task | null> {
         const task = await prisma.task.findUnique({
             where: {

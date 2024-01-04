@@ -2,14 +2,14 @@ import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 
 export type HabitCategoryPrisma = Prisma.PromiseReturnType<
-    typeof HabitCategoryController.getAllGeneric
+    typeof HabitCategoryDao.getAllGeneric
 >;
 
 const CUSTOM_HABITS_CATEGORY_ID = 13;
 const RECENT_HABITS_CATEGORY_ID = 14;
 const ACTIVE_HABITS_CATEGORY_ID = 15;
 
-export class HabitCategoryController {
+export class HabitCategoryDao {
     public static async getAllGeneric() {
         return prisma.habitCategory.findMany({
             where: {

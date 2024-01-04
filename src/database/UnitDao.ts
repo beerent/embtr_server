@@ -1,6 +1,6 @@
 import { prisma } from '@database/prisma';
 
-export class UnitController {
+export class UnitDao {
 
     public static async get(id: number) {
         return prisma.unit.findUnique({

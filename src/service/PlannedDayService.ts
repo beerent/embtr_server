@@ -19,12 +19,12 @@ import {
     GET_PLANNED_DAY_SUCCESS,
     SUCCESS,
 } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
-import { ScheduledHabitController } from '@src/controller/ScheduledHabitController';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -33,7 +33,7 @@ interface ScheduledHabitTimeOfDay {
 
 export class PlannedDayService {
     public static async getById(id: number): Promise<GetPlannedDayResponse> {
-        const plannedDay = await PlannedDayController.get(id);
+        const plannedDay = await PlannedDayDao.get(id);
 
         if (plannedDay) {
             const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
@@ -44,7 +44,7 @@ export class PlannedDayService {
     }
 
     public static async getIsComplete(request: GetPlannedDayRequest): Promise<GetBooleanResponse> {
-        const plannedDay = await PlannedDayController.getOrCreateByUserAndDayKey(
+        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(
             request.userId,
             request.dayKey
         );
@@ -60,7 +60,7 @@ export class PlannedDayService {
         // 1. get what SHOULD be completed for today
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
-        let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeekAndDate(
+        let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
             request.userId,
             dayOfWeek,
             plannedDayDate
@@ -89,7 +89,7 @@ export class PlannedDayService {
     }
 
     public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
-        const plannedDay = await PlannedDayController.getOrCreateByUserAndDayKey(
+        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(
             request.userId,
             request.dayKey
         );
@@ -97,7 +97,7 @@ export class PlannedDayService {
 
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
-        let scheduledHabits = await ScheduledHabitController.getForUserAndDayOfWeekAndDate(
+        let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
             request.userId,
             dayOfWeek,
             plannedDayDate
@@ -194,17 +194,17 @@ export class PlannedDayService {
     }
 
     public static async create(request: Request): Promise<CreatePlannedDayResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         const dayKey = request.body.dayKey;
 
-        const preExistingDayKey = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
+        const preExistingDayKey = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (preExistingDayKey) {
             return CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS;
         }
 
-        const createdPlannedDay = await PlannedDayController.create(userId, dayKey);
+        const createdPlannedDay = await PlannedDayDao.create(userId, dayKey);
         if (createdPlannedDay) {
             const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
             return { ...CREATE_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };

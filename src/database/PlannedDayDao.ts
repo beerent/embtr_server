@@ -41,7 +41,7 @@ export const PlannedDayInclude = {
     },
 } satisfies Prisma.PlannedDayInclude;
 
-export class PlannedDayController {
+export class PlannedDayDao {
     public static async create(userId: number, dayKey: string) {
         const date = new Date(dayKey);
 

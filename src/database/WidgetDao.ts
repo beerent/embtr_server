@@ -1,7 +1,7 @@
 import { prisma } from '@database/prisma';
-import { User, Widget, WidgetType } from '@resources/schema';
+import { Widget } from '@resources/schema';
 
-export class WidgetController {
+export class WidgetDao {
     public static async get(id: number) {
         const widget = await prisma.widget.findUnique({
             where: {

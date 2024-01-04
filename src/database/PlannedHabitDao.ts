@@ -5,7 +5,7 @@ import { Constants } from '@resources/types/constants/constants';
 
 export type PlannedTaskFull = PlannedTask & { plannedDay: PlannedDay };
 export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
-    typeof PlannedHabitController.getHabitJourneys
+    typeof PlannedHabitDao.getHabitJourneys
 >;
 
 // ¯\_(ツ)_/¯ - weakpotatoclone - 2023-06-02
@@ -19,7 +19,7 @@ const includes = {
     unit: true,
 };
 
-export class PlannedHabitController {
+export class PlannedHabitDao {
     public static async create(plannedTask: PlannedTaskModel): Promise<PlannedTask | null> {
         const unit = plannedTask.unitId
             ? {

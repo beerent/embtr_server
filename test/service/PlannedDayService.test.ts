@@ -23,9 +23,9 @@ import {
     UNAUTHORIZED,
     UPDATE_PLANNED_TASK_FAILED,
 } from '@src/common/RequestResponses';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedHabitController } from '@src/controller/PlannedTaskController';
-import { TaskController } from '@src/controller/TaskController';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
+import { TaskDao } from '@src/database/TaskDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -63,9 +63,9 @@ describe('planned day service', () => {
             TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES),
             TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE),
             TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE_2),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE_2),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE_3),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE_2),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE_3),
         ];
         await Promise.all(userAccountDeletes);
 
@@ -80,29 +80,29 @@ describe('planned day service', () => {
         USER_ACCOUNT_WITH_USER_ROLE_2 = c3;
 
         const taskCreates = [
-            TaskController.create(TEST_EXISTING_TASK_TITLE),
-            TaskController.create(TEST_EXISTING_TASK_TITLE + '2'),
-            TaskController.create(TEST_EXISTING_TASK_TITLE + '3'),
-            TaskController.create(TEST_EXISTING_TASK_TITLE + '4'),
-            TaskController.create(TEST_EXISTING_TASK_TITLE_2),
-            TaskController.create(TEST_EXISTING_TASK_TITLE_3),
+            TaskDao.create(TEST_EXISTING_TASK_TITLE),
+            TaskDao.create(TEST_EXISTING_TASK_TITLE + '2'),
+            TaskDao.create(TEST_EXISTING_TASK_TITLE + '3'),
+            TaskDao.create(TEST_EXISTING_TASK_TITLE + '4'),
+            TaskDao.create(TEST_EXISTING_TASK_TITLE_2),
+            TaskDao.create(TEST_EXISTING_TASK_TITLE_3),
         ];
         const [task, task2, task3, task4, task5, task6] = await Promise.all(taskCreates);
         TEST_EXISTING_TASK_ID = task!.id;
         TEST_EXISTING_TASK_ID_2 = task5!.id;
         TEST_EXISTING_TASK_ID_3 = task6!.id;
 
-        const plannedDay = await PlannedDayController.create(
+        const plannedDay = await PlannedDayDao.create(
             USER_ACCOUNT_WITH_USER_ROLE.user.id,
             TEST_EXISTING_PLANNED_DAY_KEY
         );
         TEST_EXISTING_PLANNED_DAY_ID = plannedDay.id;
 
         const taskGenerations = [
-            PlannedHabitController.create(plannedDay, task!),
-            PlannedHabitController.create(plannedDay, task2!),
-            PlannedHabitController.create(plannedDay, task3!),
-            PlannedHabitController.create(plannedDay, task4!),
+            PlannedHabitDao.create(plannedDay, task!),
+            PlannedHabitDao.create(plannedDay, task2!),
+            PlannedHabitDao.create(plannedDay, task3!),
+            PlannedHabitDao.create(plannedDay, task4!),
         ];
         const [_, createdTask2, createdTask3, inactiveTask] = await Promise.all(taskGenerations);
         TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID = createdTask2!.id;
@@ -110,11 +110,11 @@ describe('planned day service', () => {
         TEST_EXISTING_INACTIVE_PLANNED_TASK_ID = inactiveTask!.id;
 
         const taskUpdates = [
-            PlannedHabitController.update({
+            PlannedHabitDao.update({
                 id: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_ID_2,
                 status: TEST_EXISTING_PLANNED_TASK_TO_UPDATE_2_INITIAL_STATUS,
             }),
-            PlannedHabitController.update({
+            PlannedHabitDao.update({
                 id: TEST_EXISTING_INACTIVE_PLANNED_TASK_ID,
             }),
         ];
@@ -126,11 +126,11 @@ describe('planned day service', () => {
             TestUtility.deleteAccountWithUser(ACCOUNT_WITH_NO_ROLES),
             TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE),
             TestUtility.deleteAccountWithUser(ACCOUNT_WITH_USER_ROLE_2),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE + '2'),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE + '3'),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE + '4'),
-            TaskController.deleteByTitle(TEST_EXISTING_TASK_TITLE_2),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE + '2'),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE + '3'),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE + '4'),
+            TaskDao.deleteByTitle(TEST_EXISTING_TASK_TITLE_2),
         ];
 
         await Promise.all(deletes);
@@ -461,7 +461,7 @@ describe('planned day service', () => {
                 .set('Authorization', `Bearer ${USER_ACCOUNT_WITH_USER_ROLE.token}`)
                 .send(body);
 
-            const plannedTask = await PlannedHabitController.getByPlannedDayIdAndTaskId(
+            const plannedTask = await PlannedHabitDao.getByPlannedDayIdAndTaskId(
                 TEST_EXISTING_PLANNED_DAY_ID,
                 TEST_EXISTING_TASK_ID_3
             );

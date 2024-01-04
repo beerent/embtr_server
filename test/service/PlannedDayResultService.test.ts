@@ -29,13 +29,13 @@ import {
     UPDATE_PLANNED_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
 } from '@src/common/RequestResponses';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { NotificationController } from '@src/controller/NotificationController';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
-import { PlannedDayResultController } from '@src/controller/PlannedDayResultController';
-import { PlannedHabitController } from '@src/controller/PlannedTaskController';
-import { TaskController } from '@src/controller/TaskController';
-import { CommentController } from '@src/controller/common/CommentController';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { CommentDao } from '@src/database/CommentDao';
+import { NotificationDao } from '@src/database/NotificationDao';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { PlannedDayResultDao } from '@src/database/PlannedDayResultDao';
+import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
+import { TaskDao } from '@src/database/TaskDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -86,9 +86,9 @@ describe('DayResultServices', () => {
 
         //user authenticates
         const authenticates = [
-            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password'),
-            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password'),
-            AuthenticationController.generateValidIdToken(ACCOUNT_WITH_USER_ROLE_2, 'password'),
+            AuthenticationDao.generateValidIdToken(ACCOUNT_WITH_NO_ROLES, 'password'),
+            AuthenticationDao.generateValidIdToken(ACCOUNT_WITH_USER_ROLE, 'password'),
+            AuthenticationDao.generateValidIdToken(ACCOUNT_WITH_USER_ROLE_2, 'password'),
         ];
         const [token1, token2, token3] = await Promise.all(authenticates);
         ACCOUNT_WITH_NO_ROLES_TOKEN = token1;
@@ -97,19 +97,19 @@ describe('DayResultServices', () => {
 
         //planned days
         const plannedDayCreates = [
-            PlannedDayController.create(
+            PlannedDayDao.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
                 TEST_PLANNED_DAY_DATE_FOR_PRECREATED_RESULT
             ),
-            PlannedDayController.create(
+            PlannedDayDao.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
                 TEST_PLANNED_DAY_DATE_TO_CREATE_RESULT
             ),
-            PlannedDayController.create(
+            PlannedDayDao.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
                 TEST_PLANNED_DAY_DATE_TO_COMMENT
             ),
-            PlannedDayController.create(
+            PlannedDayDao.create(
                 ACCOUNT_USER_WITH_USER_ROLE.user.id,
                 TEST_PLANNED_DAY_DIFFERENT_USER
             ),
@@ -119,21 +119,21 @@ describe('DayResultServices', () => {
         TEST_PLANNED_DAY_TO_CREATE_RESULT_ID = plannedDayToCreateResult.id;
 
         //tasks
-        await TaskController.deleteByTitle(TEST_TASK_TITLE);
-        const task = await TaskController.create(TEST_TASK_TITLE);
-        await PlannedHabitController.create(plannedDay, task!);
+        await TaskDao.deleteByTitle(TEST_TASK_TITLE);
+        const task = await TaskDao.create(TEST_TASK_TITLE);
+        await PlannedHabitDao.create(plannedDay, task!);
 
         const plannedDayResultCreates = [
-            PlannedDayResultController.create(plannedDay.id),
-            PlannedDayResultController.create(plannedDayToComment.id),
-            PlannedDayResultController.create(plannedDayDifferentUser.id),
+            PlannedDayResultDao.create(plannedDay.id),
+            PlannedDayResultDao.create(plannedDayToComment.id),
+            PlannedDayResultDao.create(plannedDayDifferentUser.id),
         ];
         const [dayResult, dayResultToComment] = await Promise.all(plannedDayResultCreates);
 
         TEST_EXISTING_PLANNED_DAY_RESULT_ID = dayResult.id;
         TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID = dayResultToComment.id;
 
-        const comment = await CommentController.create(
+        const comment = await CommentDao.create(
             Interactable.PLANNED_DAY_RESULT,
             ACCOUNT_USER_WITH_USER_ROLE.user.id,
             TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID,
@@ -150,7 +150,7 @@ describe('DayResultServices', () => {
         ];
         await Promise.all(deletes);
 
-        await TaskController.deleteByTitle(TEST_TASK_TITLE);
+        await TaskDao.deleteByTitle(TEST_TASK_TITLE);
     });
 
     describe('get by id', () => {
@@ -293,41 +293,41 @@ describe('DayResultServices', () => {
         describe('with bounds', () => {
             beforeAll(async () => {
                 const creates = [
-                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-01'),
-                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-02'),
-                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-03'),
-                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-04'),
-                    PlannedDayController.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-05'),
+                    PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-01'),
+                    PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-02'),
+                    PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-03'),
+                    PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-04'),
+                    PlannedDayDao.create(ACCOUNT_USER_WITH_USER_ROLE.user.id, '2020-01-05'),
                 ];
                 const [p1, p2, p3, p4, p5] = await Promise.all(creates);
 
                 const plannedDayResultCreates = [
-                    PlannedDayResultController.create(p1.id),
-                    PlannedDayResultController.create(p2.id),
-                    PlannedDayResultController.create(p3.id),
-                    PlannedDayResultController.create(p4.id),
-                    PlannedDayResultController.create(p5.id),
+                    PlannedDayResultDao.create(p1.id),
+                    PlannedDayResultDao.create(p2.id),
+                    PlannedDayResultDao.create(p3.id),
+                    PlannedDayResultDao.create(p4.id),
+                    PlannedDayResultDao.create(p5.id),
                 ];
                 const [pdr1, pdr2, pdr3, pdr4, pdr5] = await Promise.all(plannedDayResultCreates);
 
                 const updates = [
-                    PlannedDayResultController.update({
+                    PlannedDayResultDao.update({
                         id: pdr1.id,
                         createdAt: new Date('2020-01-01'),
                     }),
-                    PlannedDayResultController.update({
+                    PlannedDayResultDao.update({
                         id: pdr2.id,
                         createdAt: new Date('2020-01-02'),
                     }),
-                    PlannedDayResultController.update({
+                    PlannedDayResultDao.update({
                         id: pdr3.id,
                         createdAt: new Date('2020-01-03'),
                     }),
-                    PlannedDayResultController.update({
+                    PlannedDayResultDao.update({
                         id: pdr4.id,
                         createdAt: new Date('2020-01-04'),
                     }),
-                    PlannedDayResultController.update({
+                    PlannedDayResultDao.update({
                         id: pdr5.id,
                         createdAt: new Date('2020-01-05'),
                     }),
@@ -769,7 +769,7 @@ describe('DayResultServices', () => {
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send();
 
-            const plannedDayResult = await PlannedDayResultController.getById(
+            const plannedDayResult = await PlannedDayResultDao.getById(
                 TEST_EXISTING_PLANNED_DAY_RESULT_TO_COMMENT_ID
             );
 
@@ -787,7 +787,7 @@ describe('DayResultServices', () => {
                 .set('Authorization', `Bearer ${ACCOUNT_WITH_USER_ROLE_TOKEN}`)
                 .send();
 
-            const plannedDayResult = await PlannedDayResultController.getById(
+            const plannedDayResult = await PlannedDayResultDao.getById(
                 TEST_EXISTING_PLANNED_DAY_RESULT_ID
             );
 
@@ -808,12 +808,12 @@ describe('DayResultServices', () => {
                     'password',
                     Role.USER
                 );
-                userToken = await AuthenticationController.generateValidIdToken(email, 'password');
-                const plannedDay = await PlannedDayController.create(
+                userToken = await AuthenticationDao.generateValidIdToken(email, 'password');
+                const plannedDay = await PlannedDayDao.create(
                     accountWithUser.user.id,
                     '2020-01-01'
                 );
-                plannedDayResultId = (await PlannedDayResultController.create(plannedDay.id)).id;
+                plannedDayResultId = (await PlannedDayResultDao.create(plannedDay.id)).id;
             });
 
             afterAll(async () => {
@@ -826,7 +826,7 @@ describe('DayResultServices', () => {
                     .set('Authorization', `Bearer ${userToken}`)
                     .send();
 
-                const likes = await NotificationController.getAll(accountWithUser.user.id);
+                const likes = await NotificationDao.getAll(accountWithUser.user.id);
                 expect(likes.length).toEqual(1);
             });
         });

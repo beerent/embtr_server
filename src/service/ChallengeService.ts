@@ -15,18 +15,15 @@ import {
 } from '@resources/types/requests/ChallengeTypes';
 import { Response } from '@resources/types/requests/RequestTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import {
-    ChallengeController,
-    ChallengeRequirementResults,
-} from '@src/controller/ChallengeController';
-import { ChallengeParticipantController } from '@src/controller/ChallengeParticipantController';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
+import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 
 export class ChallengeService {
     public static async getAll(): Promise<GetChallengesResponse> {
-        const challenges = await ChallengeController.getAll();
+        const challenges = await ChallengeDao.getAll();
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
         return { ...SUCCESS, challenges: challengeModels };
@@ -43,7 +40,7 @@ export class ChallengeService {
             lowerBound = new Date(request.query.lowerBound as string);
         }
 
-        const challenges = await ChallengeController.getAllRecentJoins(upperBound, lowerBound);
+        const challenges = await ChallengeDao.getAllRecentJoins(upperBound, lowerBound);
         const models: Challenge[] = ModelConverter.convertAll(challenges);
 
         const joinedChallenges: JoinedChallenge[] = [];
@@ -75,7 +72,7 @@ export class ChallengeService {
     public static async getChallengeParticipationForUser(
         userId: number
     ): Promise<GetChallengeParticipationResponse> {
-        const challengeParticipation = await ChallengeParticipantController.getAllForUser(userId);
+        const challengeParticipation = await ChallengeParticipantDao.getAllForUser(userId);
         const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
 
         return { ...SUCCESS, challengeParticipation: models };
@@ -84,7 +81,7 @@ export class ChallengeService {
     public static async getActiveChallengeParticipationForUser(
         userId: number
     ): Promise<GetChallengeParticipationResponse> {
-        const challengeParticipation = await ChallengeParticipantController.getAllActiveForUser(
+        const challengeParticipation = await ChallengeParticipantDao.getAllActiveForUser(
             userId
         );
         const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
@@ -95,7 +92,7 @@ export class ChallengeService {
     public static async getCompletedChallengesForUser(
         userId: number
     ): Promise<GetChallengeParticipationResponse> {
-        const challengeParticipation = await ChallengeParticipantController.getAllForUser(
+        const challengeParticipation = await ChallengeParticipantDao.getAllForUser(
             userId,
             ChallengeRequirementCompletionState.COMPLETED
         );
@@ -105,13 +102,13 @@ export class ChallengeService {
     }
 
     public static async get(request: Request): Promise<GetChallengeResponse> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
         const id = Number(request.params.id);
 
-        const challenge = await ChallengeController.get(id);
+        const challenge = await ChallengeDao.get(id);
         if (!challenge) {
             return { ...GENERAL_FAILURE, message: 'challenge not found' };
         }
@@ -122,7 +119,7 @@ export class ChallengeService {
     }
 
     public static async register(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
@@ -132,12 +129,12 @@ export class ChallengeService {
 
         const challengeId = Number(request.params.id);
 
-        const challenge = await ChallengeController.get(challengeId);
+        const challenge = await ChallengeDao.get(challengeId);
         if (challenge?.challengeParticipants.some((participant) => participant.userId === userId)) {
             return { ...GENERAL_FAILURE, message: 'user already registered for challenge' };
         }
 
-        const response = await ChallengeController.register(userId, challengeId);
+        const response = await ChallengeDao.register(userId, challengeId);
         return SUCCESS;
     }
 
@@ -153,7 +150,7 @@ export class ChallengeService {
 
         const completedChallenges = [];
 
-        const participants = await ChallengeParticipantController.getAllForUserAndTaskAndDate(
+        const participants = await ChallengeParticipantDao.getAllForUserAndTaskAndDate(
             userId,
             taskId ?? 0,
             date
@@ -206,7 +203,7 @@ export class ChallengeService {
                         ? ChallengeRequirementCompletionState.COMPLETED
                         : ChallengeRequirementCompletionState.IN_PROGRESS;
 
-                promises.push(ChallengeParticipantController.update(participant));
+                promises.push(ChallengeParticipantDao.update(participant));
 
                 if (
                     previousCompletionState !== participant.challengeRequirementCompletionState &&
@@ -240,7 +237,7 @@ export class ChallengeService {
         }
 
         const results: ChallengeRequirementResults[] =
-            await ChallengeController.getChallengeRequirementProgess(
+            await ChallengeDao.getChallengeRequirementProgess(
                 start,
                 end,
                 userId,

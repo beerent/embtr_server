@@ -2,7 +2,7 @@ import { Widget, WidgetType } from '@resources/schema';
 import { UpdateWidgetsRequest } from '@resources/types/requests/WidgetTypes';
 import app from '@src/app';
 import { FORBIDDEN, INVALID_REQUEST, SUCCESS, UNAUTHORIZED } from '@src/common/RequestResponses';
-import { WidgetController } from '@src/controller/WidgetController';
+import { WidgetDao } from '@src/database/WidgetDao';
 import { Role } from '@src/roles/Roles';
 import { TestAccountWithUser, TestUtility } from '@test/test_utility/TestUtility';
 import request from 'supertest';
@@ -92,7 +92,7 @@ describe('WidgetService', () => {
             };
 
             const response = await request(app).post('/widget').set('Authorization', `Bearer ${USER_ACCOUNT_WITH_USER_ROLE.token}`).send(body);
-            const widgets = await WidgetController.getAllForUser(USER_ACCOUNT_WITH_USER_ROLE.user.id);
+            const widgets = await WidgetDao.getAllForUser(USER_ACCOUNT_WITH_USER_ROLE.user.id);
 
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(widgets[0].type).toEqual(WidgetType.DAILY_HISTORY);
@@ -100,7 +100,7 @@ describe('WidgetService', () => {
         });
 
         test('valid update', async () => {
-            const result = await WidgetController.create(USER_ACCOUNT_WITH_USER_ROLE_2.user.id, { type: WidgetType.DAILY_HISTORY, order: 1 });
+            const result = await WidgetDao.create(USER_ACCOUNT_WITH_USER_ROLE_2.user.id, { type: WidgetType.DAILY_HISTORY, order: 1 });
 
             const body: UpdateWidgetsRequest = {
                 widgets: [
@@ -115,7 +115,7 @@ describe('WidgetService', () => {
             const response = await request(app).post('/widget').set('Authorization', `Bearer ${USER_ACCOUNT_WITH_USER_ROLE_2.token}`).send(body);
             expect(response.status).toEqual(SUCCESS.httpCode);
 
-            const widgets = await WidgetController.getAllForUser(USER_ACCOUNT_WITH_USER_ROLE_2.user.id);
+            const widgets = await WidgetDao.getAllForUser(USER_ACCOUNT_WITH_USER_ROLE_2.user.id);
             expect(widgets[0].type).toEqual(WidgetType.DAILY_HISTORY);
             expect(widgets[0].order).toEqual(2);
         });
@@ -133,15 +133,15 @@ describe('WidgetService', () => {
         });
 
         test('valid', async () => {
-            await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.DAILY_HISTORY, order: 12 });
+            await WidgetDao.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.DAILY_HISTORY, order: 12 });
             const response = await request(app).get('/widget').set('Authorization', `Bearer ${USER_WITH_WIDGETS.token}`).send();
             expect(response.status).toEqual(SUCCESS.httpCode);
             expect(response.body.widgets.length).toEqual(1);
         });
 
         test('valid does not return inactive widgets', async () => {
-            const result = await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.TIME_LEFT_IN_DAY, order: 1 });
-            await WidgetController.update({ id: result.id, active: false });
+            const result = await WidgetDao.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.TIME_LEFT_IN_DAY, order: 1 });
+            await WidgetDao.update({ id: result.id, active: false });
             const response = await request(app).get('/widget').set('Authorization', `Bearer ${USER_WITH_WIDGETS.token}`).send();
 
             expect(response.status).toEqual(SUCCESS.httpCode);
@@ -150,8 +150,8 @@ describe('WidgetService', () => {
         });
 
         test('update to widget with no id that already exists in database updates the existing widget', async () => {
-            const result = await WidgetController.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.QUOTE_OF_THE_DAY, order: 1 });
-            await WidgetController.update({ id: result.id, active: false });
+            const result = await WidgetDao.create(USER_WITH_WIDGETS.user.id, { type: WidgetType.QUOTE_OF_THE_DAY, order: 1 });
+            await WidgetDao.update({ id: result.id, active: false });
 
             const widgetToCreate: Widget = {
                 type: WidgetType.QUOTE_OF_THE_DAY,
@@ -165,7 +165,7 @@ describe('WidgetService', () => {
             const response = await request(app).post('/widget').set('Authorization', `Bearer ${USER_WITH_WIDGETS.token}`).send(body);
             expect(response.status).toEqual(SUCCESS.httpCode);
 
-            const widgetFromDatabase = await WidgetController.get(result.id);
+            const widgetFromDatabase = await WidgetDao.get(result.id);
             expect(widgetFromDatabase!.active).toEqual(true);
         });
     });

@@ -2,7 +2,7 @@ import { prisma } from '@database/prisma';
 import { NotificationTargetPage } from '@prisma/client';
 import { NotificationTargetPage as NotificationTargetPageModel } from '@resources/schema';
 
-export class NotificationController {
+export class NotificationDao {
     public static async create(
         toUser: number,
         fromUser: number,

@@ -1,6 +1,6 @@
 import { prisma } from '@database/prisma';
 
-export class SeasonController {
+export class SeasonDao {
     public static async getSeasonForDay(date: Date) {
         return prisma.season.findFirst({
             where: {

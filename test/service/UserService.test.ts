@@ -11,10 +11,10 @@ import {
     SUCCESS,
     UNAUTHORIZED,
 } from '@src/common/RequestResponses';
-import { AccountController } from '@src/controller/AccountController';
-import { AuthenticationController } from '@src/controller/AuthenticationController';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { UserController } from '@src/controller/UserController';
+import { AccountDao } from '@src/database/AccountDao';
+import { AuthenticationDao } from '@src/database/AuthenticationDao';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { UserDao } from '@src/database/UserDao';
 import { getBearerToken } from '@src/general/auth/BearerTokenUtility';
 import { Role } from '@src/roles/Roles';
 import {
@@ -61,12 +61,12 @@ describe('user service tests', () => {
         );
 
         const deletes = [
-            AccountController.delete(ACCOUNT_TO_CREATE_USER),
-            AccountController.delete(ACCOUNT_TO_CREATE_USER_2),
-            AccountController.delete(ACCOUNT_TO_CREATE_USER_3),
-            AccountController.create(ACCOUNT_TO_CREATE_USER, 'password'),
-            AccountController.create(ACCOUNT_TO_CREATE_USER_2, 'password'),
-            AccountController.create(ACCOUNT_TO_CREATE_USER_3, 'password'),
+            AccountDao.delete(ACCOUNT_TO_CREATE_USER),
+            AccountDao.delete(ACCOUNT_TO_CREATE_USER_2),
+            AccountDao.delete(ACCOUNT_TO_CREATE_USER_3),
+            AccountDao.create(ACCOUNT_TO_CREATE_USER, 'password'),
+            AccountDao.create(ACCOUNT_TO_CREATE_USER_2, 'password'),
+            AccountDao.create(ACCOUNT_TO_CREATE_USER_3, 'password'),
         ];
         await Promise.all(deletes);
     });
@@ -126,7 +126,7 @@ describe('user service tests', () => {
         });
 
         test('get unknown user with insufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(
+            const requesterToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_NO_ROLES,
                 'password'
             );
@@ -140,7 +140,7 @@ describe('user service tests', () => {
         });
 
         test('get known user with insufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(
+            const requesterToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_NO_ROLES,
                 'password'
             );
@@ -154,7 +154,7 @@ describe('user service tests', () => {
         });
 
         test('get self user with insufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(
+            const requesterToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_NO_ROLES,
                 'password'
             );
@@ -168,7 +168,7 @@ describe('user service tests', () => {
         });
 
         test('get unknown user with sufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(
+            const requesterToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_USER_ROLE,
                 'password'
             );
@@ -182,7 +182,7 @@ describe('user service tests', () => {
         });
 
         test('get known user with sufficient permissions', async () => {
-            const requesterToken = await AuthenticationController.generateValidIdToken(
+            const requesterToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_USER_ROLE,
                 'password'
             );
@@ -206,7 +206,7 @@ describe('user service tests', () => {
         });
 
         test('create pre-existing user with authenticated account', async () => {
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_USER_ROLE,
                 'password'
             );
@@ -222,7 +222,7 @@ describe('user service tests', () => {
         });
 
         test('create user with authenticated account', async () => {
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_TO_CREATE_USER,
                 'password'
             );
@@ -237,13 +237,13 @@ describe('user service tests', () => {
         });
 
         test('authenticated account sets user role as custom claim', async () => {
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_TO_CREATE_USER_2,
                 'password'
             );
 
             //verify account has no roles
-            const initialRoles = await AuthorizationController.getRolesFromToken(
+            const initialRoles = await AuthorizationDao.getRolesFromToken(
                 getBearerToken(token)
             );
             expect(initialRoles).toEqual([]);
@@ -255,26 +255,26 @@ describe('user service tests', () => {
                 .set('Authorization', getBearerToken(token))
                 .send(body);
 
-            const updatedToken = await AuthenticationController.generateValidIdToken(
+            const updatedToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_TO_CREATE_USER_2,
                 'password'
             );
 
             //verify account has user role
-            const createdUserRoles = await AuthorizationController.getRolesFromToken(
+            const createdUserRoles = await AuthorizationDao.getRolesFromToken(
                 getBearerToken(updatedToken)
             );
             expect(createdUserRoles).toEqual([Role.USER]);
         });
 
         test('authenticated account sets userId as custom claim', async () => {
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_TO_CREATE_USER_3,
                 'password'
             );
 
             //verify account has no user id
-            const userId = await AuthorizationController.getUserIdFromToken(getBearerToken(token));
+            const userId = await AuthorizationDao.getUserIdFromToken(getBearerToken(token));
             expect(userId).toBeUndefined();
 
             //create user
@@ -284,13 +284,13 @@ describe('user service tests', () => {
                 .set('Authorization', getBearerToken(token))
                 .send(body);
 
-            const updatedToken = await AuthenticationController.generateValidIdToken(
+            const updatedToken = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_TO_CREATE_USER_3,
                 'password'
             );
 
             //verify account has userId
-            const createdUserId = await AuthorizationController.getUserIdFromToken(
+            const createdUserId = await AuthorizationDao.getUserIdFromToken(
                 getBearerToken(updatedToken)
             );
             expect(createdUserId).toBeDefined();
@@ -306,7 +306,7 @@ describe('user service tests', () => {
         });
 
         test('insuffecient permissions', async () => {
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_NO_ROLES,
                 'password'
             );
@@ -321,7 +321,7 @@ describe('user service tests', () => {
         });
 
         test('success', async () => {
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_USER_ROLE,
                 'password'
             );
@@ -337,32 +337,32 @@ describe('user service tests', () => {
         test('update user with sufficient permissions updates user', async () => {
             const randomString = Math.random().toString(36).substring(7);
 
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_USER_ROLE,
                 'password'
             );
 
             const body: UpdateUserRequest = { displayName: randomString };
             await request(app).patch(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
-            const user = await UserController.getByUid(USER_ACCOUNT_WITH_USER_ROLE.user.uid);
+            const user = await UserDao.getByUid(USER_ACCOUNT_WITH_USER_ROLE.user.uid);
 
             expect(user?.displayName).toEqual(randomString);
         });
 
         test('update user with sufficient permissions does not change unmodified fields', async () => {
             const initialLocation = 'Austin, TX';
-            const token = await AuthenticationController.generateValidIdToken(
+            const token = await AuthenticationDao.generateValidIdToken(
                 ACCOUNT_WITH_USER_ROLE,
                 'password'
             );
 
-            await UserController.update(USER_ACCOUNT_WITH_USER_ROLE.user.uid, {
+            await UserDao.update(USER_ACCOUNT_WITH_USER_ROLE.user.uid, {
                 location: initialLocation,
             });
 
             const body: UpdateUserRequest = { displayName: 'displayName' };
             await request(app).patch(`${USER}`).set('Authorization', `Bearer ${token}`).send(body);
-            const user = await UserController.getByUid(USER_ACCOUNT_WITH_USER_ROLE.user.uid);
+            const user = await UserDao.getByUid(USER_ACCOUNT_WITH_USER_ROLE.user.uid);
 
             expect(user?.location).toEqual(initialLocation);
         });

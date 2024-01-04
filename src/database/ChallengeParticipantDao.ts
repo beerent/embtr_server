@@ -1,7 +1,7 @@
 import { prisma } from '@database/prisma';
 import { ChallengeParticipant, ChallengeRequirementCompletionState } from '@resources/schema';
 
-export class ChallengeParticipantController {
+export class ChallengeParticipantDao {
     public static async getAllForUserAndTaskAndDate(userId: number, taskId: number, date: Date) {
         return prisma.challengeParticipant.findMany({
             where: {

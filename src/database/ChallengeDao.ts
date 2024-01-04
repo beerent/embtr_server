@@ -7,7 +7,7 @@ export interface ChallengeRequirementResults {
     totalCompleted: number;
 }
 
-export class ChallengeController {
+export class ChallengeDao {
     public static async get(id: number) {
         return prisma.challenge.findUnique({
             where: {

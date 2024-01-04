@@ -2,7 +2,7 @@ import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { Notification as NotificationModel, PushNotificationToken } from '@resources/schema';
 import { prisma } from '@database/prisma';
 
-export class PushNotificationController {
+export class PushNotificationDao {
     public static async getByUid(uid: string) {
         const tokens = await prisma.pushNotificationToken.findMany({
             where: {

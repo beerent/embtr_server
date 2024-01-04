@@ -2,7 +2,7 @@ import { prisma } from '@database/prisma';
 import { Constants } from '@resources/types/constants/constants';
 import { DailyHistory, DayResult } from '@resources/types/widget/DailyHistory';
 
-export class DailyHistoryController {
+export class DailyHistoryDao {
     public static async get(userId: number, startDate: Date, endDate: Date): Promise<DailyHistory> {
         const plannedDays = await prisma.plannedDay.findMany({
             where: {

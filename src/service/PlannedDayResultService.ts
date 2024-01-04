@@ -17,22 +17,19 @@ import {
     UPDATE_PLANNED_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
 } from '@src/common/RequestResponses';
-import { PlannedDayController } from '@src/controller/PlannedDayController';
-import {
-    PlannedDayResultController,
-    PlannedDayResultType,
-} from '@src/controller/PlannedDayResultController';
 import { Request } from 'express';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
 import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { UserController } from '@src/controller/UserController';
 import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CompletedHabit,
     CompletedHabitElement,
     PlannedDayResultSummary,
 } from '@resources/types/planned_day_result/PlannedDayResult';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { PlannedDayResultDao, PlannedDayResultType } from '@src/database/PlannedDayResultDao';
+import { UserDao } from '@src/database/UserDao';
 
 export class PlannedDayResultService {
     public static async create(request: Request): Promise<GetPlannedDayResultResponse> {
@@ -40,7 +37,7 @@ export class PlannedDayResultService {
             plannedDayId: request.body.plannedDayId,
         };
 
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
 
@@ -48,7 +45,7 @@ export class PlannedDayResultService {
             return CREATE_DAY_RESULT_FAILED;
         }
 
-        const plannedDay = await PlannedDayController.get(body.plannedDayId);
+        const plannedDay = await PlannedDayDao.get(body.plannedDayId);
         if (!plannedDay) {
             return CREATE_DAY_RESULT_FAILED;
         }
@@ -57,7 +54,7 @@ export class PlannedDayResultService {
             return CREATE_DAY_RESULT_FAILED;
         }
 
-        const createdPlannedDayResult: PlannedDayResult = await PlannedDayResultController.create(
+        const createdPlannedDayResult: PlannedDayResult = await PlannedDayResultDao.create(
             body.plannedDayId,
             this.getRandomSuccessMessage()
         );
@@ -74,14 +71,14 @@ export class PlannedDayResultService {
     public static async update(request: Request): Promise<UpdatePlannedDayResultResponse> {
         const updateRequest: UpdatePlannedDayResultRequest = request.body;
 
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
             return UPDATE_PLANNED_DAY_RESULT_INVALID;
         }
 
-        const plannedDayResult = await PlannedDayResultController.getById(
+        const plannedDayResult = await PlannedDayResultDao.getById(
             updateRequest.plannedDayResult!.id!
         );
         if (!plannedDayResult) {
@@ -92,7 +89,7 @@ export class PlannedDayResultService {
             return UPDATE_PLANNED_DAY_RESULT_UNKNOWN;
         }
 
-        const updatedPlannedDayResult = await PlannedDayResultController.update(
+        const updatedPlannedDayResult = await PlannedDayResultDao.update(
             updateRequest.plannedDayResult!
         );
         if (updatedPlannedDayResult) {
@@ -105,12 +102,12 @@ export class PlannedDayResultService {
     }
 
     public static async getAllForUser(userId: number): Promise<GetPlannedDayResultsResponse> {
-        const user = await UserController.getById(userId);
+        const user = await UserDao.getById(userId);
         if (!user) {
             return { ...RESOURCE_NOT_FOUND, message: 'user not found' };
         }
 
-        const dayResults = await PlannedDayResultController.getAllForUser(userId);
+        const dayResults = await PlannedDayResultDao.getAllForUser(userId);
 
         if (dayResults) {
             const convertedDayResults: PlannedDayResultModel[] =
@@ -132,7 +129,7 @@ export class PlannedDayResultService {
             lowerBound = new Date(request.query.lowerBound as string);
         }
 
-        const dayResults = await PlannedDayResultController.getAll(upperBound, lowerBound);
+        const dayResults = await PlannedDayResultDao.getAll(upperBound, lowerBound);
 
         if (dayResults) {
             const convertedDayResults: PlannedDayResultModel[] =
@@ -148,7 +145,7 @@ export class PlannedDayResultService {
             return { ...SUCCESS, plannedDayResults: [] };
         }
 
-        const dayResults = await PlannedDayResultController.getAllByIds(ids);
+        const dayResults = await PlannedDayResultDao.getAllByIds(ids);
 
         if (dayResults) {
             const convertedDayResults: PlannedDayResultModel[] =
@@ -172,7 +169,7 @@ export class PlannedDayResultService {
             lowerBound = new Date(request.query.lowerBound as string);
         }
 
-        const dayResults = await PlannedDayResultController.getAll(upperBound, lowerBound);
+        const dayResults = await PlannedDayResultDao.getAll(upperBound, lowerBound);
 
         const summaries: PlannedDayResultSummary[] = [];
         for (const dayResult of dayResults) {
@@ -190,7 +187,7 @@ export class PlannedDayResultService {
     public static async getAllSummariesForUser(
         userId: number
     ): Promise<GetPlannedDayResultSummariesResponse> {
-        const dayResults = await PlannedDayResultController.getAllForUser(userId);
+        const dayResults = await PlannedDayResultDao.getAllForUser(userId);
 
         const summaries: PlannedDayResultSummary[] = [];
         for (const dayResult of dayResults) {
@@ -206,7 +203,7 @@ export class PlannedDayResultService {
     }
 
     public static async getSummaryById(id: number): Promise<GetPlannedDayResultSummaryResponse> {
-        const dayResult = await PlannedDayResultController.getById(id);
+        const dayResult = await PlannedDayResultDao.getById(id);
 
         if (dayResult) {
             const completedHabits: CompletedHabit[] = this.getCompletedHabits(dayResult);
@@ -222,7 +219,7 @@ export class PlannedDayResultService {
     }
 
     public static async getById(id: number): Promise<GetPlannedDayResultResponse> {
-        const dayResult = await PlannedDayResultController.getById(id);
+        const dayResult = await PlannedDayResultDao.getById(id);
 
         if (dayResult) {
             const convertedDayResult: PlannedDayResultModel = ModelConverter.convert(dayResult);
@@ -235,7 +232,7 @@ export class PlannedDayResultService {
     public static async getByUserAndDayKey(
         request: GetPlannedDayResultRequest
     ): Promise<GetPlannedDayResultResponse> {
-        const dayResult = await PlannedDayResultController.getByUserAndDayKey(
+        const dayResult = await PlannedDayResultDao.getByUserAndDayKey(
             request.userId,
             request.dayKey
         );
@@ -249,7 +246,7 @@ export class PlannedDayResultService {
     }
 
     public static async hideRecommendation(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationController.getUserIdFromToken(
+        const userId: number = (await AuthorizationDao.getUserIdFromToken(
             request.headers.authorization!
         )) as number;
         if (!userId) {
@@ -257,7 +254,7 @@ export class PlannedDayResultService {
         }
 
         const dayKey = request.params.dayKey;
-        const plannedDay = await PlannedDayController.getByUserAndDayKey(userId, dayKey);
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (!plannedDay) {
             return { ...UPDATE_PLANNED_DAY_RESULT_INVALID, message: 'invalid day' };
         }

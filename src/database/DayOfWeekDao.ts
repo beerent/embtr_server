@@ -1,8 +1,8 @@
 import { prisma } from '@database/prisma';
 
-export class TimeOfDayController {
+export class DayOfWeekDao {
     public static async get(id: number) {
-        return prisma.timeOfDay.findUnique({
+        return prisma.dayOfWeek.findUnique({
             where: {
                 id,
             },
@@ -10,7 +10,7 @@ export class TimeOfDayController {
     }
 
     public static async getAll() {
-        return prisma.timeOfDay.findMany({
+        return prisma.dayOfWeek.findMany({
             where: {
                 id: {
                     not: 9,

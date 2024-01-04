@@ -1,6 +1,6 @@
 import { prisma } from '@database/prisma';
 
-export class QuoteOfTheDayController {
+export class QuoteOfTheDayDao {
     public static async add(userId: number, quote: string, author?: string) {
         const createdQuoteOfTheDay = await prisma.quoteOfTheDay.create({
             data: {

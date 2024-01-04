@@ -1,7 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { UserPost } from '@resources/schema';
-import { CommonUpserts } from './common/CommonUpserts';
+import { CommonUpserts } from './CommonUpserts';
 
 export const UserPostInclude = {
     comments: {
@@ -31,7 +31,7 @@ export const UserPostInclude = {
     user: true,
 } satisfies Prisma.UserPostInclude;
 
-export class UserPostController {
+export class UserPostDao {
     public static async getAllForUser(userId: number) {
         return await prisma.userPost.findMany({
             where: {

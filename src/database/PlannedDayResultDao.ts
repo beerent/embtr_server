@@ -1,7 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
-import { CommonUpserts } from './common/CommonUpserts';
+import { CommonUpserts } from './CommonUpserts';
 
 export const PlannedDayResultInclude = {
     comments: {
@@ -50,13 +50,13 @@ export const PlannedDayResultInclude = {
 } satisfies Prisma.PlannedDayResultInclude;
 
 export type PlannedDayResultsType = Prisma.PromiseReturnType<
-    typeof PlannedDayResultController.getAll
+    typeof PlannedDayResultDao.getAll
 >;
 export type PlannedDayResultType = Prisma.PromiseReturnType<
-    typeof PlannedDayResultController.getById
+    typeof PlannedDayResultDao.getById
 >;
 
-export class PlannedDayResultController {
+export class PlannedDayResultDao {
     public static async create(plannedDayId: number, title?: string) {
         return prisma.plannedDayResult.create({
             data: {

@@ -1,9 +1,9 @@
 import { User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
-import { PushNotificationController } from './PushNotificationController';
+import { PushNotificationDao } from './PushNotificationDao';
 
-export class UserController {
+export class UserDao {
     public static async getByUid(uid: string): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
@@ -96,7 +96,7 @@ export class UserController {
         const location = user.location !== undefined ? { location: user.location.trim() } : {};
         const photoUrl = user.photoUrl !== undefined ? { photoUrl: user.photoUrl } : {};
         const bannerUrl = user.bannerUrl !== undefined ? { bannerUrl: user.bannerUrl } : {};
-        const pushNotificationTokens = await UserController.createUserPushNotification(user);
+        const pushNotificationTokens = await UserDao.createUserPushNotification(user);
         const accountSetup =
             user.accountSetup !== undefined ? { accountSetup: user.accountSetup } : {};
 
@@ -129,7 +129,7 @@ export class UserController {
             return {};
         }
 
-        const existingUserTokens = await PushNotificationController.getByUid(user.uid);
+        const existingUserTokens = await PushNotificationDao.getByUid(user.uid);
         const tokensToAdd = potentialTokensToAdd.filter((token) => {
             return !existingUserTokens.some((userToken) => userToken.token === token.token);
         });

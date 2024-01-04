@@ -4,13 +4,13 @@ import {
     GetHabitCategoryResponse,
 } from '@resources/types/requests/HabitTypes';
 import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { HabitCategoryController } from '@src/controller/HabitCategoryController';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { Request } from 'express';
 import { ContextService } from './ContextService';
 import { Context } from '@src/general/auth/Context';
 import { PureDate } from '@resources/types/date/PureDate';
+import { HabitCategoryDao } from '@src/database/HabitCategoryDao';
 
 export class HabitCategoryService {
     public static async getAllGeneric(request: Request): Promise<GetHabitCategoriesResponse> {
@@ -19,7 +19,7 @@ export class HabitCategoryService {
             return { ...GENERAL_FAILURE, habitCategories: [] };
         }
 
-        const genericHabitCategories = await HabitCategoryController.getAllGeneric();
+        const genericHabitCategories = await HabitCategoryDao.getAllGeneric();
         const genericHabitCategoriesModels =
             ModelConverter.convertAll<HabitCategory>(genericHabitCategories);
 
@@ -32,7 +32,7 @@ export class HabitCategoryService {
             return { ...GENERAL_FAILURE };
         }
 
-        const customHabitsCategory = await HabitCategoryController.getCustom(context.userId);
+        const customHabitsCategory = await HabitCategoryDao.getCustom(context.userId);
         if (!customHabitsCategory) {
             return { ...GENERAL_FAILURE };
         }
@@ -47,7 +47,7 @@ export class HabitCategoryService {
             return { ...GENERAL_FAILURE };
         }
 
-        const recentHabitsCategory = await HabitCategoryController.getRecent();
+        const recentHabitsCategory = await HabitCategoryDao.getRecent();
         if (!recentHabitsCategory) {
             return { ...GENERAL_FAILURE };
         }
@@ -67,7 +67,7 @@ export class HabitCategoryService {
         context: Context,
         date: PureDate
     ): Promise<GetHabitCategoryResponse> {
-        const activeHabitsCategory = await HabitCategoryController.getActive();
+        const activeHabitsCategory = await HabitCategoryDao.getActive();
         if (!activeHabitsCategory) {
             return { ...GENERAL_FAILURE };
         }

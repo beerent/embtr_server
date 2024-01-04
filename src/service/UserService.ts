@@ -15,9 +15,6 @@ import {
     UPDATE_USER_FAILED,
     USERNAME_ALREADY_EXISTS,
 } from '@src/common/RequestResponses';
-import { AccountController } from '@src/controller/AccountController';
-import { AuthorizationController } from '@src/controller/AuthorizationController';
-import { UserController } from '@src/controller/UserController';
 import { Role } from '@src/roles/Roles';
 import { Request } from 'express';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
@@ -25,10 +22,13 @@ import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
+import { AccountDao } from '@src/database/AccountDao';
+import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { UserDao } from '@src/database/UserDao';
 
 export class UserService {
     public static async getCurrentUser(request: Request): Promise<GetUserResponse> {
-        const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
+        const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
         if (!uid) {
             return GET_USER_FAILED_NOT_FOUND;
         }
@@ -37,7 +37,7 @@ export class UserService {
     }
 
     public static async get(uid: string): Promise<GetUserResponse> {
-        const user = await UserController.getByUid(uid);
+        const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
             return { ...GET_USER_SUCCESS, user: userModel };
@@ -47,8 +47,8 @@ export class UserService {
     }
 
     public static async create(request: Request): Promise<CreateUserResponse> {
-        const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationController.getEmailFromToken(
+        const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
+        const email = await AuthorizationDao.getEmailFromToken(
             request.headers.authorization!
         );
 
@@ -56,18 +56,18 @@ export class UserService {
             return CREATE_USER_FAILED;
         }
 
-        const user = await UserController.getByUid(uid);
+        const user = await UserDao.getByUid(uid);
         if (user) {
             return CREATE_USER_ALREADY_EXISTS;
         }
 
-        const newUser = await UserController.create(uid, email);
+        const newUser = await UserDao.create(uid, email);
         if (!newUser) {
             return CREATE_USER_FAILED;
         }
 
-        await AccountController.updateAccountRoles(uid, [Role.USER]);
-        await AccountController.updateCustomClaim(uid, 'userId', newUser.id);
+        await AccountDao.updateAccountRoles(uid, [Role.USER]);
+        await AccountDao.updateCustomClaim(uid, 'userId', newUser.id);
 
         return CREATE_USER_SUCCESS;
     }
@@ -90,8 +90,8 @@ export class UserService {
     public static async update(request: Request): Promise<UpdateUserResponse> {
         const body: UpdateUserRequest = request.body;
 
-        const uid = await AuthorizationController.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationController.getEmailFromToken(
+        const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
+        const email = await AuthorizationDao.getEmailFromToken(
             request.headers.authorization!
         );
 
@@ -112,7 +112,7 @@ export class UserService {
 
         let updatedUser = undefined;
         try {
-            updatedUser = await UserController.update(uid, { ...body });
+            updatedUser = await UserDao.update(uid, { ...body });
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
                 logger.info(`username ${body.username} already exists`);
@@ -128,7 +128,7 @@ export class UserService {
     }
 
     public static async search(query: string): Promise<GetUsersResponse> {
-        const users = await UserController.search(query);
+        const users = await UserDao.search(query);
         if (users) {
             const userModels: User[] = ModelConverter.convertAll(users);
             return { ...GET_USER_SUCCESS, users: userModels };
@@ -145,7 +145,7 @@ export class UserService {
     }
 
     private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {
-        const requests = [UserController.getByUid(uid), this.getByUsername(username)];
+        const requests = [UserDao.getByUid(uid), this.getByUsername(username)];
         const [currentUser, targetUser] = await Promise.all(requests);
         if (!currentUser) {
             return false;
@@ -163,7 +163,7 @@ export class UserService {
     }
 
     private static async getByUsername(username: string): Promise<User | null> {
-        const user = await UserController.getByUsername(username);
+        const user = await UserDao.getByUsername(username);
         if (!user) {
             return null;
         }
@@ -173,7 +173,7 @@ export class UserService {
     }
 
     private static async markUserAsSetupComplete(user: User) {
-        const updatedUser = await UserController.update(user.uid!, {
+        const updatedUser = await UserDao.update(user.uid!, {
             accountSetup: true,
         });
 
