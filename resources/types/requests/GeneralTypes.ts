@@ -14,5 +14,5 @@ export interface DeleteCommentRequest {
 }
 
 export interface GetBooleanResponse extends Response {
-  result: boolean;
+  result?: boolean;
 }

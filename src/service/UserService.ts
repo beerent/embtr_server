@@ -1,102 +1,77 @@
-import {
-    GetUserResponse,
-    CreateUserResponse,
-    UpdateUserRequest,
-    GetUsersResponse,
-    UpdateUserResponse,
-} from '@resources/types/requests/UserTypes';
-import {
-    CREATE_USER_ALREADY_EXISTS,
-    CREATE_USER_FAILED,
-    CREATE_USER_SUCCESS,
-    GET_USER_FAILED_NOT_FOUND,
-    GET_USER_SUCCESS,
-    SUCCESS,
-    UPDATE_USER_FAILED,
-    USERNAME_ALREADY_EXISTS,
-} from '@src/common/RequestResponses';
+import { UpdateUserRequest, UpdateUserResponse } from '@resources/types/requests/UserTypes';
+import { SUCCESS, UPDATE_USER_FAILED, USERNAME_ALREADY_EXISTS } from '@src/common/RequestResponses';
 import { Role } from '@src/roles/Roles';
 import { Request } from 'express';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
-import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import { AccountDao } from '@src/database/AccountDao';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { UserDao } from '@src/database/UserDao';
+import { Code } from '@resources/codes';
+import { ServiceException } from '@src/general/exception/ServiceException';
 
 export class UserService {
-    public static async getCurrentUser(request: Request): Promise<GetUserResponse> {
+    public static async getCurrentUser(request: Request): Promise<User> {
         const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
         if (!uid) {
-            return GET_USER_FAILED_NOT_FOUND;
+            throw new ServiceException(500, Code.INVALID_TOKEN, 'token in invalid state');
         }
 
-        return await this.get(uid);
+        return await this.getByUid(uid);
     }
 
-    public static async get(uid: string): Promise<GetUserResponse> {
+    public static async getByUid(uid: string): Promise<User> {
         const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
-            return { ...GET_USER_SUCCESS, user: userModel };
+            return userModel;
         }
 
-        return GET_USER_FAILED_NOT_FOUND;
+        throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
     }
 
-    public static async create(request: Request): Promise<CreateUserResponse> {
+    public static async create(request: Request): Promise<void> {
         const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationDao.getEmailFromToken(
-            request.headers.authorization!
-        );
+        const email = await AuthorizationDao.getEmailFromToken(request.headers.authorization!);
 
         if (!uid || !email) {
-            return CREATE_USER_FAILED;
+            throw new ServiceException(500, Code.INVALID_TOKEN, 'token in invalid state');
         }
 
         const user = await UserDao.getByUid(uid);
         if (user) {
-            return CREATE_USER_ALREADY_EXISTS;
+            throw new ServiceException(409, Code.RESOURCE_ALREADY_EXISTS, 'user already exists');
         }
 
         const newUser = await UserDao.create(uid, email);
         if (!newUser) {
-            return CREATE_USER_FAILED;
+            throw new ServiceException(500, Code.FAILED_TO_CREATE_USER, 'failed to create user');
         }
 
         await AccountDao.updateAccountRoles(uid, [Role.USER]);
         await AccountDao.updateCustomClaim(uid, 'userId', newUser.id);
-
-        return CREATE_USER_SUCCESS;
     }
 
-    public static async setup(request: Request): Promise<UpdateUserResponse> {
-        const response = await this.update(request);
-        if (response.httpCode !== 200) {
-            return response;
-        }
-
-        const user = response.user;
+    public static async setup(request: Request): Promise<User> {
+        const user = await this.update(request);
         if (!user) {
-            return UPDATE_USER_FAILED;
+            throw new ServiceException(500, Code.USER_UPDATE_FAILED, 'failed to update user');
         }
 
         await this.markUserAsSetupComplete(user);
-        return response;
+        return user;
     }
 
-    public static async update(request: Request): Promise<UpdateUserResponse> {
+    public static async update(request: Request): Promise<User> {
         const body: UpdateUserRequest = request.body;
 
         const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationDao.getEmailFromToken(
-            request.headers.authorization!
-        );
+        const email = await AuthorizationDao.getEmailFromToken(request.headers.authorization!);
 
         if (!uid || !email) {
-            return UPDATE_USER_FAILED;
+            throw new ServiceException(500, Code.INVALID_TOKEN, 'token in invalid state');
         }
 
         body.uid = uid;
@@ -106,7 +81,11 @@ export class UserService {
         if (body.username) {
             const usernameIsAvailable = await this.usernameIsAvailable(body.username, uid);
             if (!usernameIsAvailable) {
-                return USERNAME_ALREADY_EXISTS;
+                throw new ServiceException(
+                    409,
+                    Code.RESOURCE_ALREADY_EXISTS,
+                    'username already exists'
+                );
             }
         }
 
@@ -116,32 +95,34 @@ export class UserService {
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
                 logger.info(`username ${body.username} already exists`);
-                return USERNAME_ALREADY_EXISTS;
+                throw new ServiceException(
+                    409,
+                    Code.RESOURCE_ALREADY_EXISTS,
+                    'username already exists'
+                );
             }
         }
+
         if (!updatedUser) {
-            return UPDATE_USER_FAILED;
+            throw new ServiceException(500, Code.USER_UPDATE_FAILED, 'failed to update user');
         }
 
         const updatedUserModel: User = ModelConverter.convert(updatedUser);
-        return { ...SUCCESS, user: updatedUserModel };
+        return updatedUserModel;
     }
 
-    public static async search(query: string): Promise<GetUsersResponse> {
+    public static async search(query: string): Promise<User[]> {
         const users = await UserDao.search(query);
-        if (users) {
-            const userModels: User[] = ModelConverter.convertAll(users);
-            return { ...GET_USER_SUCCESS, users: userModels };
-        }
+        const userModels: User[] = ModelConverter.convertAll(users);
 
-        return GET_USER_FAILED_NOT_FOUND;
+        return userModels;
     }
 
-    public static async exists(username: string): Promise<GetBooleanResponse> {
+    public static async exists(username: string): Promise<boolean> {
         const user = await this.getByUsername(username);
         const exists = !!user;
 
-        return { ...SUCCESS, result: exists };
+        return exists;
     }
 
     private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {

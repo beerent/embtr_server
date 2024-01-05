@@ -1,3 +1,4 @@
+import { ServiceException } from '@src/general/exception/ServiceException';
 import { NextFunction, Request, Response, RequestHandler } from 'express';
 
 export const runEndpoint = (
@@ -8,7 +9,7 @@ export const runEndpoint = (
     };
 };
 
-export const handleError = (error: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error(error.stack);
-    res.status(500).send('Internal Server Error');
+export const handleError = (error: unknown, req: Request, res: Response, next: NextFunction) => {
+    const response = ServiceException.getResponse(error);
+    res.status(response.httpCode).json(response);
 };

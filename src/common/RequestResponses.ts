@@ -26,6 +26,7 @@ export enum HttpCode {
     RESOURCE_NOT_FOUND = 404,
     RESOURCE_ALREADY_EXISTS = 409,
     GENERAL_FAILURE = 400,
+    INTERNAL_ERROR = 500,
 
     //create account errors
     CREATE_ACCOUNT_EMAIL_IN_USE = 409,
@@ -50,6 +51,13 @@ export enum HttpCode {
     TASK_CREATE_FAILED_MISSING_REQUIREMENTS = 400,
     TASK_CREATE_SUCCESS = 200,
 }
+
+export const INTERNAL_ERROR: Response = {
+    httpCode: HttpCode.INTERNAL_ERROR,
+    internalCode: Code.INTERNAL_ERROR,
+    success: false,
+    message: 'internal error',
+};
 
 export const SUCCESS: Response = {
     httpCode: HttpCode.SUCCESS,

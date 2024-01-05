@@ -6,6 +6,7 @@ import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryT
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
 import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
+import { UserController } from '@src/controller/UserController';
 import {
     authenticate,
     authenticateCreateUser as authenticateGetCurrentUser,
@@ -20,7 +21,7 @@ import { DailyHistoryService } from '@src/service/DailyHistoryService';
 import { HabitJourneyService } from '@src/service/HabitJourneyService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { UserPostService } from '@src/service/UserPostService';
-import { UserService } from '@src/service/UserService';
+
 import express from 'express';
 
 const userRouter = express.Router();
@@ -31,7 +32,7 @@ userRouter.get(
     authorize,
     runEndpoint(async (req, res) => {
         const query = req.query.query as string;
-        const response: GetUsersResponse = await UserService.search(query);
+        let response = await UserController.search(query);
 
         res.status(response.httpCode).json(response);
     })
@@ -44,7 +45,7 @@ userRouter.get(
     // todo - add validation
     runEndpoint(async (req, res) => {
         const username = req.query.username as string;
-        const response: GetUsersResponse = await UserService.exists(username);
+        const response: GetUsersResponse = await UserController.exists(username);
 
         res.status(response.httpCode).json(response);
     })
@@ -56,7 +57,7 @@ userRouter.get(
     authorizeUserGet,
     runEndpoint(async (req, res) => {
         const uid = req.params.uid;
-        const response: GetUserResponse = await UserService.get(uid);
+        const response: GetUserResponse = await UserController.getByUid(uid);
 
         res.status(response.httpCode).json(response);
     })
@@ -66,8 +67,7 @@ userRouter.get(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const response: GetUserResponse = await UserService.getCurrentUser(req);
-
+        const response: GetUserResponse = await UserController.getCurrentUser(req);
         res.status(response.httpCode).json(response);
     })
 );
@@ -76,7 +76,7 @@ userRouter.post(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const response = await UserService.create(req);
+        const response = await UserController.create(req);
         res.status(response.httpCode).json(response);
     })
 );
@@ -86,8 +86,7 @@ userRouter.patch(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response = await UserService.setup(req);
-
+        const response = await UserController.setup(req);
         res.status(response.httpCode).json(response);
     })
 );
@@ -97,8 +96,7 @@ userRouter.patch(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response = await UserService.update(req);
-
+        const response = await UserController.update(req);
         res.status(response.httpCode).json(response);
     })
 );
