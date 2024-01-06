@@ -10,31 +10,42 @@ import { MetadataDao } from '@src/database/MetadataDao';
 import { QuoteOfTheDayDao } from '@src/database/QuoteOfTheDayDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
+import { Context } from '@src/general/auth/Context';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
 
 export class QuoteOfTheDayService {
-    public static async add(request: Request): Promise<CreateQuoteOfTheDayResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
+    public static async add(
+        context: Context,
+        quote: string,
+        author?: string
+    ): Promise<QuoteOfTheDay> {
+        quote = quote.replace(/"/g, '');
+        author = author?.replace(/"/g, '');
 
-        //remove all double quotes
-        const body: CreateQuoteOfTheDayRequest = request.body.replace(/"/g, '');
-
-        const quoteOfTheDay = await QuoteOfTheDayDao.add(userId, body.quote, body.author);
+        const quoteOfTheDay = await QuoteOfTheDayDao.add(context.userId, quote, author);
         const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
 
-        return { ...SUCCESS, quoteOfTheDay: quoteOfTheDayModel };
+        return quoteOfTheDayModel;
     }
 
-    public static async get(): Promise<GetQuoteOfTheDayResponse> {
+    public static async get(context: Context): Promise<QuoteOfTheDay> {
         const quoteOfTheDayFromMetadata = await MetadataDao.get('QUOTE_OF_THE_DAY');
         if (!quoteOfTheDayFromMetadata?.value) {
-            return { ...GENERAL_FAILURE };
+            throw new ServiceException(
+                404,
+                Code.QUOTE_OF_THE_DAY_NOT_FOUND,
+                'quote of the day not found'
+            );
         }
 
         const quoteOfTheDayId = parseInt(quoteOfTheDayFromMetadata.value);
         if (isNaN(quoteOfTheDayId)) {
-            return { ...GENERAL_FAILURE };
+            throw new ServiceException(
+                500,
+                Code.GENERIC_ERROR,
+                'quote of the day id is not a number'
+            );
         }
 
         let quoteOfTheDay;
@@ -45,12 +56,15 @@ export class QuoteOfTheDayService {
         }
 
         if (!quoteOfTheDay) {
-            return { ...GENERAL_FAILURE };
+            throw new ServiceException(
+                404,
+                Code.QUOTE_OF_THE_DAY_NOT_FOUND,
+                'quote of the day not found'
+            );
         }
 
         const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
-
-        return { ...SUCCESS, quoteOfTheDay: quoteOfTheDayModel };
+        return quoteOfTheDayModel;
     }
 
     private static shouldReset(updated: Date): boolean {

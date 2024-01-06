@@ -1,5 +1,12 @@
 import { Interactable } from '@resources/types/interactable/Interactable';
-import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
+import {
+    CreateUserPostRequest,
+    CreateUserPostResponse,
+    GetAllUserPostResponse,
+    GetUserPostResponse,
+    UpdateUserPostRequest,
+} from '@resources/types/requests/UserPostTypes';
+import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
@@ -7,7 +14,6 @@ import {
     validateCommentDelete,
     validateCommentPost,
 } from '@src/middleware/general/GeneralValidation';
-import { validateGetAllPlannedDayResults } from '@src/middleware/planned_day_result/PlannedDayResultValidation';
 import {
     validateGetById,
     validateLike,
@@ -15,8 +21,10 @@ import {
     validateUpdate,
 } from '@src/middleware/user_post/UserPostValidation';
 import { CommentService } from '@src/service/CommentService';
+import { ContextService } from '@src/service/ContextService';
 import { LikeService } from '@src/service/LikeService';
 import { UserPostService } from '@src/service/UserPostService';
+import { DateUtility } from '@src/utility/date/DateUtility';
 import express from 'express';
 
 const userPostRouter = express.Router();
@@ -27,8 +35,13 @@ userPostRouter.post(
     authorize,
     validatePost,
     runEndpoint(async (req, res) => {
-        const response = await UserPostService.create(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const request: CreateUserPostRequest = req.body;
+        const userPost = request.userPost;
+
+        const createdUserPost = await UserPostService.create(context, userPost);
+        const response: CreateUserPostResponse = { ...SUCCESS, userPost: createdUserPost };
+        res.json(response);
     })
 );
 
@@ -38,8 +51,13 @@ userPostRouter.get(
     authorize,
     //validateGetAllPlannedDayResults,
     runEndpoint(async (req, res) => {
-        const response: GetAllUserPostResponse = await UserPostService.getAllBounded(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const lowerBound = DateUtility.getOptionalDate(req.query.lowerBound as string);
+        const upperBound = DateUtility.getOptionalDate(req.query.upperBound as string);
+
+        const userPosts = await UserPostService.getAllBounded(context, lowerBound, upperBound);
+        const response: GetAllUserPostResponse = { ...SUCCESS, userPosts };
+        res.json(response);
     })
 );
 
@@ -49,10 +67,12 @@ userPostRouter.get(
     authorize,
     validateGetById,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const id = Number(req.params.id);
 
-        const response = await UserPostService.getById(id);
-        res.status(response.httpCode).json(response);
+        const userPost = await UserPostService.getById(context, id);
+        const response: GetUserPostResponse = { ...SUCCESS, userPost };
+        res.json(response);
     })
 );
 
@@ -62,8 +82,13 @@ userPostRouter.patch(
     authorize,
     validateUpdate,
     runEndpoint(async (req, res) => {
-        const response = await UserPostService.update(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const request: UpdateUserPostRequest = req.body;
+        const userPost = request.userPost;
+
+        const updatedUserPost = await UserPostService.update(context, userPost);
+        const response: CreateUserPostResponse = { ...SUCCESS, userPost: updatedUserPost };
+        res.json(response);
     })
 );
 

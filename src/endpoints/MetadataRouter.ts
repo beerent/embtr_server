@@ -1,12 +1,18 @@
+import { GetAllMetadataResponse } from '@resources/types/requests/MetadataTypes';
+import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
+import { ContextService } from '@src/service/ContextService';
 import { MetadataService } from '@src/service/MetadataService';
 import express from 'express';
 
 const metadataRouter = express.Router();
 
 metadataRouter.get('/', authenticate, async (req, res) => {
-    const response = await MetadataService.getAll();
-    res.status(response.httpCode).json(response);
+    const context = await ContextService.get(req);
+    const metadata = await MetadataService.getAll(context);
+
+    const response: GetAllMetadataResponse = { ...SUCCESS, metadata };
+    res.json(response);
 });
 
 export default metadataRouter;

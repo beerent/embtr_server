@@ -1,5 +1,4 @@
-import { Notification } from '@prisma/client';
-import { Notification as NotificationModel, NotificationTargetPage } from '@resources/schema';
+import { Notification, NotificationTargetPage } from '@resources/schema';
 import {
     GetNotificationsResponse,
     GetUnreadNotificationCountResponse,
@@ -9,8 +8,10 @@ import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { NotificationDao } from '@src/database/NotificationDao';
 import { PushNotificationDao } from '@src/database/PushNotificationDao';
+import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
+import { nativeEnum } from 'zod';
 
 export enum NotificationType {
     TIMELINE_COMMENT,
@@ -45,7 +46,7 @@ export class NotificationService {
             targetId
         );
 
-        const notificationModel: NotificationModel = ModelConverter.convert(notification);
+        const notificationModel: Notification = ModelConverter.convert(notification);
 
         // 2. send push notification
         PushNotificationDao.send(notificationModel);
@@ -53,45 +54,20 @@ export class NotificationService {
         return notification;
     }
 
-    public static async getAll(request: Request): Promise<GetNotificationsResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
+    public static async getAll(context: Context): Promise<Notification[]> {
+        const notifications = await NotificationDao.getAll(context.userId);
+        const notificationModels: Notification[] = ModelConverter.convertAll(notifications);
 
-        const notifications: Notification[] = await NotificationDao.getAll(userId);
-        const notificationModels: NotificationModel[] = ModelConverter.convertAll(notifications);
-
-        return { ...SUCCESS, notifications: notificationModels };
+        return notificationModels;
     }
 
-    public static async getUnreadNotificationCount(
-        request: Request
-    ): Promise<GetUnreadNotificationCountResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request', count: 0 };
-        }
-
-        const count = await NotificationDao.countAllUnread(userId);
-        return { ...SUCCESS, count };
+    public static async getUnreadNotificationCount(context: Context): Promise<number> {
+        const count = await NotificationDao.countAllUnread(context.userId);
+        return count;
     }
 
-    public static async clear(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        await NotificationDao.clearAll(userId);
-
-        return SUCCESS;
+    public static async clear(context: Context): Promise<void> {
+        await NotificationDao.clearAll(context.userId);
     }
 
     private static getSummary(notificationType: NotificationType): string {

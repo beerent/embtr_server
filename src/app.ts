@@ -52,7 +52,7 @@ app.use((req, res, next) => {
 
         logger.info(
             //add timestamp to beginning of log
-            `[${timestamp}]  ${req.method}${requestPadding}  ${res.statusCode}\t${contentLength}b\t${elapsedTime}ms\t${req.baseUrl}${req.path}`
+            `[${timestamp}]  ${req.method}${requestPadding}${res.statusCode}\t${contentLength}b\t${elapsedTime}ms\t${req.baseUrl}${req.path}`
         );
         return oldSend.apply(this, arguments as any);
     };
@@ -60,28 +60,37 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/user', userRouter);
-app.use('/task', taskRouter);
+app.use('/user', userRouter); // main methods are finished
 app.use('/account', accountRouter);
 app.use('/planned-day', plannedDayRouter);
 app.use('/planned-day-result', plannedDayResultRouter);
 app.use('/planned-habit', plannedHabitRouter);
 app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
-app.use('/widget', widgetRouter);
 app.use('/metadata', metadataRouter);
+app.use('/task', taskRouter); // let's remove/ replace this
 app.use('/habit', habitRouter);
 app.use('/quote-of-the-day', quoteOfTheDayRouter);
 app.use('/unit', unitRouter);
 app.use('/time-of-day', timeOfDayRouter);
 app.use('/day-of-week', dayOfWeekRouter);
-app.use('/challenge', challengeRouter);
 app.use('/mail-list', marketingRouter);
 app.use('/timeline', timelineRouter);
-app.use('/admin', adminRouter);
 
 app.use('/health', (req, res) => res.send('OK'));
 
 app.use(handleError);
+
+app.use((req, res, next) => {
+    logger.info(`Unhandled endpoint: ${req.baseUrl}${req.path}`);
+    next();
+});
+
+// ###############################
+// # ENDPOINT GRAVEYARD (R.I.P.) #
+// ###############################
+//app.use('/widget', widgetRouter);
+//app.use('/challenge', challengeRouter);
+//app.use('/admin', adminRouter);
 
 export default app;

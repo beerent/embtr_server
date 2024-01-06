@@ -25,6 +25,10 @@ import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
+import { Context } from '@src/general/auth/Context';
+import { ContextService } from '@src/service/ContextService';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -32,36 +36,37 @@ interface ScheduledHabitTimeOfDay {
 }
 
 export class PlannedDayService {
-    public static async getById(id: number): Promise<GetPlannedDayResponse> {
+    public static async getById(context: Context, id: number): Promise<PlannedDayModel> {
         const plannedDay = await PlannedDayDao.get(id);
 
         if (plannedDay) {
-            const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
-            return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
+            const plannedDayModel: PlannedDayModel = ModelConverter.convert(plannedDay);
+            return plannedDayModel;
         }
 
-        return GET_PLANNED_DAY_FAILED_NOT_FOUND;
+        throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'user not found');
     }
 
-    public static async getIsComplete(request: GetPlannedDayRequest): Promise<GetBooleanResponse> {
-        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(
-            request.userId,
-            request.dayKey
-        );
+    public static async getIsComplete(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<boolean> {
+        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(userId, dayKey);
 
         if (!plannedDay?.plannedTasks) {
-            return { ...SUCCESS, result: false };
+            return false;
         }
 
         if (plannedDay.plannedTasks.length === 0) {
-            return { ...SUCCESS, result: false };
+            return false;
         }
 
         // 1. get what SHOULD be completed for today
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
         let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
-            request.userId,
+            userId,
             dayOfWeek,
             plannedDayDate
         );
@@ -82,23 +87,27 @@ export class PlannedDayService {
         );
 
         const removedTasks = plannedDay.plannedTasks.filter((plannedTask) => !plannedTask.active);
-
         const completedTaskCount = completedTasks.length + removedTasks.length;
 
-        return { ...SUCCESS, result: completedTaskCount >= targetCount };
+        return completedTaskCount >= targetCount;
     }
 
-    public static async getByUser(request: GetPlannedDayRequest): Promise<GetPlannedDayResponse> {
-        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(
-            request.userId,
-            request.dayKey
-        );
+    public static async getByUser(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDay> {
+        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(userId, dayKey);
+        if (!plannedDay) {
+            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+        }
+
         const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
 
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
         let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
-            request.userId,
+            userId,
             dayOfWeek,
             plannedDayDate
         );
@@ -179,10 +188,6 @@ export class PlannedDayService {
             placeHolderPlannedTasks.push(placeHolderPlannedTask);
         }
 
-        if (!plannedDay) {
-            return GET_PLANNED_DAY_FAILED_NOT_FOUND;
-        }
-
         const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
         convertedPlannedDay.plannedTasks = [
             ...(convertedPlannedDay.plannedTasks?.filter((plannedTask) => plannedTask.active) ??
@@ -190,26 +195,29 @@ export class PlannedDayService {
             ...placeHolderPlannedTasks,
         ];
 
-        return { ...GET_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
+        return convertedPlannedDay;
     }
 
-    public static async create(request: Request): Promise<CreatePlannedDayResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        const dayKey = request.body.dayKey;
-
-        const preExistingDayKey = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+    public static async create(context: Context, dayKey: string): Promise<PlannedDay> {
+        const preExistingDayKey = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
         if (preExistingDayKey) {
-            return CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS;
+            throw new ServiceException(
+                409,
+                Code.PLANNED_DAY_FAILED_ALREADY_EXISTS,
+                'planned day already exists'
+            );
         }
 
-        const createdPlannedDay = await PlannedDayDao.create(userId, dayKey);
-        if (createdPlannedDay) {
-            const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
-            return { ...CREATE_PLANNED_DAY_SUCCESS, plannedDay: convertedPlannedDay };
+        const createdPlannedDay = await PlannedDayDao.create(context.userId, dayKey);
+        if (!createdPlannedDay) {
+            throw new ServiceException(
+                500,
+                Code.CREATE_PLANNED_DAY_FAILED,
+                'failed to create planned day'
+            );
         }
 
-        return CREATE_PLANNED_DAY_FAILED;
+        const plannedDayModel: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
+        return plannedDayModel;
     }
 }

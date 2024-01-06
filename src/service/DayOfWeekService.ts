@@ -1,17 +1,18 @@
-import { SUCCESS, GENERAL_FAILURE } from '@src/common/RequestResponses';
 import { DayOfWeek } from '@resources/schema';
-import { GetDaysOfWeekResponse } from '@resources/types/requests/DayOfWeekTypes';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { DayOfWeekDao } from '@src/database/DayOfWeekDao';
+import { Context } from '@src/general/auth/Context';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
 
 export class DayOfWeekService {
-    public static async getAll(): Promise<GetDaysOfWeekResponse> {
+    public static async getAll(context: Context): Promise<DayOfWeek[]> {
         const daysOfWeek = await DayOfWeekDao.getAll();
         if (!daysOfWeek) {
-            return { ...GENERAL_FAILURE, message: 'Days of week not found' };
+            throw new ServiceException(404, Code.DAY_OF_WEEK_NOT_FOUND, 'Days of week not found');
         }
 
-        const models: DayOfWeek[] = ModelConverter.convertAll(daysOfWeek);
-        return { ...SUCCESS, daysOfWeek: models };
+        const dayOfWeekModels: DayOfWeek[] = ModelConverter.convertAll(daysOfWeek);
+        return dayOfWeekModels;
     }
 }

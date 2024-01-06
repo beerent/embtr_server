@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import {
     GetTimelineResponse,
+    TimelineData,
     TimelineElement,
     TimelineElementType,
     TimelineRequestCursor,
@@ -10,22 +11,32 @@ import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { PlannedDayResult, UserPost } from '@resources/schema';
 import { TimelineDao } from '@src/database/custom/TimelineDao';
+import { Context } from '@src/general/auth/Context';
+import request from 'supertest';
 
 export class TimelineService {
-    public static async get(request: Request): Promise<GetTimelineResponse> {
-        const cursor: TimelineRequestCursor = TimelineService.getCursor(request);
-        const queryData = await TimelineDao.getByDateAndLimit(cursor.cursor, cursor.limit);
+    public static async get(
+        context: Context,
+        cursor?: Date,
+        limit?: number
+    ): Promise<TimelineData> {
+        const timelineRequestCursor: TimelineRequestCursor = TimelineService.getCursor(
+            cursor,
+            limit
+        );
+        const queryData = await TimelineDao.getByDateAndLimit(
+            timelineRequestCursor.cursor,
+            timelineRequestCursor.limit
+        );
 
         const [userPosts, plannedDayResults] = await Promise.all([
-            UserPostService.getAllByIds(queryData.userPostIds),
-            PlannedDayResultService.getAllByIds(queryData.plannedDayResultIds),
+            UserPostService.getAllByIds(context, queryData.userPostIds),
+            PlannedDayResultService.getAllByIds(context, queryData.plannedDayResultIds),
         ]);
 
         const elements: TimelineElement[] = [
-            ...TimelineService.createUserPostTimelineElements(userPosts.userPosts ?? []),
-            ...TimelineService.createPlannedDayResultTimelineElements(
-                plannedDayResults.plannedDayResults ?? []
-            ),
+            ...TimelineService.createUserPostTimelineElements(userPosts ?? []),
+            ...TimelineService.createPlannedDayResultTimelineElements(plannedDayResults ?? []),
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
@@ -33,15 +44,16 @@ export class TimelineService {
         if (elements.length > 0) {
             nextCursor = {
                 cursor: elements[elements.length - 1].createdAt,
-                limit: cursor.limit,
+                limit: timelineRequestCursor.limit,
             };
         }
 
-        return {
-            ...SUCCESS,
-            results: elements,
+        const timelineData: TimelineData = {
+            elements,
             nextCursor,
         };
+
+        return timelineData;
     }
 
     private static createUserPostTimelineElements(userPosts: UserPost[]): TimelineElement[] {
@@ -74,16 +86,19 @@ export class TimelineService {
         return elements;
     }
 
-    private static getCursor(request: Request): TimelineRequestCursor {
+    private static getCursor(
+        requestedCursor?: Date,
+        requestedLimit?: number
+    ): TimelineRequestCursor {
         let cursor = new Date();
         let limit = 15;
 
-        if (request.query.cursor) {
-            cursor = new Date(request.query.cursor as string);
+        if (requestedCursor) {
+            cursor = requestedCursor;
         }
 
-        if (request.query.limit) {
-            limit = parseInt(request.query.limit as string);
+        if (requestedLimit) {
+            limit = requestedLimit;
         }
 
         return { cursor, limit };

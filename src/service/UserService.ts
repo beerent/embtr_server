@@ -11,18 +11,15 @@ import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { UserDao } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
+import { Context } from '@src/general/auth/Context';
 
 export class UserService {
-    public static async getCurrentUser(request: Request): Promise<User> {
-        const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
-        if (!uid) {
-            throw new ServiceException(500, Code.INVALID_TOKEN, 'token in invalid state');
-        }
-
-        return await this.getByUid(uid);
+    public static async getCurrent(context: Context): Promise<User> {
+        const user = await this.getByUid(context, context.userUid);
+        return user;
     }
 
-    public static async getByUid(uid: string): Promise<User> {
+    public static async getByUid(context: Context, uid: string): Promise<User> {
         const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
@@ -32,54 +29,44 @@ export class UserService {
         throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
     }
 
-    public static async create(request: Request): Promise<void> {
-        const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationDao.getEmailFromToken(request.headers.authorization!);
-
-        if (!uid || !email) {
-            throw new ServiceException(500, Code.INVALID_TOKEN, 'token in invalid state');
-        }
-
-        const user = await UserDao.getByUid(uid);
+    public static async create(context: Context): Promise<User> {
+        const user = await UserDao.getByUid(context.userUid);
         if (user) {
             throw new ServiceException(409, Code.RESOURCE_ALREADY_EXISTS, 'user already exists');
         }
 
-        const newUser = await UserDao.create(uid, email);
+        const newUser = await UserDao.create(context.userUid, context.userEmail);
         if (!newUser) {
             throw new ServiceException(500, Code.FAILED_TO_CREATE_USER, 'failed to create user');
         }
 
-        await AccountDao.updateAccountRoles(uid, [Role.USER]);
-        await AccountDao.updateCustomClaim(uid, 'userId', newUser.id);
+        await AccountDao.updateAccountRoles(context.userUid, [Role.USER]);
+        await AccountDao.updateCustomClaim(context.userUid, 'userId', newUser.id);
+
+        const userModel: User = ModelConverter.convert(newUser);
+        return userModel;
     }
 
-    public static async setup(request: Request): Promise<User> {
-        const user = await this.update(request);
-        if (!user) {
-            throw new ServiceException(500, Code.USER_UPDATE_FAILED, 'failed to update user');
-        }
+    public static async setup(context: Context, user: User): Promise<User> {
+        const setupUser = await this.update(context, user);
+        await this.markUserAsSetupComplete(setupUser);
 
-        await this.markUserAsSetupComplete(user);
-        return user;
+        return setupUser;
     }
 
-    public static async update(request: Request): Promise<User> {
-        const body: UpdateUserRequest = request.body;
-
-        const uid = await AuthorizationDao.getUidFromToken(request.headers.authorization!);
-        const email = await AuthorizationDao.getEmailFromToken(request.headers.authorization!);
-
-        if (!uid || !email) {
-            throw new ServiceException(500, Code.INVALID_TOKEN, 'token in invalid state');
+    public static async update(context: Context, user: User): Promise<User> {
+        if (user.uid !== context.userUid || user.email !== context.userEmail) {
+            throw new ServiceException(403, Code.FORBIDDEN, 'forbidden');
         }
 
-        body.uid = uid;
-        body.email = email;
-        delete body.accountSetup;
+        const userToUpdate = { ...user };
+        delete userToUpdate.accountSetup;
 
-        if (body.username) {
-            const usernameIsAvailable = await this.usernameIsAvailable(body.username, uid);
+        if (userToUpdate.username) {
+            const usernameIsAvailable = await this.usernameIsAvailable(
+                userToUpdate.username,
+                context.userUid
+            );
             if (!usernameIsAvailable) {
                 throw new ServiceException(
                     409,
@@ -91,10 +78,10 @@ export class UserService {
 
         let updatedUser = undefined;
         try {
-            updatedUser = await UserDao.update(uid, { ...body });
+            updatedUser = await UserDao.update(context.userUid, userToUpdate);
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-                logger.info(`username ${body.username} already exists`);
+                logger.info(`username ${user.username} already exists`);
                 throw new ServiceException(
                     409,
                     Code.RESOURCE_ALREADY_EXISTS,
@@ -111,14 +98,14 @@ export class UserService {
         return updatedUserModel;
     }
 
-    public static async search(query: string): Promise<User[]> {
+    public static async search(context: Context, query: string): Promise<User[]> {
         const users = await UserDao.search(query);
         const userModels: User[] = ModelConverter.convertAll(users);
 
         return userModels;
     }
 
-    public static async exists(username: string): Promise<boolean> {
+    public static async exists(context: Context, username: string): Promise<boolean> {
         const user = await this.getByUsername(username);
         const exists = !!user;
 

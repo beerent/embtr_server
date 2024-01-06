@@ -1,7 +1,12 @@
-import { GetNotificationsResponse, GetUnreadNotificationCountResponse } from '@resources/types/requests/NotificationTypes';
+import {
+    GetNotificationsResponse,
+    GetUnreadNotificationCountResponse,
+} from '@resources/types/requests/NotificationTypes';
+import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { ContextService } from '@src/service/ContextService';
 import { NotificationService } from '@src/service/NotificationService';
 import express from 'express';
 
@@ -12,8 +17,11 @@ notificationRouter.get(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response: GetNotificationsResponse = await NotificationService.getAll(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const notifications = await NotificationService.getAll(context);
+
+        const response: GetNotificationsResponse = { ...SUCCESS, notifications };
+        res.json(response);
     })
 );
 
@@ -22,8 +30,11 @@ notificationRouter.get(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response: GetUnreadNotificationCountResponse = await NotificationService.getUnreadNotificationCount(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const count = await NotificationService.getUnreadNotificationCount(context);
+
+        const response: GetUnreadNotificationCountResponse = { ...SUCCESS, count };
+        res.json(response);
     })
 );
 
@@ -32,8 +43,10 @@ notificationRouter.post(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response: GetNotificationsResponse = await NotificationService.clear(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        await NotificationService.clear(context);
+
+        res.json(SUCCESS);
     })
 );
 

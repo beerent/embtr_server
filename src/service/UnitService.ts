@@ -2,11 +2,15 @@ import { SUCCESS } from '@src/common/RequestResponses';
 import { GetUnitsResponse } from '@resources/types/requests/UnitTypes';
 import { Unit } from '@resources/schema';
 import { UnitDao } from '@src/database/UnitDao';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { Context } from '@src/general/auth/Context';
 
 export class UnitService {
-    public static async getAll(): Promise<GetUnitsResponse> {
+    public static async getAll(context: Context): Promise<Unit[]> {
         const units = await UnitDao.getAll();
-        return { ...SUCCESS, units };
+        const unitModels: Unit[] = ModelConverter.convertAll(units);
+
+        return unitModels;
     }
 
     public static getUnitString(unit: Unit, quantity: number): string {

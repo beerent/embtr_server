@@ -11,77 +11,69 @@ import { ContextService } from './ContextService';
 import { Context } from '@src/general/auth/Context';
 import { PureDate } from '@resources/types/date/PureDate';
 import { HabitCategoryDao } from '@src/database/HabitCategoryDao';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
 
 export class HabitCategoryService {
-    public static async getAllGeneric(request: Request): Promise<GetHabitCategoriesResponse> {
-        const context = await ContextService.get(request);
-        if (!context) {
-            return { ...GENERAL_FAILURE, habitCategories: [] };
-        }
-
+    public static async getAllGeneric(context: Context): Promise<HabitCategory[]> {
         const genericHabitCategories = await HabitCategoryDao.getAllGeneric();
         const genericHabitCategoriesModels =
             ModelConverter.convertAll<HabitCategory>(genericHabitCategories);
 
-        return { ...SUCCESS, habitCategories: genericHabitCategoriesModels };
+        return genericHabitCategoriesModels;
     }
 
-    public static async getCustom(request: Request): Promise<GetHabitCategoryResponse> {
-        const context = await ContextService.get(request);
-        if (!context) {
-            return { ...GENERAL_FAILURE };
-        }
-
+    public static async getCustom(context: Context): Promise<HabitCategory> {
         const customHabitsCategory = await HabitCategoryDao.getCustom(context.userId);
         if (!customHabitsCategory) {
-            return { ...GENERAL_FAILURE };
+            throw new ServiceException(
+                404,
+                Code.HABIT_CATEGORY_NOT_FOUND,
+                'habit category not found'
+            );
         }
 
         const customHabitModels = ModelConverter.convert<HabitCategory>(customHabitsCategory);
-        return { ...SUCCESS, habitCategory: customHabitModels };
+        return customHabitModels;
     }
 
-    public static async getRecent(request: Request): Promise<GetHabitCategoryResponse> {
-        const context = await ContextService.get(request);
-        if (!context) {
-            return { ...GENERAL_FAILURE };
-        }
-
-        const recentHabitsCategory = await HabitCategoryDao.getRecent();
-        if (!recentHabitsCategory) {
-            return { ...GENERAL_FAILURE };
-        }
-
-        const recentHabitCategoryModel: HabitCategory =
-            ModelConverter.convert(recentHabitsCategory);
-        const populatedRecentHabitsCategory =
-            await HabitCategoryService.populateRecentHabitCategory(
-                context,
-                recentHabitCategoryModel
+    public static async getRecent(context: Context): Promise<HabitCategory> {
+        const habitCategory = await HabitCategoryDao.getRecent();
+        if (!habitCategory) {
+            throw new ServiceException(
+                404,
+                Code.HABIT_CATEGORY_NOT_FOUND,
+                'habit category not found'
             );
+        }
 
-        return { ...SUCCESS, habitCategory: populatedRecentHabitsCategory };
+        const habitCategoryModel: HabitCategory = ModelConverter.convert(habitCategory);
+        const populatedHabitCategoryModel = await HabitCategoryService.populateRecentHabitCategory(
+            context,
+            habitCategoryModel
+        );
+
+        return populatedHabitCategoryModel;
     }
 
-    public static async getActive(
-        context: Context,
-        date: PureDate
-    ): Promise<GetHabitCategoryResponse> {
-        const activeHabitsCategory = await HabitCategoryDao.getActive();
-        if (!activeHabitsCategory) {
-            return { ...GENERAL_FAILURE };
+    public static async getActive(context: Context, date: PureDate): Promise<HabitCategory> {
+        const habitCategory = await HabitCategoryDao.getActive();
+        if (!habitCategory) {
+            throw new ServiceException(
+                404,
+                Code.HABIT_CATEGORY_NOT_FOUND,
+                'habit category not found'
+            );
         }
 
-        const activeHabitsCategoryModel: HabitCategory =
-            ModelConverter.convert(activeHabitsCategory);
-        const populatedActiveHabitsCategoryModel =
-            await HabitCategoryService.populateMyHabitCategory(
-                context,
-                activeHabitsCategoryModel,
-                date
-            );
+        const habitCategoryModels: HabitCategory = ModelConverter.convert(habitCategory);
+        const populatedHabitCategoryModel = await HabitCategoryService.populateMyHabitCategory(
+            context,
+            habitCategoryModels,
+            date
+        );
 
-        return { ...SUCCESS, habitCategory: populatedActiveHabitsCategoryModel };
+        return populatedHabitCategoryModel;
     }
 
     private static async populateRecentHabitCategory(

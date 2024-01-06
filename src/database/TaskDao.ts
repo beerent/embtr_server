@@ -1,5 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Task } from '@prisma/client';
+import { Task as TaskModel } from '@resources/schema';
 import { logger } from '@src/common/logger/Logger';
 
 export class TaskDao {
@@ -51,14 +52,8 @@ export class TaskDao {
         return [];
     }
 
-    public static async create(
-        userId: number,
-        title: string,
-        description?: string,
-        localImage?: string,
-        remoteImageUrl?: string
-    ) {
-        const result = await prisma.task.create({
+    public static async create(userId: number, task: TaskModel) {
+        const result = prisma.task.create({
             data: {
                 habitCategory: {
                     connect: {
@@ -70,10 +65,10 @@ export class TaskDao {
                         id: userId,
                     },
                 },
-                title,
-                description,
-                localImage,
-                remoteImageUrl,
+                title: task.title ?? '',
+                description: task.description,
+                localImage: task.localImage,
+                remoteImageUrl: task.remoteImageUrl,
             },
         });
 

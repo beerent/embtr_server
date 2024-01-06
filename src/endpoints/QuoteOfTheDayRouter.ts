@@ -7,6 +7,13 @@ import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { validateLikePost } from '@src/middleware/general/GeneralValidation';
 import { LikeService } from '@src/service/LikeService';
 import { Interactable } from '@resources/types/interactable/Interactable';
+import { ContextService } from '@src/service/ContextService';
+import {
+    CreateQuoteOfTheDayRequest,
+    CreateQuoteOfTheDayResponse,
+    GetQuoteOfTheDayResponse,
+} from '@resources/types/requests/QuoteOfTheDayTypes';
+import { SUCCESS } from '@src/common/RequestResponses';
 
 const quoteOfTheDayRouter = express.Router();
 
@@ -16,8 +23,14 @@ quoteOfTheDayRouter.post(
     authorize,
     validateAddQuoteOfTheDay,
     runEndpoint(async (req, res) => {
-        const response = await QuoteOfTheDayService.add(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const request: CreateQuoteOfTheDayRequest = req.body;
+        const quote = request.quote;
+        const author = request.author;
+
+        const quoteOfTheDay = await QuoteOfTheDayService.add(context, quote, author);
+        const response: CreateQuoteOfTheDayResponse = { ...SUCCESS, quoteOfTheDay };
+        res.json(response);
     })
 );
 
@@ -26,8 +39,11 @@ quoteOfTheDayRouter.get(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response = await QuoteOfTheDayService.get();
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+
+        const quoteOfTheDay = await QuoteOfTheDayService.get(context);
+        const response: GetQuoteOfTheDayResponse = { ...SUCCESS, quoteOfTheDay };
+        res.json(response);
     })
 );
 
