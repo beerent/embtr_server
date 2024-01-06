@@ -1,4 +1,4 @@
-import { UserPost, UserPost as UserPostModel } from '@resources/schema';
+import { UserPost } from '@resources/schema';
 import {
     CreateUserPostRequest,
     CreateUserPostResponse,
@@ -14,30 +14,24 @@ import { UserPostDao } from '@src/database/UserPostDao';
 import { UserDao } from '@src/database/UserDao';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { ImageDao } from '@src/database/ImageDao';
+import { Context } from '@src/general/auth/Context';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
 
 export class UserPostService {
-    public static async create(request: Request): Promise<CreateUserPostResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        const body: CreateUserPostRequest = request.body;
-        body.userPost.userId = userId;
+    public static async create(context: Context, userPost: UserPost): Promise<UserPost> {
+        userPost.userId = context.userId;
 
         const filteredImageResults = await ImageDetectionService.filterImages(
-            body.userPost.images ?? []
+            userPost.images ?? []
         );
-
-        body.userPost.images = filteredImageResults.clean;
+        userPost.images = filteredImageResults.clean;
         await ImageDao.deleteImages(filteredImageResults.adult);
 
-        const userPost = await UserPostDao.create(body.userPost);
-        const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
+        const createdUserPost = await UserPostDao.create(userPost);
+        const createdUserPostModel: UserPost = ModelConverter.convert(createdUserPost);
 
-        return { ...SUCCESS, userPost: convertedUserPost };
+        return createdUserPostModel;
     }
 
     public static async getAllForUser(userId: number): Promise<GetAllUserPostResponse> {
@@ -51,67 +45,56 @@ export class UserPostService {
         return { ...SUCCESS, userPosts: convertedUserPostModels };
     }
 
-    public static async getAllByIds(ids: number[]): Promise<GetAllUserPostResponse> {
+    public static async getAllByIds(context: Context, ids: number[]): Promise<UserPost[]> {
         if (ids.length === 0) {
-            return { ...SUCCESS, userPosts: [] };
+            return [];
         }
 
         const userPosts = await UserPostDao.getAllInIds(ids);
-        const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
-
-        return { ...SUCCESS, userPosts: convertedUserPostModels };
+        const userPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
+        return userPostModels;
     }
 
-    public static async getAllBounded(request: Request): Promise<GetAllUserPostResponse> {
-        let upperBound = new Date();
-        if (request.query.upperBound) {
-            upperBound = new Date(request.query.upperBound as string);
-        }
+    public static async getAllBounded(
+        context: Context,
+        lowerBound: Date,
+        upperBound: Date
+    ): Promise<UserPost[]> {
+        const userPosts = await UserPostDao.getAllByBounds(lowerBound, upperBound);
+        const userPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
 
-        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
-        if (request.query.lowerBound) {
-            lowerBound = new Date(request.query.lowerBound as string);
-        }
-
-        const userPosts = await UserPostDao.getAllByBounds(upperBound, lowerBound);
-        const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
-
-        return { ...SUCCESS, userPosts: convertedUserPostModels };
+        return userPostModels;
     }
 
-    public static async getById(id: number): Promise<GetUserPostResponse> {
+    public static async getById(context: Context, id: number): Promise<UserPost> {
         const userPost = await UserPostDao.getById(id);
 
-        if (userPost) {
-            const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
-            return { ...SUCCESS, userPost: convertedUserPost };
+        if (!userPost) {
+            throw new ServiceException(404, Code.USER_POST_NOT_FOUND, 'user post not found');
         }
 
-        return RESOURCE_NOT_FOUND;
+        const userPostModel: UserPost = ModelConverter.convert(userPost);
+        return userPostModel;
     }
 
-    public static async update(request: Request): Promise<CreateUserPostResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+    public static async update(context: Context, userPost: UserPost): Promise<UserPost> {
+        if (!userPost.id) {
+            throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
         }
 
-        const body: UpdateUserPostRequest = request.body;
-        body.userPost.userId = userId;
+        userPost.userId = context.userId;
 
-        const currentPost = await UserPostDao.getById(body.userPost.id!);
-        if (!currentPost) {
-            return RESOURCE_NOT_FOUND;
+        const databaseUserPost = await UserPostDao.getById(userPost.id!);
+        if (!databaseUserPost) {
+            throw new ServiceException(404, Code.USER_POST_NOT_FOUND, 'user post not found');
         }
 
-        if (currentPost.userId !== userId) {
-            return RESOURCE_NOT_FOUND;
+        if (databaseUserPost.userId !== context.userId) {
+            throw new ServiceException(403, Code.FORBIDDEN, 'user does not have permission');
         }
 
-        const userPost = await UserPostDao.update(body.userPost);
-        const convertedUserPost: UserPostModel = ModelConverter.convert(userPost);
-        return { ...SUCCESS, userPost: convertedUserPost };
+        const updatedUserPost = await UserPostDao.update(userPost);
+        const updatedUserPostModel: UserPost = ModelConverter.convert(updatedUserPost);
+        return updatedUserPostModel;
     }
 }

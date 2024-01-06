@@ -1,24 +1,14 @@
-import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import {
-    CreatePlannedDayResultRequest,
-    GetPlannedDayResultRequest,
-    GetPlannedDayResultResponse,
     GetPlannedDayResultSummariesResponse,
-    GetPlannedDayResultSummaryResponse,
     GetPlannedDayResultsResponse,
-    UpdatePlannedDayResultRequest,
-    UpdatePlannedDayResultResponse,
 } from '@resources/types/requests/PlannedDayResultTypes';
 import {
-    CREATE_DAY_RESULT_FAILED,
     GET_DAY_RESULT_UNKNOWN,
     RESOURCE_NOT_FOUND,
     SUCCESS,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
-    UPDATE_PLANNED_DAY_RESULT_UNKNOWN,
 } from '@src/common/RequestResponses';
 import { Request } from 'express';
-import { PlannedDayResult } from '@prisma/client';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Response } from '@resources/types/requests/RequestTypes';
 import {
@@ -30,145 +20,123 @@ import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { PlannedDayResultDao, PlannedDayResultType } from '@src/database/PlannedDayResultDao';
 import { UserDao } from '@src/database/UserDao';
+import { Context } from '@src/general/auth/Context';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
+import { PlannedDayResult } from '@resources/schema';
 
 export class PlannedDayResultService {
-    public static async create(request: Request): Promise<GetPlannedDayResultResponse> {
-        const body: CreatePlannedDayResultRequest = {
-            plannedDayId: request.body.plannedDayId,
-        };
-
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-
-        if (!userId) {
-            return CREATE_DAY_RESULT_FAILED;
-        }
-
-        const plannedDay = await PlannedDayDao.get(body.plannedDayId);
+    public static async create(context: Context, plannedDayId: number): Promise<PlannedDayResult> {
+        const plannedDay = await PlannedDayDao.get(plannedDayId);
         if (!plannedDay) {
-            return CREATE_DAY_RESULT_FAILED;
+            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
-        if (plannedDay.user.id !== userId) {
-            return CREATE_DAY_RESULT_FAILED;
+        if (plannedDay.user.id !== context.userId) {
+            throw new ServiceException(404, Code.FORBIDDEN, 'planned day does not belong to user');
         }
 
-        const createdPlannedDayResult: PlannedDayResult = await PlannedDayResultDao.create(
-            body.plannedDayId,
+        const plannedDayResult = await PlannedDayResultDao.create(
+            plannedDayId,
             this.getRandomSuccessMessage()
         );
 
-        if (createdPlannedDayResult) {
-            const convertedDayResult: PlannedDayResultModel =
-                ModelConverter.convert(createdPlannedDayResult);
-            return { ...SUCCESS, plannedDayResult: convertedDayResult };
-        }
-
-        return GET_DAY_RESULT_UNKNOWN;
-    }
-
-    public static async update(request: Request): Promise<UpdatePlannedDayResultResponse> {
-        const updateRequest: UpdatePlannedDayResultRequest = request.body;
-
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return UPDATE_PLANNED_DAY_RESULT_INVALID;
-        }
-
-        const plannedDayResult = await PlannedDayResultDao.getById(
-            updateRequest.plannedDayResult!.id!
-        );
         if (!plannedDayResult) {
-            return UPDATE_PLANNED_DAY_RESULT_UNKNOWN;
+            throw new ServiceException(
+                500,
+                Code.PLANNED_DAY_RESULT_NOT_CREATED,
+                'planned day result not created'
+            );
         }
 
-        if (plannedDayResult.plannedDay.user.id !== userId) {
-            return UPDATE_PLANNED_DAY_RESULT_UNKNOWN;
-        }
-
-        const updatedPlannedDayResult = await PlannedDayResultDao.update(
-            updateRequest.plannedDayResult!
-        );
-        if (updatedPlannedDayResult) {
-            const updatedPlannedDayResultModel: PlannedDayResultModel =
-                ModelConverter.convert(updatedPlannedDayResult);
-            return { ...SUCCESS, plannedDayResult: updatedPlannedDayResultModel };
-        }
-
-        return UPDATE_PLANNED_DAY_RESULT_INVALID;
+        const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        return plannedDayResultModel;
     }
 
-    public static async getAllForUser(userId: number): Promise<GetPlannedDayResultsResponse> {
-        const user = await UserDao.getById(userId);
-        if (!user) {
-            return { ...RESOURCE_NOT_FOUND, message: 'user not found' };
+    public static async update(
+        context: Context,
+        plannedDayResult: PlannedDayResult
+    ): Promise<PlannedDayResult> {
+        if (!plannedDayResult.id) {
+            throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
         }
 
-        const dayResults = await PlannedDayResultDao.getAllForUser(userId);
-
-        if (dayResults) {
-            const convertedDayResults: PlannedDayResultModel[] =
-                ModelConverter.convertAll(dayResults);
-            return { ...SUCCESS, plannedDayResults: convertedDayResults };
+        const databasePlannedDayResult = await PlannedDayResultDao.getById(plannedDayResult.id);
+        if (!databasePlannedDayResult) {
+            throw new ServiceException(
+                404,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'planned day result does not exist'
+            );
         }
 
-        return GET_DAY_RESULT_UNKNOWN;
+        if (databasePlannedDayResult.plannedDay.userId !== context.userId) {
+            throw new ServiceException(
+                404,
+                Code.FORBIDDEN,
+                'planned day result does not belong to user'
+            );
+        }
+
+        const updatedPlannedDayResult = await PlannedDayResultDao.update(plannedDayResult);
+
+        if (!updatedPlannedDayResult) {
+            throw new ServiceException(
+                500,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'failed to update planned day result'
+            );
+        }
+
+        const plannedDayResultModel: PlannedDayResult =
+            ModelConverter.convert(updatedPlannedDayResult);
+        return plannedDayResultModel;
     }
 
-    public static async getAll(request: Request): Promise<GetPlannedDayResultsResponse> {
-        let upperBound = new Date();
-        if (request.query.upperBound) {
-            upperBound = new Date(request.query.upperBound as string);
+    public static async getAll(
+        context: Context,
+        lowerBound: Date,
+        upperBound: Date
+    ): Promise<PlannedDayResult[]> {
+        const plannedDayResults = await PlannedDayResultDao.getAll(lowerBound, upperBound);
+        if (!plannedDayResults) {
+            throw new ServiceException(
+                404,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'planned day results not found'
+            );
         }
 
-        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
-        if (request.query.lowerBound) {
-            lowerBound = new Date(request.query.lowerBound as string);
-        }
-
-        const dayResults = await PlannedDayResultDao.getAll(upperBound, lowerBound);
-
-        if (dayResults) {
-            const convertedDayResults: PlannedDayResultModel[] =
-                ModelConverter.convertAll(dayResults);
-            return { ...SUCCESS, plannedDayResults: convertedDayResults };
-        }
-
-        return GET_DAY_RESULT_UNKNOWN;
+        const plannedDayResultModels: PlannedDayResult[] =
+            ModelConverter.convertAll(plannedDayResults);
+        return plannedDayResultModels;
     }
 
-    public static async getAllByIds(ids: number[]): Promise<GetPlannedDayResultsResponse> {
+    public static async getAllByIds(context: Context, ids: number[]): Promise<PlannedDayResult[]> {
         if (ids.length === 0) {
-            return { ...SUCCESS, plannedDayResults: [] };
+            return [];
         }
 
-        const dayResults = await PlannedDayResultDao.getAllByIds(ids);
+        const plannedDayResults = await PlannedDayResultDao.getAllByIds(ids);
 
-        if (dayResults) {
-            const convertedDayResults: PlannedDayResultModel[] =
-                ModelConverter.convertAll(dayResults);
-            return { ...SUCCESS, plannedDayResults: convertedDayResults };
+        if (!plannedDayResults) {
+            throw new ServiceException(
+                404,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'planned day results not found'
+            );
         }
 
-        return GET_DAY_RESULT_UNKNOWN;
+        const plannedDayResultsModels: PlannedDayResult[] =
+            ModelConverter.convertAll(plannedDayResults);
+        return plannedDayResultsModels;
     }
 
     public static async getAllSummaries(
-        request: Request
-    ): Promise<GetPlannedDayResultSummariesResponse> {
-        let upperBound = new Date();
-        if (request.query.upperBound) {
-            upperBound = new Date(request.query.upperBound as string);
-        }
-
-        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
-        if (request.query.lowerBound) {
-            lowerBound = new Date(request.query.lowerBound as string);
-        }
-
+        context: Context,
+        lowerBound: Date,
+        upperBound: Date
+    ): Promise<PlannedDayResultSummary[]> {
         const dayResults = await PlannedDayResultDao.getAll(upperBound, lowerBound);
 
         const summaries: PlannedDayResultSummary[] = [];
@@ -181,85 +149,82 @@ export class PlannedDayResultService {
             summaries.push(summary);
         }
 
-        return { ...SUCCESS, plannedDayResultSummaries: summaries };
+        return summaries;
     }
 
     public static async getAllSummariesForUser(
+        context: Context,
         userId: number
-    ): Promise<GetPlannedDayResultSummariesResponse> {
-        const dayResults = await PlannedDayResultDao.getAllForUser(userId);
+    ): Promise<PlannedDayResultSummary[]> {
+        const plannedDayResults = await PlannedDayResultDao.getAllForUser(userId);
 
-        const summaries: PlannedDayResultSummary[] = [];
-        for (const dayResult of dayResults) {
-            const completedHabits: CompletedHabit[] = this.getCompletedHabits(dayResult);
-            const summary: PlannedDayResultSummary = {
-                plannedDayResult: ModelConverter.convert(dayResult),
+        const plannedDayResultSummaries: PlannedDayResultSummary[] = [];
+        for (const plannedDayResult of plannedDayResults) {
+            const completedHabits: CompletedHabit[] = this.getCompletedHabits(plannedDayResult);
+            const plannedDayResultSummary: PlannedDayResultSummary = {
+                plannedDayResult: ModelConverter.convert(plannedDayResult),
                 completedHabits,
             };
-            summaries.push(summary);
+            plannedDayResultSummaries.push(plannedDayResultSummary);
         }
 
-        return { ...SUCCESS, plannedDayResultSummaries: summaries };
+        return plannedDayResultSummaries;
     }
 
-    public static async getSummaryById(id: number): Promise<GetPlannedDayResultSummaryResponse> {
-        const dayResult = await PlannedDayResultDao.getById(id);
+    public static async getSummaryById(
+        context: Context,
+        id: number
+    ): Promise<PlannedDayResultSummary> {
+        const plannedDayResult = await PlannedDayResultDao.getById(id);
 
-        if (dayResult) {
-            const completedHabits: CompletedHabit[] = this.getCompletedHabits(dayResult);
-            const summary: PlannedDayResultSummary = {
-                plannedDayResult: ModelConverter.convert(dayResult),
-                completedHabits,
-            };
-
-            return { ...SUCCESS, plannedDayResultSummary: summary };
+        if (!plannedDayResult) {
+            throw new ServiceException(
+                404,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'planned day result not found'
+            );
         }
 
-        return GET_DAY_RESULT_UNKNOWN;
+        const completedHabits: CompletedHabit[] = this.getCompletedHabits(plannedDayResult);
+        const summary: PlannedDayResultSummary = {
+            plannedDayResult: ModelConverter.convert(plannedDayResult),
+            completedHabits,
+        };
+
+        return summary;
     }
 
-    public static async getById(id: number): Promise<GetPlannedDayResultResponse> {
-        const dayResult = await PlannedDayResultDao.getById(id);
+    public static async getById(context: Context, id: number): Promise<PlannedDayResult> {
+        const plannedDayResult = await PlannedDayResultDao.getById(id);
 
-        if (dayResult) {
-            const convertedDayResult: PlannedDayResultModel = ModelConverter.convert(dayResult);
-            return { ...SUCCESS, plannedDayResult: convertedDayResult };
+        if (!plannedDayResult) {
+            throw new ServiceException(
+                404,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'planned day result not found'
+            );
         }
 
-        return GET_DAY_RESULT_UNKNOWN;
+        const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        return plannedDayResultModel;
     }
 
     public static async getByUserAndDayKey(
-        request: GetPlannedDayResultRequest
-    ): Promise<GetPlannedDayResultResponse> {
-        const dayResult = await PlannedDayResultDao.getByUserAndDayKey(
-            request.userId,
-            request.dayKey
-        );
-
-        if (dayResult) {
-            const convertedDayResult: PlannedDayResultModel = ModelConverter.convert(dayResult);
-            return { ...SUCCESS, plannedDayResult: convertedDayResult };
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDayResult> {
+        const plannedDayResult = await PlannedDayResultDao.getByUserAndDayKey(userId, dayKey);
+        if (!plannedDayResult) {
+            throw new ServiceException(
+                404,
+                Code.PLANNED_DAY_RESULT_NOT_FOUND,
+                'planned day result not found'
+            );
         }
 
-        return GET_DAY_RESULT_UNKNOWN;
-    }
-
-    public static async hideRecommendation(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...UPDATE_PLANNED_DAY_RESULT_INVALID, message: 'invalid user' };
-        }
-
-        const dayKey = request.params.dayKey;
-        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
-        if (!plannedDay) {
-            return { ...UPDATE_PLANNED_DAY_RESULT_INVALID, message: 'invalid day' };
-        }
-
-        return SUCCESS;
+        const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        return plannedDayResultModel;
     }
 
     private static getCompletedHabits(plannedDayResult: PlannedDayResultType): CompletedHabit[] {

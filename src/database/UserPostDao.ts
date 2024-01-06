@@ -56,7 +56,7 @@ export class UserPostDao {
         });
     }
 
-    public static async getAllByBounds(upperBound: Date, lowerBound: Date) {
+    public static async getAllByBounds(lowerBound: Date, upperBound: Date) {
         return await prisma.userPost.findMany({
             where: {
                 active: true,

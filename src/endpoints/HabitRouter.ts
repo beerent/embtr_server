@@ -12,17 +12,55 @@ import { ContextService } from '@src/service/ContextService';
 import { HabitCategoryValidation } from '@src/middleware/habit_category/HabitCategoryValidation';
 import { PureDate } from '@resources/types/date/PureDate';
 import taskRouter from '@src/endpoints/TaskRouter';
+import { HabitService } from '@src/service/HabitService';
+import {
+    CreateTaskRequest, CreateTaskResponse,
+    GetTaskResponse,
+    SearchTasksResponse
+} from "@resources/types/requests/TaskTypes";
+import { SUCCESS } from '@src/common/RequestResponses';
+import {
+    GetHabitCategoryResponse,
+    GetHabitSummariesResponse,
+} from '@resources/types/requests/HabitTypes';
+import {
+    CreateScheduledHabitRequest,
+    CreateScheduledHabitResponse,
+    GetScheduledHabitResponse,
+    GetScheduledHabitsResponse,
+} from '@resources/types/requests/ScheduledHabitTypes';
+import { validateSearch as validateSearchTasks } from '@src/middleware/task/TaskValidation';
+import { Task } from '@resources/schema';
 
 const habitRouter = express.Router();
 
+taskRouter.get(
+    '/:id',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const task = await HabitService.get(context, id);
+        const response: GetTaskResponse = { ...SUCCESS, task };
+        res.json(response);
+    })
+);
+
 habitRouter.get('/categories/generic', authenticate, authorize, async (req, res) => {
-    const response = await HabitCategoryService.getAllGeneric(req);
-    res.status(response.httpCode).json(response);
+    const context = await ContextService.get(req);
+    const habitCategories = await HabitCategoryService.getAllGeneric(context);
+
+    res.json(habitCategories);
 });
 
 habitRouter.get('/categories/custom', authenticate, authorize, async (req, res) => {
-    const response = await HabitCategoryService.getCustom(req);
-    res.status(response.httpCode).json(response);
+    const context = await ContextService.get(req);
+    const customHabitCategory = await HabitCategoryService.getCustom(context);
+
+    const response: GetHabitCategoryResponse = { ...SUCCESS, habitCategory: customHabitCategory };
+    res.json(response);
 });
 
 habitRouter.get(
@@ -34,14 +72,19 @@ habitRouter.get(
         const context = await ContextService.get(req);
         const date: PureDate = PureDate.fromString(req.query.date as string);
 
-        const response = await HabitCategoryService.getActive(context, date);
-        res.status(response.httpCode).json(response);
+        const habitCategory = await HabitCategoryService.getActive(context, date);
+        const response: GetHabitCategoryResponse = { ...SUCCESS, habitCategory };
+
+        res.json(response);
     }
 );
 
 habitRouter.get('/categories/recent', authenticate, authorize, async (req, res) => {
-    const response = await HabitCategoryService.getRecent(req);
-    res.status(response.httpCode).json(response);
+    const context = await ContextService.get(req);
+    const habitCategory = await HabitCategoryService.getRecent(context);
+
+    const response: GetHabitCategoryResponse = { ...SUCCESS, habitCategory };
+    res.json(response);
 });
 
 habitRouter.get(
@@ -52,9 +95,10 @@ habitRouter.get(
     async (req, res) => {
         const context = await ContextService.get(req);
         const cutoffDate: PureDate = PureDate.fromString(req.query.cutoffDate as string);
-        const response = await ScheduledHabitService.getHabitSummaries(context, cutoffDate);
 
-        res.status(response.httpCode).json(response);
+        const habitSummaries = await ScheduledHabitService.getHabitSummaries(context, cutoffDate);
+        const response: GetHabitSummariesResponse = { ...SUCCESS, habitSummaries };
+        res.json(response);
     }
 );
 
@@ -67,9 +111,10 @@ habitRouter.get(
         const context = await ContextService.get(req);
         const id = Number(req.params.id);
         const cutoffDate: PureDate = PureDate.fromString(req.query.cutoffDate as string);
-        const response = await ScheduledHabitService.getHabitSummary(context, id, cutoffDate);
 
-        res.status(response.httpCode).json(response);
+        const habitSummary = await ScheduledHabitService.getHabitSummary(context, id, cutoffDate);
+        const response: GetHabitSummariesResponse = { ...SUCCESS, habitSummaries: [habitSummary] };
+        res.json(response);
     }
 );
 
@@ -79,8 +124,19 @@ habitRouter.post(
     authorize,
     validateScheduledHabitPost,
     runEndpoint(async (req, res) => {
-        const response = await ScheduledHabitService.createOrUpdate(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const request: CreateScheduledHabitRequest = req.body;
+        const scheduledHabit = request.scheduledHabit;
+
+        const createdScheduledHabit = await ScheduledHabitService.createOrUpdate(
+            context,
+            scheduledHabit
+        );
+        const response: CreateScheduledHabitResponse = {
+            ...SUCCESS,
+            scheduledHabit: createdScheduledHabit,
+        };
+        res.json(response);
     })
 );
 
@@ -90,8 +146,11 @@ habitRouter.post(
     authorize,
     validateScheduledHabitGet,
     runEndpoint(async (req, res) => {
-        const response = await ScheduledHabitService.archive(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        await ScheduledHabitService.archive(context, id);
+        res.json(SUCCESS);
     })
 );
 
@@ -104,8 +163,9 @@ habitRouter.get(
         const context = await ContextService.get(req);
         const id = Number(req.params.id);
 
-        const response = await ScheduledHabitService.getAllByHabit(context, id);
-        res.status(response.httpCode).json(response);
+        const scheduledHabits = await ScheduledHabitService.getAllByHabit(context, id);
+        const response: GetScheduledHabitsResponse = { ...SUCCESS, scheduledHabits };
+        res.json(response);
     })
 );
 
@@ -115,10 +175,56 @@ habitRouter.get(
     authorize,
     validateScheduledHabitGet,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const id = Number(req.params.id);
 
-        const response = await ScheduledHabitService.get(id);
-        res.status(response.httpCode).json(response);
+        const scheduledHabit = await ScheduledHabitService.get(context, id);
+        const response: GetScheduledHabitResponse = { ...SUCCESS, scheduledHabit };
+        res.json(response);
+    })
+);
+
+taskRouter.get(
+    '/:id',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const habit = await HabitService.get(context, id);
+        const response: GetTaskResponse = { ...SUCCESS, task: habit };
+        res.json(response);
+    })
+);
+
+taskRouter.get(
+    '/',
+    authenticate,
+    authorize,
+    validateSearchTasks,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const query = req.query.q as string;
+
+        const tasks: Task[] = await HabitService.search(context, query);
+        const response: SearchTasksResponse = { ...SUCCESS, tasks };
+        res.json(response);
+    })
+);
+
+taskRouter.post(
+    '/',
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: CreateTaskRequest = req.body;
+        const habit = request.task;
+
+        const createdHabit = await HabitService.create(context, habit);
+        const response: CreateTaskResponse = { ...SUCCESS, task: createdHabit };
+        res.json(response);
     })
 );
 

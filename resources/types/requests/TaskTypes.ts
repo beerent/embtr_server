@@ -1,30 +1,23 @@
-import { Task as TaskModel, TaskPreference } from "../../schema";
+import { Task } from "../../schema";
 import { Response } from "./RequestTypes";
 
 export interface GetTaskResponse extends Response {
-  task?: TaskModel;
+    task?: Task;
 }
 
 export interface SearchTasksResponse extends Response {
-  tasks: TaskModel[];
+    tasks: Task[];
 }
 
 export interface CreateTaskRequest {
-  title: string;
-  description?: string;
-  localImage?: string;
-  removeImageUrl?: string;
+    task: Task;
 }
 
 export interface CreateTaskResponse extends Response {
-  task?: TaskModel;
+    task?: Task;
 }
 
 export interface TaskPreferenceRequest {
-  unitId?: number;
-  quantity?: number;
-}
-
-export interface TaskPreferenceResponse extends Response {
-  preference?: TaskPreference
+    unitId?: number;
+    quantity?: number;
 }

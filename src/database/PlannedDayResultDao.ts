@@ -112,7 +112,7 @@ export class PlannedDayResultDao {
         return result;
     }
 
-    public static async getAll(upperBound: Date, lowerBound: Date) {
+    public static async getAll(lowerBound: Date, upperBound: Date) {
         return await prisma.plannedDayResult.findMany({
             where: {
                 active: true,

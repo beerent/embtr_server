@@ -18,11 +18,15 @@ export interface TimelineElement {
   plannedDayResult?: PlannedDayResult
 }
 
+export interface TimelineData {
+  elements: TimelineElement[],
+  nextCursor?: TimelineRequestCursor
+}
+
 export interface GetTimelineRequest {
   cursor?: TimelineRequestCursor
 }
 
 export interface GetTimelineResponse extends Response {
-  results: TimelineElement[],
-  nextCursor?: TimelineRequestCursor
+  timelineData?: TimelineData
 }

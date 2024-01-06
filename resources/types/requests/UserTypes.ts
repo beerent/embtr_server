@@ -11,9 +11,13 @@ export interface GetUsersResponse extends Response {
 
 export interface CreateUserRequest {}
 
-export interface CreateUserResponse extends Response {}
+export interface CreateUserResponse extends Response {
+  user?: UserModel;
+}
 
-export interface UpdateUserRequest extends UserModel {}
+export interface UpdateUserRequest {
+  user: UserModel;
+}
 
 export interface UpdateUserResponse extends Response {
   user?: UserModel;

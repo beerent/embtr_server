@@ -10,121 +10,129 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
 import { Context } from '@src/general/auth/Context';
 import { HabitSummary } from '@resources/types/habit/Habit';
-import {
-    GetHabitSummariesResponse,
-    GetHabitSummaryResponse,
-} from '@resources/types/requests/HabitTypes';
 import { PureDate } from '@resources/types/date/PureDate';
 import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSummaryProvider';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
 
 export class ScheduledHabitService {
-    public static async createOrUpdate(request: Request): Promise<CreateScheduledHabitResponse> {
-        const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
-        if (requestScheduledHabit.id) {
-            return this.update(request);
+    public static async createOrUpdate(
+        context: Context,
+        scheduledHabit: ScheduledHabit
+    ): Promise<ScheduledHabit> {
+        if (scheduledHabit.id) {
+            return this.update(context, scheduledHabit);
         }
 
-        return this.create(request);
+        return this.create(context, scheduledHabit);
     }
 
-    public static async create(request: Request): Promise<CreateScheduledHabitResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
-        const scheduledHabit = await ScheduledHabitDao.create(
-            userId,
-            requestScheduledHabit.taskId!,
-            requestScheduledHabit.description,
-            requestScheduledHabit.quantity,
-            requestScheduledHabit.unitId,
-            requestScheduledHabit.daysOfWeek
+    public static async create(
+        context: Context,
+        scheduledHabit: ScheduledHabit
+    ): Promise<ScheduledHabit> {
+        const createdScheduledHabit = await ScheduledHabitDao.create(
+            context.userId,
+            scheduledHabit.taskId!,
+            scheduledHabit.description,
+            scheduledHabit.quantity,
+            scheduledHabit.unitId,
+            scheduledHabit.daysOfWeek
                 ?.map((day) => day.id)
                 .filter((id) => id !== undefined) as number[],
-            requestScheduledHabit.timesOfDay
+            scheduledHabit.timesOfDay
                 ?.map((time) => time.id)
                 .filter((id) => id !== undefined) as number[],
-            requestScheduledHabit.startDate,
-            requestScheduledHabit.endDate
+            scheduledHabit.startDate,
+            scheduledHabit.endDate
         );
 
-        const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
-        return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+        const createdScheduledHabitModel: ScheduledHabit =
+            ModelConverter.convert(createdScheduledHabit);
+        return createdScheduledHabitModel;
     }
 
-    public static async update(request: Request): Promise<CreateScheduledHabitResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+    public static async update(
+        context: Context,
+        scheduledHabit: ScheduledHabit
+    ): Promise<ScheduledHabit> {
+        if (!scheduledHabit.id || !scheduledHabit.taskId) {
+            throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
         }
 
-        const requestScheduledHabit: ScheduledHabit = request.body.scheduledHabit;
-        if (!requestScheduledHabit.id) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        const existingScheduledHabit = await ScheduledHabitDao.get(requestScheduledHabit.id);
+        const existingScheduledHabit = await ScheduledHabitDao.get(scheduledHabit.id);
         if (!existingScheduledHabit) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+            throw new ServiceException(
+                404,
+                Code.SCHEDULED_HABIT_NOT_FOUND,
+                'scheduled habit not found'
+            );
         }
 
-        const scheduledHabit = await ScheduledHabitDao.update(
-            requestScheduledHabit.id,
-            userId,
-            existingScheduledHabit.taskId,
-            requestScheduledHabit.description,
-            requestScheduledHabit.quantity,
-            requestScheduledHabit.unitId,
-            requestScheduledHabit.daysOfWeek
+        const updatedScheduledHabit = await ScheduledHabitDao.update(
+            scheduledHabit.id,
+            context.userId,
+            scheduledHabit.taskId,
+            scheduledHabit.description,
+            scheduledHabit.quantity,
+            scheduledHabit.unitId,
+            scheduledHabit.daysOfWeek
                 ?.map((day) => day.id)
                 .filter((id) => id !== undefined) as number[],
-            requestScheduledHabit.timesOfDay
+            scheduledHabit.timesOfDay
                 ?.map((time) => time.id)
                 .filter((id) => id !== undefined) as number[],
-            requestScheduledHabit.startDate,
-            requestScheduledHabit.endDate
+            scheduledHabit.startDate,
+            scheduledHabit.endDate
         );
 
-        const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
-        return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+        const updatedScheduledHabitModel: ScheduledHabit =
+            ModelConverter.convert(updatedScheduledHabit);
+        return updatedScheduledHabitModel;
     }
 
-    public static async replace(request: Request): Promise<CreateScheduledHabitResponse> {
-        return this.update(request);
+    public static async replace(
+        context: Context,
+        scheduledHabit: ScheduledHabit
+    ): Promise<ScheduledHabit> {
+        const updatedScheduledHabit = this.update(context, scheduledHabit);
+        return updatedScheduledHabit;
     }
 
     public static async getAllByHabit(
         context: Context,
         habitId: number
-    ): Promise<GetScheduledHabitsResponse> {
+    ): Promise<ScheduledHabit[]> {
         const scheduledHabits = await ScheduledHabitDao.getAllByHabitIdAndUserId(
             habitId,
             context.userId
         );
         if (!scheduledHabits) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+            throw new ServiceException(
+                404,
+                Code.SCHEDULED_HABIT_NOT_FOUND,
+                'scheduled habit not found'
+            );
         }
 
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
-        return { ...SUCCESS, scheduledHabits: scheduledHabitModels };
+        return scheduledHabitModels;
     }
 
-    public static async get(id: number): Promise<GetScheduledHabitResponse> {
+    public static async get(context: Context, id: number): Promise<ScheduledHabit> {
         const scheduledHabit = await ScheduledHabitDao.get(id);
         if (!scheduledHabit) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+            throw new ServiceException(
+                404,
+                Code.SCHEDULED_HABIT_NOT_FOUND,
+                'scheduled habit not found'
+            );
         }
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
-        return { ...SUCCESS, scheduledHabit: scheduledHabitModel };
+        return scheduledHabitModel;
     }
 
     public static async getRecent(userId: number): Promise<ScheduledHabit[]> {
@@ -150,7 +158,7 @@ export class ScheduledHabitService {
     public static async getHabitSummaries(
         context: Context,
         cutoffDate: PureDate
-    ): Promise<GetHabitSummariesResponse> {
+    ): Promise<HabitSummary[]> {
         const scheduledHabits = await ScheduledHabitDao.getAll(context.userId);
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
         const habitSummaries = ScheduledHabitSummaryProvider.createSummaries(
@@ -158,20 +166,24 @@ export class ScheduledHabitService {
             cutoffDate
         );
 
-        return { ...SUCCESS, habitSummaries: habitSummaries };
+        return habitSummaries;
     }
 
     public static async getHabitSummary(
         context: Context,
         habitId: number,
         cutoffDate: PureDate
-    ): Promise<GetHabitSummaryResponse> {
+    ): Promise<HabitSummary> {
         const scheduledHabits = await ScheduledHabitDao.getAllByHabitIdAndUserId(
             habitId,
             context.userId
         );
         if (!scheduledHabits) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+            throw new ServiceException(
+                404,
+                Code.SCHEDULED_HABIT_NOT_FOUND,
+                'scheduled habit not found'
+            );
         }
 
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
@@ -181,25 +193,18 @@ export class ScheduledHabitService {
         );
 
         if (habitSummaries.length !== 1) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
+            throw new ServiceException(
+                500,
+                Code.SCHEDULED_HABIT_ERROR,
+                'failed to create habit summary'
+            );
         }
 
-        return { ...SUCCESS, habitSummary: habitSummaries[0] };
+        return habitSummaries[0];
     }
 
-    public static async archive(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        const id: number = Number(request.params.id);
-
+    public static async archive(context: Context, id: number): Promise<void> {
         const now = new Date();
-        await ScheduledHabitDao.archive(userId, id, now);
-
-        return { ...SUCCESS };
+        await ScheduledHabitDao.archive(context.userId, id, now);
     }
 }

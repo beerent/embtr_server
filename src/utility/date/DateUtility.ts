@@ -5,11 +5,20 @@ export namespace DateUtility {
 
         return today;
     };
+
     export const getYesterday = (): Date => {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setUTCHours(0, 0, 0, 0);
 
         return yesterday;
+    };
+
+    export const getOptionalDate = (date?: string) => {
+        if (date) {
+            return new Date(date);
+        }
+
+        return new Date();
     };
 }

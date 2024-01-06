@@ -5,8 +5,11 @@ import {
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
-import { GetUserResponse, GetUsersResponse } from '@resources/types/requests/UserTypes';
-import { UserController } from '@src/controller/UserController';
+import {
+    GetUserResponse,
+    GetUsersResponse,
+    UpdateUserRequest,
+} from '@resources/types/requests/UserTypes';
 import {
     authenticate,
     authenticateCreateUser as authenticateGetCurrentUser,
@@ -23,6 +26,11 @@ import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { UserPostService } from '@src/service/UserPostService';
 
 import express from 'express';
+import { ContextService } from '@src/service/ContextService';
+import { User } from '@resources/schema';
+import { UserService } from '@src/service/UserService';
+import { SUCCESS } from '@src/common/RequestResponses';
+import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 
 const userRouter = express.Router();
 
@@ -31,10 +39,12 @@ userRouter.get(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const query = req.query.query as string;
-        let response = await UserController.search(query);
 
-        res.status(response.httpCode).json(response);
+        const users: User[] = await UserService.search(context, query);
+        const response: GetUsersResponse = { ...SUCCESS, users };
+        res.json(response);
     })
 );
 
@@ -42,12 +52,13 @@ userRouter.get(
     '/exists',
     authenticate,
     authorize,
-    // todo - add validation
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const username = req.query.username as string;
-        const response: GetUsersResponse = await UserController.exists(username);
 
-        res.status(response.httpCode).json(response);
+        const exists = await UserService.exists(context, username);
+        const response: GetBooleanResponse = { ...SUCCESS, result: exists };
+        res.json(response);
     })
 );
 
@@ -56,10 +67,12 @@ userRouter.get(
     authenticate,
     authorizeUserGet,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const uid = req.params.uid;
-        const response: GetUserResponse = await UserController.getByUid(uid);
 
-        res.status(response.httpCode).json(response);
+        const user = await UserService.getByUid(context, uid);
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
     })
 );
 
@@ -67,8 +80,11 @@ userRouter.get(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const response: GetUserResponse = await UserController.getCurrentUser(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+
+        const user = await UserService.getCurrent(context);
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
     })
 );
 
@@ -76,8 +92,11 @@ userRouter.post(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const response = await UserController.create(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const createdUser = await UserService.create(context);
+
+        const response: GetUserResponse = { ...SUCCESS, user: createdUser };
+        res.json(response);
     })
 );
 
@@ -86,8 +105,13 @@ userRouter.patch(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response = await UserController.setup(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const requestBody: UpdateUserRequest = req.body;
+        const user: User = requestBody.user;
+
+        const setupUser = await UserService.setup(context, user);
+        const response: GetUserResponse = { ...SUCCESS, user: setupUser };
+        res.json(response);
     })
 );
 
@@ -96,8 +120,13 @@ userRouter.patch(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const response = await UserController.update(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const requestBody: UpdateUserRequest = req.body;
+        const user: User = requestBody.user;
+
+        const updatedUser = await UserService.update(context, user);
+        const response: GetUserResponse = { ...SUCCESS, user: updatedUser };
+        res.json(response);
     })
 );
 
@@ -139,10 +168,19 @@ userRouter.get(
     authorize,
     validateGetUserData,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const userId = Number(req.params.userId);
-        const response: GetPlannedDayResultSummariesResponse =
-            await PlannedDayResultService.getAllSummariesForUser(userId);
-        res.status(response.httpCode).json(response);
+
+        const plannedDayResultSummaries = await PlannedDayResultService.getAllSummariesForUser(
+            context,
+            userId
+        );
+        const response: GetPlannedDayResultSummariesResponse = {
+            ...SUCCESS,
+            plannedDayResultSummaries,
+        };
+
+        res.json(response);
     })
 );
 
