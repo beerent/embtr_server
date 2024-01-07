@@ -48,7 +48,7 @@ app.use((req, res, next) => {
         const elapsedTime = endTime - startTime;
         const contentLength = Buffer.byteLength(data, 'utf-8'); // Get the size of the response data'
         const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        const requestPadding = ' '.repeat(5 - req.method.length);
+        const requestPadding = ' '.repeat(6 - req.method.length);
 
         logger.info(
             //add timestamp to beginning of log

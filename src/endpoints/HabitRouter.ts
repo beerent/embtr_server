@@ -14,12 +14,14 @@ import { PureDate } from '@resources/types/date/PureDate';
 import taskRouter from '@src/endpoints/TaskRouter';
 import { HabitService } from '@src/service/HabitService';
 import {
-    CreateTaskRequest, CreateTaskResponse,
+    CreateTaskRequest,
+    CreateTaskResponse,
     GetTaskResponse,
-    SearchTasksResponse
-} from "@resources/types/requests/TaskTypes";
+    SearchTasksResponse,
+} from '@resources/types/requests/TaskTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import {
+    GetHabitCategoriesResponse,
     GetHabitCategoryResponse,
     GetHabitSummariesResponse,
 } from '@resources/types/requests/HabitTypes';
@@ -50,15 +52,20 @@ taskRouter.get(
 
 habitRouter.get('/categories/generic', authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
-    const habitCategories = await HabitCategoryService.getAllGeneric(context);
 
-    res.json(habitCategories);
+    const habitCategories = await HabitCategoryService.getAllGeneric(context);
+    const response: GetHabitCategoriesResponse = {
+        ...SUCCESS,
+        habitCategories,
+    };
+
+    res.json(response);
 });
 
 habitRouter.get('/categories/custom', authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
-    const customHabitCategory = await HabitCategoryService.getCustom(context);
 
+    const customHabitCategory = await HabitCategoryService.getCustom(context);
     const response: GetHabitCategoryResponse = { ...SUCCESS, habitCategory: customHabitCategory };
     res.json(response);
 });
@@ -74,7 +81,6 @@ habitRouter.get(
 
         const habitCategory = await HabitCategoryService.getActive(context, date);
         const response: GetHabitCategoryResponse = { ...SUCCESS, habitCategory };
-
         res.json(response);
     }
 );

@@ -1,13 +1,6 @@
 import { HabitCategory, ScheduledHabit, Task } from '@resources/schema';
-import {
-    GetHabitCategoriesResponse,
-    GetHabitCategoryResponse,
-} from '@resources/types/requests/HabitTypes';
-import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ScheduledHabitService } from './ScheduledHabitService';
-import { Request } from 'express';
-import { ContextService } from './ContextService';
 import { Context } from '@src/general/auth/Context';
 import { PureDate } from '@resources/types/date/PureDate';
 import { HabitCategoryDao } from '@src/database/HabitCategoryDao';
