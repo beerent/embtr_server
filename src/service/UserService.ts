@@ -55,7 +55,7 @@ export class UserService {
     }
 
     public static async update(context: Context, user: User): Promise<User> {
-        if (user.uid !== context.userUid || user.email !== context.userEmail) {
+        if (user.uid !== context.userUid) {
             throw new ServiceException(403, Code.FORBIDDEN, 'forbidden');
         }
 

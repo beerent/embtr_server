@@ -9,6 +9,7 @@ export interface User {
   photoUrl?: string;
   bannerUrl?: string;
   accountSetup?: boolean;
+  termsVersion?: number;
   createdAt?: Date;
   updatedAt?: Date;
   user?: UserPost[];

@@ -19,6 +19,7 @@ model User {
   photoUrl               String?                 @db.VarChar(255)
   bannerUrl              String?                 @db.VarChar(255)
   accountSetup           Boolean                 @default(false)
+  termsVersion           Int                     @default(0)
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @default(now()) @updatedAt
   user                   UserPost[]
