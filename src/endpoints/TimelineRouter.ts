@@ -15,8 +15,10 @@ timelineRouter.get(
     authorize,
     /*validate, */ async (req, res) => {
         const context = await ContextService.get(req);
-        const cursor: Date = DateUtility.getOptionalDate(req.body.cursor);
-        const limit: number | undefined = req.body.limit ? Number(req.body.limit) : undefined;
+        const cursor: Date = DateUtility.getOptionalDate(req.query.cursor as string);
+        const limit: number | undefined = req.query.limit
+            ? Number(req.query.limit as string)
+            : undefined;
 
         const timelineData: TimelineData = await TimelineService.get(context, cursor, limit);
         const response: GetTimelineResponse = { ...SUCCESS, timelineData };
