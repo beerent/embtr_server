@@ -44,7 +44,7 @@ taskRouter.get(
         const context = await ContextService.get(req);
         const id = Number(req.params.id);
 
-        const task = await HabitService.get(context, id);
+        const task: Task = await HabitService.get(context, id);
         const response: GetTaskResponse = { ...SUCCESS, task };
         res.json(response);
     })

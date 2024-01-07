@@ -99,6 +99,8 @@ export class UserDao {
         const pushNotificationTokens = await UserDao.createUserPushNotification(user);
         const accountSetup =
             user.accountSetup !== undefined ? { accountSetup: user.accountSetup } : {};
+        const termsVersion =
+            user.termsVersion !== undefined ? { termsVersion: user.termsVersion } : {};
 
         const updatedUser = await prisma.user.update({
             where: {
@@ -112,6 +114,7 @@ export class UserDao {
                 ...photoUrl,
                 ...bannerUrl,
                 ...accountSetup,
+                ...termsVersion,
                 pushNotificationTokens,
             },
         });
