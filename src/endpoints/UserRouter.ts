@@ -94,13 +94,25 @@ userRouter.get(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
+        const newUserContext = await ContextService.getNewUserContext(req);
 
-        const user = await UserService.getCurrent(context);
+        const user = await UserService.getCurrent(newUserContext);
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
 );
+
+// userRouter.get(
+//     '/',
+//     authenticateGetCurrentUser,
+//     runEndpoint(async (req, res) => {
+//         const context = await ContextService.get(req);
+//
+//         const user = await UserService.getCurrent(context);
+//         const response: GetUserResponse = { ...SUCCESS, user };
+//         res.json(response);
+//     })
+// );
 
 userRouter.post(
     '/',

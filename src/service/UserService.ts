@@ -23,10 +23,15 @@ export class UserService {
         }
     }
 
-    public static async getCurrent(context: Context): Promise<User> {
-        const user = await this.getByUid(context.userUid);
+    public static async getCurrent(newUserContext: NewUserContext): Promise<User> {
+        const user = await this.getByUid(newUserContext.userUid);
         return user;
     }
+
+    // public static async getCurrent(context: Context): Promise<User> {
+    //     const user = await this.getByUid(context.userUid);
+    //     return user;
+    // }
 
     public static async get(context: Context, uid: string): Promise<User> {
         return this.getByUid(uid);
