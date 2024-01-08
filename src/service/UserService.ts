@@ -15,14 +15,19 @@ import { Context, NewUserContext } from '@src/general/auth/Context';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
-        const user = await this.getByUid(newUserContext.userUid);
-        return user !== null;
+        try {
+            const user = await this.getByUid(newUserContext.userUid);
+            return !!user;
+        } catch (error) {
+            return false;
+        }
     }
 
     public static async getCurrent(context: Context): Promise<User> {
         const user = await this.getByUid(context.userUid);
         return user;
     }
+
     public static async get(context: Context, uid: string): Promise<User> {
         return this.getByUid(uid);
     }

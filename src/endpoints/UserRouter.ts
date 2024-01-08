@@ -31,6 +31,7 @@ import { User } from '@resources/schema';
 import { UserService } from '@src/service/UserService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
+import { logger } from '@src/common/logger/Logger';
 
 const userRouter = express.Router();
 
@@ -82,8 +83,9 @@ userRouter.get(
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
 
-        const user = await UserService.currentUserExists(newUserContext);
-        const response: GetBooleanResponse = { ...SUCCESS, result: !!user };
+        const exists = await UserService.currentUserExists(newUserContext);
+        logger.info(`currentUserExists: ${exists}`);
+        const response: GetBooleanResponse = { ...SUCCESS, result: exists };
         res.json(response);
     })
 );
