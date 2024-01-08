@@ -23,7 +23,7 @@ export class UserService {
         }
     }
 
-    public static async getCurrent(newUserContext: NewUserContext): Promise<User> {
+    public static async getCurrent(newUserContext: NewUserContext): Promise<User | undefined> {
         const user = await this.getByUid(newUserContext.userUid);
         return user;
     }
@@ -33,15 +33,17 @@ export class UserService {
     //     return user;
     // }
 
-    public static async get(context: Context, uid: string): Promise<User> {
+    public static async get(context: Context, uid: string): Promise<User | undefined> {
         return this.getByUid(uid);
     }
 
-    private static async getByUid(uid: string): Promise<User> {
+    private static async getByUid(uid: string): Promise<User | undefined> {
         const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
             return userModel;
+        } else {
+            return undefined;
         }
 
         throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
