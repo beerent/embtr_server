@@ -92,13 +92,8 @@ userRouter.get(
 
 userRouter.get(
     '/',
-    authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-
-        const user = await UserService.getCurrent(context);
-        const response: GetUserResponse = { ...SUCCESS, user };
-        res.json(response);
+        res.status(401).json({ message: 'Unauthorized' });
     })
 );
 
