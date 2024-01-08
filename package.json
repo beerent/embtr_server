@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "build": "npm install",
-        "start": "NODE_OPTIONS='--max-old-space-size=1700' ts-node --transpile-only src/server.ts",
+        "start": "NODE_OPTIONS='--max-old-space-size=400' ts-node --transpile-only src/server.ts",
         "test": "jest",
         "debug": "ts-node src/server.ts"
     },
