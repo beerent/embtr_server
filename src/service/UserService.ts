@@ -57,11 +57,16 @@ export class UserService {
 
         const newUser = await UserDao.create(newUserContext.userUid, newUserContext.userEmail);
         if (!newUser) {
+            console.log('FAILED TO CREATE USER', newUserContext.userUid, newUserContext.userEmail);
             throw new ServiceException(500, Code.FAILED_TO_CREATE_USER, 'failed to create user');
         }
 
+        console.log('USER CREATED');
+
         await AccountDao.updateAccountRoles(newUserContext.userUid, [Role.USER]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
+
+        console.log('UPDATED ROLES');
 
         const userModel: User = ModelConverter.convert(newUser);
         return userModel;

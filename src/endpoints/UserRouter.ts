@@ -121,8 +121,11 @@ userRouter.post(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
+        console.log('1');
         const newUserContext = await ContextService.getNewUserContext(req);
+        console.log('2');
         const createdUser = await UserService.create(newUserContext);
+        console.log('Created new user', createdUser);
 
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);
