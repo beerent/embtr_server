@@ -11,15 +11,23 @@ import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { UserDao } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
-import { Context } from '@src/general/auth/Context';
+import { Context, NewUserContext } from '@src/general/auth/Context';
 
 export class UserService {
-    public static async getCurrent(context: Context): Promise<User> {
-        const user = await this.getByUid(context, context.userUid);
-        return user;
+    public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
+        const user = await this.getByUid(newUserContext.userUid);
+        return user !== null;
     }
 
-    public static async getByUid(context: Context, uid: string): Promise<User> {
+    public static async getCurrent(context: Context): Promise<User> {
+        const user = await this.getByUid(context.userUid);
+        return user;
+    }
+    public static async get(context: Context, uid: string): Promise<User> {
+        return this.getByUid(uid);
+    }
+
+    private static async getByUid(uid: string): Promise<User> {
         const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
@@ -29,19 +37,19 @@ export class UserService {
         throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
     }
 
-    public static async create(context: Context): Promise<User> {
-        const user = await UserDao.getByUid(context.userUid);
+    public static async create(newUserContext: NewUserContext): Promise<User> {
+        const user = await UserDao.getByUid(newUserContext.userUid);
         if (user) {
             throw new ServiceException(409, Code.RESOURCE_ALREADY_EXISTS, 'user already exists');
         }
 
-        const newUser = await UserDao.create(context.userUid, context.userEmail);
+        const newUser = await UserDao.create(newUserContext.userUid, newUserContext.userEmail);
         if (!newUser) {
             throw new ServiceException(500, Code.FAILED_TO_CREATE_USER, 'failed to create user');
         }
 
-        await AccountDao.updateAccountRoles(context.userUid, [Role.USER]);
-        await AccountDao.updateCustomClaim(context.userUid, 'userId', newUser.id);
+        await AccountDao.updateAccountRoles(newUserContext.userUid, [Role.USER]);
+        await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
 
         const userModel: User = ModelConverter.convert(newUser);
         return userModel;

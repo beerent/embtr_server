@@ -3,3 +3,8 @@ export interface Context {
     userUid: string;
     userEmail: string;
 }
+
+export interface NewUserContext {
+    userUid: string;
+    userEmail: string;
+}

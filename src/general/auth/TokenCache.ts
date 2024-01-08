@@ -12,13 +12,7 @@ export class TokenCache {
             return undefined;
         }
 
-        let decodedToken = this.getDecodedTokenFromCache(encodedToken);
-        if (decodedToken) {
-            return decodedToken;
-        }
-
-        decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
-
+        const decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
         return decodedToken;
     }
 
@@ -50,9 +44,8 @@ export class TokenCache {
     private static async decodeAndAddTokenToCache(
         token: string
     ): Promise<DecodedIdToken | undefined> {
-        const decodedToken: DecodedIdToken | undefined = await this.getDecodedTokenFromFirebase(
-            token
-        );
+        const decodedToken: DecodedIdToken | undefined =
+            await this.getDecodedTokenFromFirebase(token);
         if (!decodedToken) {
             return undefined;
         }

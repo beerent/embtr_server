@@ -70,8 +70,20 @@ userRouter.get(
         const context = await ContextService.get(req);
         const uid = req.params.uid;
 
-        const user = await UserService.getByUid(context, uid);
+        const user = await UserService.get(context, uid);
         const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+userRouter.get(
+    '/currentUserExists',
+    authenticateGetCurrentUser,
+    runEndpoint(async (req, res) => {
+        const newUserContext = await ContextService.getNewUserContext(req);
+
+        const user = await UserService.currentUserExists(newUserContext);
+        const response: GetBooleanResponse = { ...SUCCESS, result: !!user };
         res.json(response);
     })
 );
@@ -92,8 +104,8 @@ userRouter.post(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-        const createdUser = await UserService.create(context);
+        const newUserContext = await ContextService.getNewUserContext(req);
+        const createdUser = await UserService.create(newUserContext);
 
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);
