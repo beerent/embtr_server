@@ -60,7 +60,7 @@ export class UserDao {
             data: {
                 uid: uid,
                 email: email,
-                username: 'new user',
+                username: 'new user' + Math.floor(Math.random() * 1000000),
                 displayName: 'new user',
                 bio: 'welcome to embtr!',
                 location: 'earth',
