@@ -31,7 +31,6 @@ import { User } from '@resources/schema';
 import { UserService } from '@src/service/UserService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
-import { logger } from '@src/common/logger/Logger';
 
 const userRouter = express.Router();
 
@@ -64,6 +63,21 @@ userRouter.get(
 );
 
 userRouter.get(
+    '/currentUserExists',
+
+    authenticateGetCurrentUser,
+    runEndpoint(async (req, res) => {
+        const newUserContext = await ContextService.getNewUserContext(req);
+        console.log(newUserContext);
+
+        const exists = await UserService.currentUserExists(newUserContext);
+        console.log(exists);
+        const response: GetBooleanResponse = { ...SUCCESS, result: exists };
+        res.json(response);
+    })
+);
+
+userRouter.get(
     '/:uid',
     authenticate,
     authorizeUserGet,
@@ -78,54 +92,23 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/currentUserExists',
-    authenticateGetCurrentUser,
-    runEndpoint(async (req, res) => {
-        const newUserContext = await ContextService.getNewUserContext(req);
-
-        const exists = await UserService.currentUserExists(newUserContext);
-        logger.info(`currentUserExists: ${exists}`);
-        const response: GetBooleanResponse = { ...SUCCESS, result: exists };
-        res.json(response);
-    })
-);
-
-userRouter.get(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        console.log('A');
-        const newUserContext = await ContextService.getNewUserContext(req);
+        const context = await ContextService.get(req);
 
-        console.log('B');
-        const user = await UserService.getCurrent(newUserContext);
-        console.log('C', user);
+        const user = await UserService.getCurrent(context);
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
 );
 
-// userRouter.get(
-//     '/',
-//     authenticateGetCurrentUser,
-//     runEndpoint(async (req, res) => {
-//         const context = await ContextService.get(req);
-//
-//         const user = await UserService.getCurrent(context);
-//         const response: GetUserResponse = { ...SUCCESS, user };
-//         res.json(response);
-//     })
-// );
-
 userRouter.post(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        console.log('1');
         const newUserContext = await ContextService.getNewUserContext(req);
-        console.log('2');
         const createdUser = await UserService.create(newUserContext);
-        console.log('Created new user', createdUser);
 
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);

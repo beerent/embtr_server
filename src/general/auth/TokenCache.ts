@@ -12,13 +12,7 @@ export class TokenCache {
             return undefined;
         }
 
-        let decodedToken = this.getDecodedTokenFromCache(encodedToken);
-        if (decodedToken) {
-            return decodedToken;
-        }
-
-        decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
-
+        const decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
         return decodedToken;
     }
 

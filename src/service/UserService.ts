@@ -1,13 +1,9 @@
-import { UpdateUserRequest, UpdateUserResponse } from '@resources/types/requests/UserTypes';
-import { SUCCESS, UPDATE_USER_FAILED, USERNAME_ALREADY_EXISTS } from '@src/common/RequestResponses';
 import { Role } from '@src/roles/Roles';
-import { Request } from 'express';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
 import { AccountDao } from '@src/database/AccountDao';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { UserDao } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
@@ -23,27 +19,20 @@ export class UserService {
         }
     }
 
-    public static async getCurrent(newUserContext: NewUserContext): Promise<User | undefined> {
-        const user = await this.getByUid(newUserContext.userUid);
+    public static async getCurrent(context: Context): Promise<User> {
+        const user = await this.getByUid(context.userUid);
         return user;
     }
 
-    // public static async getCurrent(context: Context): Promise<User> {
-    //     const user = await this.getByUid(context.userUid);
-    //     return user;
-    // }
-
-    public static async get(context: Context, uid: string): Promise<User | undefined> {
+    public static async get(context: Context, uid: string): Promise<User> {
         return this.getByUid(uid);
     }
 
-    private static async getByUid(uid: string): Promise<User | undefined> {
+    private static async getByUid(uid: string): Promise<User> {
         const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
             return userModel;
-        } else {
-            return undefined;
         }
 
         throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
