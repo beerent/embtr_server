@@ -94,12 +94,9 @@ userRouter.get(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        console.log('A');
         const newUserContext = await ContextService.getNewUserContext(req);
 
-        console.log('B');
         const user = await UserService.getCurrent(newUserContext);
-        console.log('C', user);
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
@@ -121,11 +118,8 @@ userRouter.post(
     '/',
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
-        console.log('1');
         const newUserContext = await ContextService.getNewUserContext(req);
-        console.log('2');
         const createdUser = await UserService.create(newUserContext);
-        console.log('Created new user', createdUser);
 
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);
