@@ -7,18 +7,15 @@ import plannedDayRouter from './endpoints/PlannedDayRouter';
 import plannedDayResultRouter from './endpoints/PlannedDayResultRouter';
 import userPostRouter from './endpoints/UserPostRouter';
 import notificationRouter from './endpoints/NotificationRouter';
-import widgetRouter from './endpoints/WidgetRouter';
 import metadataRouter from './endpoints/MetadataRouter';
 import habitRouter from './endpoints/HabitRouter';
 import quoteOfTheDayRouter from './endpoints/QuoteOfTheDayRouter';
 import unitRouter from '@src/endpoints/UnitRouter';
 import dayOfWeekRouter from '@src/endpoints/DayOfWeekRouter';
 import timeOfDayRouter from '@src/endpoints/TimeOfDayRouter';
-import challengeRouter from '@src/endpoints/ChallengeRouter';
 import plannedHabitRouter from '@src/endpoints/PlannedHabitRouter';
 import marketingRouter from '@src/endpoints/MarketingRouter';
 import timelineRouter from '@src/endpoints/TimelineRouter';
-import adminRouter from './endpoints/AdminRouter';
 
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
