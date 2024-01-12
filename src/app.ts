@@ -57,7 +57,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/user', userRouter); // main methods are finished
+app.use('/user', userRouter);
 app.use('/account', accountRouter);
 app.use('/planned-day', plannedDayRouter);
 app.use('/planned-day-result', plannedDayResultRouter);

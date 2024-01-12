@@ -20,3 +20,4 @@ coverage/
 
 .idea/vcs.xml
 image_upload_credentials.json
+.idea
