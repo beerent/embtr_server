@@ -27,7 +27,7 @@ import {
 const plannedDayRouter = express.Router();
 
 plannedDayRouter.get(
-    '/v1/:id',
+    ['/:id', '/v1/:id'],
     authenticate,
     authorize,
     validateGetById,
@@ -42,7 +42,7 @@ plannedDayRouter.get(
 );
 
 plannedDayRouter.get(
-    '/v1/:userId/:dayKey',
+    ['/:userId/:dayKey', '/v1/:userId/:dayKey'],
     authenticate,
     authorize,
     validateGetByUser,
@@ -58,7 +58,7 @@ plannedDayRouter.get(
 );
 
 plannedDayRouter.get(
-    '/v1/:userId/:dayKey/isComplete',
+    ['/:userId/:dayKey/isComplete', '/v1/:userId/:dayKey/isComplete'],
     authenticate,
     authorize,
     validateGetByUser,
@@ -74,7 +74,7 @@ plannedDayRouter.get(
 );
 
 plannedDayRouter.post(
-    '/v1/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     validatePlannedDayPost,
@@ -89,7 +89,7 @@ plannedDayRouter.post(
 );
 
 plannedDayRouter.post(
-    '/v1/:dayKey/planned-task',
+    ['/:dayKey/planned-task', '/v1/:dayKey/planned-task'],
     authenticate,
     authorize,
     validatePlannedTaskPost,
@@ -109,7 +109,7 @@ plannedDayRouter.post(
 );
 
 plannedDayRouter.put(
-    '/v1/planned-task/',
+    ['/planned-task/', '/v1/planned-task/'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {

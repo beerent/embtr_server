@@ -30,7 +30,7 @@ import express from 'express';
 const userPostRouter = express.Router();
 
 userPostRouter.post(
-    '/v1/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     validatePost,
@@ -46,7 +46,7 @@ userPostRouter.post(
 );
 
 userPostRouter.get(
-    '/v1/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     //validateGetAllPlannedDayResults,
@@ -62,7 +62,7 @@ userPostRouter.get(
 );
 
 userPostRouter.get(
-    '/v1/:id',
+    ['/:id', '/v1/:id'],
     authenticate,
     authorize,
     validateGetById,
@@ -77,7 +77,7 @@ userPostRouter.get(
 );
 
 userPostRouter.patch(
-    '/v1/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     validateUpdate,
@@ -93,7 +93,7 @@ userPostRouter.patch(
 );
 
 userPostRouter.post(
-    '/v1/:id/like',
+    ['/:id/like', '/v1/:id/like'],
     authenticate,
     authorize,
     validateLike,
@@ -104,7 +104,7 @@ userPostRouter.post(
 );
 
 userPostRouter.post(
-    '/v1/:id/comment/',
+    ['/:id/comment/', '/v1/:id/comment/'],
     authenticate,
     authorize,
     validateCommentPost,
@@ -115,7 +115,7 @@ userPostRouter.post(
 );
 
 userPostRouter.delete(
-    '/v1/comment/:id',
+    ['/comment/:id', '/v1/comment/:id'],
     authenticate,
     authorize,
     validateCommentDelete,

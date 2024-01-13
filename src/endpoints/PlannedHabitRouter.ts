@@ -11,7 +11,7 @@ import express from 'express';
 const plannedHabitRouter = express.Router();
 
 plannedHabitRouter.get(
-    '/v1/:id',
+    ['/:id', '/v1/:id'],
     authenticate,
     authorize,
     validateGetById,

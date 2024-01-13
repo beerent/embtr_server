@@ -7,7 +7,7 @@ import express from 'express';
 
 const metadataRouter = express.Router();
 
-metadataRouter.get('/v1/', authenticate, async (req, res) => {
+metadataRouter.get(['/', '/v1/'], authenticate, async (req, res) => {
     const context = await ContextService.get(req);
     const metadata = await MetadataService.getAll(context);
 

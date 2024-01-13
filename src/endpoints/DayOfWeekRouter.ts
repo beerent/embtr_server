@@ -8,7 +8,7 @@ import { SUCCESS } from '@src/common/RequestResponses';
 
 const dayOfWeekRouter = express.Router();
 
-dayOfWeekRouter.get('/v1/', authenticate, authorize, async (req, res) => {
+dayOfWeekRouter.get(['/', '/v1/'], authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
 
     const daysOfWeek = await DayOfWeekService.getAll(context);

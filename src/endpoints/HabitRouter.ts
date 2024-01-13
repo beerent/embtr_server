@@ -36,28 +36,41 @@ import { Task } from '@resources/schema';
 
 const habitRouter = express.Router();
 
-habitRouter.get('/v1/categories/generic', authenticate, authorize, async (req, res) => {
-    const context = await ContextService.get(req);
+habitRouter.get(
+    ['/categories/generic', '/v1/categories/generic'],
+    authenticate,
+    authorize,
+    async (req, res) => {
+        const context = await ContextService.get(req);
 
-    const habitCategories = await HabitCategoryService.getAllGeneric(context);
-    const response: GetHabitCategoriesResponse = {
-        ...SUCCESS,
-        habitCategories,
-    };
+        const habitCategories = await HabitCategoryService.getAllGeneric(context);
+        const response: GetHabitCategoriesResponse = {
+            ...SUCCESS,
+            habitCategories,
+        };
 
-    res.json(response);
-});
-
-habitRouter.get('/v1/categories/custom', authenticate, authorize, async (req, res) => {
-    const context = await ContextService.get(req);
-
-    const customHabitCategory = await HabitCategoryService.getCustom(context);
-    const response: GetHabitCategoryResponse = { ...SUCCESS, habitCategory: customHabitCategory };
-    res.json(response);
-});
+        res.json(response);
+    }
+);
 
 habitRouter.get(
-    '/v1/categories/active',
+    ['/categories/custom', '/v1/categories/custom'],
+    authenticate,
+    authorize,
+    async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const customHabitCategory = await HabitCategoryService.getCustom(context);
+        const response: GetHabitCategoryResponse = {
+            ...SUCCESS,
+            habitCategory: customHabitCategory,
+        };
+        res.json(response);
+    }
+);
+
+habitRouter.get(
+    ['/categories/active', '/v1/categories/active'],
     authenticate,
     authorize,
     HabitCategoryValidation.validateGetActiveHabitsCategory,
@@ -80,7 +93,7 @@ habitRouter.get('/v1/categories/recent', authenticate, authorize, async (req, re
 });
 
 habitRouter.get(
-    '/v1/summary',
+    ['/summary', '/v1/summary'],
     authenticate,
     authorize,
     HabitCategoryValidation.validateGetHabitSummaries,
@@ -95,7 +108,7 @@ habitRouter.get(
 );
 
 habitRouter.get(
-    '/v1/summary/:id',
+    ['/summary/:id', '/v1/summary/:id'],
     authenticate,
     authorize,
     HabitCategoryValidation.validateGetHabitSummary,
@@ -111,7 +124,7 @@ habitRouter.get(
 );
 
 habitRouter.post(
-    '/v1/schedule',
+    ['/schedule', '/v1/schedule'],
     authenticate,
     authorize,
     validateScheduledHabitPost,
@@ -133,7 +146,7 @@ habitRouter.post(
 );
 
 habitRouter.post(
-    '/v1/schedule/:id/archive',
+    ['/schedule/:id/archive', '/v1/schedule/:id/archive'],
     authenticate,
     authorize,
     validateScheduledHabitGet,
@@ -147,7 +160,7 @@ habitRouter.post(
 );
 
 habitRouter.get(
-    '/v1/:id/schedules',
+    ['/:id/schedules', '/v1/:id/schedules'],
     authenticate,
     authorize,
     validateScheduledHabitGet,
@@ -162,7 +175,7 @@ habitRouter.get(
 );
 
 habitRouter.get(
-    '/v1/schedule/:id',
+    ['/schedule/:id', '/v1/schedule/:id'],
     authenticate,
     authorize,
     validateScheduledHabitGet,
@@ -177,7 +190,7 @@ habitRouter.get(
 );
 
 habitRouter.get(
-    '/v1/:id',
+    ['/:id', '/v1/:id'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -191,7 +204,7 @@ habitRouter.get(
 );
 
 habitRouter.get(
-    '/v1/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     validateSearchTasks,
@@ -206,7 +219,7 @@ habitRouter.get(
 );
 
 habitRouter.post(
-    '/v1/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
