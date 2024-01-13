@@ -13,6 +13,6 @@ export const runEndpoint = (
 export const handleError = (error: unknown, req: Request, res: Response, next: NextFunction) => {
     const response = ServiceException.getResponse(error);
 
-    logger.info(`EXCEPTION: ${response.httpCode} ${response.internalCode} ${response.message}`);
+    logger.error(`EXCEPTION: ${response.httpCode} ${response.internalCode} ${response.message}`);
     res.status(response.httpCode).json(response);
 };

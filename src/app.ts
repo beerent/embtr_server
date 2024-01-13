@@ -78,7 +78,7 @@ app.use('/health', (req, res) => res.send('OK'));
 app.use(handleError);
 
 app.use((req, res, next) => {
-    logger.info(`Unhandled endpoint: ${req.method} ${req.baseUrl}${req.path}`);
+    logger.warn(`Unhandled endpoint: ${req.method} ${req.baseUrl}${req.path}`);
     next();
 });
 

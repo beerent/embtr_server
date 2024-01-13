@@ -28,37 +28,34 @@ export class UserService {
         return user;
     }
 
-    // public static async getCurrent(context: Context): Promise<User> {
-    //     const user = await this.getByUid(context.userUid);
-    //     return user;
-    // }
-
     public static async get(context: Context, uid: string): Promise<User | undefined> {
         return this.getByUid(uid);
     }
 
     private static async getByUid(uid: string): Promise<User | undefined> {
+        console.log(uid)
         const user = await UserDao.getByUid(uid);
         if (user) {
             const userModel: User = ModelConverter.convert(user);
             return userModel;
         } else {
-            return undefined;
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
         }
-
-        throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
     }
 
     public static async create(newUserContext: NewUserContext): Promise<User> {
         const user = await UserDao.getByUid(newUserContext.userUid);
         if (user) {
+            logger.error('failed to create user - user already exists')
             throw new ServiceException(409, Code.RESOURCE_ALREADY_EXISTS, 'user already exists');
         }
 
         const newUser = await UserDao.create(newUserContext.userUid, newUserContext.userEmail);
         if (!newUser) {
+            logger.error('failed to create user - database error')
             throw new ServiceException(500, Code.FAILED_TO_CREATE_USER, 'failed to create user');
         }
+        logger.info('created new user', newUser.id)
 
         await AccountDao.updateAccountRoles(newUserContext.userUid, [Role.USER]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
@@ -76,6 +73,7 @@ export class UserService {
 
     public static async update(context: Context, user: User): Promise<User> {
         if (user.uid !== context.userUid) {
+            logger.error('failed to update user - forbidden')
             throw new ServiceException(403, Code.FORBIDDEN, 'forbidden');
         }
 
@@ -101,7 +99,7 @@ export class UserService {
             updatedUser = await UserDao.update(context.userUid, userToUpdate);
         } catch (error) {
             if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-                logger.info(`username ${user.username} already exists`);
+                logger.warn(`username ${user.username} already exists`);
                 throw new ServiceException(
                     409,
                     Code.RESOURCE_ALREADY_EXISTS,
