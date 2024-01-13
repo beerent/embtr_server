@@ -9,7 +9,7 @@ import { SUCCESS } from '@src/common/RequestResponses';
 
 const timeOfDayRouter = express.Router();
 
-timeOfDayRouter.get('/', authenticate, authorize, async (req, res) => {
+timeOfDayRouter.get('/v1/', authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
 
     const timesOfDay: TimeOfDay[] = await TimeOfDayService.getAll(context);

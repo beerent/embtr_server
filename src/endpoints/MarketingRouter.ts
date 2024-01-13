@@ -8,7 +8,7 @@ const marketingRouter = express.Router();
 marketingRouter.use(express.urlencoded({ extended: true }));
 
 marketingRouter.post(
-    '/',
+    '/v1/',
     runEndpoint(async (req, res) => {
         const email = req.body['email-address'];
         const result = await MarketingService.register(email);

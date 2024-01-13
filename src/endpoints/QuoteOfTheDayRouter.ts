@@ -18,7 +18,7 @@ import { SUCCESS } from '@src/common/RequestResponses';
 const quoteOfTheDayRouter = express.Router();
 
 quoteOfTheDayRouter.post(
-    '/',
+    '/v1/',
     authenticate,
     authorize,
     validateAddQuoteOfTheDay,
@@ -35,7 +35,7 @@ quoteOfTheDayRouter.post(
 );
 
 quoteOfTheDayRouter.get(
-    '/',
+    '/v1/',
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -48,7 +48,7 @@ quoteOfTheDayRouter.get(
 );
 
 quoteOfTheDayRouter.post(
-    '/:id/like/',
+    '/v1/:id/like/',
     authenticate,
     authorize,
     validateLikePost,

@@ -24,7 +24,7 @@ const limiter = rateLimit({
 const accountRouter = express.Router();
 
 accountRouter.post(
-    '/create',
+    '/v1/create',
     runEndpoint(async (req, res) => {
         const body: CreateAccountRequest = req.body;
         const response: Response = await AccountService.create(body);
@@ -35,7 +35,7 @@ accountRouter.post(
 
 accountRouter.use('/forgot_password', limiter);
 accountRouter.post(
-    '/forgot_password',
+    '/v1/forgot_password',
     runEndpoint(async (req, res) => {
         const body: ForgotAccountPasswordRequest = req.body;
         const response: Response = await AccountService.forgotPassword(body);
@@ -45,7 +45,7 @@ accountRouter.post(
 );
 
 accountRouter.post(
-    '/send_verification_email',
+    '/v1/send_verification_email',
     runEndpoint(async (req, res) => {
         const body: VerifyAccountEmailRequest = req.body;
         const response: Response = await AccountService.sendVerificationEmail(body);
@@ -55,7 +55,7 @@ accountRouter.post(
 );
 
 accountRouter.post(
-    '/authenticate',
+    '/v1/authenticate',
     runEndpoint(async (req, res) => {
         const body: AuthenticationRequest = req.body;
         const response: AuthenticationResponse = await AccountService.authenticate(body);
@@ -65,7 +65,7 @@ accountRouter.post(
 );
 
 accountRouter.post(
-    '/refresh_token',
+    '/v1/refresh_token',
     runEndpoint(async (req, res) => {
         const response: AuthenticationResponse = await AccountService.refreshToken(req);
         res.status(response.httpCode).json(response);
@@ -73,12 +73,11 @@ accountRouter.post(
 );
 
 accountRouter.post(
-    '/delete',
+    '/v1/delete',
     runEndpoint(async (req, res) => {
         const response: Response = await AccountService.delete(req);
         res.status(response.httpCode).json(response);
     })
 );
-
 
 export default accountRouter;

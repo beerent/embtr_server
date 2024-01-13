@@ -13,7 +13,7 @@ import express from 'express';
 const notificationRouter = express.Router();
 
 notificationRouter.get(
-    '/',
+    '/v1/',
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -26,7 +26,7 @@ notificationRouter.get(
 );
 
 notificationRouter.get(
-    '/count',
+    '/v1/count',
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -39,7 +39,7 @@ notificationRouter.get(
 );
 
 notificationRouter.post(
-    '/clear',
+    '/v1/clear',
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {

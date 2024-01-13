@@ -6,7 +6,7 @@ import { ContextService } from '@src/service/ContextService';
 
 const unitRouter = express.Router();
 
-unitRouter.get('/', authenticate, authorize, async (req, res) => {
+unitRouter.get('/v1/', authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
 
     const units = await UnitService.getAll(context);
