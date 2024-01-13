@@ -65,7 +65,6 @@ app.use('/planned-habit', plannedHabitRouter);
 app.use('/user-post', userPostRouter);
 app.use('/notification', notificationRouter);
 app.use('/metadata', metadataRouter);
-app.use('/task', taskRouter); // let's remove/ replace this
 app.use('/habit', habitRouter);
 app.use('/quote-of-the-day', quoteOfTheDayRouter);
 app.use('/unit', unitRouter);
@@ -79,7 +78,7 @@ app.use('/health', (req, res) => res.send('OK'));
 app.use(handleError);
 
 app.use((req, res, next) => {
-    logger.info(`Unhandled endpoint: ${req.baseUrl}${req.path}`);
+    logger.info(`Unhandled endpoint: ${req.method} ${req.baseUrl}${req.path}`);
     next();
 });
 

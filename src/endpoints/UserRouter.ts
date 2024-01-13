@@ -36,7 +36,7 @@ import { logger } from '@src/common/logger/Logger';
 const userRouter = express.Router();
 
 userRouter.get(
-    '/search',
+    ['/search/', '/v1/search'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -50,7 +50,7 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/exists',
+    ['/exists', '/v1/exists'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -64,7 +64,7 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/:uid',
+    ['/:uid', '/v1/:uid'],
     authenticate,
     authorizeUserGet,
     runEndpoint(async (req, res) => {
@@ -78,7 +78,7 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/currentUserExists',
+    ['/currentUserExists', '/v1/currentUserExists'],
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
@@ -91,7 +91,7 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/',
+    ['/', '/v1/'],
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
@@ -103,7 +103,7 @@ userRouter.get(
 );
 
 userRouter.post(
-    '/',
+    ['/', '/v1/'],
     authenticateGetCurrentUser,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
@@ -115,7 +115,7 @@ userRouter.post(
 );
 
 userRouter.patch(
-    '/setup',
+    ['/setup', '/v1/setup'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -130,7 +130,7 @@ userRouter.patch(
 );
 
 userRouter.patch(
-    '/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -148,7 +148,7 @@ userRouter.patch(
  * Daily History
  */
 userRouter.get(
-    '/:id/daily-history',
+    ['/:id/daily-history', '/v1/:id/daily-history'],
     authenticate,
     authorize,
     validateGetUserDailyHistory,
@@ -162,7 +162,7 @@ userRouter.get(
  * User Posts
  */
 userRouter.get(
-    '/:userId/posts',
+    ['/:userId/posts', '/v1/:userId/posts'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -177,7 +177,7 @@ userRouter.get(
  * Planned Day Results
  */
 userRouter.get(
-    '/:userId/day-results',
+    ['/:userId/day-results', '/v1/:userId/day-results'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -202,7 +202,7 @@ userRouter.get(
  * Habit Journey
  */
 userRouter.get(
-    '/:userId/habit-journey',
+    ['/:userId/habit-journey', '/v1/:userId/habit-journey'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -218,7 +218,7 @@ userRouter.get(
  * Challenges
  */
 userRouter.get(
-    '/:userId/active-challenge-participation',
+    ['/:userId/active-challenge-participation', '/v1/:userId/active-challenge-participation'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -232,7 +232,7 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/:userId/challenge-participation',
+    ['/:userId/challenge-participation', '/v1/:userId/challenge-participation'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -246,7 +246,7 @@ userRouter.get(
 );
 
 userRouter.get(
-    '/:userId/completed-challenges',
+    ['/:userId/completed-challenges', '/v1/:userId/completed-challenges'],
     authenticate,
     authorize,
     validateGetUserData,

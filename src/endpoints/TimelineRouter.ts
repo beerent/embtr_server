@@ -10,7 +10,7 @@ import { SUCCESS } from '@src/common/RequestResponses';
 const timelineRouter = express.Router();
 
 timelineRouter.get(
-    '/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     /*validate, */ async (req, res) => {

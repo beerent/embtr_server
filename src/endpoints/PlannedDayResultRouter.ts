@@ -37,7 +37,7 @@ import express from 'express';
 const plannedDayResultRouter = express.Router();
 
 plannedDayResultRouter.get(
-    '/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     //validateGetAllPlannedDayResults,
@@ -57,7 +57,7 @@ plannedDayResultRouter.get(
 );
 
 plannedDayResultRouter.get(
-    '/summaries',
+    ['/summaries', '/v1/summaries'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -76,7 +76,7 @@ plannedDayResultRouter.get(
 );
 
 plannedDayResultRouter.get(
-    '/summary/:id',
+    ['/summary/:id', '/v1/summary/:id'],
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
@@ -92,7 +92,7 @@ plannedDayResultRouter.get(
 );
 
 plannedDayResultRouter.get(
-    '/:id',
+    ['/:id', '/v1/:id'],
     authenticate,
     authorize,
     validateGetById,
@@ -107,7 +107,7 @@ plannedDayResultRouter.get(
 );
 
 plannedDayResultRouter.get(
-    '/:userId/:dayKey',
+    ['/:userId/:dayKey', '/v1/:userId/:dayKey'],
     authenticate,
     authorize,
     validateGetByUser,
@@ -127,7 +127,7 @@ plannedDayResultRouter.get(
 );
 
 plannedDayResultRouter.post(
-    '/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     validatePost,
@@ -142,7 +142,7 @@ plannedDayResultRouter.post(
 );
 
 plannedDayResultRouter.patch(
-    '/',
+    ['/', '/v1/'],
     authenticate,
     authorize,
     validatePatch,
@@ -164,7 +164,7 @@ plannedDayResultRouter.patch(
 );
 
 plannedDayResultRouter.post(
-    '/:id/comment/',
+    ['/:id/comment/', '/v1/:id/comment/'],
     authenticate,
     authorize,
     validateCommentPost,
@@ -175,7 +175,7 @@ plannedDayResultRouter.post(
 );
 
 plannedDayResultRouter.delete(
-    '/comment/:id',
+    ['/comment/:id', '/v1/comment/:id'],
     authenticate,
     authorize,
     validateCommentDelete,
@@ -186,7 +186,7 @@ plannedDayResultRouter.delete(
 );
 
 plannedDayResultRouter.post(
-    '/:id/like/',
+    ['/:id/like/', '/v1/:id/like/'],
     authenticate,
     authorize,
     validateLikePost,
