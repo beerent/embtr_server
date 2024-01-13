@@ -24,6 +24,7 @@ import {
     GetHabitCategoriesResponse,
     GetHabitCategoryResponse,
     GetHabitSummariesResponse,
+    GetHabitSummaryResponse,
 } from '@resources/types/requests/HabitTypes';
 import {
     CreateScheduledHabitRequest,
@@ -119,7 +120,7 @@ habitRouter.get(
         const cutoffDate: PureDate = PureDate.fromString(req.query.cutoffDate as string);
 
         const habitSummary = await ScheduledHabitService.getHabitSummary(context, id, cutoffDate);
-        const response: GetHabitSummariesResponse = { ...SUCCESS, habitSummaries: [habitSummary] };
+        const response: GetHabitSummaryResponse = { ...SUCCESS, habitSummary: habitSummary };
         res.json(response);
     }
 );
