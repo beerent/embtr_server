@@ -279,6 +279,9 @@ export class ScheduledHabitDao {
                 daysOfWeek: true,
                 timesOfDay: true,
             },
+            orderBy: {
+                startDate: 'asc',
+            },
         });
     }
 

@@ -166,6 +166,12 @@ export class ScheduledHabitService {
             cutoffDate
         );
 
+        habitSummaries.sort((a, b) => {
+            const aSort = a.nextHabitDays ?? -1 * (a.lastHabitDays ?? 0);
+            const bSort = b.nextHabitDays ?? -1 * (b.lastHabitDays ?? 0);
+            return aSort > bSort ? 1 : -1;
+        });
+
         return habitSummaries;
     }
 
