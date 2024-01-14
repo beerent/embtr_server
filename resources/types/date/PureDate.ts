@@ -9,16 +9,27 @@ export class PureDate {
         this.day = day;
     }
 
-    public static fromDate(date: Date): PureDate {
+    //already in UTC timezone
+    public static fromDateOnServer(date: Date): PureDate {
         return new PureDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    }
+
+    // use local time zone
+    public static fromDateOnClient(date: Date): PureDate {
+        return new PureDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+    }
+
+    // server is utc
+    public static fromDateFromServer(date: Date): PureDate {
+        return new PureDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
     }
 
     public static fromString(date: string): PureDate {
         const dateParts = date.trim().split('-');
         return new PureDate(
-          Number(dateParts[0].trim()),
-          Number(dateParts[1].trim()),
-          Number(dateParts[2].trim())
+            Number(dateParts[0].trim()),
+            Number(dateParts[1].trim()),
+            Number(dateParts[2].trim())
         );
     }
 

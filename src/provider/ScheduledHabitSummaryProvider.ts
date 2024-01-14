@@ -56,7 +56,7 @@ export class ScheduledHabitSummaryProvider {
             }
 
             const activeScheduledCount = scheduledHabits.filter((scheduledHabit) => {
-                const startPureDate = PureDate.fromDate(scheduledHabit.startDate!);
+                const startPureDate = PureDate.fromDateOnServer(scheduledHabit.startDate!);
                 return startPureDate >= cutoffDate;
             }).length;
 
@@ -83,7 +83,7 @@ export class ScheduledHabitSummaryProvider {
                 continue;
             }
 
-            const currentStartDate = PureDate.fromDate(startDate);
+            const currentStartDate = PureDate.fromDateOnServer(startDate);
 
             if (currentStartDate < cutoffDate) {
                 if (!foundLastScheduledHabit || !foundLastScheduledHabit.startDate) {
@@ -91,7 +91,7 @@ export class ScheduledHabitSummaryProvider {
                     continue;
                 }
 
-                const lastStartDate = PureDate.fromDate(foundLastScheduledHabit.startDate);
+                const lastStartDate = PureDate.fromDateOnServer(foundLastScheduledHabit.startDate);
 
                 if (currentStartDate > lastStartDate) {
                     foundLastScheduledHabit = currentScheduledHabit;
@@ -102,7 +102,9 @@ export class ScheduledHabitSummaryProvider {
                     continue;
                 }
 
-                const foundNextStartDate = PureDate.fromDate(foundNextScheduledHabit.startDate);
+                const foundNextStartDate = PureDate.fromDateOnServer(
+                    foundNextScheduledHabit.startDate
+                );
 
                 if (currentStartDate < foundNextStartDate) {
                     foundNextScheduledHabit = currentScheduledHabit;
@@ -112,10 +114,10 @@ export class ScheduledHabitSummaryProvider {
 
         const result = {
             lastScheduledHabitDate: foundLastScheduledHabit?.startDate
-                ? PureDate.fromDate(foundLastScheduledHabit.startDate)
+                ? PureDate.fromDateOnServer(foundLastScheduledHabit.startDate)
                 : undefined,
             nextScheduledHabitDate: foundNextScheduledHabit?.startDate
-                ? PureDate.fromDate(foundNextScheduledHabit.startDate)
+                ? PureDate.fromDateOnServer(foundNextScheduledHabit.startDate)
                 : undefined,
         };
 
