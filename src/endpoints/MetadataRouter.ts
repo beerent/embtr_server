@@ -4,10 +4,11 @@ import { authenticate } from '@src/middleware/authentication';
 import { ContextService } from '@src/service/ContextService';
 import { MetadataService } from '@src/service/MetadataService';
 import express from 'express';
+import { authorize } from '@src/middleware/general/GeneralAuthorization';
 
 const metadataRouter = express.Router();
 
-metadataRouter.get(['/', '/v1/'], authenticate, async (req, res) => {
+metadataRouter.get(['/', '/v1/'], authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
     const metadata = await MetadataService.getAll(context);
 
