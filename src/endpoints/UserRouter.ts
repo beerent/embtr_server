@@ -36,6 +36,18 @@ import { logger } from '@src/common/logger/Logger';
 const userRouter = express.Router();
 
 userRouter.get(
+    ['/', '/v1/'],
+    authenticateGetCurrentUser,
+    runEndpoint(async (req, res) => {
+        const newUserContext = await ContextService.getNewUserContext(req);
+
+        const user = await UserService.getCurrent(newUserContext);
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+userRouter.get(
     ['/search/', '/v1/search'],
     authenticate,
     authorize,
@@ -86,18 +98,6 @@ userRouter.get(
         const exists = await UserService.currentUserExists(newUserContext);
         logger.info(`currentUserExists: ${exists}`);
         const response: GetBooleanResponse = { ...SUCCESS, result: exists };
-        res.json(response);
-    })
-);
-
-userRouter.get(
-    ['/', '/v1/'],
-    authenticateGetCurrentUser,
-    runEndpoint(async (req, res) => {
-        const newUserContext = await ContextService.getNewUserContext(req);
-
-        const user = await UserService.getCurrent(newUserContext);
-        const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
 );

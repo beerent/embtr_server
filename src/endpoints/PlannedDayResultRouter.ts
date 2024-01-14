@@ -57,6 +57,21 @@ plannedDayResultRouter.get(
 );
 
 plannedDayResultRouter.get(
+    ['/:id', '/v1/:id'],
+    authenticate,
+    authorize,
+    validateGetById,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const plannedDayResult = await PlannedDayResultService.getById(context, id);
+        const response: GetPlannedDayResultResponse = { ...SUCCESS, plannedDayResult };
+        res.json(response);
+    })
+);
+
+plannedDayResultRouter.get(
     ['/summaries', '/v1/summaries'],
     authenticate,
     authorize,
@@ -88,21 +103,6 @@ plannedDayResultRouter.get(
             id
         );
         res.json(summary);
-    })
-);
-
-plannedDayResultRouter.get(
-    ['/:id', '/v1/:id'],
-    authenticate,
-    authorize,
-    validateGetById,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-        const id = Number(req.params.id);
-
-        const plannedDayResult = await PlannedDayResultService.getById(context, id);
-        const response: GetPlannedDayResultResponse = { ...SUCCESS, plannedDayResult };
-        res.json(response);
     })
 );
 

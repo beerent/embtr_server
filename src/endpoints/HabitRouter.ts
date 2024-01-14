@@ -190,20 +190,6 @@ habitRouter.get(
 );
 
 habitRouter.get(
-    ['/:id', '/v1/:id'],
-    authenticate,
-    authorize,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-        const id = Number(req.params.id);
-
-        const habit = await HabitService.get(context, id);
-        const response: GetTaskResponse = { ...SUCCESS, task: habit };
-        res.json(response);
-    })
-);
-
-habitRouter.get(
     ['/', '/v1/'],
     authenticate,
     authorize,
@@ -214,6 +200,20 @@ habitRouter.get(
 
         const tasks: Task[] = await HabitService.search(context, query);
         const response: SearchTasksResponse = { ...SUCCESS, tasks };
+        res.json(response);
+    })
+);
+
+habitRouter.get(
+    ['/:id', '/v1/:id'],
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const habit = await HabitService.get(context, id);
+        const response: GetTaskResponse = { ...SUCCESS, task: habit };
         res.json(response);
     })
 );

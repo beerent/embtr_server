@@ -2,6 +2,8 @@ import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { Request } from 'express';
 import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
+import { logger } from '@src/common/logger/Logger';
 
 export class ContextService {
     public static async get(request: Request): Promise<Context> {
@@ -16,6 +18,7 @@ export class ContextService {
         ]);
 
         if (!userId || !userUid?.length || !userEmail?.length) {
+            logger.error('invalid token for:', userId, userUid, userEmail);
             throw new Error('ContextService: invalid state');
         }
 
@@ -29,7 +32,8 @@ export class ContextService {
         const [userUid, userEmail] = await Promise.all([getUserUid, getUserEmail]);
 
         if (!userUid?.length || !userEmail?.length) {
-            throw new Error('ContextService: invalid state');
+            logger.error('invalid token for:', userUid, userEmail);
+            throw new ServiceException(401, Code.REAUTHENTICATE, 'invalid token');
         }
 
         return { userUid: userUid, userEmail: userEmail };
