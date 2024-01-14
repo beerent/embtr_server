@@ -19,5 +19,5 @@ coverage/
 .idea/prettier.xml
 
 .idea/vcs.xml
-image_upload_credentials.json
+.firebase.json
 .idea
