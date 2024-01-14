@@ -37,7 +37,7 @@ const userRouter = express.Router();
 
 userRouter.get(
     ['/', '/v1/'],
-    authenticateGetCurrentUser,
+    authenticate,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
 
@@ -78,7 +78,7 @@ userRouter.get(
 userRouter.get(
     ['/:uid', '/v1/:uid'],
     authenticate,
-    authorizeUserGet,
+    authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         const uid = req.params.uid;
@@ -91,7 +91,7 @@ userRouter.get(
 
 userRouter.get(
     ['/currentUserExists', '/v1/currentUserExists'],
-    authenticateGetCurrentUser,
+    authenticate,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
 
@@ -104,7 +104,7 @@ userRouter.get(
 
 userRouter.post(
     ['/', '/v1/'],
-    authenticateGetCurrentUser,
+    authenticate,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
         const createdUser = await UserService.create(newUserContext);

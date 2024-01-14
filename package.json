@@ -6,7 +6,7 @@
     "scripts": {
         "build": "npm install",
         "start": "NODE_OPTIONS='--max-old-space-size=400' ts-node --transpile-only src/server.ts",
-        "test": "jest",
+        "test": "jest --watch",
         "debug": "ts-node src/server.ts"
     },
     "repository": {

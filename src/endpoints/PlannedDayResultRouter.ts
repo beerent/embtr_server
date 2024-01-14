@@ -40,7 +40,6 @@ plannedDayResultRouter.get(
     ['/', '/v1/'],
     authenticate,
     authorize,
-    //validateGetAllPlannedDayResults,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         const lowerBound = DateUtility.getOptionalDate(req.query.lowerBound as string);

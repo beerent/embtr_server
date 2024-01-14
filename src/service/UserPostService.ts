@@ -82,8 +82,6 @@ export class UserPostService {
             throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
         }
 
-        userPost.userId = context.userId;
-
         const databaseUserPost = await UserPostDao.getById(userPost.id!);
         if (!databaseUserPost) {
             throw new ServiceException(404, Code.USER_POST_NOT_FOUND, 'user post not found');
@@ -93,6 +91,7 @@ export class UserPostService {
             throw new ServiceException(403, Code.FORBIDDEN, 'user does not have permission');
         }
 
+        userPost.userId = context.userId;
         const updatedUserPost = await UserPostDao.update(userPost);
         const updatedUserPostModel: UserPost = ModelConverter.convert(updatedUserPost);
         return updatedUserPostModel;
