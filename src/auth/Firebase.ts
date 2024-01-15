@@ -1,7 +1,8 @@
+import { EnvironmentOption } from '@src/utility/environment/EnvironmentUtility';
 import admin from 'firebase-admin';
-import serviceAccount from '@resources/firebase.json';
+const keyFilename = EnvironmentOption.get(EnvironmentOption.SERVICE_CREDENTIALS_FILE_PATH);
 
-const credential = JSON.parse(JSON.stringify(serviceAccount));
+const credential = JSON.parse(JSON.stringify(keyFilename));
 
 export const firebase = admin.initializeApp({
     credential: admin.credential.cert(credential),
