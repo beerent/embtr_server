@@ -10,14 +10,10 @@ import {
     GetUsersResponse,
     UpdateUserRequest,
 } from '@resources/types/requests/UserTypes';
-import {
-    authenticate,
-    authenticateCreateUser as authenticateGetCurrentUser,
-} from '@src/middleware/authentication';
+import { authenticate, authenticateCreateUser } from '@src/middleware/authentication';
 import { validateGetDailyHistory as validateGetUserDailyHistory } from '@src/middleware/daily_history/DailyHistoryValidation';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
-import { authorizeUserGet } from '@src/middleware/user/UserAuthorization';
 import { validateGetUserData } from '@src/middleware/user_post/UserPostValidation';
 import { ChallengeService } from '@src/service/ChallengeService';
 import { DailyHistoryService } from '@src/service/DailyHistoryService';
@@ -104,7 +100,7 @@ userRouter.get(
 
 userRouter.post(
     ['/', '/v1/'],
-    authenticate,
+    authenticateCreateUser,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
         const createdUser = await UserService.create(newUserContext);
