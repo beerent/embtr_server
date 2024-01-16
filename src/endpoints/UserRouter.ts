@@ -28,6 +28,7 @@ import { UserService } from '@src/service/UserService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import { logger } from '@src/common/logger/Logger';
+import { ApiAlertsService } from '@src/service/ApiAlertsService';
 
 const userRouter = express.Router();
 
@@ -103,8 +104,9 @@ userRouter.post(
     authenticateCreateUser,
     runEndpoint(async (req, res) => {
         const newUserContext = await ContextService.getNewUserContext(req);
-        const createdUser = await UserService.create(newUserContext);
 
+        const createdUser = await UserService.create(newUserContext);
+        ApiAlertsService.sendAlert(`New user created: ${createdUser.username}`);
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);
     })
