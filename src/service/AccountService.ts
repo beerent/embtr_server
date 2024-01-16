@@ -91,6 +91,19 @@ export class AccountService {
         return SUCCESS;
     }
 
+    public static async emailIsVerified(email: string): Promise<boolean> {
+        const user = await AccountDao.get(email);
+        if (!user) {
+            return false;
+        }
+
+        return user.emailVerified;
+    }
+
+    public static async manuallyVerifyEmail(email: string): Promise<void> {
+        await AccountDao.verifyEmail(email);
+    }
+
     public static async authenticate(
         request: AuthenticationRequest
     ): Promise<AuthenticationResponse> {

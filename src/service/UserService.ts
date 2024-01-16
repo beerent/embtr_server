@@ -12,6 +12,7 @@ import { UserDao } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
+import { AccountService } from '@src/service/AccountService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -46,16 +47,22 @@ export class UserService {
     public static async create(newUserContext: NewUserContext): Promise<User> {
         const user = await UserDao.getByUid(newUserContext.userUid);
         if (user) {
-            logger.error('failed to create user - user already exists')
+            logger.error('failed to create user - user already exists');
             throw new ServiceException(409, Code.RESOURCE_ALREADY_EXISTS, 'user already exists');
+        }
+
+        const emailIsVerified = await AccountService.emailIsVerified(newUserContext.userEmail);
+        if (!emailIsVerified) {
+            logger.error('failed to create user - email is not verified');
+            throw new ServiceException(403, Code.EMAIL_NOT_VERIFIED, 'email is not verified');
         }
 
         const newUser = await UserDao.create(newUserContext.userUid, newUserContext.userEmail);
         if (!newUser) {
-            logger.error('failed to create user - database error')
+            logger.error('failed to create user - database error');
             throw new ServiceException(500, Code.FAILED_TO_CREATE_USER, 'failed to create user');
         }
-        logger.info('created new user', newUser.id)
+        logger.info('created new user', newUser.id);
 
         await AccountDao.updateAccountRoles(newUserContext.userUid, [Role.USER]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
@@ -73,7 +80,7 @@ export class UserService {
 
     public static async update(context: Context, user: User): Promise<User> {
         if (user.uid !== context.userUid) {
-            logger.error('failed to update user - forbidden')
+            logger.error('failed to update user - forbidden');
             throw new ServiceException(403, Code.FORBIDDEN, 'forbidden');
         }
 

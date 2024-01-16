@@ -51,6 +51,15 @@ export class AccountDao {
         }
     }
 
+    public static async verifyEmail(email: string): Promise<void> {
+        const account = await this.get(email);
+        if (account) {
+            await firebase.auth().updateUser(account.uid, {
+                emailVerified: true,
+            });
+        }
+    }
+
     public static async get(email: string): Promise<UserRecord | undefined> {
         try {
             const user = await firebase.auth().getUserByEmail(email);
