@@ -44,6 +44,7 @@ export class TestUtility {
         const user = await UserDao.create(account.user!.uid, email);
 
         await AccountDao.updateAccountRoles(account.user!.uid, [role]);
+        await AccountDao.updateCustomClaim(account.user!.uid, 'userId', user?.id!);
         const token = await AuthenticationDao.generateValidIdToken(email, password);
 
         await this.sendAuthRequest(token);

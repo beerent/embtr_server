@@ -26,6 +26,7 @@ export enum HttpCode {
     RESOURCE_NOT_FOUND = 404,
     RESOURCE_ALREADY_EXISTS = 409,
     GENERAL_FAILURE = 400,
+    INVALID_REQUEST = 400,
     INTERNAL_ERROR = 500,
 
     //create account errors
