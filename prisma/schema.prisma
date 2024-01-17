@@ -24,14 +24,14 @@ model User {
   updatedAt              DateTime                @default(now()) @updatedAt
   user                   UserPost[]
   plannedDays            PlannedDay[]
-  recievedNotifications  Notification[]          @relation("fromUser")
+  receivedNotifications  Notification[]          @relation("fromUser")
   sendNotifications      Notification[]          @relation("toUser")
   pushNotificationTokens PushNotificationToken[]
   comments               Comment[]
   likes                  Like[]
   widgets                Widget[]
   quoteOfTheDay          QuoteOfTheDay[]
-  shallenges             Challenge[]
+  challenges             Challenge[]
   ChallengeParticipant   ChallengeParticipant[]
   userAchievements       UserAchievement[]
   tasks                  Task[]

@@ -1,18 +1,15 @@
-import { UpdateUserRequest, UpdateUserResponse } from '@resources/types/requests/UserTypes';
-import { SUCCESS, UPDATE_USER_FAILED, USERNAME_ALREADY_EXISTS } from '@src/common/RequestResponses';
 import { Role } from '@src/roles/Roles';
-import { Request } from 'express';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { User } from '@resources/schema';
+import { PushNotificationToken, User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
 import { AccountDao } from '@src/database/AccountDao';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
-import { UserDao } from '@src/database/UserDao';
+import { UserDao, UserInclude } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
+import { PushNotificationDao } from '@src/database/PushNotificationDao';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -31,17 +28,6 @@ export class UserService {
 
     public static async get(context: Context, uid: string): Promise<User | undefined> {
         return this.getByUid(uid);
-    }
-
-    private static async getByUid(uid: string): Promise<User | undefined> {
-        console.log(uid)
-        const user = await UserDao.getByUid(uid);
-        if (user) {
-            const userModel: User = ModelConverter.convert(user);
-            return userModel;
-        } else {
-            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
-        }
     }
 
     public static async create(newUserContext: NewUserContext): Promise<User> {
@@ -171,5 +157,15 @@ export class UserService {
         });
 
         return updatedUser;
+    }
+
+    private static async getByUid(uid: string): Promise<User | undefined> {
+        const user = await UserDao.getByUid(uid);
+        if (user) {
+            const userModel: User = ModelConverter.convert(user);
+            return userModel;
+        } else {
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
+        }
     }
 }

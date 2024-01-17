@@ -3,28 +3,14 @@ import { Notification as NotificationModel, PushNotificationToken } from '@resou
 import { prisma } from '@database/prisma';
 
 export class PushNotificationDao {
-    public static async getByUid(uid: string) {
-        const tokens = await prisma.pushNotificationToken.findMany({
-            where: {
-                user: {
-                    uid,
-                },
-            },
-            include: {
-                user: true,
-            },
-        });
-
-        return tokens;
-    }
-
     public static async send(notification: NotificationModel) {
         // Create a new Expo SDK client
         // optionally providing an access token if you have enabled push security
         let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
         const fromUser = notification.fromUser;
-        const recieverTokens: PushNotificationToken[] = notification.toUser?.pushNotificationTokens || [];
+        const recieverTokens: PushNotificationToken[] =
+            notification.toUser?.pushNotificationTokens || [];
 
         // Create the messages that you want to send to clients
         let messages: ExpoPushMessage[] = [];

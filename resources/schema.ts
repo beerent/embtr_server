@@ -14,14 +14,14 @@ export interface User {
   updatedAt?: Date;
   user?: UserPost[];
   plannedDays?: PlannedDay[];
-  recievedNotifications?: Notification[];
+  receivedNotifications?: Notification[];
   sendNotifications?: Notification[];
   pushNotificationTokens?: PushNotificationToken[];
   comments?: Comment[];
   likes?: Like[];
   widgets?: Widget[];
   quoteOfTheDay?: QuoteOfTheDay[];
-  shallenges?: Challenge[];
+  challenges?: Challenge[];
   ChallengeParticipant?: ChallengeParticipant[];
   userAchievements?: UserAchievement[];
   tasks?: Task[];

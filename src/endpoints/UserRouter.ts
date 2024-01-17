@@ -29,6 +29,9 @@ import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import { logger } from '@src/common/logger/Logger';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
+import { UserValidation } from '@src/validation/UserValidation';
+import { PushNotificationTokenService } from '@src/service/PushNotificationTokenService';
+import { CreatePushNotificationTokenRequest } from '@resources/types/requests/NotificationTypes';
 
 const userRouter = express.Router();
 
@@ -254,6 +257,20 @@ userRouter.get(
             await ChallengeService.getCompletedChallengesForUser(userId);
 
         res.status(response.httpCode).json(response);
+    })
+);
+
+userRouter.post(
+    ['/registerPushNotificationToken/v1/'],
+    authenticate,
+    UserValidation.validateRegisterPushNotificationRequest,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const requestBody: CreatePushNotificationTokenRequest = req.body;
+        const token = requestBody.token;
+
+        await PushNotificationTokenService.register(context, token);
+        res.status(200).json(SUCCESS);
     })
 );
 

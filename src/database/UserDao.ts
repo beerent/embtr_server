@@ -1,14 +1,15 @@
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
 import { PushNotificationDao } from './PushNotificationDao';
 
 export class UserDao {
-    public static async getByUid(uid: string): Promise<User | null> {
+    public static async getByUid(uid: string, includes?: Prisma.UserInclude): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
                 uid: uid,
             },
+            include: includes,
         });
 
         return user;
@@ -94,7 +95,6 @@ export class UserDao {
         const location = user.location !== undefined ? { location: user.location.trim() } : {};
         const photoUrl = user.photoUrl !== undefined ? { photoUrl: user.photoUrl } : {};
         const bannerUrl = user.bannerUrl !== undefined ? { bannerUrl: user.bannerUrl } : {};
-        const pushNotificationTokens = await UserDao.createUserPushNotification(user);
         const accountSetup =
             user.accountSetup !== undefined ? { accountSetup: user.accountSetup } : {};
         const termsVersion =
@@ -113,41 +113,10 @@ export class UserDao {
                 ...bannerUrl,
                 ...accountSetup,
                 ...termsVersion,
-                pushNotificationTokens,
             },
         });
 
         return updatedUser;
-    }
-
-    private static async createUserPushNotification(user: UserModel) {
-        const potentialTokensToAdd = user.pushNotificationTokens;
-        if (!potentialTokensToAdd) {
-            return {};
-        }
-
-        if (!user.uid) {
-            return {};
-        }
-
-        const existingUserTokens = await PushNotificationDao.getByUid(user.uid);
-        const tokensToAdd = potentialTokensToAdd.filter((token) => {
-            return !existingUserTokens.some((userToken) => userToken.token === token.token);
-        });
-
-        if (tokensToAdd.length === 0) {
-            return {};
-        }
-
-        return {
-            upsert: tokensToAdd
-                ?.filter((token) => token.token !== undefined)
-                .map((token) => ({
-                    where: { id: token.id ?? -1 },
-                    create: { token: token.token! },
-                    update: { token: token.token!, active: token.active ?? true },
-                })),
-        };
     }
 }
 
