@@ -54,18 +54,18 @@ export class CommentService {
 
         const commentModel: Comment = ModelConverter.convert(result);
 
-        NotificationService.createNotification(
+        const notification = await NotificationService.createNotification(
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? result.plannedDayResults[0].plannedDay.userId
                 : interactable === Interactable.USER_POST
-                ? result.userPosts[0].userId
-                : result.challenges[0].creatorId,
+                  ? result.userPosts[0].userId
+                  : result.challenges[0].creatorId,
             userId,
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? NotificationType.PLANNED_DAY_RESULT_COMMENT
                 : interactable === Interactable.USER_POST
-                ? NotificationType.TIMELINE_COMMENT
-                : NotificationType.CHALLENGE_COMMENT,
+                  ? NotificationType.TIMELINE_COMMENT
+                  : NotificationType.CHALLENGE_COMMENT,
             targetId
         );
         return { ...SUCCESS, comment: commentModel };
