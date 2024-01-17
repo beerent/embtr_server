@@ -4,12 +4,11 @@ import { PushNotificationToken, User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
 import { AccountDao } from '@src/database/AccountDao';
-import { UserDao, UserInclude } from '@src/database/UserDao';
+import { UserDao} from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
-import { PushNotificationDao } from '@src/database/PushNotificationDao';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {

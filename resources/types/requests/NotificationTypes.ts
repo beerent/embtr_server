@@ -1,4 +1,4 @@
-import { Notification as NotificationModel } from '../../schema';
+import { Notification as NotificationModel, PushNotificationToken } from '../../schema';
 import { Response } from './RequestTypes';
 
 export interface GetUnreadNotificationCountResponse extends Response {
@@ -15,4 +15,12 @@ export interface ClearNotificationsRequest {
 
 export interface CreatePushNotificationTokenRequest {
     token: string;
+}
+
+export interface GetPushNotificationTokenRequest {
+    token: string;
+}
+
+export interface GetPushNotificationTokenResponse extends Response {
+    pushNotificationToken: PushNotificationToken
 }
