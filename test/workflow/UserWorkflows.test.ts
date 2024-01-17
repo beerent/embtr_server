@@ -5,9 +5,9 @@ import { AccountService } from '@src/service/AccountService';
 import { AuthenticationDao } from '@src/database/AuthenticationDao';
 import { Code } from '@resources/codes';
 import { Role } from '@src/roles/Roles';
-import { RegisterPushNotificationTokenRequest } from '@resources/types/requests/NotificationTypes';
 import { PushNotificationTokenService } from '@src/service/PushNotificationTokenService';
 import { Context } from '@src/general/auth/Context';
+import { CreatePushNotificationTokenRequest } from '@resources/types/requests/NotificationTypes';
 
 describe('user workflow tests', () => {
     const EMAIL = 'test_create_user_workflow@embtr.com';
@@ -78,12 +78,12 @@ describe('register push notification workflow', () => {
 
     test('test can add token', async () => {
         const testUser = await TestUtility.createAccountWithUser(EMAIL, PASSWORD, Role.USER);
-        const registerRequest: RegisterPushNotificationTokenRequest = {
+        const registerRequest: CreatePushNotificationTokenRequest = {
             token: 'test_token',
         };
 
         const response = await request(app)
-            .post('/user/registerPushNotificationToken/v1/')
+            .post('/user/createPushNotificationToken/v1/')
             .set('Authorization', `Bearer ${testUser.token}`)
             .send(registerRequest);
         expect(response.status).toEqual(200);
@@ -100,17 +100,17 @@ describe('register push notification workflow', () => {
 
     test('test does not add duplicate token', async () => {
         const testUser = await TestUtility.createAccountWithUser(EMAIL, PASSWORD, Role.USER);
-        const registerRequest: RegisterPushNotificationTokenRequest = {
+        const registerRequest: CreatePushNotificationTokenRequest = {
             token: 'test_token',
         };
 
         await request(app)
-            .post('/user/registerPushNotificationToken/v1/')
+            .post('/user/createPushNotificationToken/v1/')
             .set('Authorization', `Bearer ${testUser.token}`)
             .send(registerRequest);
 
         await request(app)
-            .post('/user/registerPushNotificationToken/v1/')
+            .post('/user/createPushNotificationToken/v1/')
             .set('Authorization', `Bearer ${testUser.token}`)
             .send(registerRequest);
 

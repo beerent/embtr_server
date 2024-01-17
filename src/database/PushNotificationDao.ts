@@ -1,9 +1,18 @@
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { Notification as NotificationModel, PushNotificationToken } from '@resources/schema';
 import { prisma } from '@database/prisma';
+import { logger } from '@src/common/logger/Logger';
 
 export class PushNotificationDao {
     public static async send(notification: NotificationModel) {
+        try {
+            await this.sendNotification(notification);
+        } catch (error) {
+            logger.error('Error sending push notification: ' + error);
+        }
+    }
+
+    private static async sendNotification(notification: NotificationModel) {
         // Create a new Expo SDK client
         // optionally providing an access token if you have enabled push security
         let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });

@@ -261,7 +261,7 @@ userRouter.get(
 );
 
 userRouter.post(
-    ['/registerPushNotificationToken/v1/'],
+    ['/createPushNotificationToken/v1/'],
     authenticate,
     UserValidation.validateRegisterPushNotificationRequest,
     runEndpoint(async (req, res) => {
