@@ -1,25 +1,11 @@
-import {
-    GetPlannedDayResultSummariesResponse,
-    GetPlannedDayResultsResponse,
-} from '@resources/types/requests/PlannedDayResultTypes';
-import {
-    GET_DAY_RESULT_UNKNOWN,
-    RESOURCE_NOT_FOUND,
-    SUCCESS,
-    UPDATE_PLANNED_DAY_RESULT_INVALID,
-} from '@src/common/RequestResponses';
-import { Request } from 'express';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Response } from '@resources/types/requests/RequestTypes';
 import {
     CompletedHabit,
     CompletedHabitElement,
     PlannedDayResultSummary,
 } from '@resources/types/planned_day_result/PlannedDayResult';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { PlannedDayResultDao, PlannedDayResultType } from '@src/database/PlannedDayResultDao';
-import { UserDao } from '@src/database/UserDao';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';

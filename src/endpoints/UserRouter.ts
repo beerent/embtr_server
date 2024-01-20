@@ -32,6 +32,10 @@ import { ApiAlertsService } from '@src/service/ApiAlertsService';
 import { UserValidation } from '@src/validation/UserValidation';
 import { PushNotificationTokenService } from '@src/service/PushNotificationTokenService';
 import { CreatePushNotificationTokenRequest } from '@resources/types/requests/NotificationTypes';
+import { DateUtility } from '@src/utility/date/DateUtility';
+import { GetTimelineResponse, TimelineData } from '@resources/types/requests/Timeline';
+import { TimelineService } from '@src/service/TimelineService';
+import timelineRouter from '@src/endpoints/TimelineRouter';
 
 const userRouter = express.Router();
 
@@ -162,8 +166,9 @@ userRouter.get(
 /*
  * User Posts
  */
+// TODO: Add optional limit
 userRouter.get(
-    ['/:userId/posts', '/v1/:userId/posts'],
+    ['/v1/:userId/posts'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -174,11 +179,35 @@ userRouter.get(
     })
 );
 
+userRouter.get(
+    ['/v1/:userId/timeline-posts'],
+    authenticate,
+    authorize,
+    /*validate, */ async (req, res) => {
+        const userId = Number(req.params.userId);
+        const context = await ContextService.get(req);
+        const cursor: Date = DateUtility.getOptionalDate(req.query.cursor as string);
+        const limit: number | undefined = req.query.limit
+            ? Number(req.query.limit as string)
+            : undefined;
+
+        const timelineData: TimelineData = await TimelineService.getUserPostsForUser(
+            context,
+            userId,
+            cursor,
+            limit
+        );
+        const response: GetTimelineResponse = { ...SUCCESS, timelineData };
+        res.json(response);
+    }
+);
+
 /*
  * Planned Day Results
  */
+// TODO: Add optional limit
 userRouter.get(
-    ['/:userId/day-results', '/v1/:userId/day-results'],
+    ['/v1/:userId/day-results'],
     authenticate,
     authorize,
     validateGetUserData,
@@ -197,6 +226,29 @@ userRouter.get(
 
         res.json(response);
     })
+);
+
+userRouter.get(
+    ['/v1/:userId/timeline-day-results'],
+    authenticate,
+    authorize,
+    /*validate, */ async (req, res) => {
+        const userId = Number(req.params.userId);
+        const context = await ContextService.get(req);
+        const cursor: Date = DateUtility.getOptionalDate(req.query.cursor as string);
+        const limit: number | undefined = req.query.limit
+            ? Number(req.query.limit as string)
+            : undefined;
+
+        const timelineData: TimelineData = await TimelineService.getPlannedDayResultForUser(
+            context,
+            userId,
+            cursor,
+            limit
+        );
+        const response: GetTimelineResponse = { ...SUCCESS, timelineData };
+        res.json(response);
+    }
 );
 
 /*

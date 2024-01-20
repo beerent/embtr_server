@@ -1,6 +1,4 @@
-import { Request } from 'express';
 import {
-    GetTimelineResponse,
     TimelineData,
     TimelineElement,
     TimelineElementType,
@@ -8,11 +6,9 @@ import {
 } from '@resources/types/requests/Timeline';
 import { UserPostService } from '@src/service/UserPostService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
-import { SUCCESS } from '@src/common/RequestResponses';
 import { PlannedDayResult, UserPost } from '@resources/schema';
 import { TimelineDao } from '@src/database/custom/TimelineDao';
 import { Context } from '@src/general/auth/Context';
-import request from 'supertest';
 
 export class TimelineService {
     public static async get(
@@ -40,11 +36,71 @@ export class TimelineService {
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
+        const timelineData = this.postProcessData(elements, timelineRequestCursor.limit);
+        return timelineData;
+    }
+
+    public static async getUserPostsForUser(
+        context: Context,
+        userId: number,
+        cursor?: Date,
+        limit?: number
+    ): Promise<TimelineData> {
+        const timelineRequestCursor: TimelineRequestCursor = TimelineService.getCursor(
+            cursor,
+            limit
+        );
+        const queryData = await TimelineDao.getUserPostsForUserByDateAndLimit(
+            userId,
+            timelineRequestCursor.cursor,
+            timelineRequestCursor.limit
+        );
+
+        const userPosts = await UserPostService.getAllByIds(context, queryData.userPostIds);
+        const elements: TimelineElement[] = TimelineService.createUserPostTimelineElements(
+            userPosts ?? []
+        );
+
+        const timelineData = this.postProcessData(elements, timelineRequestCursor.limit);
+        return timelineData;
+    }
+
+    public static async getPlannedDayResultForUser(
+        context: Context,
+        userId: number,
+        cursor?: Date,
+        limit?: number
+    ): Promise<TimelineData> {
+        const timelineRequestCursor: TimelineRequestCursor = TimelineService.getCursor(
+            cursor,
+            limit
+        );
+        const queryData = await TimelineDao.getPlannedDayResultsForUserByDateAndLimit(
+            userId,
+            timelineRequestCursor.cursor,
+            timelineRequestCursor.limit
+        );
+
+        const plannedDayResults = await PlannedDayResultService.getAllByIds(
+            context,
+            queryData.plannedDayResultIds
+        );
+        const elements: TimelineElement[] = TimelineService.createPlannedDayResultTimelineElements(
+            plannedDayResults ?? []
+        );
+
+        const timelineData = this.postProcessData(elements, timelineRequestCursor.limit);
+        return timelineData;
+    }
+
+    private static postProcessData(elements: TimelineElement[], limit: number) {
+        elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
         let nextCursor: TimelineRequestCursor | undefined = undefined;
         if (elements.length > 0) {
             nextCursor = {
                 cursor: elements[elements.length - 1].createdAt,
-                limit: timelineRequestCursor.limit,
+                limit,
             };
         }
 

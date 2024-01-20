@@ -22,5 +22,5 @@ export interface GetPushNotificationTokenRequest {
 }
 
 export interface GetPushNotificationTokenResponse extends Response {
-    pushNotificationToken: PushNotificationToken
+    pushNotificationToken: PushNotificationToken;
 }

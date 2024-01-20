@@ -30,3 +30,11 @@ export interface GetTimelineRequest {
 export interface GetTimelineResponse extends Response {
   timelineData?: TimelineData
 }
+
+export interface GetTimelineUserPostsResponse extends Response {
+  timelineData?: TimelineData
+}
+
+export interface GetTimelinePlannedDayResultsResponse extends Response {
+  timelineData?: TimelineData
+}

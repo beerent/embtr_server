@@ -1,6 +1,5 @@
 import express from 'express';
 import accountRouter from './endpoints/AccountRouter';
-import taskRouter from './endpoints/TaskRouter';
 import bodyParser from 'body-parser';
 import userRouter from './endpoints/UserRouter';
 import plannedDayRouter from './endpoints/PlannedDayRouter';
