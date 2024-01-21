@@ -232,7 +232,8 @@ userRouter.get(
     ['/v1/:userId/timeline-day-results'],
     authenticate,
     authorize,
-    /*validate, */ async (req, res) => {
+    UserValidation.validateTimelineDayResultsRequest,
+    async (req, res) => {
         const userId = Number(req.params.userId);
         const context = await ContextService.get(req);
         const cursor: Date = DateUtility.getOptionalDate(req.query.cursor as string);
