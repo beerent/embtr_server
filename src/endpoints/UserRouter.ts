@@ -28,14 +28,12 @@ import { UserService } from '@src/service/UserService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import { logger } from '@src/common/logger/Logger';
-import { ApiAlertsService } from '@src/service/ApiAlertsService';
 import { UserValidation } from '@src/validation/UserValidation';
 import { PushNotificationTokenService } from '@src/service/PushNotificationTokenService';
 import { CreatePushNotificationTokenRequest } from '@resources/types/requests/NotificationTypes';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { GetTimelineResponse, TimelineData } from '@resources/types/requests/Timeline';
 import { TimelineService } from '@src/service/TimelineService';
-import timelineRouter from '@src/endpoints/TimelineRouter';
 
 const userRouter = express.Router();
 
@@ -113,7 +111,6 @@ userRouter.post(
         const newUserContext = await ContextService.getNewUserContext(req);
 
         const createdUser = await UserService.create(newUserContext);
-        ApiAlertsService.sendAlert(`New user created: ${createdUser.username}`);
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);
     })

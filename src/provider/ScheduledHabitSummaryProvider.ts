@@ -41,7 +41,10 @@ export class ScheduledHabitSummaryProvider {
     ) {
         const habitSummaries: HabitSummary[] = [];
         for (const task of taskToScheduledHabitMap.keys()) {
-            const scheduledHabits = taskToScheduledHabitMap.get(task)!;
+            const scheduledHabits = taskToScheduledHabitMap.get(task);
+            if (!scheduledHabits) {
+                continue;
+            }
 
             const recentHabitDates = this.getRecentHabitDates(scheduledHabits, cutoffDate);
 
@@ -56,7 +59,11 @@ export class ScheduledHabitSummaryProvider {
             }
 
             const activeScheduledCount = scheduledHabits.filter((scheduledHabit) => {
-                const startPureDate = PureDate.fromDateOnServer(scheduledHabit.startDate!);
+                if (!scheduledHabit.startDate) {
+                    return true;
+                }
+
+                const startPureDate = PureDate.fromDateOnServer(scheduledHabit.startDate);
                 return startPureDate >= cutoffDate;
             }).length;
 

@@ -15,14 +15,54 @@ export class UserDao {
         return user;
     }
 
+    public static async existsByEmail(email: string): Promise<boolean> {
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email,
+            },
+        });
+
+        return !!user;
+    }
+
+    public static async existsById(id: number): Promise<boolean> {
+        const user = await prisma.user.findUnique({
+            where: {
+                id: id,
+            },
+        });
+
+        return !!user;
+    }
+
+    public static async existsByUsername(username: string): Promise<boolean> {
+        const user = await prisma.user.findUnique({
+            where: {
+                username: username,
+            },
+        });
+
+        return !!user;
+    }
+
     public static async getByEmail(email: string): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
                 email: email,
             },
         });
-    
+
         return user;
+    }
+
+    public static async existsByUid(uid: string): Promise<boolean> {
+        const user = await prisma.user.findUnique({
+            where: {
+                uid: uid,
+            },
+        });
+
+        return !!user;
     }
 
     public static async getById(id: number): Promise<User | null> {
