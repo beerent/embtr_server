@@ -10,11 +10,13 @@ export class ContextService {
         const getUserId = AuthorizationDao.getUserIdFromToken(request.headers.authorization!);
         const getUserUid = AuthorizationDao.getUidFromToken(request.headers.authorization!);
         const getUserEmail = AuthorizationDao.getEmailFromToken(request.headers.authorization!);
+        const getUserRoles = AuthorizationDao.getRolesFromToken(request.headers.authorization!);
 
-        const [userId, userUid, userEmail] = await Promise.all([
+        const [userId, userUid, userEmail, userRoles] = await Promise.all([
             getUserId,
             getUserUid,
             getUserEmail,
+            getUserRoles,
         ]);
 
         if (!userId || !userUid?.length || !userEmail?.length) {
@@ -22,7 +24,7 @@ export class ContextService {
             throw new Error('ContextService: invalid state');
         }
 
-        return { userId, userUid: userUid, userEmail: userEmail };
+        return { userId, userUid: userUid, userEmail: userEmail, userRoles: userRoles };
     }
 
     public static async getNewUserContext(request: Request): Promise<NewUserContext> {

@@ -12,12 +12,11 @@ export class TokenCache {
             return undefined;
         }
 
-        let decodedToken = this.getDecodedTokenFromCache(encodedToken);
-        if (decodedToken) {
-            return decodedToken;
+        const decodedToken: DecodedIdToken | undefined =
+            await this.getDecodedTokenFromFirebase(encodedToken);
+        if (!decodedToken) {
+            return undefined;
         }
-
-        decodedToken = await this.decodeAndAddTokenToCache(encodedToken);
 
         return decodedToken;
     }

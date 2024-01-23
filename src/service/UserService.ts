@@ -1,10 +1,10 @@
 import { Role } from '@src/roles/Roles';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { PushNotificationToken, User } from '@resources/schema';
+import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
 import { logger } from '@src/common/logger/Logger';
 import { AccountDao } from '@src/database/AccountDao';
-import { UserDao} from '@src/database/UserDao';
+import { UserDao } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
@@ -27,6 +27,16 @@ export class UserService {
 
     public static async get(context: Context, uid: string): Promise<User | undefined> {
         return this.getByUid(uid);
+    }
+
+    public static async getByEmail(email: string): Promise<User> {
+        const user = await UserDao.getByEmail(email);
+        if (!user) {
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
+        }
+
+        const userModel: User = ModelConverter.convert(user);
+        return userModel;
     }
 
     public static async create(newUserContext: NewUserContext): Promise<User> {
@@ -120,6 +130,10 @@ export class UserService {
         const exists = !!user;
 
         return exists;
+    }
+
+    public static async deleteByEmail(email: string): Promise<void> {
+        await UserDao.deleteByEmail(email);
     }
 
     private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {

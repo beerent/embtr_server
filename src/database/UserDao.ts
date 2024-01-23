@@ -15,6 +15,16 @@ export class UserDao {
         return user;
     }
 
+    public static async getByEmail(email: string): Promise<User | null> {
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email,
+            },
+        });
+    
+        return user;
+    }
+
     public static async getById(id: number): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
@@ -80,7 +90,7 @@ export class UserDao {
     }
 
     public static async deleteByEmail(email: string): Promise<void> {
-        await prisma.user.deleteMany({
+        await prisma.user.delete({
             where: {
                 email: email,
             },

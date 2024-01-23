@@ -45,14 +45,14 @@ export class AccountDao {
             return;
         }
 
-        const account = await this.get(email);
+        const account = await this.getByEmail(email);
         if (account) {
             await firebase.auth().deleteUser(account.uid);
         }
     }
 
     public static async verifyEmail(email: string): Promise<void> {
-        const account = await this.get(email);
+        const account = await this.getByEmail(email);
         if (account) {
             await firebase.auth().updateUser(account.uid, {
                 emailVerified: true,
@@ -60,7 +60,7 @@ export class AccountDao {
         }
     }
 
-    public static async get(email: string): Promise<UserRecord | undefined> {
+    public static async getByEmail(email: string): Promise<UserRecord | undefined> {
         try {
             const user = await firebase.auth().getUserByEmail(email);
             return user;
@@ -80,6 +80,14 @@ export class AccountDao {
 
     public static async updateAccountRoles(uid: string, roles: Role[]): Promise<void> {
         await this.updateCustomClaim(uid, 'roles', roles);
+    }
+
+    public static async removeAccountRoles(uid: string, roles: Role[]): Promise<void> {
+        const currentRoles = await this.getCustomClaims(uid);
+        if (currentRoles) {
+            const updatedRoles = currentRoles.roles.filter((role: Role) => !roles.includes(role));
+            await this.updateCustomClaim(uid, 'roles', updatedRoles);
+        }
     }
 
     public static async updateCustomClaim(uid: string, key: string, value: unknown): Promise<void> {
@@ -104,7 +112,7 @@ export class AccountDao {
         }
     }
 
-    private static async getCustomClaims(uid: string): Promise<unknown> {
+    private static async getCustomClaims(uid: string) {
         try {
             const user = await firebase.auth().getUser(uid);
             const customClaims = user.customClaims;

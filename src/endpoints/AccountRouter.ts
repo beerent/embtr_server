@@ -13,6 +13,10 @@ import { AccountService } from '@src/service/AccountService';
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import { authenticate } from '@src/middleware/authentication';
+import { ContextService } from '@src/service/ContextService';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
+import { AccountValidation } from '@src/validation/AccountValidation';
+import { SUCCESS } from '@src/common/RequestResponses';
 
 const limiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -77,7 +81,8 @@ accountRouter.post(
     ['/delete', '/v1/delete'],
     authenticate,
     runEndpoint(async (req, res) => {
-        const response: Response = await AccountService.delete(req);
+        const context = await ContextService.get(req);
+        const response: Response = await AccountService.delete(context);
         res.status(response.httpCode).json(response);
     })
 );

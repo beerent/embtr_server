@@ -13,7 +13,7 @@ describe('Authentication middleware', () => {
         const accountCreates = [AccountDao.create(ACCOUNT_THAT_EXISTS, 'password')];
         await Promise.all(accountCreates);
 
-        const account = await AccountDao.get(ACCOUNT_THAT_EXISTS);
+        const account = await AccountDao.getByEmail(ACCOUNT_THAT_EXISTS);
         const uid = account!.uid!;
 
         const userCreates = [UserDao.create(uid, ACCOUNT_THAT_EXISTS)];

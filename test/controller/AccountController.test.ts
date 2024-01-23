@@ -73,22 +73,22 @@ describe('account', () => {
 
     describe('get account', () => {
         test('email is empty', async () => {
-            const result = await AccountDao.get('');
+            const result = await AccountDao.getByEmail('');
             expect(result).toBeUndefined();
         });
 
         test('email is invalid', async () => {
-            const result = await AccountDao.get('email');
+            const result = await AccountDao.getByEmail('email');
             expect(result).toBeUndefined();
         });
 
         test('email is not in use', async () => {
-            const result = await AccountDao.get('test_unknown_email@embtr.com');
+            const result = await AccountDao.getByEmail('test_unknown_email@embtr.com');
             expect(result).toBeUndefined();
         });
 
         test('get a account', async () => {
-            const result = await AccountDao.get(ACCOUNT_THAT_EXISTS);
+            const result = await AccountDao.getByEmail(ACCOUNT_THAT_EXISTS);
             expect(result?.email).toEqual(ACCOUNT_THAT_EXISTS);
         });
     });
@@ -96,41 +96,41 @@ describe('account', () => {
     describe('delete account', () => {
         test('delete an account', async () => {
             await AccountDao.delete(ACCOUNT_TO_DELETE);
-            const account = await AccountDao.get(ACCOUNT_TO_DELETE);
+            const account = await AccountDao.getByEmail(ACCOUNT_TO_DELETE);
             expect(account).toBeUndefined();
         });
     });
 
     describe('update account roles', () => {
         test('can update roles', async () => {
-            const account = await AccountDao.get(ACCOUNT_TO_ADD_ROLES);
+            const account = await AccountDao.getByEmail(ACCOUNT_TO_ADD_ROLES);
             expect(account!.customClaims).toBeFalsy();
 
             await AccountDao.updateAccountRoles(account!.uid, [Role.ADMIN]);
-            const updatedaccount = await AccountDao.get(ACCOUNT_TO_ADD_ROLES);
+            const updatedaccount = await AccountDao.getByEmail(ACCOUNT_TO_ADD_ROLES);
             expect(updatedaccount!.customClaims!.roles).toEqual([Role.ADMIN]);
         });
 
         test('update roles does not clear other claims', async () => {
-            const account = await AccountDao.get(ACCOUNT_TO_ADD_ROLES);
+            const account = await AccountDao.getByEmail(ACCOUNT_TO_ADD_ROLES);
             await AccountDao.updateCustomClaim(account!.uid, 'key', 'value');
 
-            let updatedAccount = await AccountDao.get(ACCOUNT_TO_ADD_ROLES);
+            let updatedAccount = await AccountDao.getByEmail(ACCOUNT_TO_ADD_ROLES);
             expect(updatedAccount!.customClaims!.key).toEqual('value');
 
             await AccountDao.updateAccountRoles(account!.uid, [Role.ADMIN]);
-            updatedAccount = await AccountDao.get(ACCOUNT_TO_ADD_ROLES);
+            updatedAccount = await AccountDao.getByEmail(ACCOUNT_TO_ADD_ROLES);
             expect(updatedAccount!.customClaims!.key).toEqual('value');
         });
     });
 
     describe('update custom claims', () => {
         test('can update custom claims', async () => {
-            const account = await AccountDao.get(ACCOUNT_TO_UPDATE_ROLES);
+            const account = await AccountDao.getByEmail(ACCOUNT_TO_UPDATE_ROLES);
             expect(account!.customClaims).toBeFalsy();
 
             await AccountDao.updateCustomClaim(account!.uid, 'testClaim', 'testValue');
-            const updatedaccount = await AccountDao.get(ACCOUNT_TO_UPDATE_ROLES);
+            const updatedaccount = await AccountDao.getByEmail(ACCOUNT_TO_UPDATE_ROLES);
             expect(updatedaccount!.customClaims!.testClaim).toEqual('testValue');
         });
     });

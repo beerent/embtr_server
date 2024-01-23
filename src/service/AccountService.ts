@@ -10,6 +10,7 @@ import {
     ACCOUNT_AUTHENTICATION_INVALID_CREDENTIALS,
     SUCCESS,
     GENERAL_FAILURE,
+    HttpCode,
 } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
 import { firebase } from '@src/auth/Firebase';
@@ -31,6 +32,10 @@ import { AuthenticationDao } from '@src/database/AuthenticationDao';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { EmailDao } from '@src/database/EmailDao';
 import { UserDao } from '@src/database/UserDao';
+import { Context } from '@src/general/auth/Context';
+import { Roles } from '@src/roles/Roles';
+import { Role } from '@src/roles/Roles';
+import { ServiceException } from '@src/general/exception/ServiceException';
 
 interface EmailVerificationLink {
     link: string;
@@ -38,9 +43,28 @@ interface EmailVerificationLink {
 }
 
 export class AccountService {
+    public static async get(context: Context, email: string) {
+        //const isAdmin = Roles.isAdmin(context.userRoles);
+        //if (!isAdmin) {
+        //    throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'forbidden');
+        //}
+
+        const account = await AccountDao.getByEmail(email);
+        if (!account) {
+            // todo - make this accountnotfound not usernotfound
+            throw new ServiceException(
+                HttpCode.RESOURCE_NOT_FOUND,
+                Code.USER_NOT_FOUND,
+                'account not found'
+            );
+        }
+
+        return account;
+    }
+
     public static async create(request: CreateAccountRequest): Promise<Response> {
         if (!request.email || !request.password) {
-            return this.getInvalidRequestResponse(request);
+            return CREATE_ACCOUNT_ERROR;
         }
 
         const result: CreateAccountResult = await AccountDao.create(
@@ -76,7 +100,7 @@ export class AccountService {
             return SEND_ACCOUNT_VERIFICATION_EMAIL_INVALID_EMAIL;
         }
 
-        const user = await AccountDao.get(request.email);
+        const user = await AccountDao.getByEmail(request.email);
         if (!user) {
             return SEND_ACCOUNT_VERIFICATION_EMAIL_UNKNOWN_EMAIL;
         }
@@ -92,7 +116,7 @@ export class AccountService {
     }
 
     public static async emailIsVerified(email: string): Promise<boolean> {
-        const user = await AccountDao.get(email);
+        const user = await AccountDao.getByEmail(email);
         if (!user) {
             return false;
         }
@@ -141,42 +165,50 @@ export class AccountService {
         return { ...SUCCESS };
     }
 
-    public static async delete(req: Request): Promise<Response> {
-        const uid = await AuthorizationDao.getUidFromToken(req.headers.authorization!);
-        if (!uid) {
-            return { ...GENERAL_FAILURE, message: 'failed to delete account' };
-        }
-
-        const user = await AccountDao.getByUid(uid);
+    public static async delete(context: Context): Promise<Response> {
+        const user = await AccountDao.getByUid(context.userUid);
         if (!user) {
             return { ...GENERAL_FAILURE, message: 'failed to delete account' };
         }
 
         await EmailDao.sendEmail(
-            'brent@embtr.com',
-            'delete account request',
-            (user.email ?? '') + ' has requested to delete their account. screw them.'
-        );
-
-        await EmailDao.sendEmail(
             user.email ?? '',
-            'delete account request',
-            'You have requested to delete your account and all of its data. We are sorry to see you go! We are processing this request ' +
-                'and will notify you when it is complete. '
+            'Embtr Account Deleted',
+            'We sorry to see you go! Your account and all of your data has been deleted. If ever want to come back, you can create a new account.'
         );
 
-        await AccountDao.delete(user.email);
-        await TokenCache.invalidateToken(req.headers.authorization!);
+        await AccountDao.delete(context.userEmail);
+        await UserDao.deleteByEmail(context.userEmail);
 
         return { ...SUCCESS };
     }
 
-    private static getInvalidRequestResponse(request: CreateAccountRequest): Response {
-        if (!request.email) {
-            return CREATE_ACCOUNT_INVALID_EMAIL;
+    public static async deleteByEmail(email: string): Promise<Response> {
+        const user = await AccountDao.getByEmail(email);
+        if (!user) {
+            return { ...GENERAL_FAILURE, message: 'failed to delete account' };
         }
 
-        return CREATE_ACCOUNT_INVALID_PASSWORD;
+        await AccountDao.delete(user.email);
+
+        return { ...SUCCESS };
+    }
+
+    public static async upgradeToAdmin(context: Context, email: string) {
+        if (!Roles.isAdmin(context.userRoles)) {
+            throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'forbidden');
+        }
+
+        AccountDao.updateAccountRoles(email, [Role.ADMIN]);
+    }
+
+    public static async revokeToken(email: string) {
+        const account = await AccountDao.getByEmail(email);
+        if (!account) {
+            return;
+        }
+
+        await firebase.auth().revokeRefreshTokens(account.uid);
     }
 
     private static getFailureResponse(result: CreateAccountResult): Response {

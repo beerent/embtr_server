@@ -28,3 +28,9 @@ export const INVALID_ROLE: RolePermissions = {
     role: Role.INVALID,
     permissions: [],
 };
+
+export namespace Roles {
+    export const isAdmin = (roles: Role[]): boolean => {
+        return roles.includes(Role.ADMIN);
+    };
+}
