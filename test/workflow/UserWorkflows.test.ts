@@ -29,7 +29,6 @@ describe('create user workflow tests', () => {
     });
 
     test('create user workflow', async () => {
-        // create firebase account
         const createFirebaseAccountResponse = await request(app).post('/account/create/').send({
             email: EMAIL,
             password: PASSWORD,

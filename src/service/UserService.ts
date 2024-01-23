@@ -9,6 +9,7 @@ import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
+import { ApiAlertsService } from '@src/service/ApiAlertsService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -69,6 +70,8 @@ export class UserService {
     public static async setup(context: Context, user: User): Promise<User> {
         const setupUser = await this.update(context, user);
         await this.markUserAsSetupComplete(setupUser);
+
+        ApiAlertsService.sendAlert(`New user created: ${setupUser.username}`);
 
         return setupUser;
     }
@@ -134,6 +137,26 @@ export class UserService {
 
     public static async deleteByEmail(email: string): Promise<void> {
         await UserDao.deleteByEmail(email);
+    }
+
+    public static async existsByEmail(email: string): Promise<boolean> {
+        const exists = UserDao.existsByEmail(email);
+        return exists;
+    }
+
+    public static async existsByUid(uid: string): Promise<boolean> {
+        const exists = UserDao.existsByUid(uid);
+        return exists;
+    }
+
+    public static async existsByUsername(username: string): Promise<boolean> {
+        const exists = UserDao.existsByUsername(username);
+        return exists;
+    }
+
+    public static async existsById(id: number): Promise<boolean> {
+        const exists = UserDao.existsById(id);
+        return exists;
     }
 
     private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {

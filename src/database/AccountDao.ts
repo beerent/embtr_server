@@ -3,6 +3,7 @@ import { logger } from '@src/common/logger/Logger';
 import { firebase } from '@src/auth/Firebase';
 import { Code } from '@resources/codes';
 import { Role } from '@src/roles/Roles';
+import { prisma } from '@database/prisma';
 
 export interface CreateAccountResult {
     user: UserRecord | undefined;
@@ -110,6 +111,16 @@ export class AccountDao {
         } catch (error) {
             logger.error('Error clearing user custom claims:', error);
         }
+    }
+
+    public static async existsByEmail(email: string): Promise<boolean> {
+        const account = await this.getByEmail(email);
+        return !!account;
+    }
+
+    public static async existsByUid(uid: string): Promise<boolean> {
+        const account = await this.getByUid(uid);
+        return !!account;
     }
 
     private static async getCustomClaims(uid: string) {
