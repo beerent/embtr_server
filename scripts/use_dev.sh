@@ -1,3 +1,3 @@
 #! /bin/bash
 
-cp .env/.env.dev ../.env
+cp ../.environment/development/.env ../.env
