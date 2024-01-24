@@ -29,6 +29,7 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { ContextService } from '@src/service/ContextService';
+import { ScheduledHabitUtil } from '@resources/types/util/ScheduledHabitUtil';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -170,10 +171,16 @@ export class PlannedDayService {
             const placeHolderPlannedTask: PlannedTask = {
                 plannedDayId: plannedDay?.id,
                 scheduledHabitId: timeOfDayScheduledHabit.scheduledHabit?.id,
-                title: timeOfDayScheduledHabit.scheduledHabit?.task?.title,
-                description: timeOfDayScheduledHabit.scheduledHabit?.description ?? '',
-                remoteImageUrl: timeOfDayScheduledHabit.scheduledHabit?.task?.remoteImageUrl ?? '',
-                localImage: timeOfDayScheduledHabit.scheduledHabit?.task?.localImage ?? '',
+                title: ScheduledHabitUtil.getTitle(timeOfDayScheduledHabit.scheduledHabit),
+                description: ScheduledHabitUtil.getDescription(
+                    timeOfDayScheduledHabit.scheduledHabit
+                ),
+                remoteImageUrl: ScheduledHabitUtil.getRemoteImageUrl(
+                    timeOfDayScheduledHabit.scheduledHabit
+                ),
+                localImage: ScheduledHabitUtil.getLocalImage(
+                    timeOfDayScheduledHabit.scheduledHabit
+                ),
                 unitId: timeOfDayScheduledHabit.scheduledHabit?.unitId ?? 0,
                 unit: timeOfDayScheduledHabit.scheduledHabit?.unit ?? undefined,
                 quantity: timeOfDayScheduledHabit.scheduledHabit?.quantity ?? 1,

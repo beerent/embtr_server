@@ -68,8 +68,10 @@ export class ScheduledHabitDao {
     public static async update(
         id: number,
         userId: number,
-        taskId: number,
+        title?: string,
         description?: string,
+        remoteImageUrl?: string,
+        localImage?: string,
         quantity?: number,
         unitId?: number,
         daysOfWeekIds?: number[],
@@ -88,10 +90,31 @@ export class ScheduledHabitDao {
             };
         }
 
+        let titleData = {};
+        if (title) {
+            titleData = {
+                title,
+            };
+        }
+
         let descriptionData = {};
         if (description) {
             descriptionData = {
                 description,
+            };
+        }
+
+        let remoteImageUrlData = {};
+        if (remoteImageUrl) {
+            remoteImageUrlData = {
+                remoteImageUrl,
+            };
+        }
+
+        let localImageData = {};
+        if (localImage) {
+            localImageData = {
+                localImage,
             };
         }
 
@@ -152,13 +175,11 @@ export class ScheduledHabitDao {
                         id: userId,
                     },
                 },
-                task: {
-                    connect: {
-                        id: taskId,
-                    },
-                },
                 ...unitData,
+                ...titleData,
                 ...descriptionData,
+                ...remoteImageUrlData,
+                ...localImageData,
                 ...quantityData,
                 ...daysOfWeekData,
                 ...timesOfDayData,
