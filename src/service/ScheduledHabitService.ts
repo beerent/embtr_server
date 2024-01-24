@@ -58,7 +58,7 @@ export class ScheduledHabitService {
         context: Context,
         scheduledHabit: ScheduledHabit
     ): Promise<ScheduledHabit> {
-        if (!scheduledHabit.id || !scheduledHabit.taskId) {
+        if (!scheduledHabit.id) {
             throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
         }
 
@@ -70,22 +70,30 @@ export class ScheduledHabitService {
                 'scheduled habit not found'
             );
         }
+        const existingScheduledHabitModel: ScheduledHabit =
+            ModelConverter.convert(existingScheduledHabit);
+        const updatedHabit: ScheduledHabit = {
+            ...existingScheduledHabitModel,
+            ...scheduledHabit,
+        };
 
         const updatedScheduledHabit = await ScheduledHabitDao.update(
             scheduledHabit.id,
             context.userId,
-            scheduledHabit.taskId,
-            scheduledHabit.description,
-            scheduledHabit.quantity,
-            scheduledHabit.unitId,
-            scheduledHabit.daysOfWeek
+            updatedHabit.title,
+            updatedHabit.description,
+            updatedHabit.remoteImageUrl,
+            updatedHabit.localImage,
+            updatedHabit.quantity,
+            updatedHabit.unitId,
+            updatedHabit.daysOfWeek
                 ?.map((day) => day.id)
                 .filter((id) => id !== undefined) as number[],
-            scheduledHabit.timesOfDay
+            updatedHabit.timesOfDay
                 ?.map((time) => time.id)
                 .filter((id) => id !== undefined) as number[],
-            scheduledHabit.startDate,
-            scheduledHabit.endDate
+            updatedHabit.startDate,
+            updatedHabit.endDate
         );
 
         const updatedScheduledHabitModel: ScheduledHabit =

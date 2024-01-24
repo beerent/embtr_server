@@ -83,6 +83,21 @@ const handleUserExists = async (email: string) => {
     }
 };
 
+const handleEmailVerified = async (email: string) => {
+    try {
+        const emailVerified = await AccountService.emailIsVerified(email);
+        console.log(emailVerified);
+    } catch (error) {
+        console.log('false');
+    }
+};
+
+const handleVerifyEmail = async (email: string) => {
+    try {
+        await AccountService.manuallyVerifyEmail(email);
+    } catch (error) {}
+};
+
 const handleRevokeToken = async (email: string) => {
     try {
         const account = await AccountService.get(adminContext, email);
@@ -151,6 +166,14 @@ const processCommand = async (command: string) => {
 
         case 'deleteUser':
             await UserService.deleteByEmail(email);
+            break;
+
+        case 'emailVerified':
+            await handleEmailVerified(email);
+            break;
+
+        case 'verifyEmail':
+            await handleVerifyEmail(email);
             break;
 
         default:

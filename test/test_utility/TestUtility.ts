@@ -6,6 +6,8 @@ import { Request, Response } from 'express';
 import { AccountDao } from '@src/database/AccountDao';
 import { AuthenticationDao } from '@src/database/AuthenticationDao';
 import { UserDao } from '@src/database/UserDao';
+import { AccountService } from '@src/service/AccountService';
+import { UserService } from '@src/service/UserService';
 
 export interface TestAccountWithoutUser {
     account: UserRecord;
@@ -64,8 +66,18 @@ export class TestUtility {
     }
 
     public static async deleteAccountWithUser(email: string): Promise<void> {
-        const deletes = [AccountDao.delete(email), UserDao.deleteByEmail(email)];
-        await Promise.all(deletes);
+        const promises = [];
+        const accountExists = await AccountService.existsByEmail(email);
+        if (accountExists) {
+            promises.push(AccountDao.delete(email));
+        }
+
+        const userExists = await UserService.existsByEmail(email);
+        if (userExists) {
+            promises.push(UserDao.deleteByEmail(email));
+        }
+
+        await Promise.all(promises);
     }
 
     public static async sendAuthRequest(token: string) {

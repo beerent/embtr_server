@@ -345,7 +345,10 @@ export interface ScheduledHabit {
   user?: User;
   taskId?: number;
   task?: Task;
+  title?: string;
   description?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   daysOfWeek?: DayOfWeek[];
   timesOfDay?: TimeOfDay[];
   quantity?: number;
