@@ -211,6 +211,14 @@ export class AccountService {
         await firebase.auth().revokeRefreshTokens(account.uid);
     }
 
+    public static async existsByEmail(email: string): Promise<boolean> {
+        return AccountDao.existsByEmail(email);
+    }
+
+    public static async existsByUid(uid: string): Promise<boolean> {
+        return AccountDao.existsByUid(uid);
+    }
+
     private static getFailureResponse(result: CreateAccountResult): Response {
         switch (result.code) {
             case Code.CREATE_ACCOUNT_INVALID_EMAIL:
