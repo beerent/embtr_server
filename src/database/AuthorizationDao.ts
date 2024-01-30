@@ -1,10 +1,12 @@
 import { Role } from '@src/roles/Roles';
-import { TokenCache } from '@src/general/auth/TokenCache';
+import { TokenService } from '@src/general/auth/TokenService';
 require('dotenv').config();
 
 export class AuthorizationDao {
-    public static async getUserIdFromToken(authorizationHeader: string): Promise<number | undefined> {
-        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+    public static async getUserIdFromToken(
+        authorizationHeader: string
+    ): Promise<number | undefined> {
+        const decodedToken = await TokenService.getDecodedToken(authorizationHeader);
 
         if (!decodedToken?.userId) {
             return undefined;
@@ -14,7 +16,7 @@ export class AuthorizationDao {
     }
 
     public static async getRolesFromToken(authorizationHeader: string): Promise<Role[]> {
-        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+        const decodedToken = await TokenService.getDecodedToken(authorizationHeader);
 
         if (!decodedToken?.roles) {
             return [];
@@ -24,7 +26,7 @@ export class AuthorizationDao {
     }
 
     public static async getUidFromToken(authorizationHeader: string): Promise<string | undefined> {
-        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+        const decodedToken = await TokenService.getDecodedToken(authorizationHeader);
 
         if (!decodedToken?.uid) {
             return undefined;
@@ -33,8 +35,10 @@ export class AuthorizationDao {
         return decodedToken.uid;
     }
 
-    public static async getEmailFromToken(authorizationHeader: string): Promise<string | undefined> {
-        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+    public static async getEmailFromToken(
+        authorizationHeader: string
+    ): Promise<string | undefined> {
+        const decodedToken = await TokenService.getDecodedToken(authorizationHeader);
 
         if (!decodedToken?.email) {
             return undefined;

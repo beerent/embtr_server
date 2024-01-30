@@ -26,7 +26,7 @@ import {
 } from '@resources/types/requests/RequestTypes';
 import { logger } from '@src/common/logger/Logger';
 import { Request } from 'express';
-import { TokenCache } from '@src/general/auth/TokenCache';
+import { TokenService } from '@src/general/auth/TokenService';
 import { CreateAccountResult, AccountDao } from '@src/database/AccountDao';
 import { AuthenticationDao } from '@src/database/AuthenticationDao';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
@@ -160,7 +160,7 @@ export class AccountService {
         }
 
         await AccountDao.updateCustomClaim(uid, 'userId', user.id);
-        await TokenCache.invalidateToken(req.headers.authorization!);
+        await TokenService.invalidateToken(uid);
 
         return { ...SUCCESS };
     }

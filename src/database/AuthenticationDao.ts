@@ -1,4 +1,4 @@
-import { TokenCache } from '@src/general/auth/TokenCache';
+import { TokenService } from '@src/general/auth/TokenService';
 import { EnvironmentOption } from '@src/utility/environment/EnvironmentUtility';
 
 const apiKey = EnvironmentOption.get(EnvironmentOption.FIREBASE_WEB_API_KEY);
@@ -6,7 +6,7 @@ const GENERATE_TOKEN_URL = `https://identitytoolkit.googleapis.com/v1/accounts:s
 
 export class AuthenticationDao {
     public static async tokenIsValid(authorizationHeader: string) {
-        const decodedToken = await TokenCache.getDecodedToken(authorizationHeader);
+        const decodedToken = await TokenService.getDecodedToken(authorizationHeader);
         return decodedToken !== undefined;
     }
 
