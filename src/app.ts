@@ -1,23 +1,24 @@
-import express from 'express';
-import accountRouter from './endpoints/AccountRouter';
+import express, { NextFunction, Request, Response } from 'express';
 import bodyParser from 'body-parser';
-import userRouter from './endpoints/UserRouter';
-import plannedDayRouter from './endpoints/PlannedDayRouter';
-import plannedDayResultRouter from './endpoints/PlannedDayResultRouter';
-import userPostRouter from './endpoints/UserPostRouter';
-import notificationRouter from './endpoints/NotificationRouter';
-import metadataRouter from './endpoints/MetadataRouter';
-import habitRouter from './endpoints/HabitRouter';
-import quoteOfTheDayRouter from './endpoints/QuoteOfTheDayRouter';
-import unitRouter from '@src/endpoints/UnitRouter';
-import dayOfWeekRouter from '@src/endpoints/DayOfWeekRouter';
-import timeOfDayRouter from '@src/endpoints/TimeOfDayRouter';
-import plannedHabitRouter from '@src/endpoints/PlannedHabitRouter';
-import marketingRouter from '@src/endpoints/MarketingRouter';
-import timelineRouter from '@src/endpoints/TimelineRouter';
-
+import userRouter from './endpoints/user/UserRouter';
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
+import habitRouter from '@src/endpoints/habit/HabitRouter';
+import { ClientVersionUtil } from '@src/utility/ClientVersionUtil';
+import accountRouter from './endpoints/account/AccountRouter';
+import plannedDayRouter from './endpoints/planned_day/PlannedDayRouter';
+import plannedDayResultRouter from '@src/endpoints/planned_day_result/PlannedDayResult';
+import userPostRouter from '@src/endpoints/user_post/UserPostRouter';
+import notificationRouter from '@src/endpoints/notification/NotificationRouter';
+import metadataRouter from '@src/endpoints/metadata/MetadataRouter';
+import plannedHabitRouter from '@src/endpoints/planned-habit/PlannedHabitRouter';
+import quoteOfTheDayRouter from '@src/endpoints/quote_of_the_day/QuoteOfTheDayRouter';
+import unitRouter from '@src/endpoints/unit/UnitRouter';
+import timeOfTheDayRouter from '@src/endpoints/time_of_the_day/TimeOfTheDayRouter';
+import dayOfTheWeekRouter from '@src/endpoints/day_of_week/DayOfTheWeekRouter';
+import marketingRouter from '@src/endpoints/marketing/MarketingRouter';
+import timelineRouter from '@src/endpoints/timeline/TimelineRouter';
+import healthRouter from '@src/endpoints/health/HealthRouter';
 
 const cors = require('cors');
 const app = express();
@@ -36,43 +37,35 @@ app.use(
 
 app.use(bodyParser.json());
 
-app.use((req, res, next) => {
-    const startTime = Date.now();
-    const oldSend = res.send;
-    res.send = function (data) {
-        const endTime = Date.now();
-        const elapsedTime = endTime - startTime;
-        const contentLength = Buffer.byteLength(data, 'utf-8'); // Get the size of the response data'
-        const timestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        const requestPadding = ' '.repeat(6 - req.method.length);
+const versionUrlMiddleware = (req: Request, res: Response, next: NextFunction) => {
+    const clientMajorVersion = ClientVersionUtil.getMajorClientVersion(req);
+    const urlHasVersion = req.url.match(/\/v[0-9]+\//);
 
-        logger.info(
-            //add timestamp to beginning of log
-            `[${timestamp}]  ${req.method}${requestPadding}${res.statusCode}\t${contentLength}b\t${elapsedTime}ms\t${req.baseUrl}${req.path}`
-        );
-        return oldSend.apply(this, arguments as any);
-    };
+    if (clientMajorVersion != undefined && clientMajorVersion >= 0 && !urlHasVersion) {
+        req.url = `/v${clientMajorVersion}${req.url}`;
+    }
 
     next();
-});
+};
 
-app.use('/user', userRouter);
-app.use('/account', accountRouter);
-app.use('/planned-day', plannedDayRouter);
-app.use('/planned-day-result', plannedDayResultRouter);
-app.use('/planned-habit', plannedHabitRouter);
-app.use('/user-post', userPostRouter);
-app.use('/notification', notificationRouter);
-app.use('/metadata', metadataRouter);
-app.use('/habit', habitRouter);
-app.use('/quote-of-the-day', quoteOfTheDayRouter);
-app.use('/unit', unitRouter);
-app.use('/time-of-day', timeOfDayRouter);
-app.use('/day-of-week', dayOfWeekRouter);
-app.use('/mail-list', marketingRouter);
-app.use('/timeline', timelineRouter);
+app.use(versionUrlMiddleware);
 
-app.use('/health', (req, res) => res.send('OK'));
+app.use('/', habitRouter);
+app.use('/', userRouter);
+app.use('/', accountRouter);
+app.use('/', plannedDayRouter);
+app.use('/', plannedDayResultRouter);
+app.use('/', userPostRouter);
+app.use('/', notificationRouter);
+app.use('/', metadataRouter);
+app.use('/', plannedHabitRouter);
+app.use('/', quoteOfTheDayRouter);
+app.use('/', unitRouter);
+app.use('/', timeOfTheDayRouter);
+app.use('/', dayOfTheWeekRouter);
+app.use('/', marketingRouter);
+app.use('/', timelineRouter);
+app.use('/', healthRouter);
 
 app.use(handleError);
 
@@ -84,8 +77,8 @@ app.use((req, res, next) => {
 // ###############################
 // # ENDPOINT GRAVEYARD (R.I.P.) #
 // ###############################
-//app.use('/widget', widgetRouter);
-//app.use('/challenge', challengeRouter);
+//app.use('/widget', widgetRouterV1);
+//app.use('/challenge', challengeRouterV1);
 //app.use('/admin', adminRouter);
 
 export default app;

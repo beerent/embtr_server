@@ -217,8 +217,9 @@ export class ScheduledHabitService {
         return habitSummaries[0];
     }
 
-    public static async archive(context: Context, id: number): Promise<void> {
-        const now = new Date();
-        await ScheduledHabitDao.archive(context.userId, id, now);
+    public static async archive(context: Context, id: number, date: PureDate): Promise<void> {
+        const utcDate = date.toUtcDate();
+        utcDate.setDate(utcDate.getDate() - 1);
+        await ScheduledHabitDao.archive(context.userId, id, utcDate);
     }
 }

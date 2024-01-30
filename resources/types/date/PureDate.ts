@@ -24,6 +24,10 @@ export class PureDate {
         return new PureDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
     }
 
+    public static fromObject(date: any): PureDate {
+        return new PureDate(date.year, date.month, date.day);
+    }
+
     public static fromString(date: string): PureDate {
         const dateParts = date.trim().split('-');
         return new PureDate(
@@ -64,5 +68,9 @@ export class PureDate {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
         return diffDays;
+    }
+
+    public toUtcDate(): Date {
+        return new Date(Date.UTC(this.year, this.month - 1, this.day));
     }
 }

@@ -1,4 +1,3 @@
 #! /bin/bash
 
-cp .env/.env.prod ../.env
-cp ../.environment/production/.env ../.env
+cp ~/Documents/embtr_server/.environment/production/.env ~/Documents/embtr_server/.env
