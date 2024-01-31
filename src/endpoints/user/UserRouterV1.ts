@@ -52,7 +52,7 @@ userRouterV1.get(
 );
 
 userRouterV1.get(
-    'search/',
+    '/search/',
     routeLogger(v),
     authenticate,
     authorize,
@@ -67,7 +67,7 @@ userRouterV1.get(
 );
 
 userRouterV1.get(
-    'exists',
+    '/exists',
     routeLogger(v),
     authenticate,
     authorize,
