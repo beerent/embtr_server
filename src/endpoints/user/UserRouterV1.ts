@@ -216,7 +216,7 @@ userRouterV1.get(
  */
 // TODO: Add optional limit
 userRouterV1.get(
-    '/v1/:userId/day-results',
+    '/:userId/day-results',
     routeLogger(v),
     authenticate,
     authorize,

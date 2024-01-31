@@ -5,6 +5,7 @@ export class ScheduledHabitDao {
     public static async create(
         userId: number,
         taskId: number,
+        title?: string,
         description?: string,
         quantity?: number,
         unitId?: number,
@@ -37,6 +38,7 @@ export class ScheduledHabitDao {
                     },
                 },
                 ...unit,
+                title: title,
                 description: description,
                 quantity: quantity ?? 1,
                 daysOfWeek: {

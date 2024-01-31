@@ -36,6 +36,7 @@ export class ScheduledHabitService {
         const createdScheduledHabit = await ScheduledHabitDao.create(
             context.userId,
             scheduledHabit.taskId!,
+            scheduledHabit.title,
             scheduledHabit.description,
             scheduledHabit.quantity,
             scheduledHabit.unitId,

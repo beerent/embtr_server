@@ -7,7 +7,7 @@ import habitRouter from '@src/endpoints/habit/HabitRouter';
 import { ClientVersionUtil } from '@src/utility/ClientVersionUtil';
 import accountRouter from './endpoints/account/AccountRouter';
 import plannedDayRouter from './endpoints/planned_day/PlannedDayRouter';
-import plannedDayResultRouter from '@src/endpoints/planned_day_result/PlannedDayResult';
+import plannedDayResultRouter from '@src/endpoints/planned_day_result/PlannedDayResultRouter';
 import userPostRouter from '@src/endpoints/user_post/UserPostRouter';
 import notificationRouter from '@src/endpoints/notification/NotificationRouter';
 import metadataRouter from '@src/endpoints/metadata/MetadataRouter';
