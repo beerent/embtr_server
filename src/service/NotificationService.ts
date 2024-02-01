@@ -1,17 +1,8 @@
 import { Notification, NotificationTargetPage } from '@resources/schema';
-import {
-    GetNotificationsResponse,
-    GetUnreadNotificationCountResponse,
-} from '@resources/types/requests/NotificationTypes';
-import { Response } from '@resources/types/requests/RequestTypes';
-import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { NotificationDao } from '@src/database/NotificationDao';
 import { PushNotificationDao } from '@src/database/PushNotificationDao';
 import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
-import { nativeEnum } from 'zod';
 
 export enum NotificationType {
     TIMELINE_COMMENT,
@@ -37,6 +28,10 @@ export class NotificationService {
         notificationType: NotificationType,
         targetId: number
     ) {
+        if (toUserId === fromUserId) {
+            return;
+        }
+
         // 1. store in database
         const notification = await NotificationDao.create(
             toUserId,

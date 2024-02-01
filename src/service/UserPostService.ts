@@ -1,18 +1,10 @@
 import { UserPost } from '@resources/schema';
-import {
-    CreateUserPostRequest,
-    CreateUserPostResponse,
-    GetAllUserPostResponse,
-    GetUserPostResponse,
-    UpdateUserPostRequest,
-} from '@resources/types/requests/UserPostTypes';
-import { GENERAL_FAILURE, RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
+import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
+import { RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
 import { ImageDetectionService } from './ImageService';
 import { UserPostDao } from '@src/database/UserPostDao';
 import { UserDao } from '@src/database/UserDao';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { ImageDao } from '@src/database/ImageDao';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';

@@ -10,6 +10,8 @@ import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { PlannedDayResult } from '@resources/schema';
+import { ImageDetectionService } from './ImageService';
+import { ImageDao } from '@src/database/ImageDao';
 
 export class PlannedDayResultService {
     public static async create(context: Context, plannedDayId: number): Promise<PlannedDayResult> {
@@ -63,6 +65,12 @@ export class PlannedDayResultService {
                 'planned day result does not belong to user'
             );
         }
+
+        const filteredImageResults = await ImageDetectionService.filterImages(
+            plannedDayResult.images ?? []
+        );
+        plannedDayResult.images = filteredImageResults.clean;
+        await ImageDao.deleteImages(filteredImageResults.adult);
 
         const updatedPlannedDayResult = await PlannedDayResultDao.update(plannedDayResult);
 

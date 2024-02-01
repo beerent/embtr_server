@@ -2,13 +2,36 @@ import vision from '@google-cloud/vision';
 import { Image } from '@resources/schema';
 import { EnvironmentOption } from '@src/utility/environment/EnvironmentUtility';
 
-export interface FilteredImageResults {
-    clean: Image[];
-    adult: Image[];
+export interface FilteredImageResults<T extends string | Image> {
+    clean: T[];
+    adult: T[];
 }
 
 export class ImageDetectionService {
-    public static async filterImages(images: Image[]): Promise<FilteredImageResults> {
+    public static async filterUrlImage(image: string): Promise<string | undefined> {
+        if (await this.isAdult(image)) {
+            return undefined;
+        }
+
+        return image;
+    }
+
+    public static async filterUrlImages(images: string[]): Promise<FilteredImageResults<string>> {
+        const clean: string[] = [];
+        const adult: string[] = [];
+
+        for (const image of images) {
+            if (await this.isAdult(image)) {
+                adult.push(image);
+            } else {
+                clean.push(image);
+            }
+        }
+
+        return { clean, adult };
+    }
+
+    public static async filterImages(images: Image[]): Promise<FilteredImageResults<Image>> {
         const clean: Image[] = [];
         const adult: Image[] = [];
 

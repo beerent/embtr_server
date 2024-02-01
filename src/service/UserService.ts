@@ -10,6 +10,7 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
+import { ImageDetectionService } from '@src/service/ImageService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -40,6 +41,7 @@ export class UserService {
         return userModel;
     }
 
+    // TODO
     public static async create(newUserContext: NewUserContext): Promise<User> {
         const user = await UserDao.getByUid(newUserContext.userUid);
         if (user) {
@@ -67,6 +69,7 @@ export class UserService {
         return userModel;
     }
 
+    // TODO
     public static async setup(context: Context, user: User): Promise<User> {
         const setupUser = await this.update(context, user);
         await this.markUserAsSetupComplete(setupUser);
@@ -76,6 +79,7 @@ export class UserService {
         return setupUser;
     }
 
+    // TODO
     public static async update(context: Context, user: User): Promise<User> {
         if (user.uid !== context.userUid) {
             logger.error('failed to update user - forbidden');
@@ -97,6 +101,12 @@ export class UserService {
                     'username already exists'
                 );
             }
+        }
+
+        if (userToUpdate.photoUrl) {
+            userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
+                userToUpdate.photoUrl
+            );
         }
 
         let updatedUser = undefined;

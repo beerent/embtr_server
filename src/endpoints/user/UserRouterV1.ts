@@ -144,6 +144,7 @@ userRouterV1.patch(
     routeLogger(v),
     authenticate,
     authorize,
+    //validate me
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         const requestBody: UpdateUserRequest = req.body;
