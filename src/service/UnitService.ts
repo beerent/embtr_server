@@ -1,5 +1,3 @@
-import { SUCCESS } from '@src/common/RequestResponses';
-import { GetUnitsResponse } from '@resources/types/requests/UnitTypes';
 import { Unit } from '@resources/schema';
 import { UnitDao } from '@src/database/UnitDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
