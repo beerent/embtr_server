@@ -9,6 +9,7 @@ import { ImageDao } from '@src/database/ImageDao';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
+import { BlockUserService } from './BlockUserService';
 
 export class UserPostService {
     public static async create(context: Context, userPost: UserPost): Promise<UserPost> {
@@ -64,6 +65,11 @@ export class UserPostService {
         if (!userPost) {
             throw new ServiceException(404, Code.USER_POST_NOT_FOUND, 'user post not found');
         }
+
+        const blockedUserIds = await BlockUserService.getBlockedAndBlockedByUserIds(context);
+        userPost.comments = userPost.comments.filter(
+            (comment) => !blockedUserIds.includes(comment.userId)
+        );
 
         const userPostModel: UserPost = ModelConverter.convert(userPost);
         return userPostModel;

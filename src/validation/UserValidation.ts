@@ -47,4 +47,24 @@ export namespace UserValidation {
 
         next();
     };
+
+    export const validateCreateBlockUserRequest = (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ) => {
+        try {
+            z.object({
+                userId: z.coerce.number(),
+            }).parse(req.body);
+        } catch (error) {
+            throw new ServiceException(
+                HttpCode.INVALID_REQUEST,
+                Code.INVALID_REQUEST,
+                'invalid params'
+            );
+        }
+
+        next();
+    };
 }

@@ -11,6 +11,7 @@ import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
 import { ImageDetectionService } from '@src/service/ImageService';
+import { BlockUserService } from './BlockUserService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -41,7 +42,6 @@ export class UserService {
         return userModel;
     }
 
-    // TODO
     public static async create(newUserContext: NewUserContext): Promise<User> {
         const user = await UserDao.getByUid(newUserContext.userUid);
         if (user) {
@@ -69,7 +69,6 @@ export class UserService {
         return userModel;
     }
 
-    // TODO
     public static async setup(context: Context, user: User): Promise<User> {
         const setupUser = await this.update(context, user);
         await this.markUserAsSetupComplete(setupUser);
@@ -79,7 +78,6 @@ export class UserService {
         return setupUser;
     }
 
-    // TODO
     public static async update(context: Context, user: User): Promise<User> {
         if (user.uid !== context.userUid) {
             logger.error('failed to update user - forbidden');
@@ -133,7 +131,9 @@ export class UserService {
 
     public static async search(context: Context, query: string): Promise<User[]> {
         const users = await UserDao.search(query);
-        const userModels: User[] = ModelConverter.convertAll(users);
+        const blockedUserIds = await BlockUserService.getBlockedAndBlockedByUserIds(context);
+        const filteredUsers = users.filter((user) => !blockedUserIds.includes(user.id));
+        const userModels: User[] = ModelConverter.convertAll(filteredUsers);
 
         return userModels;
     }

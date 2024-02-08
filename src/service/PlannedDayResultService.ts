@@ -12,6 +12,7 @@ import { Code } from '@resources/codes';
 import { PlannedDayResult } from '@resources/schema';
 import { ImageDetectionService } from './ImageService';
 import { ImageDao } from '@src/database/ImageDao';
+import { BlockUserService } from './BlockUserService';
 
 export class PlannedDayResultService {
     public static async create(context: Context, plannedDayId: number): Promise<PlannedDayResult> {
@@ -198,6 +199,11 @@ export class PlannedDayResultService {
                 'planned day result not found'
             );
         }
+
+        const blockedUserIds = await BlockUserService.getBlockedAndBlockedByUserIds(context);
+        plannedDayResult.comments = plannedDayResult.comments.filter(
+            (comment) => !blockedUserIds.includes(comment.userId)
+        );
 
         const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
         return plannedDayResultModel;

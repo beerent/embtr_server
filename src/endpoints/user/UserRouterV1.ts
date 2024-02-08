@@ -7,6 +7,7 @@ import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryT
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
 import {
+    CreateBlockUserRequest,
     GetUserResponse,
     GetUsersResponse,
     UpdateUserRequest,
@@ -34,6 +35,7 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { GetTimelineResponse, TimelineData } from '@resources/types/requests/Timeline';
 import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import { BlockUserService } from '@src/service/BlockUserService';
 
 const userRouterV1 = express.Router();
 const v = 'v1';
@@ -120,6 +122,22 @@ userRouterV1.post(
         const createdUser = await UserService.create(newUserContext);
         const response: GetUserResponse = { ...SUCCESS, user: createdUser };
         res.json(response);
+    })
+);
+
+userRouterV1.post(
+    '/block',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    UserValidation.validateCreateBlockUserRequest,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: CreateBlockUserRequest = req.body;
+        const userId: number = request.userId;
+
+        await BlockUserService.create(context, userId);
+        res.json(SUCCESS);
     })
 );
 

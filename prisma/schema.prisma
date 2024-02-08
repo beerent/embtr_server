@@ -36,6 +36,8 @@ model User {
   userAchievements       UserAchievement[]
   tasks                  Task[]
   scheduledHabits        ScheduledHabit[]
+  blockingUsers          BlockedUser[]           @relation("blockingUser")
+  blockedUsers           BlockedUser[]           @relation("blockedUser")
 
   @@index([username])
   @@map("user")
@@ -493,4 +495,20 @@ model ScheduledHabit {
   @@index([unitId])
   @@index([userId])
   @@map("scheduled_habit")
+}
+
+model BlockedUser {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @db.Int
+  user          User     @relation("blockingUser", fields: [userId], references: [id], onDelete: Cascade)
+  blockedUserId Int      @db.Int
+  blockedUser   User     @relation("blockedUser", fields: [blockedUserId], references: [id], onDelete: Cascade)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+
+  @@unique([userId, blockedUserId], name: "unique_user_blocked_user")
+  @@index([userId])
+  @@index([blockedUserId])
+  @@map("blocked_user")
 }

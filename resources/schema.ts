@@ -26,6 +26,8 @@ export interface User {
   userAchievements?: UserAchievement[];
   tasks?: Task[];
   scheduledHabits?: ScheduledHabit[];
+  blockingUsers?: BlockedUser[];
+  blockedUsers?: BlockedUser[];
 }
 
 export interface PushNotificationToken {
@@ -360,6 +362,17 @@ export interface ScheduledHabit {
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];
+}
+
+export interface BlockedUser {
+  id?: number;
+  userId?: number;
+  user?: User;
+  blockedUserId?: number;
+  blockedUser?: User;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum NotificationTargetPage {
