@@ -15,6 +15,7 @@ import {
 import { HttpCode } from '@src/common/RequestResponses';
 import { AccountDao } from '@src/database/AccountDao';
 import { UserPostDao } from '@src/database/UserPostDao';
+import { UpdateUserRequest } from '@resources/types/requests/UserTypes';
 
 describe('create user workflow tests', () => {
     const EMAIL = 'test_create_user_workflow@embtr.com';
@@ -29,10 +30,13 @@ describe('create user workflow tests', () => {
     });
 
     test('create user workflow', async () => {
-        const createFirebaseAccountResponse = await request(app).post('/account/create/').send({
-            email: EMAIL,
-            password: PASSWORD,
-        });
+        const createFirebaseAccountResponse = await request(app)
+            .post('/account/create/')
+            .set('client-version', '1.0.0')
+            .send({
+                email: EMAIL,
+                password: PASSWORD,
+            });
         expect(createFirebaseAccountResponse.status).toEqual(200);
 
         // verify
@@ -40,6 +44,7 @@ describe('create user workflow tests', () => {
         const verifyInitialGetFailsResponse = await request(app)
             .post('/user/')
             .set('Authorization', `Bearer ${badToken}`)
+            .set('client-version', '1.0.0')
             .send({});
         expect(verifyInitialGetFailsResponse.status).toEqual(403);
         expect(verifyInitialGetFailsResponse.body.internalCode).toEqual(Code.EMAIL_NOT_VERIFIED);
@@ -50,6 +55,7 @@ describe('create user workflow tests', () => {
         const verifyInitialGetSucceedsResponse = await request(app)
             .post('/user/')
             .set('Authorization', `Bearer ${goodToken}`)
+            .set('client-version', '1.0.0')
             .send({});
         const body = verifyInitialGetSucceedsResponse.body;
         expect(verifyInitialGetSucceedsResponse.status).toEqual(200);
@@ -57,6 +63,7 @@ describe('create user workflow tests', () => {
         const x = await request(app)
             .get('/unit/')
             .set('Authorization', `Bearer ${goodToken}`)
+            .set('client-version', '1.0.0')
             .send({});
         expect(x.status).toEqual(401);
 
@@ -64,6 +71,7 @@ describe('create user workflow tests', () => {
         const y = await request(app)
             .get('/unit/')
             .set('Authorization', `Bearer ${bestToken}`)
+            .set('client-version', '1.0.0')
             .send({});
         expect(y.status).toEqual(200);
         const done = true;
@@ -108,6 +116,7 @@ describe('delete user workflow tests', () => {
         const verifyInitialGetSucceedsResponse = await request(app)
             .post('/user/')
             .set('Authorization', `Bearer ${token}`)
+            .set('client-version', '1.0.0')
             .send({});
         expect(verifyInitialGetSucceedsResponse.status).toEqual(200);
         token = await AuthenticationDao.generateValidIdToken(EMAIL, PASSWORD);
@@ -123,6 +132,7 @@ describe('delete user workflow tests', () => {
         const response = await request(app)
             .post('/user-post/v1/')
             .set('Authorization', `Bearer ${token}`)
+            .set('client-version', '1.0.0')
             .send(createUserPost);
         const createUserPostResponse: CreateUserPostResponse = response.body;
         expect(createUserPostResponse.success).toEqual(true);
@@ -132,12 +142,14 @@ describe('delete user workflow tests', () => {
         const hardDeleteResponse = await request(app)
             .post(`/account/v1/${EMAIL}/hard-delete`)
             .set('Authorization', `Bearer ${token}`)
+            .set('client-version', '1.0.0')
             .send(createUserPost);
         expect(hardDeleteResponse.status).toEqual(HttpCode.FORBIDDEN);
 
         const adminDeleteResponse = await request(app)
             .post(`/account/v1/${EMAIL}/hard-delete`)
             .set('Authorization', `Bearer ${adminUser.token}`)
+            .set('client-version', '1.0.0')
             .send(createUserPost);
         expect(adminDeleteResponse.status).toEqual(HttpCode.SUCCESS);
 
@@ -149,6 +161,35 @@ describe('delete user workflow tests', () => {
     }, 20000);
 });
 
+// describe('edit user workflow tests', () => {
+//     const EMAIL = 'test_create_user_workflow@embtr.com';
+//     const PASSWORD = 'Password1!';
+//
+//     beforeAll(async () => {
+//         await TestUtility.deleteAccountWithUser(EMAIL);
+//     });
+//
+//     afterAll(async () => {
+//         await TestUtility.deleteAccountWithUser(EMAIL);
+//     });
+//
+//     test('edit user username fails if invalid', async () => {
+//         const user = await TestUtility.createAccountWithUser(EMAIL, PASSWORD, Role.USER);
+//
+//         const updateRequest: UpdateUserRequest = {
+//             user: {
+//                 username: '',
+//             },
+//         };
+//
+//         await request(app)
+//             .patch('/user/')
+//             .set('Authorization', `Bearer ${user.token}`)
+//             .set('client-version', '1.0.0')
+//             .send(updateRequest);
+//     });
+// });
+//
 describe('register push notification workflow', () => {
     const EMAIL = 'reg_push_noti_test@embtr.com';
     const PASSWORD = 'Password1!';
@@ -170,6 +211,7 @@ describe('register push notification workflow', () => {
         const response = await request(app)
             .post('/user/createPushNotificationToken/v1/')
             .set('Authorization', `Bearer ${testUser.token}`)
+            .set('client-version', '1.0.0')
             .send(registerRequest);
         expect(response.status).toEqual(200);
 
@@ -193,11 +235,13 @@ describe('register push notification workflow', () => {
         await request(app)
             .post('/user/createPushNotificationToken/v1/')
             .set('Authorization', `Bearer ${testUser.token}`)
+            .set('client-version', '1.0.0')
             .send(registerRequest);
 
         await request(app)
             .post('/user/createPushNotificationToken/v1/')
             .set('Authorization', `Bearer ${testUser.token}`)
+            .set('client-version', '1.0.0')
             .send(registerRequest);
 
         const context: Context = {

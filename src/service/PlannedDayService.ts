@@ -202,6 +202,16 @@ export class PlannedDayService {
             ...placeHolderPlannedTasks,
         ];
 
+        convertedPlannedDay.plannedTasks = convertedPlannedDay.plannedTasks?.sort((a, b) => {
+            if (a.timeOfDay === b.timeOfDay) {
+                return 0;
+            }
+
+            const aRank = a.timeOfDay?.id === undefined ? 0 : a.timeOfDay.id;
+            const bRank = b.timeOfDay?.id === undefined ? 0 : b.timeOfDay.id;
+            return aRank < bRank ? -1 : 1;
+        });
+
         return convertedPlannedDay;
     }
 

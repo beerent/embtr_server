@@ -19,6 +19,7 @@ import dayOfTheWeekRouter from '@src/endpoints/day_of_week/DayOfTheWeekRouter';
 import marketingRouter from '@src/endpoints/marketing/MarketingRouter';
 import timelineRouter from '@src/endpoints/timeline/TimelineRouter';
 import healthRouter from '@src/endpoints/health/HealthRouter';
+import reportRouter from './endpoints/report/ReportRouter';
 
 const cors = require('cors');
 const app = express();
@@ -65,6 +66,7 @@ app.use('/', timeOfTheDayRouter);
 app.use('/', dayOfTheWeekRouter);
 app.use('/', marketingRouter);
 app.use('/', timelineRouter);
+app.use('/', reportRouter);
 app.use('/', healthRouter);
 
 app.use(handleError);

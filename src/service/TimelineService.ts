@@ -9,6 +9,7 @@ import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { PlannedDayResult, UserPost } from '@resources/schema';
 import { TimelineDao } from '@src/database/custom/TimelineDao';
 import { Context } from '@src/general/auth/Context';
+import { BlockUserService } from '@src/service/BlockUserService';
 
 export class TimelineService {
     public static async get(
@@ -20,15 +21,26 @@ export class TimelineService {
             cursor,
             limit
         );
+
+        const joinedBlockedUserIds = await BlockUserService.getBlockedAndBlockedByUserIds(context);
+
         const queryData = await TimelineDao.getByDateAndLimit(
             timelineRequestCursor.cursor,
             timelineRequestCursor.limit
         );
 
-        const [userPosts, plannedDayResults] = await Promise.all([
+        let [userPosts, plannedDayResults] = await Promise.all([
             UserPostService.getAllByIds(context, queryData.userPostIds),
             PlannedDayResultService.getAllByIds(context, queryData.plannedDayResultIds),
         ]);
+
+        userPosts = userPosts.filter(
+            (userPost) => !joinedBlockedUserIds.includes(userPost.userId ?? -1)
+        );
+        plannedDayResults = plannedDayResults.filter(
+            (plannedDayResult) =>
+                !joinedBlockedUserIds.includes(plannedDayResult.plannedDay?.userId ?? -1)
+        );
 
         const elements: TimelineElement[] = [
             ...TimelineService.createUserPostTimelineElements(userPosts ?? []),

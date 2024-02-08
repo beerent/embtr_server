@@ -3,6 +3,7 @@ import { NotificationDao } from '@src/database/NotificationDao';
 import { PushNotificationDao } from '@src/database/PushNotificationDao';
 import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { BlockUserService } from './BlockUserService';
 
 export enum NotificationType {
     TIMELINE_COMMENT,
@@ -51,7 +52,11 @@ export class NotificationService {
 
     public static async getAll(context: Context): Promise<Notification[]> {
         const notifications = await NotificationDao.getAll(context.userId);
-        const notificationModels: Notification[] = ModelConverter.convertAll(notifications);
+        const blockedUserIds = await BlockUserService.getBlockedAndBlockedByUserIds(context);
+        const filteredNotifications = notifications.filter(
+            (notification) => !blockedUserIds.includes(notification.fromUserId)
+        );
+        const notificationModels: Notification[] = ModelConverter.convertAll(filteredNotifications);
 
         return notificationModels;
     }
