@@ -10,6 +10,10 @@ export class BlockUserService {
             throw new ServiceException(409, Code.BLOCK_USER_ALREADY_EXISTS, 'user already blocked');
         }
 
+        if (context.userId === userId) {
+            throw new ServiceException(400, Code.BLOCK_SELF, 'cannot block self');
+        }
+
         await BlockUserDao.create(context.userId, userId);
     }
 
