@@ -1,5 +1,6 @@
 import vision from '@google-cloud/vision';
 import { Image } from '@resources/schema';
+import { logger } from '@src/common/logger/Logger';
 import { EnvironmentOption } from '@src/utility/environment/EnvironmentUtility';
 
 export interface FilteredImageResults<T extends string | Image> {
@@ -52,6 +53,11 @@ export class ImageDetectionService {
 
     private static async isAdult(filename: string) {
         const keyFilename = EnvironmentOption.get(EnvironmentOption.SERVICE_CREDENTIALS_FILE_PATH);
+        if (!keyFilename) {
+            logger.error('Service credentials file path is not set');
+            return false;
+        }
+
         const client = new vision.ImageAnnotatorClient({
             keyFilename,
         });
