@@ -44,6 +44,9 @@ plannedDayRouterV1.get(
     })
 );
 
+/**
+ * @deprecated since version 2.0.0
+ */
 plannedDayRouterV1.get(
     '/:userId/:dayKey',
     routeLogger(v),

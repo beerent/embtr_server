@@ -99,10 +99,10 @@ model PlannedTask {
   plannedDay          PlannedDay      @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
   scheduledHabitId    Int?            @db.Int
   scheduledHabit      ScheduledHabit? @relation(fields: [scheduledHabitId], references: [id])
-  timeOfDayId         Int?            @db.Int
-  timeOfDay           TimeOfDay?      @relation("current_planned_tasks", fields: [timeOfDayId], references: [id])
-  originalTimeOfDayId Int?            @db.Int
-  originalTimeOfDay   TimeOfDay?      @relation("original_planned_tasks", fields: [originalTimeOfDayId], references: [id])
+  timeOfDayId         Int             @default(5) @db.Int
+  timeOfDay           TimeOfDay       @relation("current_planned_tasks", fields: [timeOfDayId], references: [id])
+  originalTimeOfDayId Int             @default(5) @db.Int
+  originalTimeOfDay   TimeOfDay       @relation("original_planned_tasks", fields: [originalTimeOfDayId], references: [id])
   title               String?         @db.VarChar(255)
   description         String?         @db.VarChar(255)
   remoteImageUrl      String?         @db.VarChar(255)
@@ -116,6 +116,8 @@ model PlannedTask {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @default(now()) @updatedAt
 
+  @@unique([plannedDayId, scheduledHabitId, timeOfDayId], name: "unique_planned_day_task")
+  @@unique([plannedDayId, scheduledHabitId, originalTimeOfDayId], name: "unique_planned_day_original_task")
   @@index([plannedDayId], name: "planned_day_id")
   @@index([scheduledHabitId], name: "scheduled_habit_id")
   @@index([unitId], name: "unit_id")

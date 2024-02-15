@@ -1,34 +1,16 @@
 import {
-    PlannedTask as PlannedTaskModel,
     PlannedDay as PlannedDayModel,
     PlannedTask,
     ScheduledHabit,
     TimeOfDay,
     PlannedDay,
 } from '@resources/schema';
-import {
-    CreatePlannedDayResponse,
-    GetPlannedDayRequest,
-    GetPlannedDayResponse,
-} from '@resources/types/requests/PlannedDayTypes';
-import {
-    CREATE_PLANNED_DAY_FAILED,
-    CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
-    CREATE_PLANNED_DAY_SUCCESS,
-    GET_PLANNED_DAY_FAILED_NOT_FOUND,
-    GET_PLANNED_DAY_SUCCESS,
-    SUCCESS,
-} from '@src/common/RequestResponses';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
-import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
-import { ContextService } from '@src/service/ContextService';
 import { ScheduledHabitUtil } from '@resources/types/util/ScheduledHabitUtil';
 
 interface ScheduledHabitTimeOfDay {
@@ -120,36 +102,17 @@ export class PlannedDayService {
         const plannedScheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] =
             plannedDayModel.plannedTasks
                 ? plannedDayModel.plannedTasks?.map((plannedTask) => {
-                      return {
-                          scheduledHabit: plannedTask.scheduledHabit ?? undefined,
-                          timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
-                      };
-                  })
+                    return {
+                        scheduledHabit: plannedTask.scheduledHabit ?? undefined,
+                        timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
+                    };
+                })
                 : [];
 
         // 2. find what tasks the user should have
         // scheduled habit id w/ time of day id for scheduled habits
-        const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = scheduledHabitModels.flatMap(
-            (scheduledHabit) => {
-                if (scheduledHabit.timesOfDay && scheduledHabit.timesOfDay.length > 0) {
-                    return scheduledHabit.timesOfDay.map((timeOfDay) => {
-                        const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
-                            scheduledHabit: scheduledHabit,
-                            timeOfDay: timeOfDay,
-                        };
-
-                        return scheduledHabitTimeOfDay;
-                    });
-                } else {
-                    const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
-                        scheduledHabit: scheduledHabit,
-                        timeOfDay: undefined,
-                    };
-
-                    return [scheduledHabitTimeOfDay];
-                }
-            }
-        );
+        const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] =
+            this.getPlannedDayByUserAndDayKey(scheduledHabitModels);
 
         // 3. find what tasks the user should have but does not (the diff)
         // get all scheduled habits w/ time of day that do not exist in planned tasks
@@ -158,9 +121,9 @@ export class PlannedDayService {
                 return !plannedScheduledHabitTimeOfDays.some((plannedScheduledHabitTimeOfDay) => {
                     return (
                         scheduledHabitTimeOfDay.scheduledHabit?.id ===
-                            plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
+                        plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
                         scheduledHabitTimeOfDay.timeOfDay?.id ===
-                            plannedScheduledHabitTimeOfDay.timeOfDay?.id
+                        plannedScheduledHabitTimeOfDay.timeOfDay?.id
                     );
                 });
             });
@@ -236,5 +199,32 @@ export class PlannedDayService {
 
         const plannedDayModel: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
         return plannedDayModel;
+    }
+
+    /**
+     * @deprecated since version 2.0.0
+     */
+    protected static getPlannedDayByUserAndDayKey(scheduledHabitModels: ScheduledHabit[]) {
+        const scheduledHabits = scheduledHabitModels.flatMap((scheduledHabit) => {
+            if (scheduledHabit.timesOfDay && scheduledHabit.timesOfDay.length > 0) {
+                return scheduledHabit.timesOfDay.map((timeOfDay) => {
+                    const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
+                        scheduledHabit: scheduledHabit,
+                        timeOfDay: timeOfDay,
+                    };
+
+                    return scheduledHabitTimeOfDay;
+                });
+            } else {
+                const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
+                    scheduledHabit: scheduledHabit,
+                    timeOfDay: undefined,
+                };
+
+                return [scheduledHabitTimeOfDay];
+            }
+        });
+
+        return scheduledHabits;
     }
 }
