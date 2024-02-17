@@ -1,29 +1,11 @@
 import { PlannedTask } from '@resources/schema';
-import {
-    CreateOrReplacePlannedTaskResponse,
-    GetPlannedHabitResponse,
-    UpdatePlannedTaskRequest,
-    UpdatePlannedTaskResponse,
-} from '@resources/types/requests/PlannedTaskTypes';
-import {
-    CREATE_PLANNED_TASK_FAILED,
-    CREATE_PLANNED_TASK_UNKNOWN_PLANNED_DAY,
-    GET_PLANNED_DAY_FAILED_NOT_FOUND,
-    GET_PLANNED_DAY_SUCCESS,
-    SUCCESS,
-    UPDATE_PLANNED_TASK_FAILED,
-} from '@src/common/RequestResponses';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { ChallengeService } from './ChallengeService';
-import { Request } from 'express';
 import { Constants } from '@resources/types/constants/constants';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
-import { ContextService } from '@src/service/ContextService';
 
 export class PlannedHabitService {
     public static async getById(context: Context, id: number): Promise<PlannedTask> {
@@ -32,7 +14,7 @@ export class PlannedHabitService {
             throw new ServiceException(404, Code.PLANNED_TASK_NOT_FOUND, 'planned habit not found');
         }
 
-        const plannedHabitModel : PlannedTask = ModelConverter.convert(plannedHabit);
+        const plannedHabitModel: PlannedTask = ModelConverter.convert(plannedHabit);
         return plannedHabitModel;
     }
 
@@ -42,6 +24,17 @@ export class PlannedHabitService {
         plannedTask: PlannedTask
     ): Promise<PlannedTask> {
         if (plannedTask.id) {
+            return this.update(context, plannedTask);
+        }
+
+        const existingId = await this.getIdByUniqueData(
+            plannedTask.plannedDayId,
+            plannedTask.scheduledHabitId,
+            plannedTask.timeOfDayId
+        );
+
+        if (existingId) {
+            plannedTask.id = existingId;
             return this.update(context, plannedTask);
         }
 
@@ -103,12 +96,30 @@ export class PlannedHabitService {
     private static getUpdatedStatus(plannedTask: PlannedTask): string {
         if (
             (plannedTask.status ?? Constants.HabitStatus.INCOMPLETE) ===
-                Constants.HabitStatus.INCOMPLETE &&
+            Constants.HabitStatus.INCOMPLETE &&
             (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
         ) {
             return Constants.HabitStatus.COMPLETE;
         }
 
         return plannedTask.status ?? Constants.HabitStatus.INCOMPLETE;
+    }
+
+    private static async getIdByUniqueData(
+        plannedDayId?: number,
+        scheduledHabitId?: number,
+        timeOfDayId?: number
+    ) {
+        if (!plannedDayId || !scheduledHabitId || !timeOfDayId) {
+            return undefined;
+        }
+
+        const plannedHabit = await PlannedHabitDao.getByPlannedDayAndScheduledHabitAndTimeOfDay(
+            plannedDayId,
+            scheduledHabitId,
+            timeOfDayId
+        );
+
+        return plannedHabit?.id;
     }
 }
