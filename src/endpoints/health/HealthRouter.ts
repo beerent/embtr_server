@@ -1,6 +1,4 @@
 import express from 'express';
-import MarketingRouterV1 from '@src/endpoints/marketing/MarketingRouterV1';
-import app from '@src/app';
 
 const healthRouter = express.Router();
 

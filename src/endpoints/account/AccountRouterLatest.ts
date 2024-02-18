@@ -25,10 +25,10 @@ const limiter = rateLimit({
     },
 });
 
-const accountRouterV1 = express.Router();
-const v = 'v1';
+const accountRouterLatest = express.Router();
+const v = '✓';
 
-accountRouterV1.post(
+accountRouterLatest.post(
     '/create',
     routeLogger(v),
     runEndpoint(async (req, res) => {
@@ -39,8 +39,8 @@ accountRouterV1.post(
     })
 );
 
-accountRouterV1.use('/forgot_password', limiter);
-accountRouterV1.post(
+accountRouterLatest.use('/forgot_password', limiter);
+accountRouterLatest.post(
     '/forgot_password',
     routeLogger(v),
     runEndpoint(async (req, res) => {
@@ -51,7 +51,7 @@ accountRouterV1.post(
     })
 );
 
-accountRouterV1.post(
+accountRouterLatest.post(
     '/send_verification_email',
     routeLogger(v),
     runEndpoint(async (req, res) => {
@@ -62,7 +62,7 @@ accountRouterV1.post(
     })
 );
 
-accountRouterV1.post(
+accountRouterLatest.post(
     '/authenticate',
     routeLogger(v),
     runEndpoint(async (req, res) => {
@@ -73,7 +73,7 @@ accountRouterV1.post(
     })
 );
 
-accountRouterV1.post(
+accountRouterLatest.post(
     '/refresh_token',
     routeLogger(v),
     runEndpoint(async (req, res) => {
@@ -82,7 +82,7 @@ accountRouterV1.post(
     })
 );
 
-accountRouterV1.post(
+accountRouterLatest.post(
     '/delete',
     routeLogger(v),
     authenticate,
@@ -94,4 +94,4 @@ accountRouterV1.post(
     })
 );
 
-export default accountRouterV1;
+export default accountRouterLatest;

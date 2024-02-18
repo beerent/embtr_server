@@ -16,10 +16,10 @@ import {
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const quoteOfTheDayRouterV1 = express.Router();
-const v = 'v1';
+const quoteOfTheDayRouterLatest = express.Router();
+const v = '✓';
 
-quoteOfTheDayRouterV1.post(
+quoteOfTheDayRouterLatest.post(
     '/',
     routeLogger(v),
     authenticate,
@@ -37,7 +37,7 @@ quoteOfTheDayRouterV1.post(
     })
 );
 
-quoteOfTheDayRouterV1.get(
+quoteOfTheDayRouterLatest.get(
     '/',
     routeLogger(v),
     authenticate,
@@ -51,7 +51,7 @@ quoteOfTheDayRouterV1.get(
     })
 );
 
-quoteOfTheDayRouterV1.post(
+quoteOfTheDayRouterLatest.post(
     '/:id/like/',
     routeLogger(v),
     authenticate,
@@ -63,4 +63,4 @@ quoteOfTheDayRouterV1.post(
     })
 );
 
-export default quoteOfTheDayRouterV1;
+export default quoteOfTheDayRouterLatest;

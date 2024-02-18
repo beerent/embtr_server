@@ -38,4 +38,7 @@ plannedHabitRouterV1.get(
     })
 );
 
+// unsure if needed
+//plannedHabitRouterV1.use('/', plannedHabitRouterLatest);
+
 export default plannedHabitRouterV1;

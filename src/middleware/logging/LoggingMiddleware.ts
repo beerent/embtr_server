@@ -5,7 +5,7 @@ export const routeLogger =
     (receivingVersion: string) => (req: Request, res: Response, next: NextFunction) => {
         const startTime = Date.now();
         const oldSend = res.send;
-        res.send = function (data) {
+        res.send = function(data) {
             const endTime = Date.now();
             const elapsedTime = endTime - startTime;
             const contentLength = Buffer.byteLength(data, 'utf-8'); // Get the size of the response data'

@@ -7,10 +7,10 @@ import { GetDaysOfWeekResponse } from '@resources/types/requests/DayOfWeekTypes'
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const dayOfWeekRouterV1 = express.Router();
-const v = 'v1';
+const dayOfWeekRouterLatest = express.Router();
+const v = '✓';
 
-dayOfWeekRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
+dayOfWeekRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
 
     const daysOfWeek = await DayOfWeekService.getAll(context);
@@ -18,4 +18,4 @@ dayOfWeekRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, 
     res.json(response);
 });
 
-export default dayOfWeekRouterV1;
+export default dayOfWeekRouterLatest;

@@ -1,3 +1,4 @@
+import express from 'express';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import {
     CreateUserPostRequest,
@@ -25,13 +26,12 @@ import { ContextService } from '@src/service/ContextService';
 import { LikeService } from '@src/service/LikeService';
 import { UserPostService } from '@src/service/UserPostService';
 import { DateUtility } from '@src/utility/date/DateUtility';
-import express from 'express';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const userPostRouterV1 = express.Router();
-const v = 'v1';
+const userPostRouterLatest = express.Router();
+const v = '✓';
 
-userPostRouterV1.post(
+userPostRouterLatest.post(
     '/',
     routeLogger(v),
     authenticate,
@@ -48,7 +48,7 @@ userPostRouterV1.post(
     })
 );
 
-userPostRouterV1.get(
+userPostRouterLatest.get(
     '/',
     routeLogger(v),
     authenticate,
@@ -65,7 +65,7 @@ userPostRouterV1.get(
     })
 );
 
-userPostRouterV1.get(
+userPostRouterLatest.get(
     '/:id',
     routeLogger(v),
     authenticate,
@@ -81,7 +81,7 @@ userPostRouterV1.get(
     })
 );
 
-userPostRouterV1.patch(
+userPostRouterLatest.patch(
     '/',
     routeLogger(v),
     authenticate,
@@ -98,7 +98,7 @@ userPostRouterV1.patch(
     })
 );
 
-userPostRouterV1.post(
+userPostRouterLatest.post(
     '/:id/like',
     routeLogger(v),
     authenticate,
@@ -110,7 +110,7 @@ userPostRouterV1.post(
     })
 );
 
-userPostRouterV1.post(
+userPostRouterLatest.post(
     '/:id/comment/',
     routeLogger(v),
     authenticate,
@@ -122,7 +122,7 @@ userPostRouterV1.post(
     })
 );
 
-userPostRouterV1.delete(
+userPostRouterLatest.delete(
     '/comment/:id',
     routeLogger(v),
     authenticate,
@@ -134,4 +134,4 @@ userPostRouterV1.delete(
     })
 );
 
-export default userPostRouterV1;
+export default userPostRouterLatest;

@@ -10,10 +10,10 @@ import { PlannedHabitService } from '@src/service/PlannedHabitService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import plannedHabitRouterV1 from './PlannedHabitRouterV1';
 
-const plannedHabitRouterV2 = express.Router();
-const v = 'v2';
+const plannedHabitRouterLatest = express.Router();
+const v = '✓';
 
-plannedHabitRouterV2.get(
+plannedHabitRouterLatest.get(
     '/:id',
     routeLogger(v),
     authenticate,
@@ -32,6 +32,6 @@ plannedHabitRouterV2.get(
     })
 );
 
-plannedHabitRouterV2.use('/', plannedHabitRouterV1);
+plannedHabitRouterLatest.use('/', plannedHabitRouterV1);
 
-export default plannedHabitRouterV2;
+export default plannedHabitRouterLatest;

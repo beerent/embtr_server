@@ -16,7 +16,11 @@ const silentInTestEnv = (
 // Custom format function to colorize the version part of the log message
 const colorizeVersion = winston.format((info, opts) => {
     if (info.message) {
-        info.message = info.message.replace(/ \[(.*?)] /g, '\x1b[32m [$1] \x1b[0m');
+        if (info.message.includes('✓')) {
+            info.message = info.message.replace(/ \[(.*?)] /g, '\x1b[32m [$1] \x1b[0m');
+        } else {
+            info.message = info.message.replace(/ \[(.*?)] /g, '\x1b[33m [$1] \x1b[0m');
+        }
     }
     return info;
 });

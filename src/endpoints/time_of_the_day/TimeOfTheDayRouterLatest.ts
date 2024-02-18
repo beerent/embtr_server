@@ -8,10 +8,10 @@ import { GetTimesOfDayResponse } from '@resources/types/requests/TimeOfDayTypes'
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const timeOfTheDayRouterV1 = express.Router();
-const v = 'v1';
+const timeOfTheDayRouterLatest = express.Router();
+const v = '✓';
 
-timeOfTheDayRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
+timeOfTheDayRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
 
     const timesOfDay: TimeOfDay[] = await TimeOfDayService.getAll(context);
@@ -19,4 +19,4 @@ timeOfTheDayRouterV1.get('/', routeLogger(v), authenticate, authorize, async (re
     res.json(response);
 });
 
-export default timeOfTheDayRouterV1;
+export default timeOfTheDayRouterLatest;

@@ -1,11 +1,8 @@
 import express from 'express';
-import userPostRouterV1 from '@src/endpoints/user_post/UserPostRouterV1';
+import userPostRouterLatest from './UserPostRouterLatest';
 
 const userPostRouter = express.Router();
 
-userPostRouter.use('/v1/user-post', userPostRouterV1);
-
-//default fallback is always latest
-userPostRouter.use('/:version/user-post', userPostRouterV1);
+userPostRouter.use('/:version/user-post', userPostRouterLatest);
 
 export default userPostRouter;

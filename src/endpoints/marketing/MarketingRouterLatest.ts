@@ -3,13 +3,13 @@ import { MarketingService } from '@src/service/MarketingService';
 import express from 'express';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const marketingRouterV1 = express.Router();
-const v = 'v1';
+const marketingRouterLatest = express.Router();
+const v = '✓';
 
 // convert web form data to json
-marketingRouterV1.use(express.urlencoded({ extended: true }));
+marketingRouterLatest.use(express.urlencoded({ extended: true }));
 
-marketingRouterV1.post(
+marketingRouterLatest.post(
     '/',
     routeLogger(v),
     runEndpoint(async (req, res) => {
@@ -20,4 +20,4 @@ marketingRouterV1.post(
     })
 );
 
-export default marketingRouterV1;
+export default marketingRouterLatest;
