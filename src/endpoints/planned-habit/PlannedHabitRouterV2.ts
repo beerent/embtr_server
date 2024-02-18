@@ -8,17 +8,12 @@ import { validateGetById } from '@src/middleware/planned_day/PlannedDayValidatio
 import { ContextService } from '@src/service/ContextService';
 import { PlannedHabitService } from '@src/service/PlannedHabitService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
-import { PlannedHabitTransformationServiceV1 } from '@src/transform/PlannedHabitTransformationService';
+import plannedHabitRouterV1 from './PlannedHabitRouterV1';
 
-const plannedHabitRouterV1 = express.Router();
-const v = 'v1';
+const plannedHabitRouterV2 = express.Router();
+const v = 'v2';
 
-const transformationService = new PlannedHabitTransformationServiceV1();
-
-/**
- * @deprecated on version 1.0.14 (use version 2.0.0)
- */
-plannedHabitRouterV1.get(
+plannedHabitRouterV2.get(
     '/:id',
     routeLogger(v),
     authenticate,
@@ -29,13 +24,14 @@ plannedHabitRouterV1.get(
         const id = Number(req.params.id);
 
         const plannedHabit = await PlannedHabitService.getById(context, id);
-        const transformedPlannedHabit = transformationService.transformOut(plannedHabit);
         const response: GetPlannedHabitResponse = {
             ...SUCCESS,
-            plannedHabit: transformedPlannedHabit,
+            plannedHabit: plannedHabit,
         };
         res.json(response);
     })
 );
 
-export default plannedHabitRouterV1;
+plannedHabitRouterV2.use('/', plannedHabitRouterV1);
+
+export default plannedHabitRouterV2;

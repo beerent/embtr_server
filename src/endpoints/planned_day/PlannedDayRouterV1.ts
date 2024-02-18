@@ -24,9 +24,14 @@ import {
     UpdatePlannedTaskResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import { PlannedDayTransformationServiceV1 } from '@src/transform/PlannedDayTransformationService';
+import { PlannedHabitTransformationServiceV1 } from '@src/transform/PlannedHabitTransformationService';
 
 const plannedDayRouterV1 = express.Router();
 const v = 'v1';
+
+const plannedDayTransformationService = new PlannedDayTransformationServiceV1();
+const plannedHabitTransformationService = new PlannedHabitTransformationServiceV1();
 
 plannedDayRouterV1.get(
     '/:id',
@@ -44,6 +49,9 @@ plannedDayRouterV1.get(
     })
 );
 
+/**
+ * @deprecated on version 1.0.14 (use version 2.0.0)
+ */
 plannedDayRouterV1.get(
     '/:userId/:dayKey',
     routeLogger(v),
@@ -56,7 +64,8 @@ plannedDayRouterV1.get(
         const dayKey = req.params.dayKey;
 
         const plannedDay = await PlannedDayService.getByUser(context, userId, dayKey);
-        const response: GetPlannedDayResponse = { ...SUCCESS, plannedDay };
+        const transformedPlannedDay = plannedDayTransformationService.transformOut(plannedDay);
+        const response: GetPlannedDayResponse = { ...SUCCESS, plannedDay: transformedPlannedDay };
         res.json(response);
     })
 );
@@ -94,6 +103,9 @@ plannedDayRouterV1.post(
     })
 );
 
+/**
+ * @deprecated on version 1.0.14 (use version 2.0.0)
+ */
 plannedDayRouterV1.post(
     '/:dayKey/planned-task',
     routeLogger(v),
@@ -104,17 +116,26 @@ plannedDayRouterV1.post(
         const context = await ContextService.get(req);
         const dayKey = req.params.dayKey;
         const plannedTask: PlannedTask = req.body.plannedTask;
+        const transformedPlannedTask = plannedHabitTransformationService.transformIn(plannedTask);
 
         const updatedPlannedTask = await PlannedHabitService.createOrUpdate(
             context,
             dayKey,
-            plannedTask
+            transformedPlannedTask
         );
-        const response: CreatePlannedTaskResponse = { ...SUCCESS, plannedTask: updatedPlannedTask };
+        const transformedUpdatedPlannedTask =
+            plannedHabitTransformationService.transformOut(updatedPlannedTask);
+        const response: CreatePlannedTaskResponse = {
+            ...SUCCESS,
+            plannedTask: transformedUpdatedPlannedTask,
+        };
         res.json(response);
     })
 );
 
+/**
+ * @deprecated on version 1.0.14 (use version 2.0.0)
+ */
 plannedDayRouterV1.put(
     '/planned-task/',
     routeLogger(v),
@@ -124,8 +145,18 @@ plannedDayRouterV1.put(
         const context = await ContextService.get(req);
         const plannedTask: PlannedTask = req.body.plannedTask;
 
-        const updatedPlannedTask = await PlannedHabitService.update(context, plannedTask);
-        const response: UpdatePlannedTaskResponse = { ...SUCCESS, plannedTask: updatedPlannedTask };
+        const transformedPlannedTask = plannedHabitTransformationService.transformIn(plannedTask);
+        const updatedPlannedTask = await PlannedHabitService.update(
+            context,
+            transformedPlannedTask
+        );
+        const transformedUpdatedPlannedTask =
+            plannedHabitTransformationService.transformOut(updatedPlannedTask);
+
+        const response: UpdatePlannedTaskResponse = {
+            ...SUCCESS,
+            plannedTask: transformedUpdatedPlannedTask,
+        };
         res.json(response);
     })
 );

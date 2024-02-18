@@ -36,6 +36,9 @@ import {
 import { validateSearch as validateSearchTasks } from '@src/middleware/task/TaskValidation';
 import { Task } from '@resources/schema';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import { PlannedHabitTransformationServiceV1 } from '@src/transform/PlannedHabitTransformationService';
+
+const transformationService = new PlannedHabitTransformationServiceV1();
 
 const habitRouterV1 = express.Router();
 const v = 'v1';
@@ -139,6 +142,9 @@ habitRouterV1.get(
     }
 );
 
+/**
+ * @deprecated on version 1.0.14 (use version 2.0.0)
+ */
 habitRouterV1.post(
     '/schedule',
     routeLogger(v),
@@ -149,14 +155,17 @@ habitRouterV1.post(
         const context = await ContextService.get(req);
         const request: CreateScheduledHabitRequest = req.body;
         const scheduledHabit = request.scheduledHabit;
+        const transformedScheduledHabit = transformationService.transformIn(scheduledHabit);
 
         const createdScheduledHabit = await ScheduledHabitService.createOrUpdate(
             context,
-            scheduledHabit
+            transformedScheduledHabit
         );
+        const transformedCreatedScheduledHabit =
+            transformationService.transformOut(createdScheduledHabit);
         const response: CreateScheduledHabitResponse = {
             ...SUCCESS,
-            scheduledHabit: createdScheduledHabit,
+            scheduledHabit: transformedCreatedScheduledHabit,
         };
         res.json(response);
     })
@@ -179,6 +188,9 @@ habitRouterV1.post(
     })
 );
 
+/**
+ * @deprecated on version 1.0.14 (use version 2.0.0)
+ */
 habitRouterV1.get(
     '/:id/schedules',
     routeLogger(v),
@@ -190,11 +202,18 @@ habitRouterV1.get(
         const id = Number(req.params.id);
 
         const scheduledHabits = await ScheduledHabitService.getAllByHabit(context, id);
-        const response: GetScheduledHabitsResponse = { ...SUCCESS, scheduledHabits };
+        const transformedScheduledHabits = transformationService.transformOut(scheduledHabits);
+        const response: GetScheduledHabitsResponse = {
+            ...SUCCESS,
+            scheduledHabits: transformedScheduledHabits,
+        };
         res.json(response);
     })
 );
 
+/**
+ * @deprecated on version 1.0.14 (use version 2.0.0)
+ */
 habitRouterV1.get(
     '/schedule/:id',
     routeLogger(v),
@@ -206,7 +225,11 @@ habitRouterV1.get(
         const id = Number(req.params.id);
 
         const scheduledHabit = await ScheduledHabitService.get(context, id);
-        const response: GetScheduledHabitResponse = { ...SUCCESS, scheduledHabit };
+        const transformedScheduledHabit = transformationService.transformOut(scheduledHabit);
+        const response: GetScheduledHabitResponse = {
+            ...SUCCESS,
+            scheduledHabit: transformedScheduledHabit,
+        };
         res.json(response);
     })
 );
