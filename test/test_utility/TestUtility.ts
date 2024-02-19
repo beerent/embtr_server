@@ -21,6 +21,18 @@ export interface TestAccountWithUser {
 }
 
 export class TestUtility {
+    public static async getUser(email: string, password: string) {
+        const userExists = await UserDao.existsByEmail(email);
+        if (!userExists) {
+            await TestUtility.createAccountWithUser(email, password, Role.USER);
+
+            await AccountService.manuallyVerifyEmail(email);
+        }
+
+        const user = await UserDao.getByEmail(email);
+        return user;
+    }
+
     public static async createAccountWithoutUser(
         email: string,
         password: string,

@@ -105,7 +105,4 @@ plannedDayRouterV1.get(
     })
 );
 
-// IDK if I need this
-//plannedDayRouterV2.use('/', plannedDayRouterV1);
-
 export default plannedDayRouterV1;

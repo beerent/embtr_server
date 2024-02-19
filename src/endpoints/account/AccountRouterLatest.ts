@@ -20,9 +20,7 @@ import { authorize } from '@src/middleware/general/GeneralAuthorization';
 const limiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 3000, // limit each IP to 100 requests per windowMs
-    onLimitReached: (req, res, options) => {
-        res.status(429).end('Too many requests, please try again later.');
-    },
+    // TODO - fix rate limiting
 });
 
 const accountRouterLatest = express.Router();
