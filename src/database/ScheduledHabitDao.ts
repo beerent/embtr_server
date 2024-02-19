@@ -445,4 +445,12 @@ export class ScheduledHabitDao {
             },
         });
     }
+
+    public static async delete(id: number) {
+        return prisma.scheduledHabit.delete({
+            where: {
+                id: id,
+            },
+        });
+    }
 }

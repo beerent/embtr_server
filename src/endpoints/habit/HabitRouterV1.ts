@@ -19,12 +19,12 @@ import {
     validateScheduledHabitGet,
     validateScheduledHabitPost,
 } from '@src/middleware/scheduled_habit/ScheduledHabitValidation';
-import { PlannedHabitTransformationServiceV1 } from '@src/transform/PlannedHabitTransformationService';
+import { ScheduledHabitTransformationServiceV1 } from '@src/transform/ScheduledHabitTransformationService';
 
 const habitRouterV1 = express.Router();
 const v = 'v1';
 
-const transformationService = new PlannedHabitTransformationServiceV1();
+const transformationService = new ScheduledHabitTransformationServiceV1();
 
 //TODO - transform/ deprecate this
 habitRouterV1.post(
