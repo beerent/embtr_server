@@ -21,6 +21,7 @@ import {
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import {
     CreatePlannedTaskResponse,
+    UpdatePlannedTaskRequest,
     UpdatePlannedTaskResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
@@ -125,7 +126,8 @@ plannedDayRouterLatest.put(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const plannedTask: PlannedTask = req.body.plannedTask;
+        const request: UpdatePlannedTaskRequest = req.body;
+        const plannedTask: PlannedTask = request.plannedTask;
 
         const updatedPlannedTask = await PlannedHabitService.update(context, plannedTask);
 

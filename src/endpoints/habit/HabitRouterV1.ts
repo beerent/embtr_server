@@ -119,7 +119,4 @@ habitRouterV1.get(
     })
 );
 
-// IDK if this is needed
-//habitRouterV1.use('/', habitRouterV1);
-
 export default habitRouterV1;

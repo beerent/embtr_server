@@ -20,13 +20,14 @@ describe('HabitServiceV1', () => {
 
     const email = 'habit_router_v1_test@embtr.com';
     const password = 'password';
+    const taskTitle = 'hrv1_test_task';
 
     beforeAll(async () => {
         user = await TestUtility.getUser(email, password);
         USER_TOKEN = await AuthenticationDao.generateValidIdToken(email, password);
 
         const task: Task = {
-            title: 'testTitle',
+            title: taskTitle,
             description: 'description',
             remoteImageUrl: '',
             localImage: '',
@@ -36,8 +37,7 @@ describe('HabitServiceV1', () => {
     });
 
     afterAll(async () => {
-        await TaskDao.deleteByTitle('testTitle');
-        ScheduledHabitDao.delete(scheduledHabit.id);
+        await TaskDao.deleteByTitle(taskTitle);
     });
 
     test('get one', async () => {

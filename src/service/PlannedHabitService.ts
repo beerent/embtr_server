@@ -32,7 +32,7 @@ export class PlannedHabitService {
             throw new ServiceException(404, Code.PLANNED_TASK_NOT_FOUND, 'planned habit not found');
         }
 
-        const plannedHabitModel : PlannedTask = ModelConverter.convert(plannedHabit);
+        const plannedHabitModel: PlannedTask = ModelConverter.convert(plannedHabit);
         return plannedHabitModel;
     }
 
@@ -83,6 +83,7 @@ export class PlannedHabitService {
         }
 
         plannedTask.status = this.getUpdatedStatus(plannedTask);
+        plannedTask.timeOfDayId = plannedTask.timeOfDayId ?? 5;
 
         const updatedPlannedTask = await PlannedHabitDao.update(plannedTask);
         if (!updatedPlannedTask) {
@@ -103,7 +104,7 @@ export class PlannedHabitService {
     private static getUpdatedStatus(plannedTask: PlannedTask): string {
         if (
             (plannedTask.status ?? Constants.HabitStatus.INCOMPLETE) ===
-                Constants.HabitStatus.INCOMPLETE &&
+            Constants.HabitStatus.INCOMPLETE &&
             (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
         ) {
             return Constants.HabitStatus.COMPLETE;

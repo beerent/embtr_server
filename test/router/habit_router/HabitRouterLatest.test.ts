@@ -20,13 +20,14 @@ describe('HabitRouterLatest', () => {
 
     const email = 'habit_router_latest_test@embtr.com';
     const password = 'password';
+    const taskTitle = 'hrl_test_task';
 
     beforeAll(async () => {
         user = await TestUtility.getUser(email, password);
         USER_TOKEN = await AuthenticationDao.generateValidIdToken(email, password);
 
         const task: Task = {
-            title: 'hrl_test_task',
+            title: taskTitle,
             description: 'description',
             remoteImageUrl: '',
             localImage: '',
@@ -36,8 +37,7 @@ describe('HabitRouterLatest', () => {
     });
 
     afterAll(async () => {
-        await TaskDao.deleteByTitle('hrl_test_task');
-        ScheduledHabitDao.delete(scheduledHabit.id);
+        await TaskDao.deleteByTitle(taskTitle);
     });
 
     test('get one', async () => {

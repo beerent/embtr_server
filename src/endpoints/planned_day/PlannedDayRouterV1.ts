@@ -13,6 +13,7 @@ import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { PlannedDayService } from '@src/service/PlannedDayService';
 import {
     CreatePlannedTaskResponse,
+    UpdatePlannedTaskRequest,
     UpdatePlannedTaskResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
 import { PlannedHabitService } from '@src/service/PlannedHabitService';
@@ -66,7 +67,8 @@ plannedDayRouterV1.put(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const plannedTask: PlannedTask = req.body.plannedTask;
+        const request: UpdatePlannedTaskRequest = req.body;
+        const plannedTask: PlannedTask = request.plannedTask;
 
         const transformedPlannedTask = plannedHabitTransformationService.transformIn(plannedTask);
         const updatedPlannedTask = await PlannedHabitService.update(
