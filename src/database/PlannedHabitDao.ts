@@ -132,6 +132,22 @@ export class PlannedHabitDao {
         return result;
     }
 
+    public static async getByPlannedDayAndScheduledHabitAndTimeOfDay(
+        plannedDayId: number,
+        scheduledHabitId: number,
+        timeOfDayId: number
+    ) {
+        const results = await prisma.plannedTask.findFirst({
+            where: {
+                plannedDayId,
+                scheduledHabitId,
+                timeOfDayId,
+            },
+        });
+
+        return results;
+    }
+
     public static async get(id: number): Promise<PlannedTaskFull | null> {
         return prisma.plannedTask.findUnique({
             where: {
