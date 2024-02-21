@@ -11,10 +11,10 @@ import { NotificationService } from '@src/service/NotificationService';
 import express from 'express';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const notificationRouterV1 = express.Router();
-const v = 'v1';
+const notificationRouterLatest = express.Router();
+const v = '✓';
 
-notificationRouterV1.get(
+notificationRouterLatest.get(
     '/',
     routeLogger(v),
     authenticate,
@@ -28,7 +28,7 @@ notificationRouterV1.get(
     })
 );
 
-notificationRouterV1.get(
+notificationRouterLatest.get(
     '/count',
     routeLogger(v),
     authenticate,
@@ -42,7 +42,7 @@ notificationRouterV1.get(
     })
 );
 
-notificationRouterV1.post(
+notificationRouterLatest.post(
     '/clear',
     routeLogger(v),
     authenticate,
@@ -55,4 +55,4 @@ notificationRouterV1.post(
     })
 );
 
-export default notificationRouterV1;
+export default notificationRouterLatest;

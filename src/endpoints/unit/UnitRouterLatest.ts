@@ -7,10 +7,10 @@ import { GetUnitsResponse } from '@resources/types/requests/UnitTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const unitRouterV1 = express.Router();
-const v = 'v1';
+const unitRouterLatest = express.Router();
+const v = '✓';
 
-unitRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
+unitRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
 
     const units = await UnitService.getAll(context);
@@ -21,4 +21,4 @@ unitRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, res) 
     res.json(response);
 });
 
-export default unitRouterV1;
+export default unitRouterLatest;

@@ -8,10 +8,10 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const timelineRouterV1 = express.Router();
-const v = 'v1';
+const timelineRouterLatest = express.Router();
+const v = '✓';
 
-timelineRouterV1.get(
+timelineRouterLatest.get(
     '/',
     routeLogger(v),
     authenticate,
@@ -29,4 +29,4 @@ timelineRouterV1.get(
     }
 );
 
-export default timelineRouterV1;
+export default timelineRouterLatest;

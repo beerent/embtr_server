@@ -1,34 +1,16 @@
 import {
-    PlannedTask as PlannedTaskModel,
     PlannedDay as PlannedDayModel,
     PlannedTask,
     ScheduledHabit,
     TimeOfDay,
     PlannedDay,
 } from '@resources/schema';
-import {
-    CreatePlannedDayResponse,
-    GetPlannedDayRequest,
-    GetPlannedDayResponse,
-} from '@resources/types/requests/PlannedDayTypes';
-import {
-    CREATE_PLANNED_DAY_FAILED,
-    CREATE_PLANNED_DAY_FAILED_ALREADY_EXISTS,
-    CREATE_PLANNED_DAY_SUCCESS,
-    GET_PLANNED_DAY_FAILED_NOT_FOUND,
-    GET_PLANNED_DAY_SUCCESS,
-    SUCCESS,
-} from '@src/common/RequestResponses';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
-import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
-import { ContextService } from '@src/service/ContextService';
 import { ScheduledHabitUtil } from '@resources/types/util/ScheduledHabitUtil';
 
 interface ScheduledHabitTimeOfDay {
@@ -120,11 +102,11 @@ export class PlannedDayService {
         const plannedScheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] =
             plannedDayModel.plannedTasks
                 ? plannedDayModel.plannedTasks?.map((plannedTask) => {
-                      return {
-                          scheduledHabit: plannedTask.scheduledHabit ?? undefined,
-                          timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
-                      };
-                  })
+                    return {
+                        scheduledHabit: plannedTask.scheduledHabit ?? undefined,
+                        timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
+                    };
+                })
                 : [];
 
         // 2. find what tasks the user should have
@@ -158,9 +140,9 @@ export class PlannedDayService {
                 return !plannedScheduledHabitTimeOfDays.some((plannedScheduledHabitTimeOfDay) => {
                     return (
                         scheduledHabitTimeOfDay.scheduledHabit?.id ===
-                            plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
+                        plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
                         scheduledHabitTimeOfDay.timeOfDay?.id ===
-                            plannedScheduledHabitTimeOfDay.timeOfDay?.id
+                        plannedScheduledHabitTimeOfDay.timeOfDay?.id
                     );
                 });
             });

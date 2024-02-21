@@ -76,6 +76,7 @@ export class PlannedHabitService {
         }
 
         plannedTask.status = this.getUpdatedStatus(plannedTask);
+        plannedTask.timeOfDayId = plannedTask.timeOfDayId ?? 5;
 
         const updatedPlannedTask = await PlannedHabitDao.update(plannedTask);
         if (!updatedPlannedTask) {

@@ -7,10 +7,10 @@ import express from 'express';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
-const metadataRouterV1 = express.Router();
-const v = 'v1';
+const metadataRouterLatest = express.Router();
+const v = '✓';
 
-metadataRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
+metadataRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
     const metadata = await MetadataService.getAll(context);
 
@@ -18,4 +18,4 @@ metadataRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, r
     res.json(response);
 });
 
-export default metadataRouterV1;
+export default metadataRouterLatest;

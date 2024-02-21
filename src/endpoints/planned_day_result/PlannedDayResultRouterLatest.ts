@@ -32,10 +32,10 @@ import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import express from 'express';
 
-const plannedDayResultRouterV1 = express.Router();
-const v = 'v1';
+const plannedDayResultRouterLatest = express.Router();
+const v = '✓';
 
-plannedDayResultRouterV1.get(
+plannedDayResultRouterLatest.get(
     '/',
     routeLogger(v),
     authenticate,
@@ -55,7 +55,7 @@ plannedDayResultRouterV1.get(
     })
 );
 
-plannedDayResultRouterV1.get(
+plannedDayResultRouterLatest.get(
     '/:id',
     routeLogger(v),
     authenticate,
@@ -71,7 +71,7 @@ plannedDayResultRouterV1.get(
     })
 );
 
-plannedDayResultRouterV1.get(
+plannedDayResultRouterLatest.get(
     '/summaries',
     routeLogger(v),
     authenticate,
@@ -91,7 +91,7 @@ plannedDayResultRouterV1.get(
     })
 );
 
-plannedDayResultRouterV1.get(
+plannedDayResultRouterLatest.get(
     '/summary/:id',
     routeLogger(v),
     authenticate,
@@ -108,7 +108,7 @@ plannedDayResultRouterV1.get(
     })
 );
 
-plannedDayResultRouterV1.get(
+plannedDayResultRouterLatest.get(
     '/:userId/:dayKey',
     routeLogger(v),
     authenticate,
@@ -129,7 +129,7 @@ plannedDayResultRouterV1.get(
     })
 );
 
-plannedDayResultRouterV1.post(
+plannedDayResultRouterLatest.post(
     '/',
     routeLogger(v),
     authenticate,
@@ -145,7 +145,7 @@ plannedDayResultRouterV1.post(
     })
 );
 
-plannedDayResultRouterV1.patch(
+plannedDayResultRouterLatest.patch(
     '/',
     routeLogger(v),
     authenticate,
@@ -168,7 +168,7 @@ plannedDayResultRouterV1.patch(
     })
 );
 
-plannedDayResultRouterV1.post(
+plannedDayResultRouterLatest.post(
     '/:id/comment/',
     routeLogger(v),
     authenticate,
@@ -180,7 +180,7 @@ plannedDayResultRouterV1.post(
     })
 );
 
-plannedDayResultRouterV1.delete(
+plannedDayResultRouterLatest.delete(
     '/comment/:id',
     routeLogger(v),
     authenticate,
@@ -192,7 +192,7 @@ plannedDayResultRouterV1.delete(
     })
 );
 
-plannedDayResultRouterV1.post(
+plannedDayResultRouterLatest.post(
     '/:id/like/',
     routeLogger(v),
     authenticate,
@@ -204,4 +204,4 @@ plannedDayResultRouterV1.post(
     })
 );
 
-export default plannedDayResultRouterV1;
+export default plannedDayResultRouterLatest;

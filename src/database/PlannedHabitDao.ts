@@ -31,25 +31,21 @@ export class PlannedHabitDao {
             }
             : {};
 
-        const timeOfDay = plannedTask.timeOfDayId
-            ? {
-                timeOfDay: {
-                    connect: {
-                        id: plannedTask.timeOfDayId,
-                    },
+        const timeOfDay = {
+            timeOfDay: {
+                connect: {
+                    id: plannedTask.timeOfDayId ?? 5,
                 },
-            }
-            : {};
+            },
+        };
 
-        const originalTimeOfDay = plannedTask.originalTimeOfDayId
-            ? {
-                originalTimeOfDay: {
-                    connect: {
-                        id: plannedTask.originalTimeOfDayId,
-                    },
+        const originalTimeOfDay = {
+            originalTimeOfDay: {
+                connect: {
+                    id: plannedTask.originalTimeOfDayId ?? 5,
                 },
-            }
-            : {};
+            },
+        };
 
         return prisma.plannedTask.create({
             data: {
@@ -93,7 +89,7 @@ export class PlannedHabitDao {
             quantity = 1,
             completedQuantity = 0,
             unitId,
-            timeOfDayId,
+            timeOfDayId = 5,
         } = plannedTask;
 
         const unit = {
@@ -101,18 +97,6 @@ export class PlannedHabitDao {
                 ? {
                     connect: {
                         id: unitId,
-                    },
-                }
-                : {
-                    disconnect: true,
-                },
-        };
-
-        const timeOfDay = {
-            timeOfDay: timeOfDayId
-                ? {
-                    connect: {
-                        id: timeOfDayId,
                     },
                 }
                 : {
@@ -133,8 +117,12 @@ export class PlannedHabitDao {
                 localImage,
                 quantity,
                 completedQuantity,
+                timeOfDay: {
+                    connect: {
+                        id: timeOfDayId,
+                    },
+                },
                 ...unit,
-                ...timeOfDay,
             },
             include: {
                 ...includes,
