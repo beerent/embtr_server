@@ -1,11 +1,8 @@
 import express from 'express';
-import accountRouterV1 from './AccountRouterV1';
+import accountRouterLatest from './AccountRouterLatest';
 
 const accountRouter = express.Router();
 
-accountRouter.use('/v1/account', accountRouterV1);
-
-//default fallback is always latest
-accountRouter.use('/:version/account', accountRouterV1);
+accountRouter.use('/:version/account', accountRouterLatest);
 
 export default accountRouter;

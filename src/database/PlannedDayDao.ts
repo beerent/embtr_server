@@ -68,6 +68,22 @@ export class PlannedDayDao {
         });
     }
 
+    public static async findByUserAndDayKey(userId: number, dayKey: string) {
+        return await prisma.plannedDay.findFirst({
+            where: {
+                userId,
+                dayKey,
+            },
+            include: PlannedDayInclude,
+        });
+    }
+
+    public static async existsByUserAndDayKey(userId: number, dayKey: string) {
+        const plannedDay = await this.findByUserAndDayKey(userId, dayKey);
+        return plannedDay !== null;
+    }
+
+    //todo - fix this
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
         const date = new Date(dayKey);
 
@@ -130,6 +146,6 @@ export class PlannedDayDao {
                     },
                 },
             });
-        } catch (error) {}
+        } catch (error) { }
     }
 }

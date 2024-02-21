@@ -1,11 +1,8 @@
 import express from 'express';
-import metadataRouterV1 from '@src/endpoints/metadata/MetadataRouterV1';
+import metadataRouterLatest from './MetadataRouterLatest';
 
 const metadataRouter = express.Router();
 
-metadataRouter.use('/v1/metadata', metadataRouterV1);
-
-//default fallback is always latest
-metadataRouter.use('/:version/metadata', metadataRouterV1);
+metadataRouter.use('/:version/metadata', metadataRouterLatest);
 
 export default metadataRouter;

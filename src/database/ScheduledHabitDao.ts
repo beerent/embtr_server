@@ -1,6 +1,8 @@
 import { prisma } from '@database/prisma';
 import { PureDate } from '@resources/types/date/PureDate';
 
+const DEFAULT_TIME_OF_DAY_ID = 5;
+
 export class ScheduledHabitDao {
     public static async create(
         userId: number,
@@ -23,6 +25,10 @@ export class ScheduledHabitDao {
                     },
                 },
             };
+        }
+
+        if (!timesOfDayIds) {
+            timesOfDayIds = [DEFAULT_TIME_OF_DAY_ID];
         }
 
         return prisma.scheduledHabit.create({
@@ -241,28 +247,28 @@ export class ScheduledHabitDao {
                 quantity: quantity ?? 1,
                 daysOfWeek: daysOfWeekIds
                     ? {
-                          set: daysOfWeekIds?.map((id) => {
-                              return {
-                                  id,
-                              };
-                          }),
-                      }
+                        set: daysOfWeekIds?.map((id) => {
+                            return {
+                                id,
+                            };
+                        }),
+                    }
                     : undefined,
                 timesOfDay: timesOfDayIds
                     ? {
-                          set: timesOfDayIds?.map((id) => {
-                              return {
-                                  id,
-                              };
-                          }),
-                      }
+                        set: timesOfDayIds?.map((id) => {
+                            return {
+                                id,
+                            };
+                        }),
+                    }
                     : undefined,
                 unit: unitId
                     ? {
-                          connect: {
-                              id: unitId,
-                          },
-                      }
+                        connect: {
+                            id: unitId,
+                        },
+                    }
                     : undefined,
                 startDate,
                 endDate,
@@ -436,6 +442,14 @@ export class ScheduledHabitDao {
                 unit: true,
                 daysOfWeek: true,
                 timesOfDay: true,
+            },
+        });
+    }
+
+    public static async delete(id: number) {
+        return prisma.scheduledHabit.delete({
+            where: {
+                id: id,
             },
         });
     }

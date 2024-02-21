@@ -1,5 +1,4 @@
 import express from 'express';
-import userPostRouterV1 from '@src/endpoints/user_post/UserPostRouterV1';
 
 const widgetRouter = express.Router();
 

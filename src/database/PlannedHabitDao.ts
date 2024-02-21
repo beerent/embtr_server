@@ -23,33 +23,29 @@ export class PlannedHabitDao {
     public static async create(plannedTask: PlannedTaskModel): Promise<PlannedTask | null> {
         const unit = plannedTask.unitId
             ? {
-                  unit: {
-                      connect: {
-                          id: plannedTask.unitId,
-                      },
-                  },
-              }
+                unit: {
+                    connect: {
+                        id: plannedTask.unitId,
+                    },
+                },
+            }
             : {};
 
-        const timeOfDay = plannedTask.timeOfDayId
-            ? {
-                  timeOfDay: {
-                      connect: {
-                          id: plannedTask.timeOfDayId,
-                      },
-                  },
-              }
-            : {};
+        const timeOfDay = {
+            timeOfDay: {
+                connect: {
+                    id: plannedTask.timeOfDayId ?? 5,
+                },
+            },
+        };
 
-        const originalTimeOfDay = plannedTask.originalTimeOfDayId
-            ? {
-                  originalTimeOfDay: {
-                      connect: {
-                          id: plannedTask.originalTimeOfDayId,
-                      },
-                  },
-              }
-            : {};
+        const originalTimeOfDay = {
+            originalTimeOfDay: {
+                connect: {
+                    id: plannedTask.originalTimeOfDayId ?? 5,
+                },
+            },
+        };
 
         return prisma.plannedTask.create({
             data: {
@@ -93,31 +89,19 @@ export class PlannedHabitDao {
             quantity = 1,
             completedQuantity = 0,
             unitId,
-            timeOfDayId,
+            timeOfDayId = 5,
         } = plannedTask;
 
         const unit = {
             unit: unitId
                 ? {
-                      connect: {
-                          id: unitId,
-                      },
-                  }
+                    connect: {
+                        id: unitId,
+                    },
+                }
                 : {
-                      disconnect: true,
-                  },
-        };
-
-        const timeOfDay = {
-            timeOfDay: timeOfDayId
-                ? {
-                      connect: {
-                          id: timeOfDayId,
-                      },
-                  }
-                : {
-                      disconnect: true,
-                  },
+                    disconnect: true,
+                },
         };
 
         const result = await prisma.plannedTask.update({
@@ -133,8 +117,12 @@ export class PlannedHabitDao {
                 localImage,
                 quantity,
                 completedQuantity,
+                timeOfDay: {
+                    connect: {
+                        id: timeOfDayId,
+                    },
+                },
                 ...unit,
-                ...timeOfDay,
             },
             include: {
                 ...includes,

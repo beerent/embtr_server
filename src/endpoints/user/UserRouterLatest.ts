@@ -37,10 +37,10 @@ import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
 
-const userRouterV1 = express.Router();
-const v = 'v1';
+const userRouterLatest = express.Router();
+const v = '✓';
 
-userRouterV1.get(
+userRouterLatest.get(
     '/',
     routeLogger(v),
     authenticate,
@@ -53,7 +53,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/search/',
     routeLogger(v),
     authenticate,
@@ -68,7 +68,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/exists',
     routeLogger(v),
     authenticate,
@@ -83,7 +83,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/:uid',
     routeLogger(v),
     authenticate,
@@ -98,7 +98,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/currentUserExists',
     routeLogger(v),
     authenticate,
@@ -112,7 +112,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.post(
+userRouterLatest.post(
     '/',
     routeLogger(v),
     authenticateCreateUser,
@@ -125,7 +125,7 @@ userRouterV1.post(
     })
 );
 
-userRouterV1.post(
+userRouterLatest.post(
     '/block',
     routeLogger(v),
     authenticate,
@@ -141,7 +141,7 @@ userRouterV1.post(
     })
 );
 
-userRouterV1.patch(
+userRouterLatest.patch(
     '/setup',
     routeLogger(v),
     authenticate,
@@ -157,7 +157,7 @@ userRouterV1.patch(
     })
 );
 
-userRouterV1.patch(
+userRouterLatest.patch(
     '/',
     routeLogger(v),
     authenticate,
@@ -177,7 +177,7 @@ userRouterV1.patch(
 /*
  * Daily History
  */
-userRouterV1.get(
+userRouterLatest.get(
     '/:id/daily-history',
     routeLogger(v),
     authenticate,
@@ -193,7 +193,7 @@ userRouterV1.get(
  * User Posts
  */
 // TODO: Add optional limit
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/posts',
     routeLogger(v),
     authenticate,
@@ -206,7 +206,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/timeline-posts',
     routeLogger(v),
     authenticate,
@@ -234,7 +234,7 @@ userRouterV1.get(
  * Planned Day Results
  */
 // TODO: Add optional limit
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/day-results',
     routeLogger(v),
     authenticate,
@@ -257,7 +257,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/timeline-day-results',
     routeLogger(v),
     authenticate,
@@ -285,7 +285,7 @@ userRouterV1.get(
 /*
  * Habit Journey
  */
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/habit-journey',
     routeLogger(v),
     authenticate,
@@ -302,7 +302,7 @@ userRouterV1.get(
 /*
  * Challenges
  */
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/active-challenge-participation',
     routeLogger(v),
     authenticate,
@@ -317,7 +317,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/challenge-participation',
     routeLogger(v),
     authenticate,
@@ -332,7 +332,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.get(
+userRouterLatest.get(
     '/:userId/completed-challenges',
     routeLogger(v),
     authenticate,
@@ -347,7 +347,7 @@ userRouterV1.get(
     })
 );
 
-userRouterV1.post(
+userRouterLatest.post(
     '/createPushNotificationToken/',
     routeLogger(v),
     authenticate,
@@ -362,4 +362,4 @@ userRouterV1.post(
     })
 );
 
-export default userRouterV1;
+export default userRouterLatest;
