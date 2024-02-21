@@ -1,514 +1,516 @@
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 model User {
-  id                     Int                     @id @default(autoincrement())
-  uid                    String                  @unique @db.VarChar(255)
-  email                  String                  @unique @db.VarChar(255)
-  username               String?                 @unique @db.VarChar(255)
-  displayName            String?                 @db.VarChar(255)
-  location               String?                 @db.VarChar(255)
-  bio                    String?                 @db.VarChar(255)
-  photoUrl               String?                 @db.VarChar(255)
-  bannerUrl              String?                 @db.VarChar(255)
-  accountSetup           Boolean                 @default(false)
-  termsVersion           Int                     @default(0)
-  createdAt              DateTime                @default(now())
-  updatedAt              DateTime                @default(now()) @updatedAt
-  user                   UserPost[]
-  plannedDays            PlannedDay[]
-  receivedNotifications  Notification[]          @relation("fromUser")
-  sendNotifications      Notification[]          @relation("toUser")
-  pushNotificationTokens PushNotificationToken[]
-  comments               Comment[]
-  likes                  Like[]
-  widgets                Widget[]
-  quoteOfTheDay          QuoteOfTheDay[]
-  challenges             Challenge[]
-  ChallengeParticipant   ChallengeParticipant[]
-  userAchievements       UserAchievement[]
-  tasks                  Task[]
-  scheduledHabits        ScheduledHabit[]
-  blockingUsers          BlockedUser[]           @relation("blockingUser")
-  blockedUsers           BlockedUser[]           @relation("blockedUser")
+    id                     Int                     @id @default(autoincrement())
+    uid                    String                  @unique @db.VarChar(255)
+    email                  String                  @unique @db.VarChar(255)
+    username               String?                 @unique @db.VarChar(255)
+    displayName            String?                 @db.VarChar(255)
+    location               String?                 @db.VarChar(255)
+    bio                    String?                 @db.VarChar(255)
+    photoUrl               String?                 @db.VarChar(255)
+    bannerUrl              String?                 @db.VarChar(255)
+    accountSetup           Boolean                 @default(false)
+    termsVersion           Int                     @default(0)
+    createdAt              DateTime                @default(now())
+    updatedAt              DateTime                @default(now()) @updatedAt
+    user                   UserPost[]
+    plannedDays            PlannedDay[]
+    receivedNotifications  Notification[]          @relation("fromUser")
+    sendNotifications      Notification[]          @relation("toUser")
+    pushNotificationTokens PushNotificationToken[]
+    comments               Comment[]
+    likes                  Like[]
+    widgets                Widget[]
+    quoteOfTheDay          QuoteOfTheDay[]
+    challenges             Challenge[]
+    ChallengeParticipant   ChallengeParticipant[]
+    userAchievements       UserAchievement[]
+    tasks                  Task[]
+    scheduledHabits        ScheduledHabit[]
+    blockingUsers          BlockedUser[]           @relation("blockingUser")
+    blockedUsers           BlockedUser[]           @relation("blockedUser")
 
-  @@index([username])
-  @@map("user")
+    @@index([username])
+    @@map("user")
 }
 
 model PushNotificationToken {
-  id        Int      @id @default(autoincrement())
-  userId    Int      @db.Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token     String   @db.VarChar(255)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+    id        Int      @id @default(autoincrement())
+    userId    Int      @db.Int
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    token     String   @db.VarChar(255)
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-  @@unique([userId, token], name: "unique_user_token")
-  @@map("user_push_notification")
+    @@unique([userId, token], name: "unique_user_token")
+    @@map("user_push_notification")
 }
 
 model Task {
-  id                   Int                    @id @default(autoincrement())
-  title                String                 @db.VarChar(255)
-  description          String?                @db.VarChar(255)
-  remoteImageUrl       String?                @db.VarChar(255)
-  localImage           String?                @db.VarChar(255)
-  userId               Int?                   @db.Int
-  user                 User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  habitCategoryId      Int?                   @db.Int
-  habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
-  active               Boolean                @default(true)
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  ChallengeRequirement ChallengeRequirement[]
-  scheduledHabits      ScheduledHabit[]
+    id                   Int                    @id @default(autoincrement())
+    title                String                 @db.VarChar(255)
+    description          String?                @db.VarChar(255)
+    remoteImageUrl       String?                @db.VarChar(255)
+    localImage           String?                @db.VarChar(255)
+    userId               Int?                   @db.Int
+    user                 User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    habitCategoryId      Int?                   @db.Int
+    habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
+    active               Boolean                @default(true)
+    createdAt            DateTime               @default(now())
+    updatedAt            DateTime               @default(now()) @updatedAt
+    ChallengeRequirement ChallengeRequirement[]
+    scheduledHabits      ScheduledHabit[]
 
-  @@index([userId], name: "user_id")
-  @@index([habitCategoryId], name: "habit_category_id")
-  @@map("task")
+    @@index([userId], name: "user_id")
+    @@index([habitCategoryId], name: "habit_category_id")
+    @@map("task")
 }
 
 model PlannedDay {
-  id                   Int                    @id @default(autoincrement())
-  user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId               Int                    @db.Int
-  dayKey               String                 @db.VarChar(10)
-  date                 DateTime               @db.Date
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  plannedTasks         PlannedTask[]
-  plannedDayResults    PlannedDayResult[]
-  challengeParticipant ChallengeParticipant[]
+    id                   Int                    @id @default(autoincrement())
+    user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId               Int                    @db.Int
+    dayKey               String                 @db.VarChar(10)
+    date                 DateTime               @db.Date
+    createdAt            DateTime               @default(now())
+    updatedAt            DateTime               @default(now()) @updatedAt
+    plannedTasks         PlannedTask[]
+    plannedDayResults    PlannedDayResult[]
+    challengeParticipant ChallengeParticipant[]
 
-  @@unique([userId, dayKey], name: "unique_user_daykey")
-  @@map("planned_day")
+    @@unique([userId, dayKey], name: "unique_user_daykey")
+    @@map("planned_day")
 }
 
 model PlannedTask {
-  id                  Int             @id @default(autoincrement())
-  plannedDayId        Int             @db.Int
-  plannedDay          PlannedDay      @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  scheduledHabitId    Int?            @db.Int
-  scheduledHabit      ScheduledHabit? @relation(fields: [scheduledHabitId], references: [id])
-  timeOfDayId         Int?            @db.Int
-  timeOfDay           TimeOfDay?      @relation("current_planned_tasks", fields: [timeOfDayId], references: [id])
-  originalTimeOfDayId Int?            @db.Int
-  originalTimeOfDay   TimeOfDay?      @relation("original_planned_tasks", fields: [originalTimeOfDayId], references: [id])
-  title               String?         @db.VarChar(255)
-  description         String?         @db.VarChar(255)
-  remoteImageUrl      String?         @db.VarChar(255)
-  localImage          String?         @db.VarChar(255)
-  unitId              Int?            @db.Int
-  unit                Unit?           @relation(fields: [unitId], references: [id])
-  quantity            Float?          @db.Double
-  completedQuantity   Float?          @db.Double
-  status              String          @db.VarChar(225)
-  active              Boolean         @default(true)
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @default(now()) @updatedAt
+    id                  Int             @id @default(autoincrement())
+    plannedDayId        Int             @db.Int
+    plannedDay          PlannedDay      @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+    scheduledHabitId    Int?            @db.Int
+    scheduledHabit      ScheduledHabit? @relation(fields: [scheduledHabitId], references: [id])
+    timeOfDayId         Int             @default(5) @db.Int
+    timeOfDay           TimeOfDay       @relation("current_planned_tasks", fields: [timeOfDayId], references: [id])
+    originalTimeOfDayId Int             @default(5) @db.Int
+    originalTimeOfDay   TimeOfDay       @relation("original_planned_tasks", fields: [originalTimeOfDayId], references: [id])
+    title               String?         @db.VarChar(255)
+    description         String?         @db.VarChar(255)
+    remoteImageUrl      String?         @db.VarChar(255)
+    localImage          String?         @db.VarChar(255)
+    unitId              Int?            @db.Int
+    unit                Unit?           @relation(fields: [unitId], references: [id])
+    quantity            Float?          @db.Double
+    completedQuantity   Float?          @db.Double
+    status              String          @db.VarChar(225)
+    active              Boolean         @default(true)
+    createdAt           DateTime        @default(now())
+    updatedAt           DateTime        @default(now()) @updatedAt
 
-  @@index([plannedDayId], name: "planned_day_id")
-  @@index([scheduledHabitId], name: "scheduled_habit_id")
-  @@index([unitId], name: "unit_id")
-  @@index([timeOfDayId], name: "time_of_day_id")
-  @@index([originalTimeOfDayId], name: "original_time_of_day_id")
-  @@map("planned_task")
+    @@unique([plannedDayId, scheduledHabitId, timeOfDayId], name: "unique_planned_day_task")
+    @@unique([plannedDayId, scheduledHabitId, originalTimeOfDayId], name: "unique_planned_day_original_task")
+    @@index([plannedDayId], name: "planned_day_id")
+    @@index([scheduledHabitId], name: "scheduled_habit_id")
+    @@index([unitId], name: "unit_id")
+    @@index([timeOfDayId], name: "time_of_day_id")
+    @@index([originalTimeOfDayId], name: "original_time_of_day_id")
+    @@map("planned_task")
 }
 
 model UserPost {
-  id        Int       @id @default(autoincrement())
-  title     String?   @db.VarChar(255)
-  body      String?   @db.VarChar(750)
-  userId    Int       @db.Int
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
-  active    Boolean   @default(true)
-  images    Image[]
-  likes     Like[]
-  comments  Comment[]
+    id        Int       @id @default(autoincrement())
+    title     String?   @db.VarChar(255)
+    body      String?   @db.VarChar(750)
+    userId    Int       @db.Int
+    user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @default(now()) @updatedAt
+    active    Boolean   @default(true)
+    images    Image[]
+    likes     Like[]
+    comments  Comment[]
 
-  @@index([userId])
-  @@map("user_post")
+    @@index([userId])
+    @@map("user_post")
 }
 
 model PlannedDayResult {
-  id           Int        @id @default(autoincrement())
-  plannedDayId Int        @db.Int
-  plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-  active       Boolean    @default(true)
-  title        String?    @db.VarChar(255)
-  description  String?    @db.VarChar(255)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now()) @updatedAt
-  images       Image[]
-  likes        Like[]
-  comments     Comment[]
+    id           Int        @id @default(autoincrement())
+    plannedDayId Int        @db.Int
+    plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+    active       Boolean    @default(true)
+    title        String?    @db.VarChar(255)
+    description  String?    @db.VarChar(255)
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @default(now()) @updatedAt
+    images       Image[]
+    likes        Like[]
+    comments     Comment[]
 
-  @@index([plannedDayId])
-  @@map("planned_day_result")
+    @@index([plannedDayId])
+    @@map("planned_day_result")
 }
 
 model Comment {
-  id                Int                @id @default(autoincrement())
-  userId            Int                @db.Int
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  comment           String             @db.VarChar(255)
-  active            Boolean            @default(true)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @default(now()) @updatedAt
-  plannedDayResults PlannedDayResult[]
-  userPosts         UserPost[]
-  challenges        Challenge[]
+    id                Int                @id @default(autoincrement())
+    userId            Int                @db.Int
+    user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+    comment           String             @db.VarChar(255)
+    active            Boolean            @default(true)
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @default(now()) @updatedAt
+    plannedDayResults PlannedDayResult[]
+    userPosts         UserPost[]
+    challenges        Challenge[]
 
-  @@index([userId])
-  @@map("comment")
+    @@index([userId])
+    @@map("comment")
 }
 
 model Like {
-  id                Int                @id @default(autoincrement())
-  userId            Int                @db.Int
-  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  active            Boolean            @default(true)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @default(now()) @updatedAt
-  plannedDayResults PlannedDayResult[]
-  userPosts         UserPost[]
-  quoteOfTheDays    QuoteOfTheDay[]
-  challenges        Challenge[]
+    id                Int                @id @default(autoincrement())
+    userId            Int                @db.Int
+    user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+    active            Boolean            @default(true)
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @default(now()) @updatedAt
+    plannedDayResults PlannedDayResult[]
+    userPosts         UserPost[]
+    quoteOfTheDays    QuoteOfTheDay[]
+    challenges        Challenge[]
 
-  @@index([userId])
-  @@map("like")
+    @@index([userId])
+    @@map("like")
 }
 
 model Image {
-  id                Int                @id @default(autoincrement())
-  url               String             @db.VarChar(255)
-  active            Boolean            @default(true)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @default(now()) @updatedAt
-  plannedDayResults PlannedDayResult[]
-  userPosts         UserPost[]
-  challenges        Challenge[]
+    id                Int                @id @default(autoincrement())
+    url               String             @db.VarChar(255)
+    active            Boolean            @default(true)
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @default(now()) @updatedAt
+    plannedDayResults PlannedDayResult[]
+    userPosts         UserPost[]
+    challenges        Challenge[]
 
-  @@map("image")
+    @@map("image")
 }
 
 enum NotificationTargetPage {
-  INVALID
-  GOAL_DETAILS
-  USER_PROFILE
-  CHALLENGE_DETAILS
-  USER_POST_DETAILS
-  PLANNED_DAY_RESULT
-  TODAY
+    INVALID
+    GOAL_DETAILS
+    USER_PROFILE
+    CHALLENGE_DETAILS
+    USER_POST_DETAILS
+    PLANNED_DAY_RESULT
+    TODAY
 }
 
 model Notification {
-  id         Int                    @id @default(autoincrement())
-  fromUserId Int                    @db.Int
-  fromUser   User                   @relation("fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
-  toUserId   Int                    @db.Int
-  toUser     User                   @relation("toUser", fields: [toUserId], references: [id], onDelete: Cascade)
-  read       Boolean                @default(false)
-  summary    String                 @db.VarChar(255)
-  targetPage NotificationTargetPage
-  targetId   Int                    @db.Int
-  createdAt  DateTime               @default(now())
-  updatedAt  DateTime               @default(now()) @updatedAt
+    id         Int                    @id @default(autoincrement())
+    fromUserId Int                    @db.Int
+    fromUser   User                   @relation("fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+    toUserId   Int                    @db.Int
+    toUser     User                   @relation("toUser", fields: [toUserId], references: [id], onDelete: Cascade)
+    read       Boolean                @default(false)
+    summary    String                 @db.VarChar(255)
+    targetPage NotificationTargetPage
+    targetId   Int                    @db.Int
+    createdAt  DateTime               @default(now())
+    updatedAt  DateTime               @default(now()) @updatedAt
 
-  @@index([fromUserId])
-  @@index([toUserId])
-  @@map("notification")
+    @@index([fromUserId])
+    @@index([toUserId])
+    @@map("notification")
 }
 
 enum WidgetType {
-  TIME_LEFT_IN_DAY
-  QUOTE_OF_THE_DAY
-  TODAYS_TASKS
-  TODAYS_NOTES
-  TODAYS_PHOTOS
-  DAILY_HISTORY
-  HABIT_JOURNEY
-  PLANNING
-  ACTIVE_CHALLENGES
+    TIME_LEFT_IN_DAY
+    QUOTE_OF_THE_DAY
+    TODAYS_TASKS
+    TODAYS_NOTES
+    TODAYS_PHOTOS
+    DAILY_HISTORY
+    HABIT_JOURNEY
+    PLANNING
+    ACTIVE_CHALLENGES
 }
 
 model Widget {
-  id        Int        @id @default(autoincrement())
-  type      WidgetType
-  order     Int        @db.Int
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int        @db.Int
-  active    Boolean    @default(true)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now()) @updatedAt
+    id        Int        @id @default(autoincrement())
+    type      WidgetType
+    order     Int        @db.Int
+    user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    Int        @db.Int
+    active    Boolean    @default(true)
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @default(now()) @updatedAt
 
-  @@unique([userId, type])
-  @@map("widget")
+    @@unique([userId, type])
+    @@map("widget")
 }
 
 model QuoteOfTheDay {
-  id        Int      @id @default(autoincrement())
-  quote     String   @db.VarChar(255)
-  author    String?  @db.VarChar(255)
-  userId    Int      @db.Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  active    Boolean  @default(true)
-  likes     Like[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+    id        Int      @id @default(autoincrement())
+    quote     String   @db.VarChar(255)
+    author    String?  @db.VarChar(255)
+    userId    Int      @db.Int
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    active    Boolean  @default(true)
+    likes     Like[]
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([userId])
-  @@map("quote_of_the_day")
+    @@index([userId])
+    @@map("quote_of_the_day")
 }
 
 model Metadata {
-  id        Int      @id @default(autoincrement())
-  key       String   @unique @db.VarChar(255)
-  value     String   @db.VarChar(255)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+    id        Int      @id @default(autoincrement())
+    key       String   @unique @db.VarChar(255)
+    value     String   @db.VarChar(255)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-  @@map("metadata")
+    @@map("metadata")
 }
 
 model Season {
-  id        Int      @id @default(autoincrement())
-  date      DateTime @db.Date
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+    id        Int      @id @default(autoincrement())
+    date      DateTime @db.Date
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-  @@map("season")
+    @@map("season")
 }
 
 model Challenge {
-  id                    Int                    @id @default(autoincrement())
-  name                  String                 @db.VarChar(255)
-  description           String?                @db.VarChar(255)
-  creator               User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  creatorId             Int                    @db.Int
-  challengeRequirements ChallengeRequirement[]
-  challengeRewards      ChallengeReward[]
-  start                 DateTime               @db.Date
-  end                   DateTime               @db.Date
-  active                Boolean                @default(true)
-  images                Image[]
-  likes                 Like[]
-  comments              Comment[]
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @default(now()) @updatedAt
-  challengeParticipants ChallengeParticipant[]
+    id                    Int                    @id @default(autoincrement())
+    name                  String                 @db.VarChar(255)
+    description           String?                @db.VarChar(255)
+    creator               User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+    creatorId             Int                    @db.Int
+    challengeRequirements ChallengeRequirement[]
+    challengeRewards      ChallengeReward[]
+    start                 DateTime               @db.Date
+    end                   DateTime               @db.Date
+    active                Boolean                @default(true)
+    images                Image[]
+    likes                 Like[]
+    comments              Comment[]
+    createdAt             DateTime               @default(now())
+    updatedAt             DateTime               @default(now()) @updatedAt
+    challengeParticipants ChallengeParticipant[]
 
-  @@index([creatorId])
-  @@map("challenge")
+    @@index([creatorId])
+    @@map("challenge")
 }
 
 enum ChallengeCalculationType {
-  INVALID
-  TOTAL
-  UNIQUE
+    INVALID
+    TOTAL
+    UNIQUE
 }
 
 model ChallengeRequirement {
-  id Int @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  challenge   Challenge @relation(fields: [challengeId], references: [id])
-  challengeId Int       @db.Int
+    challenge   Challenge @relation(fields: [challengeId], references: [id])
+    challengeId Int       @db.Int
 
-  task   Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  taskId Int?  @db.Int
-  unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
-  unitId Int?  @db.Int
+    task   Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    taskId Int?  @db.Int
+    unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
+    unitId Int?  @db.Int
 
-  calculationType          ChallengeCalculationType @default(INVALID)
-  calculationIntervalDays  Int?                     @db.Int
-  requiredIntervalQuantity Int?                     @db.Int
+    calculationType          ChallengeCalculationType @default(INVALID)
+    calculationIntervalDays  Int?                     @db.Int
+    requiredIntervalQuantity Int?                     @db.Int
 
-  requiredTaskQuantity Int? @db.Int
+    requiredTaskQuantity Int? @db.Int
 
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-  @@index([taskId])
-  @@index([unitId])
-  @@index([challengeId])
-  @@map("challenge_requirement")
+    @@index([taskId])
+    @@index([unitId])
+    @@index([challengeId])
+    @@map("challenge_requirement")
 }
 
 model ChallengeReward {
-  id             Int         @id @default(autoincrement())
-  name           String      @db.VarChar(255)
-  description    String?     @db.VarChar(255)
-  remoteImageUrl String?     @db.VarChar(255)
-  localImage     String?     @db.VarChar(255)
-  active         Boolean     @default(true)
-  challenge      Challenge[]
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @default(now()) @updatedAt
+    id             Int         @id @default(autoincrement())
+    name           String      @db.VarChar(255)
+    description    String?     @db.VarChar(255)
+    remoteImageUrl String?     @db.VarChar(255)
+    localImage     String?     @db.VarChar(255)
+    active         Boolean     @default(true)
+    challenge      Challenge[]
+    createdAt      DateTime    @default(now())
+    updatedAt      DateTime    @default(now()) @updatedAt
 
-  @@map("challenge_reward")
+    @@map("challenge_reward")
 }
 
 model ChallengeParticipant {
-  id                                  Int                                 @id @default(autoincrement())
-  user                                User                                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId                              Int                                 @db.Int
-  challenge                           Challenge                           @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  challengeId                         Int                                 @db.Int
-  amountComplete                      Float                               @default(0) @db.Double
-  challengeRequirementCompletionState ChallengeRequirementCompletionState @default(INVALID)
-  completedOnPlannedDayId             Int?                                @db.Int
-  completedOnPlannedDay               PlannedDay?                         @relation(fields: [completedOnPlannedDayId], references: [id], onDelete: Cascade)
-  active                              Boolean                             @default(true)
-  createdAt                           DateTime                            @default(now())
-  updatedAt                           DateTime                            @default(now()) @updatedAt
+    id                                  Int                                 @id @default(autoincrement())
+    user                                User                                @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId                              Int                                 @db.Int
+    challenge                           Challenge                           @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+    challengeId                         Int                                 @db.Int
+    amountComplete                      Float                               @default(0) @db.Double
+    challengeRequirementCompletionState ChallengeRequirementCompletionState @default(INVALID)
+    completedOnPlannedDayId             Int?                                @db.Int
+    completedOnPlannedDay               PlannedDay?                         @relation(fields: [completedOnPlannedDayId], references: [id], onDelete: Cascade)
+    active                              Boolean                             @default(true)
+    createdAt                           DateTime                            @default(now())
+    updatedAt                           DateTime                            @default(now()) @updatedAt
 
-  @@unique([userId, challengeId], name: "unique_challenge_participant")
-  @@index([userId])
-  @@index([challengeId])
-  @@index([completedOnPlannedDayId])
-  @@map("challenge_participant")
+    @@unique([userId, challengeId], name: "unique_challenge_participant")
+    @@index([userId])
+    @@index([challengeId])
+    @@index([completedOnPlannedDayId])
+    @@map("challenge_participant")
 }
 
 enum ChallengeRequirementCompletionState {
-  INVALID
-  IN_PROGRESS
-  COMPLETED
+    INVALID
+    IN_PROGRESS
+    COMPLETED
 }
 
 model Achievement {
-  id               Int               @id @default(autoincrement())
-  name             String            @db.VarChar(255)
-  remoteImageUrl   String?           @db.VarChar(255)
-  localImage       String?           @db.VarChar(255)
-  active           Boolean           @default(true)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @default(now()) @updatedAt
-  userAchievements UserAchievement[]
+    id               Int               @id @default(autoincrement())
+    name             String            @db.VarChar(255)
+    remoteImageUrl   String?           @db.VarChar(255)
+    localImage       String?           @db.VarChar(255)
+    active           Boolean           @default(true)
+    createdAt        DateTime          @default(now())
+    updatedAt        DateTime          @default(now()) @updatedAt
+    userAchievements UserAchievement[]
 
-  @@map("achievement")
+    @@map("achievement")
 }
 
 model UserAchievement {
-  id            Int         @id @default(autoincrement())
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId        Int         @db.Int
-  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-  achievementId Int         @db.Int
-  active        Boolean     @default(true)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @default(now()) @updatedAt
+    id            Int         @id @default(autoincrement())
+    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId        Int         @db.Int
+    achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+    achievementId Int         @db.Int
+    active        Boolean     @default(true)
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @default(now()) @updatedAt
 
-  @@unique([userId, achievementId], name: "unique_user_achievement")
-  @@index([userId])
-  @@index([achievementId])
-  @@map("user_achievement")
+    @@unique([userId, achievementId], name: "unique_user_achievement")
+    @@index([userId])
+    @@index([achievementId])
+    @@map("user_achievement")
 }
 
 model Unit {
-  id                   Int                    @id @default(autoincrement())
-  unit                 String                 @db.VarChar(255)
-  abreveation          String                 @default("") @db.VarChar(5)
-  stepSize             Float                  @db.Double
-  active               Boolean                @default(true)
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @default(now()) @updatedAt
-  PlannedTask          PlannedTask[]
-  challengeRequirement ChallengeRequirement[]
-  ScheduledHabit       ScheduledHabit[]
+    id                   Int                    @id @default(autoincrement())
+    unit                 String                 @db.VarChar(255)
+    abreveation          String                 @default("") @db.VarChar(5)
+    stepSize             Float                  @db.Double
+    active               Boolean                @default(true)
+    createdAt            DateTime               @default(now())
+    updatedAt            DateTime               @default(now()) @updatedAt
+    PlannedTask          PlannedTask[]
+    challengeRequirement ChallengeRequirement[]
+    ScheduledHabit       ScheduledHabit[]
 
-  @@map("unit")
+    @@map("unit")
 }
 
 model HabitCategory {
-  id             Int      @id @default(autoincrement())
-  name           String   @db.VarChar(255)
-  description    String?  @db.VarChar(255)
-  remoteImageUrl String?  @db.VarChar(255)
-  localImage     String?  @db.VarChar(255)
-  active         Boolean  @default(true)
-  order          Int      @default(99) @db.Int
-  generic        Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now()) @updatedAt
-  tasks          Task[]
+    id             Int      @id @default(autoincrement())
+    name           String   @db.VarChar(255)
+    description    String?  @db.VarChar(255)
+    remoteImageUrl String?  @db.VarChar(255)
+    localImage     String?  @db.VarChar(255)
+    active         Boolean  @default(true)
+    order          Int      @default(99) @db.Int
+    generic        Boolean  @default(false)
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @default(now()) @updatedAt
+    tasks          Task[]
 
-  @@map("habit_category")
+    @@map("habit_category")
 }
 
 model DayOfWeek {
-  id              Int              @id @default(autoincrement())
-  day             String           @db.VarChar(10)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @default(now()) @updatedAt
-  scheduledHabits ScheduledHabit[]
+    id              Int              @id @default(autoincrement())
+    day             String           @db.VarChar(10)
+    createdAt       DateTime         @default(now())
+    updatedAt       DateTime         @default(now()) @updatedAt
+    scheduledHabits ScheduledHabit[]
 
-  @@map("day_of_week")
+    @@map("day_of_week")
 }
 
 model TimeOfDay {
-  id                   Int              @id @default(autoincrement())
-  period               String           @db.VarChar(255)
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @default(now()) @updatedAt
-  scheduledHabits      ScheduledHabit[]
-  plannedTasks         PlannedTask[]    @relation("current_planned_tasks")
-  originalPlannedTasks PlannedTask[]    @relation("original_planned_tasks")
+    id                   Int              @id @default(autoincrement())
+    period               String           @db.VarChar(255)
+    createdAt            DateTime         @default(now())
+    updatedAt            DateTime         @default(now()) @updatedAt
+    scheduledHabits      ScheduledHabit[]
+    plannedTasks         PlannedTask[]    @relation("current_planned_tasks")
+    originalPlannedTasks PlannedTask[]    @relation("original_planned_tasks")
 
-  @@map("time_of_day")
+    @@map("time_of_day")
 }
 
 model ScheduledHabit {
-  id             Int           @id @default(autoincrement())
-  userId         Int           @db.Int
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  taskId         Int           @db.Int
-  task           Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  title          String?       @db.VarChar(255)
-  description    String?       @db.VarChar(255)
-  remoteImageUrl String?       @db.VarChar(255)
-  localImage     String?       @db.VarChar(255)
-  daysOfWeek     DayOfWeek[]
-  timesOfDay     TimeOfDay[]
-  quantity       Float         @db.Double
-  unitId         Int?          @db.Int
-  unit           Unit?         @relation(fields: [unitId], references: [id])
-  startDate      DateTime?     @db.Date
-  endDate        DateTime?     @db.Date
-  active         Boolean       @default(true)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt
-  plannedTasks   PlannedTask[]
+    id             Int           @id @default(autoincrement())
+    userId         Int           @db.Int
+    user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    taskId         Int           @db.Int
+    task           Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    title          String?       @db.VarChar(255)
+    description    String?       @db.VarChar(255)
+    remoteImageUrl String?       @db.VarChar(255)
+    localImage     String?       @db.VarChar(255)
+    daysOfWeek     DayOfWeek[]
+    timesOfDay     TimeOfDay[]
+    quantity       Float         @db.Double
+    unitId         Int?          @db.Int
+    unit           Unit?         @relation(fields: [unitId], references: [id])
+    startDate      DateTime?     @db.Date
+    endDate        DateTime?     @db.Date
+    active         Boolean       @default(true)
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @default(now()) @updatedAt
+    plannedTasks   PlannedTask[]
 
-  @@index([taskId])
-  @@index([unitId])
-  @@index([userId])
-  @@map("scheduled_habit")
+    @@index([taskId])
+    @@index([unitId])
+    @@index([userId])
+    @@map("scheduled_habit")
 }
 
 model BlockedUser {
-  id            Int      @id @default(autoincrement())
-  userId        Int      @db.Int
-  user          User     @relation("blockingUser", fields: [userId], references: [id], onDelete: Cascade)
-  blockedUserId Int      @db.Int
-  blockedUser   User     @relation("blockedUser", fields: [blockedUserId], references: [id], onDelete: Cascade)
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
+    id            Int      @id @default(autoincrement())
+    userId        Int      @db.Int
+    user          User     @relation("blockingUser", fields: [userId], references: [id], onDelete: Cascade)
+    blockedUserId Int      @db.Int
+    blockedUser   User     @relation("blockedUser", fields: [blockedUserId], references: [id], onDelete: Cascade)
+    active        Boolean  @default(true)
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @default(now()) @updatedAt
 
-  @@unique([userId, blockedUserId], name: "unique_user_blocked_user")
-  @@index([userId])
-  @@index([blockedUserId])
-  @@map("blocked_user")
+    @@unique([userId, blockedUserId], name: "unique_user_blocked_user")
+    @@index([userId])
+    @@index([blockedUserId])
+    @@map("blocked_user")
 }
