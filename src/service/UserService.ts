@@ -62,7 +62,7 @@ export class UserService {
         }
         logger.info('created new user', newUser.id);
 
-        await AccountDao.updateAccountRoles(newUserContext.userUid, [Role.USER]);
+        await AccountDao.addAccountRole(newUserContext.userUid, Role.USER);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
 
         const userModel: User = ModelConverter.convert(newUser);

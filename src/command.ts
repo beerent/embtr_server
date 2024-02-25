@@ -41,15 +41,15 @@ const handleCommandIsUser = async (email: string) => {
     }
 };
 
-const handleCommandSetAdminRole = async (email: string) => {
+const handleCommandAddAdminRole = async (email: string) => {
     if (email) {
-        await UserRoleService.setUserRole(adminContext, email, Role.ADMIN);
+        await UserRoleService.addUserRole(adminContext, email, Role.ADMIN);
     }
 };
 
-const handleCommandSetUserRole = async (email: string) => {
+const handleCommandAddUserRole = async (email: string) => {
     if (email) {
-        await UserRoleService.setUserRole(adminContext, email, Role.USER);
+        await UserRoleService.addUserRole(adminContext, email, Role.USER);
     }
 };
 
@@ -95,7 +95,7 @@ const handleEmailVerified = async (email: string) => {
 const handleVerifyEmail = async (email: string) => {
     try {
         await AccountService.manuallyVerifyEmail(email);
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const handleRevokeToken = async (email: string) => {
@@ -104,7 +104,7 @@ const handleRevokeToken = async (email: string) => {
         if (account) {
             await AccountService.revokeToken(email);
         }
-    } catch (error) {}
+    } catch (error) { }
 };
 
 const rl = readline.createInterface({
@@ -132,12 +132,12 @@ const processCommand = async (command: string) => {
             await handleCommandIsUser(email);
             break;
 
-        case 'setAdminRole':
-            await handleCommandSetAdminRole(email);
+        case 'addAdminRole':
+            await handleCommandAddAdminRole(email);
             break;
 
-        case 'setUserRole':
-            await handleCommandSetUserRole(email);
+        case 'addUserRole':
+            await handleCommandAddUserRole(email);
             break;
 
         case 'removeAdminRole':
