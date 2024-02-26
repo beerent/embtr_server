@@ -10,6 +10,7 @@ import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { BlockUserService } from './BlockUserService';
+import { ApiAlertsService } from './ApiAlertsService';
 
 export class UserPostService {
     public static async create(context: Context, userPost: UserPost): Promise<UserPost> {
@@ -23,6 +24,8 @@ export class UserPostService {
 
         const createdUserPost = await UserPostDao.create(userPost);
         const createdUserPostModel: UserPost = ModelConverter.convert(createdUserPost);
+
+        ApiAlertsService.sendAlert('new post wast created!');
 
         return createdUserPostModel;
     }
