@@ -109,9 +109,9 @@ export class UserService {
         }
 
         if (userToUpdate.photoUrl) {
-            //userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
-            //    userToUpdate.photoUrl
-            //);
+            userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
+                userToUpdate.photoUrl
+            );
         }
 
         let updatedUser = undefined;
