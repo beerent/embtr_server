@@ -3,7 +3,6 @@ import { logger } from '@src/common/logger/Logger';
 import { firebase } from '@src/auth/Firebase';
 import { Code } from '@resources/codes';
 import { Role } from '@src/roles/Roles';
-import { prisma } from '@database/prisma';
 
 export interface CreateAccountResult {
     user: UserRecord | undefined;
@@ -79,8 +78,22 @@ export class AccountDao {
         }
     }
 
-    public static async updateAccountRoles(uid: string, roles: Role[]): Promise<void> {
-        await this.updateCustomClaim(uid, 'roles', roles);
+    public static async addAccountRole(uid: string, role: Role): Promise<void> {
+        this.addAccountRoles(uid, [role]);
+    }
+
+    public static async addAccountRoles(uid: string, roles: Role[]): Promise<void> {
+        let updatedRoles = Array.from(new Set(roles));
+        const currentRoles = await this.getCustomClaims(uid);
+        if (currentRoles) {
+            updatedRoles = Array.from(new Set([...currentRoles.roles, ...roles]));
+        }
+
+        await this.updateCustomClaim(uid, 'roles', updatedRoles);
+    }
+
+    public static async removeAccountRole(uid: string, role: Role): Promise<void> {
+        this.removeAccountRoles(uid, [role]);
     }
 
     public static async removeAccountRoles(uid: string, roles: Role[]): Promise<void> {

@@ -10,8 +10,8 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
-import { ImageDetectionService } from '@src/service/ImageService';
 import { BlockUserService } from './BlockUserService';
+import { UserRoleService } from '@src/service/UserRoleService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -30,6 +30,13 @@ export class UserService {
 
     public static async get(context: Context, uid: string): Promise<User | undefined> {
         return this.getByUid(uid);
+    }
+
+    public static async getAll(context: Context): Promise<User[]> {
+        const users = await UserDao.getAll();
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
     }
 
     public static async getByEmail(email: string): Promise<User> {
@@ -62,7 +69,7 @@ export class UserService {
         }
         logger.info('created new user', newUser.id);
 
-        await AccountDao.updateAccountRoles(newUserContext.userUid, [Role.USER]);
+        await UserRoleService.addUserRoles(newUserContext, newUser.email, [Role.USER, Role.FREE]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
 
         const userModel: User = ModelConverter.convert(newUser);

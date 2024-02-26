@@ -1,49 +1,92 @@
-import { HttpCode } from '@src/common/RequestResponses';
-import { Code } from '@resources/codes';
 import { AccountDao } from '@src/database/AccountDao';
+import { RoleDao } from '@src/database/RoleDao';
 import { UserDao } from '@src/database/UserDao';
-import { Context } from '@src/general/auth/Context';
-import { Roles } from '@src/roles/Roles';
+import { Context, NewUserContext } from '@src/general/auth/Context';
 import { Role } from '@src/roles/Roles';
-import { ServiceException } from '@src/general/exception/ServiceException';
 
 export class UserRoleService {
-    public static async hardDelete(context: Context, email: string) {
-        const isAdmin = Roles.isAdmin(context.userRoles);
-        if (!isAdmin) {
-            throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'forbidden');
+    public static async addUserRole(context: Context | NewUserContext, email: string, role: Role) {
+        this.addUserRoles(context, email, [role]);
+    }
+
+    public static async addUserRoles(
+        context: Context | NewUserContext,
+        email: string,
+        roles: Role[]
+    ) {
+        const databaseRoles = await RoleDao.getAllByName(roles);
+        if (!databaseRoles) {
+            return;
+        }
+
+        const user = await UserDao.getByEmail(email);
+        if (!user) {
+            return;
         }
 
         const account = await AccountDao.getByEmail(email);
         if (!account) {
-            throw new ServiceException(
-                HttpCode.RESOURCE_NOT_FOUND,
-                Code.RESOURCE_NOT_FOUND,
-                'user not found'
-            );
+            return;
         }
 
-        const uid = account.uid;
-        await AccountDao.delete(email);
+        const databaseRoleIds = databaseRoles.map((role) => {
+            return role.id;
+        });
 
-        const user = await UserDao.getByUid(uid);
-        if (user) {
-            await UserDao.deleteByUid(uid);
+        try {
+            const updatedUser = await UserDao.addUserRoles(user.uid, databaseRoleIds);
+            if (!updatedUser) {
+                return;
+            }
+        } catch (error) {
+            return;
         }
-    }
 
-    public static async setUserRole(context: Context, email: string, role: Role) {
-        //if (!Roles.isAdmin(context.userRoles)) {
-        //    throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'forbidden');
-        //}
-
-        const account = await AccountDao.getByEmail(email);
-        AccountDao.updateAccountRoles(account!.uid, [role]);
+        try {
+            await AccountDao.addAccountRoles(account!.uid, roles);
+        } catch (error) {
+            await UserDao.removeUserRoles(user.uid, databaseRoleIds);
+        }
     }
 
     public static async removeUserRole(context: Context, email: string, role: Role) {
+        this.removeUserRoles(context, email, [role]);
+    }
+
+    public static async removeUserRoles(context: Context, email: string, roles: Role[]) {
+        const databaseRoles = await RoleDao.getAllByName(roles);
+        if (!databaseRoles) {
+            return;
+        }
+
+        const user = await UserDao.getByEmail(email);
+        if (!user) {
+            return;
+        }
+
         const account = await AccountDao.getByEmail(email);
-        AccountDao.removeAccountRoles(account!.uid, [role]);
+        if (!account) {
+            return;
+        }
+
+        const databaseRoleIds = databaseRoles.map((role) => {
+            return role.id;
+        });
+
+        try {
+            const updatedUser = await UserDao.removeUserRoles(user.uid, databaseRoleIds);
+            if (!updatedUser) {
+                return;
+            }
+        } catch (error) {
+            return;
+        }
+
+        try {
+            await AccountDao.removeAccountRoles(account!.uid, roles);
+        } catch (error) {
+            await UserDao.addUserRoles(user.uid, databaseRoleIds);
+        }
     }
 
     public static async isAdmin(email: string): Promise<boolean> {
@@ -60,10 +103,15 @@ export class UserRoleService {
         return isAdmin;
     }
 
-    public static async getRoles(email: string): Promise<Role[]> {
+    public static async getRoles(email: string) {
+        const user = await UserDao.getByEmail(email);
         const account = await AccountDao.getByEmail(email);
-        const roles = account?.customClaims?.roles;
+        const accountRoles = account?.customClaims?.roles;
+        const userRoles = user?.roles;
 
-        return roles;
+        return {
+            accountRoles,
+            userRoles,
+        };
     }
 }

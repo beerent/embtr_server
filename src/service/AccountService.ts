@@ -199,7 +199,7 @@ export class AccountService {
             throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'forbidden');
         }
 
-        AccountDao.updateAccountRoles(email, [Role.ADMIN]);
+        AccountDao.addAccountRole(email, Role.ADMIN);
     }
 
     public static async revokeToken(email: string) {

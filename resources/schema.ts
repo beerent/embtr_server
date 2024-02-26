@@ -28,6 +28,7 @@ export interface User {
   scheduledHabits?: ScheduledHabit[];
   blockingUsers?: BlockedUser[];
   blockedUsers?: BlockedUser[];
+  roles?: Role[];
 }
 
 export interface PushNotificationToken {
@@ -373,6 +374,19 @@ export interface BlockedUser {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface Feature {
+  id?: number;
+  name?: string;
+  roles?: Role[];
+}
+
+export interface Role {
+  id?: number;
+  name?: string;
+  features?: Feature[];
+  users?: User[];
 }
 
 export enum NotificationTargetPage {
