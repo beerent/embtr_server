@@ -32,6 +32,13 @@ export class UserService {
         return this.getByUid(uid);
     }
 
+    public static async getAll(context: Context): Promise<User[]> {
+        const users = await UserDao.getAll();
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
     public static async getByEmail(email: string): Promise<User> {
         const user = await UserDao.getByEmail(email);
         if (!user) {

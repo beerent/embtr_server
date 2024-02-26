@@ -1,7 +1,6 @@
 import { Prisma, User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
-import { PushNotificationDao } from './PushNotificationDao';
 
 export class UserDao {
     public static async getByUid(uid: string, includes?: Prisma.UserInclude): Promise<User | null> {
@@ -45,14 +44,22 @@ export class UserDao {
         return !!user;
     }
 
-    public static async getByEmail(email: string): Promise<User | null> {
+    public static async getByEmail(email: string) {
         const user = await prisma.user.findUnique({
             where: {
                 email: email,
             },
+            include: {
+                roles: true,
+            },
         });
 
         return user;
+    }
+
+    public static async getAll(): Promise<User[]> {
+        const users = await prisma.user.findMany();
+        return users;
     }
 
     public static async existsByUid(uid: string): Promise<boolean> {
@@ -168,11 +175,38 @@ export class UserDao {
 
         return updatedUser;
     }
-}
 
-// SHOULD BE:
-/*
- * Router - fields a call
- * Service - handles business logic
- * Dao - handles database calls
- */
+    public static async addUserRole(uid: string, roleId: number) {
+        const updatedUser = await prisma.user.update({
+            where: {
+                uid: uid,
+            },
+            data: {
+                roles: {
+                    connect: {
+                        id: roleId,
+                    },
+                },
+            },
+        });
+
+        return updatedUser;
+    }
+
+    public static async removeUserRole(uid: string, roleId: number) {
+        const updatedUser = await prisma.user.update({
+            where: {
+                uid: uid,
+            },
+            data: {
+                roles: {
+                    disconnect: {
+                        id: roleId,
+                    },
+                },
+            },
+        });
+
+        return updatedUser;
+    }
+}

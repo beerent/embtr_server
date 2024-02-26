@@ -1,6 +1,8 @@
 export const enum Role {
     ADMIN = 'admin',
     USER = 'user',
+    FREE = 'free',
+    PREMIUM = 'premium',
     INVALID = 'invalid',
     NONE = 'NONE',
 }
