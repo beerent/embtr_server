@@ -12,6 +12,7 @@ import { AccountService } from '@src/service/AccountService';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
 import { BlockUserService } from './BlockUserService';
 import { UserRoleService } from '@src/service/UserRoleService';
+import { ImageDetectionService } from './ImageService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
