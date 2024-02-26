@@ -193,6 +193,25 @@ export class UserDao {
         return updatedUser;
     }
 
+    public static async addUserRoles(uid: string, roleIds: number[]) {
+        const updatedUser = await prisma.user.update({
+            where: {
+                uid: uid,
+            },
+            data: {
+                roles: {
+                    connect: roleIds.map((id) => {
+                        return {
+                            id: id,
+                        };
+                    }),
+                },
+            },
+        });
+
+        return updatedUser;
+    }
+
     public static async removeUserRole(uid: string, roleId: number) {
         const updatedUser = await prisma.user.update({
             where: {
@@ -203,6 +222,25 @@ export class UserDao {
                     disconnect: {
                         id: roleId,
                     },
+                },
+            },
+        });
+
+        return updatedUser;
+    }
+
+    public static async removeUserRoles(uid: string, roleIds: number[]) {
+        const updatedUser = await prisma.user.update({
+            where: {
+                uid: uid,
+            },
+            data: {
+                roles: {
+                    disconnect: roleIds.map((id) => {
+                        return {
+                            id: id,
+                        };
+                    }),
                 },
             },
         });

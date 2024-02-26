@@ -10,8 +10,8 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
-import { ImageDetectionService } from '@src/service/ImageService';
 import { BlockUserService } from './BlockUserService';
+import { UserRoleService } from '@src/service/UserRoleService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -69,7 +69,7 @@ export class UserService {
         }
         logger.info('created new user', newUser.id);
 
-        await AccountDao.addAccountRole(newUserContext.userUid, Role.USER);
+        await UserRoleService.addUserRoles(newUserContext, newUser.email, [Role.USER, Role.FREE]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
 
         const userModel: User = ModelConverter.convert(newUser);
@@ -109,9 +109,9 @@ export class UserService {
         }
 
         if (userToUpdate.photoUrl) {
-            userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
-                userToUpdate.photoUrl
-            );
+            //userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
+            //    userToUpdate.photoUrl
+            //);
         }
 
         let updatedUser = undefined;

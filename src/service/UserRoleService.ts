@@ -1,13 +1,21 @@
 import { AccountDao } from '@src/database/AccountDao';
 import { RoleDao } from '@src/database/RoleDao';
 import { UserDao } from '@src/database/UserDao';
-import { Context } from '@src/general/auth/Context';
+import { Context, NewUserContext } from '@src/general/auth/Context';
 import { Role } from '@src/roles/Roles';
 
 export class UserRoleService {
-    public static async addUserRole(context: Context, email: string, role: Role) {
-        const databaseRole = await RoleDao.get(role);
-        if (!databaseRole) {
+    public static async addUserRole(context: Context | NewUserContext, email: string, role: Role) {
+        this.addUserRoles(context, email, [role]);
+    }
+
+    public static async addUserRoles(
+        context: Context | NewUserContext,
+        email: string,
+        roles: Role[]
+    ) {
+        const databaseRoles = await RoleDao.getAllByName(roles);
+        if (!databaseRoles) {
             return;
         }
 
@@ -21,8 +29,12 @@ export class UserRoleService {
             return;
         }
 
+        const databaseRoleIds = databaseRoles.map((role) => {
+            return role.id;
+        });
+
         try {
-            const updatedUser = await UserDao.addUserRole(user.uid, databaseRole.id);
+            const updatedUser = await UserDao.addUserRoles(user.uid, databaseRoleIds);
             if (!updatedUser) {
                 return;
             }
@@ -31,16 +43,19 @@ export class UserRoleService {
         }
 
         try {
-            await AccountDao.addAccountRole(account!.uid, role);
+            await AccountDao.addAccountRoles(account!.uid, roles);
         } catch (error) {
-            await UserDao.removeUserRole(user.uid, databaseRole.id);
+            await UserDao.removeUserRoles(user.uid, databaseRoleIds);
         }
     }
 
-    // needs to update database
     public static async removeUserRole(context: Context, email: string, role: Role) {
-        const databaseRole = await RoleDao.get(role);
-        if (!databaseRole) {
+        this.removeUserRoles(context, email, [role]);
+    }
+
+    public static async removeUserRoles(context: Context, email: string, roles: Role[]) {
+        const databaseRoles = await RoleDao.getAllByName(roles);
+        if (!databaseRoles) {
             return;
         }
 
@@ -54,8 +69,12 @@ export class UserRoleService {
             return;
         }
 
+        const databaseRoleIds = databaseRoles.map((role) => {
+            return role.id;
+        });
+
         try {
-            const updatedUser = await UserDao.removeUserRole(user.uid, databaseRole.id);
+            const updatedUser = await UserDao.removeUserRoles(user.uid, databaseRoleIds);
             if (!updatedUser) {
                 return;
             }
@@ -64,9 +83,9 @@ export class UserRoleService {
         }
 
         try {
-            await AccountDao.removeAccountRole(account!.uid, role);
+            await AccountDao.removeAccountRoles(account!.uid, roles);
         } catch (error) {
-            await UserDao.addUserRole(user.uid, databaseRole.id);
+            await UserDao.addUserRoles(user.uid, databaseRoleIds);
         }
     }
 
