@@ -73,9 +73,9 @@ const handleCommandAddFreeRoleToAllUsers = async () => {
         if (!user.email) {
             continue;
         }
-        console.log(`Adding role to ${user.email}`);
+        console.log(`Adding role to ${i}`);
 
-        if (i % 10 === 0) {
+        if (i % 20 === 0) {
             await new Promise((resolve) => setTimeout(resolve, 10000));
         } else {
             await new Promise((resolve) => setTimeout(resolve, 1000));
