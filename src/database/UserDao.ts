@@ -1,14 +1,16 @@
-import { Prisma, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
 
 export class UserDao {
-    public static async getByUid(uid: string, includes?: Prisma.UserInclude): Promise<User | null> {
+    public static async getByUid(uid: string): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
                 uid: uid,
             },
-            include: includes,
+            include: {
+                roles: true,
+            },
         });
 
         return user;

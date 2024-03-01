@@ -13,6 +13,7 @@ import { ApiAlertsService } from '@src/service/ApiAlertsService';
 import { BlockUserService } from './BlockUserService';
 import { UserRoleService } from '@src/service/UserRoleService';
 import { ImageDetectionService } from './ImageService';
+import { RevenueCatService } from './internal/RevenueCatService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -144,6 +145,19 @@ export class UserService {
         const userModels: User[] = ModelConverter.convertAll(filteredUsers);
 
         return userModels;
+    }
+
+    public static async updatePremiumStatus(context: Context) {
+        const isPremium = await RevenueCatService.isPremium(context.userUid);
+
+        if (isPremium) {
+            await UserRoleService.addUserRole(context, context.userEmail, Role.PREMIUM);
+        } else {
+            await UserRoleService.removeUserRole(context, context.userEmail, Role.PREMIUM);
+        }
+
+        const user = await this.getByUid(context.userUid);
+        return user;
     }
 
     public static async exists(context: Context, username: string): Promise<boolean> {

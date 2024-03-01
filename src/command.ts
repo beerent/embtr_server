@@ -7,6 +7,7 @@ import { Context } from './general/auth/Context';
 import { Role } from './roles/Roles';
 import { AccountService } from './service/AccountService';
 import { UserService } from './service/UserService';
+import { RevenueCatService } from './service/internal/RevenueCatService';
 
 const adminContext: Context = {
     userId: 1,
@@ -65,26 +66,6 @@ const handleCommandRemoveUserRole = async (email: string) => {
     }
 };
 
-const handleCommandAddFreeRoleToAllUsers = async () => {
-    const users = await UserService.getAll(adminContext);
-
-    for (let i = 0; i < users.length; i++) {
-        const user = users[i];
-        if (!user.email) {
-            continue;
-        }
-        console.log(`Adding role to ${i}`);
-
-        if (i % 20 === 0) {
-            await new Promise((resolve) => setTimeout(resolve, 10000));
-        } else {
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-
-        await UserRoleService.addUserRole(adminContext, user.email, Role.FREE);
-    }
-};
-
 const handleAccountExists = async (email: string) => {
     try {
         const account = await AccountService.get(adminContext, email);
@@ -125,6 +106,21 @@ const handleRevokeToken = async (email: string) => {
             await AccountService.revokeToken(email);
         }
     } catch (error) { }
+};
+
+const handleCommandIsPremium = async (email: string) => {
+    try {
+        const user = await UserService.getByEmail(email);
+        if (!user.uid) {
+            console.log('user not found');
+            return;
+        }
+
+        const isPremium = await RevenueCatService.isPremium(user.uid);
+        console.log(!!isPremium);
+    } catch (error) {
+        console.log('error checking premium status');
+    }
 };
 
 const rl = readline.createInterface({
@@ -195,8 +191,8 @@ const processCommand = async (command: string) => {
             await handleVerifyEmail(email);
             break;
 
-        case 'addFreeRoleToAllUsers':
-            await handleCommandAddFreeRoleToAllUsers();
+        case 'isPremium':
+            await handleCommandIsPremium(email);
             break;
 
         default:

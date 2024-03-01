@@ -379,14 +379,16 @@ export interface BlockedUser {
 export interface Feature {
   id?: number;
   name?: string;
-  roles?: Role[];
+  requesterRoles?: Role[];
+  targetRoles?: Role[];
 }
 
 export interface Role {
   id?: number;
   name?: string;
-  features?: Feature[];
   users?: User[];
+  requesterFeatures?: Feature[];
+  targetFeatures?: Feature[];
 }
 
 export enum NotificationTargetPage {

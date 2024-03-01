@@ -520,7 +520,8 @@ model Feature {
     id   Int    @id @default(autoincrement())
     name String @unique @db.VarChar(255)
 
-    roles Role[]
+    requesterRoles Role[] @relation("FeatureToRequesterRole")
+    targetRoles    Role[] @relation("FeatureToTargetRole")
 
     @@map("feature")
 }
@@ -529,8 +530,9 @@ model Role {
     id   Int    @id @default(autoincrement())
     name String @unique @db.VarChar(255)
 
-    features Feature[]
-    users    User[]
+    users             User[]
+    requesterFeatures Feature[] @relation("FeatureToRequesterRole")
+    targetFeatures    Feature[] @relation("FeatureToTargetRole")
 
     @@map("role")
 }

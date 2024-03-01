@@ -9,7 +9,7 @@ export interface GetUsersResponse extends Response {
     users?: UserModel[];
 }
 
-export interface CreateUserRequest {}
+export interface CreateUserRequest { }
 
 export interface CreateUserResponse extends Response {
     user?: UserModel;
@@ -24,5 +24,9 @@ export interface UpdateUserResponse extends Response {
 }
 
 export interface CreateBlockUserRequest {
-    userId: number
+    userId: number;
+}
+
+export interface UpdatePremiumStatusResponse extends Response {
+    user?: UserModel;
 }
