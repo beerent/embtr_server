@@ -154,9 +154,23 @@ const processCommand = async (command: string) => {
         case 'addUserRole':
             await handleCommandAddUserRole(email);
             break;
-
         case 'removeAdminRole':
             await handleCommandRemoveAdminRole(email);
+            break;
+
+        case 'addPremiumRole':
+            await UserRoleService.addUserRole(adminContext, email, Role.PREMIUM);
+            break;
+        case 'removePremiumRole':
+            await UserRoleService.removeUserRole(adminContext, email, Role.PREMIUM);
+            break;
+
+        case 'addFreeRole':
+            await UserRoleService.addUserRole(adminContext, email, Role.FREE);
+            break;
+
+        case 'removeFreeRole':
+            await UserRoleService.removeUserRole(adminContext, email, Role.FREE);
             break;
 
         case 'removeUserRole':

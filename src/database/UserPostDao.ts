@@ -9,7 +9,11 @@ export const UserPostInclude = {
             active: true,
         },
         include: {
-            user: true,
+            user: {
+                include: {
+                    roles: true,
+                },
+            },
         },
     },
     likes: {
@@ -28,7 +32,11 @@ export const UserPostInclude = {
             plannedDayResults: true,
         },
     },
-    user: true,
+    user: {
+        include: {
+            roles: true,
+        },
+    },
 } satisfies Prisma.UserPostInclude;
 
 export class UserPostDao {

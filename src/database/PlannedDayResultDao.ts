@@ -9,7 +9,11 @@ export const PlannedDayResultInclude = {
             active: true,
         },
         include: {
-            user: true,
+            user: {
+                include: {
+                    roles: true,
+                },
+            },
         },
     },
     likes: {
@@ -36,7 +40,11 @@ export const PlannedDayResultInclude = {
                     },
                 },
             },
-            user: true,
+            user: {
+                include: {
+                    roles: true,
+                },
+            },
             plannedTasks: {
                 where: {
                     active: true,
@@ -49,12 +57,8 @@ export const PlannedDayResultInclude = {
     },
 } satisfies Prisma.PlannedDayResultInclude;
 
-export type PlannedDayResultsType = Prisma.PromiseReturnType<
-    typeof PlannedDayResultDao.getAll
->;
-export type PlannedDayResultType = Prisma.PromiseReturnType<
-    typeof PlannedDayResultDao.getById
->;
+export type PlannedDayResultsType = Prisma.PromiseReturnType<typeof PlannedDayResultDao.getAll>;
+export type PlannedDayResultType = Prisma.PromiseReturnType<typeof PlannedDayResultDao.getById>;
 
 export class PlannedDayResultDao {
     public static async create(plannedDayId: number, title?: string) {
