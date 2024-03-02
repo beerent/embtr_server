@@ -152,6 +152,7 @@ export class UserService {
 
         if (isPremium) {
             await UserRoleService.addUserRole(context, context.userEmail, Role.PREMIUM);
+            ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
         } else {
             await UserRoleService.removeUserRole(context, context.userEmail, Role.PREMIUM);
         }
