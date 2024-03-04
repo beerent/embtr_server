@@ -20,6 +20,7 @@ import marketingRouter from '@src/endpoints/marketing/MarketingRouter';
 import timelineRouter from '@src/endpoints/timeline/TimelineRouter';
 import healthRouter from '@src/endpoints/health/HealthRouter';
 import reportRouter from './endpoints/report/ReportRouter';
+import scheduledHabitRouter from './endpoints/scheduled_habit/ScheduledHabitRouter';
 
 const cors = require('cors');
 const app = express();
@@ -52,6 +53,7 @@ const versionUrlMiddleware = (req: Request, res: Response, next: NextFunction) =
 app.use(versionUrlMiddleware);
 
 app.use('/', habitRouter);
+app.use('/', scheduledHabitRouter);
 app.use('/', userRouter);
 app.use('/', accountRouter);
 app.use('/', plannedDayRouter);

@@ -83,7 +83,7 @@ export class HabitCategoryService {
         activeHabitCategory: HabitCategory,
         date: PureDate
     ): Promise<HabitCategory> {
-        const scheduledHabits = await ScheduledHabitService.getActive(context.userId, date);
+        const scheduledHabits = await ScheduledHabitService.getActive(context, date);
         activeHabitCategory.tasks = this.populateHabitCategoryTasks(scheduledHabits);
         return activeHabitCategory;
     }

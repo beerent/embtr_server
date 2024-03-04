@@ -247,28 +247,28 @@ export class ScheduledHabitDao {
                 quantity: quantity ?? 1,
                 daysOfWeek: daysOfWeekIds
                     ? {
-                        set: daysOfWeekIds?.map((id) => {
-                            return {
-                                id,
-                            };
-                        }),
-                    }
+                          set: daysOfWeekIds?.map((id) => {
+                              return {
+                                  id,
+                              };
+                          }),
+                      }
                     : undefined,
                 timesOfDay: timesOfDayIds
                     ? {
-                        set: timesOfDayIds?.map((id) => {
-                            return {
-                                id,
-                            };
-                        }),
-                    }
+                          set: timesOfDayIds?.map((id) => {
+                              return {
+                                  id,
+                              };
+                          }),
+                      }
                     : undefined,
                 unit: unitId
                     ? {
-                        connect: {
-                            id: unitId,
-                        },
-                    }
+                          connect: {
+                              id: unitId,
+                          },
+                      }
                     : undefined,
                 startDate,
                 endDate,
@@ -373,20 +373,70 @@ export class ScheduledHabitDao {
         });
     }
 
+    public static getPast(userId: number, date: PureDate) {
+        return prisma.scheduledHabit.findMany({
+            where: {
+                userId: userId,
+                endDate: {
+                    lt: date + 'T00:00:00.000Z',
+                },
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
     public static async getActive(userId: number, date: PureDate) {
         return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
-                OR: [
+                AND: [
                     {
-                        startDate: null,
+                        OR: [
+                            {
+                                endDate: null,
+                            },
+                            {
+                                endDate: {
+                                    gte: date + 'T00:00:00.000Z',
+                                },
+                            },
+                        ],
                     },
                     {
-                        startDate: {
-                            gte: date + 'T00:00:00.000Z',
-                        },
+                        OR: [
+                            {
+                                startDate: null,
+                            },
+                            {
+                                startDate: {
+                                    lte: date + 'T00:00:00.000Z',
+                                },
+                            },
+                        ],
                     },
                 ],
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
+    public static getFuture(userId: number, date: PureDate) {
+        return prisma.scheduledHabit.findMany({
+            where: {
+                userId: userId,
+                startDate: {
+                    gt: date + 'T00:00:00.000Z',
+                },
             },
             include: {
                 task: true,

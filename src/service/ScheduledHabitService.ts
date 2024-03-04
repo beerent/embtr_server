@@ -1,18 +1,9 @@
-import { ScheduledHabit, Task } from '@resources/schema';
-import { Response } from '@resources/types/requests/RequestTypes';
-import {
-    CreateScheduledHabitResponse,
-    GetScheduledHabitResponse,
-    GetScheduledHabitsResponse,
-} from '@resources/types/requests/ScheduledHabitTypes';
-import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
+import { ScheduledHabit } from '@resources/schema';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
 import { Context } from '@src/general/auth/Context';
 import { HabitSummary } from '@resources/types/habit/Habit';
 import { PureDate } from '@resources/types/date/PureDate';
 import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSummaryProvider';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
@@ -154,8 +145,28 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
-    public static async getActive(userId: number, date: PureDate): Promise<ScheduledHabit[]> {
-        const scheduledHabits = await ScheduledHabitDao.getActive(userId, date);
+    public static async getPast(context: Context, date: PureDate): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitDao.getPast(context.userId, date);
+        if (!scheduledHabits) {
+            return [];
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return scheduledHabitModels;
+    }
+
+    public static async getActive(context: Context, date: PureDate): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitDao.getActive(context.userId, date);
+        if (!scheduledHabits) {
+            return [];
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return scheduledHabitModels;
+    }
+
+    public static async getFuture(context: Context, date: PureDate): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitDao.getFuture(context.userId, date);
         if (!scheduledHabits) {
             return [];
         }
