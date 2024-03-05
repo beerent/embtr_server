@@ -87,9 +87,10 @@ export class PlannedDayResultDao {
     }
 
     public static async update(plannedDayResult: PlannedDayResultModel) {
-        const description = plannedDayResult.description
-            ? { description: plannedDayResult.description }
-            : {};
+        const descriptionExists =
+            plannedDayResult.description !== undefined && plannedDayResult.description !== null;
+        const description = descriptionExists ? { description: plannedDayResult.description } : {};
+
         const active =
             plannedDayResult.active !== undefined ? { active: plannedDayResult.active } : {};
         const createdAt =
