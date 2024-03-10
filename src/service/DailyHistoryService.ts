@@ -20,6 +20,9 @@ export class DailyHistoryService {
             end: new Date(request.query.end as string),
         };
 
+        // add one to end date
+        body.end.setDate(body.end.getDate() + 1);
+
         const dailyHistory = await DailyHistoryDao.get(user.id, body.start, body.end);
         return { ...SUCCESS, dailyHistory };
     }
