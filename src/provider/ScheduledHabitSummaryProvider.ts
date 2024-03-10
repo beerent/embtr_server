@@ -18,20 +18,15 @@ export class ScheduledHabitSummaryProvider {
                 continue;
             }
 
-            let found = false;
-            for (const key of taskToScheduledHabitMap.keys()) {
-                if (key.id === scheduledHabitModel.task.id) {
-                    taskToScheduledHabitMap.get(key)?.push(scheduledHabitModel);
-                    found = true;
-                    break;
-                }
-            }
-            if (found) {
+            const exists = taskToScheduledHabitMap.get(scheduledHabitModel.task);
+            if (exists) {
+                exists.push(scheduledHabitModel);
                 continue;
             }
 
             taskToScheduledHabitMap.set(scheduledHabitModel.task, [scheduledHabitModel]);
         }
+
         return taskToScheduledHabitMap;
     }
 

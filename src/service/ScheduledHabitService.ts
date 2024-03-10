@@ -26,19 +26,7 @@ export class ScheduledHabitService {
     ): Promise<ScheduledHabit> {
         const createdScheduledHabit = await ScheduledHabitDao.create(
             context.userId,
-            scheduledHabit.taskId!,
-            scheduledHabit.title,
-            scheduledHabit.description,
-            scheduledHabit.quantity,
-            scheduledHabit.unitId,
-            scheduledHabit.daysOfWeek
-                ?.map((day) => day.id)
-                .filter((id) => id !== undefined) as number[],
-            scheduledHabit.timesOfDay
-                ?.map((time) => time.id)
-                .filter((id) => id !== undefined) as number[],
-            scheduledHabit.startDate,
-            scheduledHabit.endDate
+            scheduledHabit
         );
 
         const createdScheduledHabitModel: ScheduledHabit =
@@ -69,24 +57,7 @@ export class ScheduledHabitService {
             ...scheduledHabit,
         };
 
-        const updatedScheduledHabit = await ScheduledHabitDao.update(
-            scheduledHabit.id,
-            context.userId,
-            updatedHabit.title,
-            updatedHabit.description,
-            updatedHabit.remoteImageUrl,
-            updatedHabit.localImage,
-            updatedHabit.quantity,
-            updatedHabit.unitId,
-            updatedHabit.daysOfWeek
-                ?.map((day) => day.id)
-                .filter((id) => id !== undefined) as number[],
-            updatedHabit.timesOfDay
-                ?.map((time) => time.id)
-                .filter((id) => id !== undefined) as number[],
-            updatedHabit.startDate,
-            updatedHabit.endDate
-        );
+        const updatedScheduledHabit = await ScheduledHabitDao.update(context.userId, updatedHabit);
 
         const updatedScheduledHabitModel: ScheduledHabit =
             ModelConverter.convert(updatedScheduledHabit);

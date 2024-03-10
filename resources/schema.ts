@@ -352,8 +352,11 @@ export interface ScheduledHabit {
   description?: string;
   remoteImageUrl?: string;
   localImage?: string;
+  daysOfWeekEnabled?: boolean;
   daysOfWeek?: DayOfWeek[];
+  timesOfDayEnabled?: boolean;
   timesOfDay?: TimeOfDay[];
+  detailsEnabled?: boolean;
   quantity?: number;
   unitId?: number;
   unit?: Unit;

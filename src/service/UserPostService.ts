@@ -25,7 +25,7 @@ export class UserPostService {
         const createdUserPost = await UserPostDao.create(userPost);
         const createdUserPostModel: UserPost = ModelConverter.convert(createdUserPost);
 
-        ApiAlertsService.sendAlert('new post wast created!');
+        ApiAlertsService.sendAlert('new post was created!');
 
         return createdUserPostModel;
     }

@@ -473,26 +473,29 @@ model TimeOfDay {
 }
 
 model ScheduledHabit {
-    id             Int           @id @default(autoincrement())
-    userId         Int           @db.Int
-    user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-    taskId         Int           @db.Int
-    task           Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
-    title          String?       @db.VarChar(255)
-    description    String?       @db.VarChar(255)
-    remoteImageUrl String?       @db.VarChar(255)
-    localImage     String?       @db.VarChar(255)
-    daysOfWeek     DayOfWeek[]
-    timesOfDay     TimeOfDay[]
-    quantity       Float         @db.Double
-    unitId         Int?          @db.Int
-    unit           Unit?         @relation(fields: [unitId], references: [id])
-    startDate      DateTime?     @db.Date
-    endDate        DateTime?     @db.Date
-    active         Boolean       @default(true)
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @default(now()) @updatedAt
-    plannedTasks   PlannedTask[]
+    id                Int           @id @default(autoincrement())
+    userId            Int           @db.Int
+    user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    taskId            Int           @db.Int
+    task              Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    title             String?       @db.VarChar(255)
+    description       String?       @db.VarChar(255)
+    remoteImageUrl    String?       @db.VarChar(255)
+    localImage        String?       @db.VarChar(255)
+    daysOfWeekEnabled Boolean       @default(true)
+    daysOfWeek        DayOfWeek[]
+    timesOfDayEnabled Boolean       @default(true)
+    timesOfDay        TimeOfDay[]
+    detailsEnabled    Boolean       @default(true)
+    quantity          Float         @db.Double
+    unitId            Int?          @db.Int
+    unit              Unit?         @relation(fields: [unitId], references: [id])
+    startDate         DateTime?     @db.Date
+    endDate           DateTime?     @db.Date
+    active            Boolean       @default(true)
+    createdAt         DateTime      @default(now())
+    updatedAt         DateTime      @default(now()) @updatedAt
+    plannedTasks      PlannedTask[]
 
     @@index([taskId])
     @@index([unitId])

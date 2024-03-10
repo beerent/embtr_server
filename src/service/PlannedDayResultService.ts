@@ -13,6 +13,7 @@ import { PlannedDayResult } from '@resources/schema';
 import { ImageDetectionService } from './ImageService';
 import { ImageDao } from '@src/database/ImageDao';
 import { BlockUserService } from './BlockUserService';
+import { ApiAlertsService } from './ApiAlertsService';
 
 export class PlannedDayResultService {
     public static async create(context: Context, plannedDayId: number): Promise<PlannedDayResult> {
@@ -37,6 +38,8 @@ export class PlannedDayResultService {
                 'planned day result not created'
             );
         }
+
+        ApiAlertsService.sendAlert('new planned day result was created!');
 
         const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
         return plannedDayResultModel;

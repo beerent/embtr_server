@@ -1,34 +1,27 @@
 import { prisma } from '@database/prisma';
+import { ScheduledHabit } from '@resources/schema';
 import { PureDate } from '@resources/types/date/PureDate';
 
 const DEFAULT_TIME_OF_DAY_ID = 5;
 
 export class ScheduledHabitDao {
-    public static async create(
-        userId: number,
-        taskId: number,
-        title?: string,
-        description?: string,
-        quantity?: number,
-        unitId?: number,
-        daysOfWeekIds?: number[],
-        timesOfDayIds?: number[],
-        startDate?: Date,
-        endDate?: Date
-    ) {
+    public static async create(userId: number, scheduledHabit: ScheduledHabit) {
         let unit = {};
-        if (unitId) {
+        if (scheduledHabit.unitId) {
             unit = {
                 unit: {
                     connect: {
-                        id: unitId ?? 1,
+                        id: scheduledHabit.unitId ?? 1,
                     },
                 },
             };
         }
 
-        if (!timesOfDayIds) {
-            timesOfDayIds = [DEFAULT_TIME_OF_DAY_ID];
+        let daysOfWeekIds = scheduledHabit.daysOfWeek?.map((day) => day.id ?? 0);
+
+        let timesOfDayIds = [DEFAULT_TIME_OF_DAY_ID];
+        if (scheduledHabit.timesOfDay) {
+            timesOfDayIds = scheduledHabit.timesOfDay?.map((time) => time.id ?? 0);
         }
 
         return prisma.scheduledHabit.create({
@@ -40,13 +33,15 @@ export class ScheduledHabitDao {
                 },
                 task: {
                     connect: {
-                        id: taskId,
+                        id: scheduledHabit.taskId,
                     },
                 },
                 ...unit,
-                title: title,
-                description: description,
-                quantity: quantity ?? 1,
+                title: scheduledHabit.title,
+                description: scheduledHabit.description,
+                detailsEnabled: scheduledHabit.detailsEnabled === true,
+                quantity: scheduledHabit.quantity ?? 1,
+                daysOfWeekEnabled: scheduledHabit.daysOfWeekEnabled === true,
                 daysOfWeek: {
                     connect: daysOfWeekIds?.map((id) => {
                         return {
@@ -54,6 +49,7 @@ export class ScheduledHabitDao {
                         };
                     }),
                 },
+                timesOfDayEnabled: scheduledHabit.timesOfDayEnabled === true,
                 timesOfDay: {
                     connect: timesOfDayIds?.map((id) => {
                         return {
@@ -61,8 +57,7 @@ export class ScheduledHabitDao {
                         };
                     }),
                 },
-                startDate,
-                endDate,
+                startDate: scheduledHabit.startDate,
             },
             include: {
                 task: true,
@@ -73,73 +68,60 @@ export class ScheduledHabitDao {
         });
     }
 
-    public static async update(
-        id: number,
-        userId: number,
-        title?: string,
-        description?: string,
-        remoteImageUrl?: string,
-        localImage?: string,
-        quantity?: number,
-        unitId?: number,
-        daysOfWeekIds?: number[],
-        timesOfDayIds?: number[],
-        startDate?: Date,
-        endDate?: Date
-    ) {
+    public static async update(userId: number, scheduledHabit: ScheduledHabit) {
         let unitData = {};
-        if (unitId) {
+        if (scheduledHabit.unitId) {
             unitData = {
                 unit: {
                     connect: {
-                        id: unitId ?? 1,
+                        id: scheduledHabit.unitId ?? 1,
                     },
                 },
             };
         }
 
         let titleData = {};
-        if (title) {
+        if (scheduledHabit.title) {
             titleData = {
-                title,
+                title: scheduledHabit.title,
             };
         }
 
         let descriptionData = {};
-        if (description) {
+        if (scheduledHabit.description) {
             descriptionData = {
-                description,
+                description: scheduledHabit.description,
             };
         }
 
         let remoteImageUrlData = {};
-        if (remoteImageUrl) {
+        if (scheduledHabit.remoteImageUrl) {
             remoteImageUrlData = {
-                remoteImageUrl,
+                remoteImageUrl: scheduledHabit.remoteImageUrl,
             };
         }
 
         let localImageData = {};
-        if (localImage) {
+        if (scheduledHabit.localImage) {
             localImageData = {
-                localImage,
+                localImage: scheduledHabit.localImage,
             };
         }
 
         let quantityData = {};
-        if (quantity) {
+        if (scheduledHabit.quantity) {
             quantityData = {
-                quantity,
+                quantity: scheduledHabit.quantity,
             };
         }
 
         let daysOfWeekData = {};
-        if (daysOfWeekIds) {
+        if (scheduledHabit.daysOfWeek) {
             daysOfWeekData = {
                 daysOfWeek: {
-                    set: daysOfWeekIds?.map((id) => {
+                    set: scheduledHabit.daysOfWeek?.map((dayOfWeek) => {
                         return {
-                            id,
+                            id: dayOfWeek.id,
                         };
                     }),
                 },
@@ -147,35 +129,42 @@ export class ScheduledHabitDao {
         }
 
         let timesOfDayData = {};
-        if (timesOfDayIds) {
+        if (scheduledHabit.timesOfDay) {
             timesOfDayData = {
                 timesOfDay: {
-                    set: timesOfDayIds?.map((id) => {
+                    set: scheduledHabit.timesOfDay?.map((timeOfDay) => {
                         return {
-                            id,
+                            id: timeOfDay.id,
                         };
                     }),
                 },
             };
         }
 
-        let startDateData = {};
-        if (startDate) {
-            startDateData = {
-                startDate,
+        let timesOfDayEnabledData = {};
+        if (scheduledHabit.timesOfDayEnabled != undefined) {
+            timesOfDayEnabledData = {
+                timesOfDayEnabled: scheduledHabit.timesOfDayEnabled === true,
             };
         }
 
-        let endDateData = {};
-        if (endDate) {
-            endDateData = {
-                endDate,
+        let daysOfWeekEnabledData = {};
+        if (scheduledHabit.daysOfWeekEnabled != undefined) {
+            daysOfWeekEnabledData = {
+                daysOfWeekEnabled: scheduledHabit.daysOfWeekEnabled === true,
+            };
+        }
+
+        let detailsEnabledData = {};
+        if (scheduledHabit.detailsEnabled != undefined) {
+            detailsEnabledData = {
+                detailsEnabled: scheduledHabit.detailsEnabled === true,
             };
         }
 
         return prisma.scheduledHabit.update({
             where: {
-                id: id,
+                id: scheduledHabit.id,
             },
             data: {
                 user: {
@@ -191,8 +180,9 @@ export class ScheduledHabitDao {
                 ...quantityData,
                 ...daysOfWeekData,
                 ...timesOfDayData,
-                ...startDateData,
-                ...endDateData,
+                ...timesOfDayEnabledData,
+                ...daysOfWeekEnabledData,
+                ...detailsEnabledData,
             },
             include: {
                 task: true,
@@ -247,28 +237,28 @@ export class ScheduledHabitDao {
                 quantity: quantity ?? 1,
                 daysOfWeek: daysOfWeekIds
                     ? {
-                          set: daysOfWeekIds?.map((id) => {
-                              return {
-                                  id,
-                              };
-                          }),
-                      }
+                        set: daysOfWeekIds?.map((id) => {
+                            return {
+                                id,
+                            };
+                        }),
+                    }
                     : undefined,
                 timesOfDay: timesOfDayIds
                     ? {
-                          set: timesOfDayIds?.map((id) => {
-                              return {
-                                  id,
-                              };
-                          }),
-                      }
+                        set: timesOfDayIds?.map((id) => {
+                            return {
+                                id,
+                            };
+                        }),
+                    }
                     : undefined,
                 unit: unitId
                     ? {
-                          connect: {
-                              id: unitId,
-                          },
-                      }
+                        connect: {
+                            id: unitId,
+                        },
+                    }
                     : undefined,
                 startDate,
                 endDate,

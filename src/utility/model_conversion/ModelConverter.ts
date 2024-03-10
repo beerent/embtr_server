@@ -15,7 +15,7 @@ import {
     HabitCategory,
     ScheduledHabit,
     TimeOfDay,
-    DayOfWeek
+    DayOfWeek,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -43,7 +43,7 @@ type PrismaModel =
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
-        return prismaObj.map(ModelConverter.convert<T>);
+        return prismaObj.map(this.convert<T>);
     }
 
     public static convert<T>(prismaObj: PrismaModel): T {
