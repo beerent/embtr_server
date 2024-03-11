@@ -29,6 +29,17 @@ export interface User {
   blockingUsers?: BlockedUser[];
   blockedUsers?: BlockedUser[];
   roles?: Role[];
+  properties?: Property[];
+}
+
+export interface Property {
+  id?: number;
+  userId?: number;
+  user?: User;
+  key?: string;
+  value?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface PushNotificationToken {

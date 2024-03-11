@@ -1,4 +1,4 @@
-import { User as UserModel } from '../../schema';
+import { Property, User as UserModel } from '../../schema';
 import { Response } from './RequestTypes';
 
 export interface GetUserResponse extends Response {
@@ -29,4 +29,20 @@ export interface CreateBlockUserRequest {
 
 export interface UpdatePremiumStatusResponse extends Response {
     user?: UserModel;
+}
+
+export interface GetPropertyResponse extends Response {
+    property?: Property;
+}
+
+export interface GetPropertiesResponse extends Response {
+    properties?: Property[];
+}
+
+export interface CreatePropertyRequest {
+    property: Property;
+}
+
+export interface CreatePropertyResponse extends Response {
+    property?: Property;
 }

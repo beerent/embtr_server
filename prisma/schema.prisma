@@ -39,9 +39,24 @@ model User {
     blockingUsers          BlockedUser[]           @relation("blockingUser")
     blockedUsers           BlockedUser[]           @relation("blockedUser")
     roles                  Role[]
+    properties             Property[]
 
     @@index([username])
     @@map("user")
+}
+
+model Property {
+    id        Int      @id @default(autoincrement())
+    userId    Int      @db.Int
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    key       String   @db.VarChar(255)
+    value     String   @db.VarChar(255)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    @@unique([userId, key])
+    @@index([userId])
+    @@map("property")
 }
 
 model PushNotificationToken {

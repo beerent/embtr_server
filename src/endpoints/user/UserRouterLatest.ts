@@ -8,6 +8,9 @@ import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
 import {
     CreateBlockUserRequest,
+    CreatePropertyRequest,
+    GetPropertiesResponse,
+    GetPropertyResponse,
     GetUserResponse,
     GetUsersResponse,
     UpdatePremiumStatusResponse,
@@ -37,6 +40,7 @@ import { GetTimelineResponse, TimelineData } from '@resources/types/requests/Tim
 import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
+import { UserPropertyService } from '@src/service/UserPropertyService';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -185,6 +189,56 @@ userRouterLatest.post(
 
         const user = await UserService.updatePremiumStatus(context);
         const response: UpdatePremiumStatusResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+userRouterLatest.get(
+    '/:id/property/:property',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    //validate me
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const userId = Number(req.params.id);
+        const key = req.params.property;
+
+        const property = await UserPropertyService.get(context, userId, key);
+        const response: GetPropertyResponse = { ...SUCCESS, property };
+        res.json(response);
+    })
+);
+
+userRouterLatest.get(
+    '/:id/property',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    //validate me
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const userId = Number(req.params.id);
+
+        const properties = await UserPropertyService.getAll(context, userId);
+        const response: GetPropertiesResponse = { ...SUCCESS, properties };
+        res.json(response);
+    })
+);
+
+userRouterLatest.post(
+    '/property',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    //validate me
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: CreatePropertyRequest = req.body;
+        const property = request.property;
+
+        const createdProperty = await UserPropertyService.set(context, property);
+        const response: GetPropertyResponse = { ...SUCCESS, property: createdProperty };
         res.json(response);
     })
 );

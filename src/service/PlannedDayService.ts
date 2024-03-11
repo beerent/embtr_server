@@ -11,7 +11,7 @@ import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
-import { ScheduledHabitUtil } from '@resources/types/util/ScheduledHabitUtil';
+import { ScheduledHabitUtil } from '@src/utility/ScheduledHabitUtil';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
