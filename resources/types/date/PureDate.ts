@@ -73,4 +73,16 @@ export class PureDate {
     public toUtcDate(): Date {
         return new Date(Date.UTC(this.year, this.month - 1, this.day));
     }
+
+    public getYear(): number {
+        return this.year;
+    }
+
+    public getMonth(): number {
+        return this.month;
+    }
+
+    public getDay(): number {
+        return this.day;
+    }
 }

@@ -148,4 +148,21 @@ export class PlannedDayDao {
             });
         } catch (error) { }
     }
+
+    public static async getByUserInDateRange(userId: number, startDate: Date, endDate: Date) {
+        const plannedDays = await prisma.plannedDay.findMany({
+            where: {
+                userId,
+                date: {
+                    gte: startDate,
+                    lte: endDate,
+                },
+            },
+            include: {
+                plannedTasks: true,
+            },
+        });
+
+        return plannedDays;
+    }
 }

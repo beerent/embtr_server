@@ -12,6 +12,8 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { ScheduledHabitUtil } from '@src/utility/ScheduledHabitUtil';
+import { Constants } from '@resources/types/constants/constants';
+import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -37,42 +39,26 @@ export class PlannedDayService {
     ): Promise<boolean> {
         const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(userId, dayKey);
 
-        if (!plannedDay?.plannedTasks) {
+        if (plannedDay.date === undefined) {
             return false;
         }
 
-        if (plannedDay.plannedTasks.length === 0) {
-            return false;
-        }
+        const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
 
-        // 1. get what SHOULD be completed for today
-        const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
         let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
             userId,
             dayOfWeek,
-            plannedDayDate
+            plannedDay.date
+        );
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        const completionState = PlannedDayCommonService.generateCompletionState(
+            scheduledHabitModels,
+            plannedDay.date,
+            plannedDayModel
         );
 
-        // 2. get count of what SHOULD be completed for today
-        const targetCount = scheduledHabits.reduce((acc, scheduledHabit) => {
-            let timeOfDayCount = scheduledHabit.timesOfDay.length;
-            if (timeOfDayCount === 0) {
-                timeOfDayCount = 1;
-            }
-
-            return acc + timeOfDayCount;
-        }, 0);
-
-        // 3. get count of what IS completed for today
-        const completedTasks = plannedDay.plannedTasks.filter(
-            (plannedTask) => (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
-        );
-
-        const removedTasks = plannedDay.plannedTasks.filter((plannedTask) => !plannedTask.active);
-        const completedTaskCount = completedTasks.length + removedTasks.length;
-
-        return completedTaskCount >= targetCount;
+        return completionState === Constants.CompletionState.COMPLETE;
     }
 
     public static async getByUser(
@@ -218,5 +204,71 @@ export class PlannedDayService {
 
         const plannedDayModel: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
         return plannedDayModel;
+    }
+
+    public static async exists(context: Context, userId: number, dayKey: string): Promise<boolean> {
+        const exists = await PlannedDayDao.existsByUserAndDayKey(userId, dayKey);
+        return exists;
+    }
+
+    public static async getInDateRange(
+        context: Context,
+        userId: number,
+        startDate: Date,
+        endDate: Date
+    ) {
+        const plannedDays = await PlannedDayDao.getByUserInDateRange(userId, startDate, endDate);
+        if (!plannedDays) {
+            return [];
+        }
+
+        const plannedDayModels: PlannedDay[] = ModelConverter.convertAll(plannedDays);
+        return plannedDayModels;
+    }
+
+    public static plannedDayIsComplete(scheduledHabits: ScheduledHabit[], plannedDay?: PlannedDay) {
+        if (!plannedDay) {
+            return false;
+        }
+
+        const plannedDayDayOfWeek = plannedDay.date!.getDay() + 1;
+        const scheduledHabitsForDayOfWeek = scheduledHabits.filter(
+            (scheduledHabit) =>
+                scheduledHabit.daysOfWeek?.some((dayOfWeek) => dayOfWeek.id === plannedDayDayOfWeek)
+        );
+
+        const scheduledHabitCount = scheduledHabitsForDayOfWeek.reduce((acc, scheduledHabit) => {
+            let timeOfDayCount = scheduledHabit.timesOfDay?.length ?? 0;
+            if (timeOfDayCount === 0) {
+                timeOfDayCount = 1;
+            }
+
+            return acc + timeOfDayCount;
+        }, 0);
+
+        const plannedTaskCount = plannedDay.plannedTasks?.length ?? 0;
+        if (scheduledHabitCount !== plannedTaskCount) {
+            return false;
+        }
+
+        const complete =
+            (plannedDay.plannedTasks?.length ?? 0) > 0 &&
+            plannedDay.plannedTasks?.every((task) => {
+                if (task.status === Constants.HabitStatus.FAILED) {
+                    return false;
+                }
+
+                if (task.status === Constants.HabitStatus.SKIPPED) {
+                    return true;
+                }
+
+                if (task.active === false) {
+                    return true;
+                }
+
+                return (task.completedQuantity ?? 0) >= (task.quantity ?? 1);
+            });
+
+        return complete;
     }
 }

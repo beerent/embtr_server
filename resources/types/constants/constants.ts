@@ -4,6 +4,14 @@ export namespace Constants {
         INCOMPLETE = 'INCOMPLETE',
         COMPLETE = 'COMPLETE',
         FAILED = 'FAILED',
-        SKIPPED = 'SKIPPED'
+        SKIPPED = 'SKIPPED',
+    }
+
+    export enum CompletionState {
+        INVALID = 'INVALID',
+        INCOMPLETE = 'INCOMPLETE',
+        COMPLETE = 'COMPLETE',
+        FAILED = 'FAILED',
+        SKIPPED = 'SKIPPED',
     }
 }

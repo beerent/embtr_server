@@ -437,6 +437,50 @@ export class ScheduledHabitDao {
         });
     }
 
+    public static async getForUserInDateRange(
+        userId: number,
+        startDate: PureDate,
+        endDate: PureDate
+    ) {
+        return prisma.scheduledHabit.findMany({
+            where: {
+                userId: userId,
+                AND: [
+                    {
+                        OR: [
+                            {
+                                startDate: null,
+                            },
+                            {
+                                startDate: {
+                                    lte: endDate + 'T00:00:00.000Z',
+                                },
+                            },
+                        ],
+                    },
+                    {
+                        OR: [
+                            {
+                                endDate: null,
+                            },
+                            {
+                                endDate: {
+                                    gte: startDate + 'T00:00:00.000Z',
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
+            },
+        });
+    }
+
     public static async getForUserAndDayOfWeekAndDate(
         userId: number,
         dayOfWeek: number,

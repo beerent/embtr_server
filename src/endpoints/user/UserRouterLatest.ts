@@ -246,6 +246,10 @@ userRouterLatest.post(
 /*
  * Daily History
  */
+
+/**
+ * @deprecated on version 2.0.14 (use habitStreakRouter)
+ */
 userRouterLatest.get(
     '/:id/daily-history',
     routeLogger(v),
@@ -356,6 +360,20 @@ userRouterLatest.get(
  */
 userRouterLatest.get(
     '/:userId/habit-journey',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    validateGetUserData,
+    runEndpoint(async (req, res) => {
+        const userId = Number(req.params.userId);
+        const response: GetHabitJourneyResponse = await HabitJourneyService.get(userId);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
+userRouterLatest.get(
+    '/:userId/habit-streak',
     routeLogger(v),
     authenticate,
     authorize,

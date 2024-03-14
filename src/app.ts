@@ -21,6 +21,7 @@ import timelineRouter from '@src/endpoints/timeline/TimelineRouter';
 import healthRouter from '@src/endpoints/health/HealthRouter';
 import reportRouter from './endpoints/report/ReportRouter';
 import scheduledHabitRouter from './endpoints/scheduled_habit/ScheduledHabitRouter';
+import habitStreakRouter from './endpoints/habit_streak/HabitStreakRouter';
 
 const cors = require('cors');
 const app = express();
@@ -69,6 +70,7 @@ app.use('/', dayOfTheWeekRouter);
 app.use('/', marketingRouter);
 app.use('/', timelineRouter);
 app.use('/', reportRouter);
+app.use('/', habitStreakRouter);
 app.use('/', healthRouter);
 
 app.use(handleError);

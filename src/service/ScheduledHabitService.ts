@@ -7,6 +7,9 @@ import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSumma
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
+import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
+import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -146,6 +149,25 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
+    public static async getForDayOfWeekInDateRange(
+        context: Context,
+        userId: number,
+        startDate: PureDate,
+        endDate: PureDate
+    ): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitDao.getForUserInDateRange(
+            userId,
+            startDate,
+            endDate
+        );
+        if (!scheduledHabits) {
+            return [];
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return scheduledHabitModels;
+    }
+
     public static async getHabitSummaries(
         context: Context,
         cutoffDate: PureDate
@@ -201,8 +223,17 @@ export class ScheduledHabitService {
     }
 
     public static async archive(context: Context, id: number, date: PureDate): Promise<void> {
+        const dayKey = DayKeyUtility.getDayKeyFromPureDate(date);
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
+        const plannedTaskHasScheduledHabit = plannedDay?.plannedTasks?.some((task) => {
+            return task.scheduledHabitId === id;
+        });
+
         const utcDate = date.toUtcDate();
-        utcDate.setDate(utcDate.getDate() - 1);
+        if (!plannedTaskHasScheduledHabit) {
+            utcDate.setDate(utcDate.getDate() - 1);
+        }
+
         await ScheduledHabitDao.archive(context.userId, id, utcDate);
     }
 }
