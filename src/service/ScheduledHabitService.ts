@@ -7,7 +7,6 @@ import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSumma
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
-import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 

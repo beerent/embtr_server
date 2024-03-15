@@ -20,7 +20,7 @@ export class ScheduledHabitDao {
         let daysOfWeekIds = scheduledHabit.daysOfWeek?.map((day) => day.id ?? 0);
 
         let timesOfDayIds = [DEFAULT_TIME_OF_DAY_ID];
-        if (scheduledHabit.timesOfDay) {
+        if (scheduledHabit.timesOfDayEnabled === true && scheduledHabit.timesOfDay) {
             timesOfDayIds = scheduledHabit.timesOfDay?.map((time) => time.id ?? 0);
         }
 
