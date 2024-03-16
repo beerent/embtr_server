@@ -4,9 +4,13 @@ import { Context } from '@src/general/auth/Context';
 import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { ScheduledHabitService } from './ScheduledHabitService';
-import { PlannedDay, ScheduledHabit } from '@resources/schema';
+import { PlannedDay, Property, ScheduledHabit } from '@resources/schema';
 import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { Constants } from '@resources/types/constants/constants';
+import { UserPropertyKey, UserPropertyService } from './UserPropertyService';
+import { HabitStreakEvents } from '@src/event/HabitStreakEvents';
+import eventBus from '@src/event/eventBus';
+import { PlannedDayDao } from '@src/database/PlannedDayDao';
 
 // "comment" - stronkbad - 2024-03-13
 
@@ -43,18 +47,57 @@ export class HabitStreakService {
             plannedDaysInDateRange
         );
 
+        let currentHabitStreak = await this.getCurrentHabitStreak(context, userId);
+
         const habitStreak: HabitStreak = {
             startDate: PureDate.fromDateOnServer(startDate),
             medianDate: PureDate.fromDateOnServer(medianDate),
             endDate: PureDate.fromDateOnServer(endDate),
 
-            currentStreak: 0,
+            currentStreak: currentHabitStreak,
             longestStreak: 0,
             streakRank: 0,
             results: habitStreakResults,
         };
 
         return habitStreak;
+    }
+
+    public static async fullPopulateCurrentStreak(context: Context, userId: number) {
+        let startDate = await this.getStartDateForUser(context, userId);
+        const endDate = await this.getEndDateForUser(context, userId);
+        if (startDate === undefined) {
+            startDate = endDate;
+        }
+
+        const statuses = await PlannedDayDao.getCompletionStatusesForDateRange(
+            userId,
+            startDate,
+            endDate
+        );
+        statuses.reverse();
+
+        let completionCount = 0;
+        for (const status of statuses) {
+            if (status.status === Constants.CompletionState.COMPLETE) {
+                completionCount++;
+            } else {
+                break;
+            }
+        }
+
+        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_CURRENT;
+        const property: Property = {
+            key,
+            value: completionCount.toString(),
+        };
+
+        UserPropertyService.set(context, property);
+    }
+
+    private static async getStartDateForUser(context: Context, userId: number) {
+        const plannedDay = await PlannedDayDao.getFirst(userId);
+        return plannedDay?.date;
     }
 
     private static async getEndDateForUser(context: Context, userId: number) {
@@ -128,5 +171,39 @@ export class HabitStreakService {
         }
 
         return habitStreakResult;
+    }
+
+    private static async getCurrentHabitStreak(context: Context, userId: number): Promise<number> {
+        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_CURRENT;
+        const currentStreakProperty = await UserPropertyService.get(context, userId, key);
+
+        if (currentStreakProperty === undefined) {
+            this.emitBackPopulateCurrentHabitStreak(context, userId);
+            return 0;
+        }
+
+        const valueString = currentStreakProperty.value;
+        if (valueString === undefined) {
+            this.emitBackPopulateCurrentHabitStreak(context, userId);
+            return 0;
+        }
+
+        const value = parseInt(valueString);
+        if (isNaN(value)) {
+            this.emitBackPopulateCurrentHabitStreak(context, userId);
+            return 0;
+        }
+
+        return value;
+    }
+
+    private static async emitBackPopulateCurrentHabitStreak(context: Context, userId: number) {
+        const option = HabitStreakEvents.Option.FULL_POPULATE_CURRENT_STREAK;
+        const type: HabitStreakEvents.Type.FullPopulateCurrentStreakEvent = {
+            context,
+            userId,
+        };
+
+        eventBus.emit(option, type);
     }
 }

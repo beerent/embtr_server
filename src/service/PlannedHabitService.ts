@@ -6,6 +6,9 @@ import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
+import { PlannedDayService } from './PlannedDayService';
+import { PlannedDayEvents } from '@src/event/PlannedDayEvents';
+import eventBus from '@src/event/eventBus';
 
 export class PlannedHabitService {
     public static async getById(context: Context, id: number): Promise<PlannedTask> {
@@ -52,6 +55,9 @@ export class PlannedHabitService {
         }
         plannedTask.plannedDayId = plannedDay.id;
 
+        // not awaiting so we don't block the response
+        PlannedDayService.updateCompletionStatus(context, plannedDay.id);
+
         const createdPlannedTask = await PlannedHabitDao.create(plannedTask);
         if (!createdPlannedTask) {
             throw new ServiceException(
@@ -86,6 +92,12 @@ export class PlannedHabitService {
                 'failed to update planned task'
             );
         }
+
+        // trigger long running external process
+        this.triggerUpdatePlannedDayCompletionStatusEvent(
+            context,
+            existingPlannedTask.plannedDayId
+        );
 
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
         // const completedChallenges =
@@ -122,5 +134,18 @@ export class PlannedHabitService {
         );
 
         return plannedHabit?.id;
+    }
+
+    private static triggerUpdatePlannedDayCompletionStatusEvent(
+        context: Context,
+        plannedDayId: number
+    ) {
+        const option = PlannedDayEvents.Option.UPDATE_PLANNED_DAY_COMPLETION_STATUS;
+        const event: PlannedDayEvents.Type.PlannedDayCompletionStatusUpdateEvent = {
+            context,
+            plannedDayId,
+        };
+
+        eventBus.emit(option, event);
     }
 }

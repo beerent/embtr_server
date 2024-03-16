@@ -21,6 +21,20 @@ interface ScheduledHabitTimeOfDay {
 }
 
 export class PlannedDayService {
+    public static async getByUserIdAndDayKey(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDayModel> {
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+        if (plannedDay) {
+            const plannedDayModel: PlannedDayModel = ModelConverter.convert(plannedDay);
+            return plannedDayModel;
+        }
+
+        throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+    }
+
     public static async getById(context: Context, id: number): Promise<PlannedDayModel> {
         const plannedDay = await PlannedDayDao.get(id);
 
@@ -37,10 +51,19 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<boolean> {
+        const completionStatus = await this.getCompletionStatus(context, userId, dayKey);
+        return completionStatus === Constants.CompletionState.COMPLETE;
+    }
+
+    public static async getCompletionStatus(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<Constants.CompletionState> {
         const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(userId, dayKey);
 
         if (plannedDay.date === undefined) {
-            return false;
+            return Constants.CompletionState.INVALID;
         }
 
         const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
@@ -58,7 +81,7 @@ export class PlannedDayService {
             plannedDayModel
         );
 
-        return completionState === Constants.CompletionState.COMPLETE;
+        return completionState;
     }
 
     public static async getByUser(
@@ -270,5 +293,55 @@ export class PlannedDayService {
             });
 
         return complete;
+    }
+
+    public static async updateCompletionStatus(context: Context, plannedDayId: number) {
+        const plannedDay = await this.getById(context, plannedDayId);
+        if (!plannedDay?.dayKey) {
+            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+        }
+
+        const completionStatus = await this.getCompletionStatus(
+            context,
+            context.userId,
+            plannedDay.dayKey
+        );
+        plannedDay.status = completionStatus;
+
+        const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
+        return updatedPlannedDay;
+    }
+
+    public static async update(context: Context, plannedDay: PlannedDay) {
+        const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
+        if (!updatedPlannedDay) {
+            throw new ServiceException(
+                500,
+                Code.UPDATE_PLANNED_DAY_FAILED,
+                'failed to update planned day'
+            );
+        }
+
+        const plannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
+        return plannedDayModel;
+    }
+
+    public static async getPlannedDayIdsForUser(
+        context: Context,
+        userId: number
+    ): Promise<number[]> {
+        const plannedDayKeys = await PlannedDayDao.getPlannedDayIdsForUser(userId);
+        return plannedDayKeys;
+    }
+
+    public static async backPopulateCompletionStatuses(context: Context, userId: number) {
+        const plannedDayIds = await PlannedDayService.getPlannedDayIdsForUser(context, userId);
+        try {
+            for (const plannedDayId of plannedDayIds) {
+                await PlannedDayService.updateCompletionStatus(context, plannedDayId);
+            }
+        } catch (error) {
+            console.error('Failed to back populate planned day completion statuses', error);
+        }
     }
 }

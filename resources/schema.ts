@@ -75,6 +75,7 @@ export interface PlannedDay {
   userId?: number;
   dayKey?: string;
   date?: Date;
+  status?: string;
   createdAt?: Date;
   updatedAt?: Date;
   plannedTasks?: PlannedTask[];

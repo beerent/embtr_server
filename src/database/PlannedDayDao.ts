@@ -1,5 +1,11 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
+import { PlannedDay } from '@resources/schema';
+
+export interface QueryResults {
+    date: Date;
+    status: string;
+}
 
 export const PlannedDayGetInclude = {
     user: true,
@@ -164,5 +170,80 @@ export class PlannedDayDao {
         });
 
         return plannedDays;
+    }
+
+    public static async update(plannedDay: PlannedDay) {
+        return await prisma.plannedDay.update({
+            where: {
+                id: plannedDay.id,
+            },
+            data: {
+                status: plannedDay.status,
+            },
+        });
+    }
+
+    public static async getPlannedDayIdsForUser(userId: number): Promise<number[]> {
+        const plannedDays = await prisma.plannedDay.findMany({
+            where: {
+                userId,
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return plannedDays.map((plannedDay) => plannedDay.id);
+    }
+
+    public static async getFirst(userId: number) {
+        return await prisma.plannedDay.findFirst({
+            where: {
+                userId,
+            },
+            orderBy: {
+                date: 'asc',
+            },
+            include: PlannedDayInclude,
+        });
+    }
+
+    public static async getCompletionStatusesForDateRange(
+        userId: number,
+        startDate: Date,
+        endDate: Date
+    ) {
+        const startDateString = startDate
+            .toISOString()
+            .replace('T', ' ')
+            .replace('Z', '')
+            .split(' ')[0];
+        const endDateString = endDate
+            .toISOString()
+            .replace('T', ' ')
+            .replace('Z', '')
+            .split(' ')[0];
+
+        const results: QueryResults[] = await prisma.$queryRaw(
+            Prisma.sql`
+                SELECT all_dates.date, p.status
+                FROM (
+                    SELECT DATE(${startDateString}) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date
+                    FROM (
+                        SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+                    ) AS a
+                    CROSS JOIN (
+                        SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+                    ) AS b
+                    CROSS JOIN (
+                        SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9
+                    ) AS c
+                    WHERE DATE(${startDateString}) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY BETWEEN ${startDateString} AND ${endDateString}
+                ) AS all_dates
+                LEFT JOIN planned_day AS p ON all_dates.date = p.date
+                ORDER BY all_dates.date ASC;
+            `
+        );
+        return results;
     }
 }

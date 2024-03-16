@@ -99,6 +99,7 @@ model PlannedDay {
     userId               Int                    @db.Int
     dayKey               String                 @db.VarChar(10)
     date                 DateTime               @db.Date
+    status               String?                @db.VarChar(225)
     createdAt            DateTime               @default(now())
     updatedAt            DateTime               @default(now()) @updatedAt
     plannedTasks         PlannedTask[]
