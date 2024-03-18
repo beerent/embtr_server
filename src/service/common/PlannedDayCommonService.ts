@@ -1,11 +1,11 @@
-import { ScheduledHabit, PlannedDay } from '@resources/schema';
+import { ScheduledHabit, PlannedTask } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 
 export class PlannedDayCommonService {
     public static generateCompletionState(
         scheduledHabits: ScheduledHabit[],
         plannedDayDate: Date,
-        plannedDay?: PlannedDay
+        plannedHabits: PlannedTask[]
     ): Constants.CompletionState {
         const scheduledHabitCount = this.getScheduledActiveHabitCount(
             scheduledHabits,
@@ -18,19 +18,14 @@ export class PlannedDayCommonService {
         // at this point we do have expected scheduled habits
         // ==================================================================
 
-        // user hasn't started the day, consider it incomplete
-        if (!plannedDay) {
-            return Constants.CompletionState.FAILED;
-        }
-
-        const plannedTaskCount = plannedDay.plannedTasks?.length ?? 0;
+        const plannedTaskCount = plannedHabits.length ?? 0;
 
         // user hasn't started all tasks, consider it incomplete
         if (scheduledHabitCount !== plannedTaskCount) {
             return Constants.CompletionState.FAILED;
         }
 
-        const hasFailed = plannedDay.plannedTasks?.some((task) => {
+        const hasFailed = plannedHabits?.some((task) => {
             if (task.active === false) {
                 return false;
             }
@@ -42,7 +37,7 @@ export class PlannedDayCommonService {
         }
 
         const complete: boolean =
-            plannedDay.plannedTasks?.every((task) => {
+            plannedHabits?.every((task) => {
                 if (task.active === false) {
                     return true;
                 }

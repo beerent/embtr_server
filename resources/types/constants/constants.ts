@@ -14,4 +14,17 @@ export namespace Constants {
         FAILED = 'FAILED',
         SKIPPED = 'SKIPPED',
     }
+
+    export const getCompletionState = (value: string) => {
+        switch (value) {
+            case 'COMPLETE':
+                return CompletionState.COMPLETE;
+            case 'FAILED':
+                return CompletionState.FAILED;
+            case 'SKIPPED':
+                return CompletionState.SKIPPED;
+        }
+
+        return CompletionState.INVALID;
+    };
 }

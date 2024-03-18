@@ -8,6 +8,8 @@ import { Role } from './roles/Roles';
 import { AccountService } from './service/AccountService';
 import { UserService } from './service/UserService';
 import { RevenueCatService } from './service/internal/RevenueCatService';
+import { PlannedDayService } from './service/PlannedDayService';
+import { HabitStreakService } from './service/HabitStreakService';
 
 const adminContext: Context = {
     userId: 1,
@@ -123,6 +125,56 @@ const handleCommandIsPremium = async (email: string) => {
     }
 };
 
+const handleCommandUpdateAllPlannedDayStatusesForAllUsers = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+    for (const user of users) {
+        if (!user.id) {
+            continue;
+        }
+
+        count++;
+
+        await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
+    }
+};
+
+const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) => {
+    const user = await UserService.getByEmail(email);
+    if (!user.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
+};
+
+const handleCommandUpdateUserStreaks = async (email: string) => {
+    const user = await UserService.getByEmail(email);
+    if (!user.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await HabitStreakService.fullPopulateCurrentStreak(adminContext, user.id);
+    await HabitStreakService.fullPopulateLongestStreak(adminContext, user.id);
+};
+
+const handleCommandUpdateAllUserStreaks = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+    for (const user of users) {
+        if (!user.id) {
+            continue;
+        }
+
+        count++;
+
+        await HabitStreakService.fullPopulateCurrentStreak(adminContext, user.id);
+        await HabitStreakService.fullPopulateLongestStreak(adminContext, user.id);
+    }
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -207,6 +259,22 @@ const processCommand = async (command: string) => {
 
         case 'isPremium':
             await handleCommandIsPremium(email);
+            break;
+
+        case 'updateAllUsersPlannedDayStatuses':
+            await handleCommandUpdateAllPlannedDayStatusesForAllUsers();
+            break;
+
+        case 'updateUserPlannedDayStatuses':
+            await handleCommandUpdateAllPlannedDayStatusesForUser(email);
+            break;
+
+        case 'updateUserStreaks':
+            await handleCommandUpdateUserStreaks(email);
+            break;
+
+        case 'updateAllUserStreaks':
+            await handleCommandUpdateAllUserStreaks();
             break;
 
         default:

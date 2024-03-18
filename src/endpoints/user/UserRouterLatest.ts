@@ -237,7 +237,7 @@ userRouterLatest.post(
         const request: CreatePropertyRequest = req.body;
         const property = request.property;
 
-        const createdProperty = await UserPropertyService.set(context, property);
+        const createdProperty = await UserPropertyService.set(context, context.userId, property);
         const response: GetPropertyResponse = { ...SUCCESS, property: createdProperty };
         res.json(response);
     })

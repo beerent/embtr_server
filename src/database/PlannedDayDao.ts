@@ -241,6 +241,7 @@ export class PlannedDayDao {
                     WHERE DATE(${startDateString}) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY BETWEEN ${startDateString} AND ${endDateString}
                 ) AS all_dates
                 LEFT JOIN planned_day AS p ON all_dates.date = p.date
+                WHERE p.userId = ${userId}
                 ORDER BY all_dates.date ASC;
             `
         );

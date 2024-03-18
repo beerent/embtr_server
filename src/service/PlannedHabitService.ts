@@ -6,9 +6,7 @@ import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
-import { PlannedDayService } from './PlannedDayService';
-import { PlannedDayEvents } from '@src/event/PlannedDayEvents';
-import eventBus from '@src/event/eventBus';
+import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
 
 export class PlannedHabitService {
     public static async getById(context: Context, id: number): Promise<PlannedTask> {
@@ -19,6 +17,17 @@ export class PlannedHabitService {
 
         const plannedHabitModel: PlannedTask = ModelConverter.convert(plannedHabit);
         return plannedHabitModel;
+    }
+
+    public static async getAllByPlannedDayId(
+        context: Context,
+        plannedDayId: number
+    ): Promise<PlannedTask[]> {
+        const plannedHabits = await PlannedHabitDao.getAllByPlannedDayId(plannedDayId);
+        const plannedHabitModels: PlannedTask[] = plannedHabits.map((plannedHabit) =>
+            ModelConverter.convert(plannedHabit)
+        );
+        return plannedHabitModels;
     }
 
     public static async createOrUpdate(
@@ -55,9 +64,6 @@ export class PlannedHabitService {
         }
         plannedTask.plannedDayId = plannedDay.id;
 
-        // not awaiting so we don't block the response
-        PlannedDayService.updateCompletionStatus(context, plannedDay.id);
-
         const createdPlannedTask = await PlannedHabitDao.create(plannedTask);
         if (!createdPlannedTask) {
             throw new ServiceException(
@@ -66,6 +72,8 @@ export class PlannedHabitService {
                 'failed to create planned task'
             );
         }
+
+        PlannedHabitEventDispatcher.onCreated(context, createdPlannedTask.id);
 
         const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
         return plannedTaskModel;
@@ -93,11 +101,7 @@ export class PlannedHabitService {
             );
         }
 
-        // trigger long running external process
-        this.triggerUpdatePlannedDayCompletionStatusEvent(
-            context,
-            existingPlannedTask.plannedDayId
-        );
+        PlannedHabitEventDispatcher.onUpdated(context, existingPlannedTask.id);
 
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
         // const completedChallenges =
@@ -134,18 +138,5 @@ export class PlannedHabitService {
         );
 
         return plannedHabit?.id;
-    }
-
-    private static triggerUpdatePlannedDayCompletionStatusEvent(
-        context: Context,
-        plannedDayId: number
-    ) {
-        const option = PlannedDayEvents.Option.UPDATE_PLANNED_DAY_COMPLETION_STATUS;
-        const event: PlannedDayEvents.Type.PlannedDayCompletionStatusUpdateEvent = {
-            context,
-            plannedDayId,
-        };
-
-        eventBus.emit(option, event);
     }
 }

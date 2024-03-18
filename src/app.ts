@@ -22,6 +22,7 @@ import healthRouter from '@src/endpoints/health/HealthRouter';
 import reportRouter from './endpoints/report/ReportRouter';
 import scheduledHabitRouter from './endpoints/scheduled_habit/ScheduledHabitRouter';
 import habitStreakRouter from './endpoints/habit_streak/HabitStreakRouter';
+import '@src/event/event_listener_imports';
 
 const cors = require('cors');
 const app = express();

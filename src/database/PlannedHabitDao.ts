@@ -159,6 +159,17 @@ export class PlannedHabitDao {
         });
     }
 
+    public static async getAllByPlannedDayId(plannedDayId: number) {
+        return prisma.plannedTask.findMany({
+            where: {
+                plannedDayId,
+            },
+            include: {
+                ...includes,
+            },
+        });
+    }
+
     public static async getByPlannedDayIdAndTaskId(plannedDayId: number, taskId: number) {
         return prisma.plannedTask.findMany({
             where: {

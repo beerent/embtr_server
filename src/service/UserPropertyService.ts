@@ -7,6 +7,7 @@ import { Code } from '@resources/codes';
 
 export enum UserPropertyKey {
     HABIT_STREAK_CURRENT = 'HABIT_STREAK_CURRENT',
+    HABIT_STREAK_LONGEST = 'HABIT_STREAK_LONGEST',
 }
 
 export class UserPropertyService {
@@ -31,7 +32,11 @@ export class UserPropertyService {
         return propertyModels;
     }
 
-    public static async set(context: Context, property: Property): Promise<Property> {
+    public static async set(
+        context: Context,
+        userId: number,
+        property: Property
+    ): Promise<Property> {
         if (!property.key || !property.value) {
             throw new ServiceException(
                 400,
@@ -40,11 +45,7 @@ export class UserPropertyService {
             );
         }
 
-        const createdProperty = await UserPropertyDao.set(
-            context.userId,
-            property.key,
-            property.value
-        );
+        const createdProperty = await UserPropertyDao.set(userId, property.key, property.value);
         const createdPropertyModel: Property = ModelConverter.convert(createdProperty);
 
         return createdPropertyModel;

@@ -3,13 +3,9 @@ import { HabitStreak, HabitStreakResult } from '@resources/types/dto/HabitStreak
 import { Context } from '@src/general/auth/Context';
 import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
-import { ScheduledHabitService } from './ScheduledHabitService';
-import { PlannedDay, Property, ScheduledHabit } from '@resources/schema';
-import { PlannedDayCommonService } from './common/PlannedDayCommonService';
+import { PlannedDay, Property } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyKey, UserPropertyService } from './UserPropertyService';
-import { HabitStreakEvents } from '@src/event/HabitStreakEvents';
-import eventBus from '@src/event/eventBus';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 
 // "comment" - stronkbad - 2024-03-13
@@ -26,13 +22,6 @@ export class HabitStreakService {
         const medianDate = new Date(endDate);
         medianDate.setDate(endDate.getDate() - Math.floor(days / 2));
 
-        const habitSchedulesInDateRange = await ScheduledHabitService.getForDayOfWeekInDateRange(
-            context,
-            userId,
-            PureDate.fromDateOnServer(startDate),
-            PureDate.fromDateOnServer(endDate)
-        );
-
         const plannedDaysInDateRange = await PlannedDayService.getInDateRange(
             context,
             userId,
@@ -40,14 +29,14 @@ export class HabitStreakService {
             endDate
         );
 
-        const habitStreakResults: HabitStreakResult[] = this.getHabitStreak(
+        const habitStreakResults: HabitStreakResult[] = await this.getHabitStreak(
             startDate,
             endDate,
-            habitSchedulesInDateRange,
             plannedDaysInDateRange
         );
 
-        let currentHabitStreak = await this.getCurrentHabitStreak(context, userId);
+        const currentHabitStreak = await this.getCurrentHabitStreak(context, userId);
+        const lonestHabitStreak = await this.getLongestHabitStreak(context, userId);
 
         const habitStreak: HabitStreak = {
             startDate: PureDate.fromDateOnServer(startDate),
@@ -55,7 +44,7 @@ export class HabitStreakService {
             endDate: PureDate.fromDateOnServer(endDate),
 
             currentStreak: currentHabitStreak,
-            longestStreak: 0,
+            longestStreak: lonestHabitStreak,
             streakRank: 0,
             results: habitStreakResults,
         };
@@ -81,6 +70,8 @@ export class HabitStreakService {
         for (const status of statuses) {
             if (status.status === Constants.CompletionState.COMPLETE) {
                 completionCount++;
+            } else if (status.status === Constants.CompletionState.INVALID) {
+                continue;
             } else {
                 break;
             }
@@ -92,7 +83,46 @@ export class HabitStreakService {
             value: completionCount.toString(),
         };
 
-        UserPropertyService.set(context, property);
+        console.log('Setting current habit streak to', completionCount);
+        UserPropertyService.set(context, userId, property);
+    }
+
+    public static async fullPopulateLongestStreak(context: Context, userId: number) {
+        let startDate = await this.getStartDateForUser(context, userId);
+        const endDate = await this.getEndDateForUser(context, userId);
+        if (startDate === undefined) {
+            startDate = endDate;
+        }
+
+        const statuses = await PlannedDayDao.getCompletionStatusesForDateRange(
+            userId,
+            startDate,
+            endDate
+        );
+
+        let currentStreak = 0;
+        let longestStreak = 0;
+        for (const status of statuses) {
+            if (status.status === Constants.CompletionState.COMPLETE) {
+                currentStreak++;
+                if (currentStreak > longestStreak) {
+                    longestStreak = currentStreak;
+                }
+            } else if (status.status === Constants.CompletionState.INVALID) {
+                continue;
+            } else {
+                currentStreak = 0;
+            }
+        }
+
+        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_LONGEST;
+        const property: Property = {
+            key,
+            value: longestStreak.toString(),
+        };
+
+        console.log('Setting longest habit streak to', longestStreak);
+        UserPropertyService.set(context, userId, property);
     }
 
     private static async getStartDateForUser(context: Context, userId: number) {
@@ -110,7 +140,6 @@ export class HabitStreakService {
             userId,
             latestPossibleEndDayKey
         );
-
         if (latestIsComplete) {
             return latestPossibleEndDate;
         }
@@ -142,12 +171,7 @@ export class HabitStreakService {
         return utc14Date;
     }
 
-    private static getHabitStreak(
-        startDate: Date,
-        endDate: Date,
-        scheduledHabits: ScheduledHabit[],
-        plannedDays: PlannedDay[]
-    ) {
+    private static async getHabitStreak(startDate: Date, endDate: Date, plannedDays: PlannedDay[]) {
         const endDateUtc = new Date(endDate);
         endDateUtc.setUTCHours(0, 0, 0, 0);
 
@@ -159,14 +183,10 @@ export class HabitStreakService {
             const day = plannedDays.find(
                 (plannedDay) => plannedDay.date?.toDateString() === d.toDateString()
             );
-            const dayKey = DayKeyUtility.getDayKey(d);
-
-            const completionState: Constants.CompletionState =
-                PlannedDayCommonService.generateCompletionState(scheduledHabits, d, day);
 
             habitStreakResult.push({
-                dayKey,
-                result: completionState,
+                dayKey: DayKeyUtility.getDayKey(d),
+                result: Constants.getCompletionState(day?.status ?? ''),
             });
         }
 
@@ -178,32 +198,40 @@ export class HabitStreakService {
         const currentStreakProperty = await UserPropertyService.get(context, userId, key);
 
         if (currentStreakProperty === undefined) {
-            this.emitBackPopulateCurrentHabitStreak(context, userId);
             return 0;
         }
 
         const valueString = currentStreakProperty.value;
         if (valueString === undefined) {
-            this.emitBackPopulateCurrentHabitStreak(context, userId);
             return 0;
         }
 
         const value = parseInt(valueString);
         if (isNaN(value)) {
-            this.emitBackPopulateCurrentHabitStreak(context, userId);
             return 0;
         }
 
         return value;
     }
 
-    private static async emitBackPopulateCurrentHabitStreak(context: Context, userId: number) {
-        const option = HabitStreakEvents.Option.FULL_POPULATE_CURRENT_STREAK;
-        const type: HabitStreakEvents.Type.FullPopulateCurrentStreakEvent = {
-            context,
-            userId,
-        };
+    private static async getLongestHabitStreak(context: Context, userId: number): Promise<number> {
+        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_LONGEST;
+        const longestStreakProperty = await UserPropertyService.get(context, userId, key);
 
-        eventBus.emit(option, type);
+        if (longestStreakProperty === undefined) {
+            return 0;
+        }
+
+        const valueString = longestStreakProperty.value;
+        if (valueString === undefined) {
+            return 0;
+        }
+
+        const value = parseInt(valueString);
+        if (isNaN(value)) {
+            return 0;
+        }
+
+        return value;
     }
 }
