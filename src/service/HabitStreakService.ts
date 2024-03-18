@@ -7,6 +7,7 @@ import { PlannedDay, Property } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyKey, UserPropertyService } from './UserPropertyService';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { DateUtility } from '@src/utility/date/DateUtility';
 
 // "comment" - stronkbad - 2024-03-13
 
@@ -133,18 +134,37 @@ export class HabitStreakService {
     private static async getEndDateForUser(context: Context, userId: number) {
         const earliestPossibleEndDate = this.getLastCompletedDayInAllTimezones();
         const latestPossibleEndDate = this.getFirstCompletedDayInAllTimezones();
-        const latestPossibleEndDayKey = DayKeyUtility.getDayKey(latestPossibleEndDate);
 
-        const latestIsComplete = await PlannedDayService.getIsComplete(
-            context,
-            userId,
-            latestPossibleEndDayKey
+        const allDates = DateUtility.getAllDatesInBetween(
+            earliestPossibleEndDate,
+            latestPossibleEndDate
         );
-        if (latestIsComplete) {
-            return latestPossibleEndDate;
+        allDates.reverse();
+
+        let currentDate = earliestPossibleEndDate;
+        for (const date of allDates) {
+            const dayKey = DayKeyUtility.getDayKey(date);
+            const plannedDayExists = await PlannedDayService.exists(context, userId, dayKey);
+            if (!plannedDayExists) {
+                continue;
+            }
+
+            const completionStatus = await PlannedDayService.getCompletionStatus(
+                context,
+                userId,
+                dayKey
+            );
+
+            if (
+                completionStatus === Constants.CompletionState.COMPLETE ||
+                completionStatus === Constants.CompletionState.INVALID
+            ) {
+                currentDate = date;
+                break;
+            }
         }
 
-        return earliestPossibleEndDate;
+        return currentDate;
     }
 
     private static getLastCompletedDayInAllTimezones(): Date {
@@ -165,7 +185,7 @@ export class HabitStreakService {
         const utc14Time = currentDate.getTime() + utc14Offset * 60 * 1000;
         const utc14Date = new Date(utc14Time);
 
-        utc14Date.setDate(utc14Date.getDate() - 1);
+        utc14Date.setDate(utc14Date.getDate());
         utc14Date.setUTCHours(0, 0, 0, 0);
 
         return utc14Date;

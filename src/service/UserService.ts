@@ -210,7 +210,7 @@ export class UserService {
         return false;
     }
 
-    private static async getByUsername(username: string): Promise<User | null> {
+    public static async getByUsername(username: string): Promise<User | null> {
         const user = await UserDao.getByUsername(username);
         if (!user) {
             return null;

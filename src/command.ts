@@ -134,14 +134,15 @@ const handleCommandUpdateAllPlannedDayStatusesForAllUsers = async () => {
         }
 
         count++;
+        console.log('updating (', count, '/', users.length, ')');
 
         await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
     }
 };
 
 const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) => {
-    const user = await UserService.getByEmail(email);
-    if (!user.id) {
+    const user = await UserService.getByUsername(email);
+    if (!user?.id) {
         console.log('user not found');
         return;
     }
@@ -150,8 +151,8 @@ const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) =>
 };
 
 const handleCommandUpdateUserStreaks = async (email: string) => {
-    const user = await UserService.getByEmail(email);
-    if (!user.id) {
+    const user = await UserService.getByUsername(email);
+    if (!user?.id) {
         console.log('user not found');
         return;
     }
@@ -169,6 +170,7 @@ const handleCommandUpdateAllUserStreaks = async () => {
         }
 
         count++;
+        console.log('updating (', count, '/', users.length, ')');
 
         await HabitStreakService.fullPopulateCurrentStreak(adminContext, user.id);
         await HabitStreakService.fullPopulateLongestStreak(adminContext, user.id);
