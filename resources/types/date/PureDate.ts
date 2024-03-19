@@ -1,3 +1,10 @@
+/* Dear future me. I have no idea what is going on here, but since you're reading this,
+ * I assume you're going to make changes. Please increment this counter after your
+ * (failed) attempts at optimizing. TOTAL_HOURS_WASTED_HERE: 0
+ *
+ * - Sydgren - 2024-03-17
+ */
+
 export class PureDate {
     private readonly year: number;
     private readonly month: number;

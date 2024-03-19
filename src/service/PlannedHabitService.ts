@@ -112,14 +112,14 @@ export class PlannedHabitService {
 
     private static getUpdatedStatus(plannedTask: PlannedTask): string {
         if (
-            (plannedTask.status ?? Constants.HabitStatus.INCOMPLETE) ===
-            Constants.HabitStatus.INCOMPLETE &&
+            (plannedTask.status ?? Constants.CompletionState.INCOMPLETE) ===
+            Constants.CompletionState.INCOMPLETE &&
             (plannedTask.completedQuantity ?? 0) >= (plannedTask.quantity ?? 1)
         ) {
-            return Constants.HabitStatus.COMPLETE;
+            return Constants.CompletionState.COMPLETE;
         }
 
-        return plannedTask.status ?? Constants.HabitStatus.INCOMPLETE;
+        return plannedTask.status ?? Constants.CompletionState.INCOMPLETE;
     }
 
     private static async getIdByUniqueData(

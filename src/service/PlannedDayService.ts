@@ -54,11 +54,6 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<boolean> {
-        const exists = await PlannedDayDao.existsByUserAndDayKey(userId, dayKey);
-        if (!exists) {
-            return false;
-        }
-
         const completionStatus = await this.getCompletionStatus(context, userId, dayKey);
         return completionStatus === Constants.CompletionState.COMPLETE;
     }
@@ -67,10 +62,10 @@ export class PlannedDayService {
         context: Context,
         userId: number,
         dayKey: string
-    ): Promise<Constants.CompletionState> {
+    ): Promise<Constants.CompletionState | undefined> {
         const exists = await PlannedDayDao.existsByUserAndDayKey(userId, dayKey);
         if (!exists) {
-            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+            return undefined;
         }
 
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
@@ -243,7 +238,7 @@ export class PlannedDayService {
         return exists;
     }
 
-    public static async getInDateRange(
+    public static async getAllInDateRange(
         context: Context,
         userId: number,
         startDate: Date,
@@ -286,11 +281,11 @@ export class PlannedDayService {
         const complete =
             (plannedDay.plannedTasks?.length ?? 0) > 0 &&
             plannedDay.plannedTasks?.every((task) => {
-                if (task.status === Constants.HabitStatus.FAILED) {
+                if (task.status === Constants.CompletionState.FAILED) {
                     return false;
                 }
 
-                if (task.status === Constants.HabitStatus.SKIPPED) {
+                if (task.status === Constants.CompletionState.SKIPPED) {
                     return true;
                 }
 

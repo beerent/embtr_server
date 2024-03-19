@@ -148,7 +148,7 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
-    public static async getForDayOfWeekInDateRange(
+    public static async getAllForUserInDateRange(
         context: Context,
         userId: number,
         startDate: PureDate,

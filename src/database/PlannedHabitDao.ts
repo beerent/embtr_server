@@ -66,7 +66,7 @@ export class PlannedHabitDao {
                 description: plannedTask.description,
                 quantity: plannedTask.quantity ?? 1,
                 completedQuantity: plannedTask.completedQuantity ?? 0,
-                status: plannedTask.status ?? Constants.HabitStatus.INCOMPLETE,
+                status: plannedTask.status ?? Constants.CompletionState.INCOMPLETE,
                 active: plannedTask.active ?? true,
                 remoteImageUrl: plannedTask.remoteImageUrl,
                 localImage: plannedTask.localImage,
@@ -81,7 +81,7 @@ export class PlannedHabitDao {
     public static async update(plannedTask: PlannedTaskModel): Promise<PlannedTaskFull> {
         const {
             active = true,
-            status = Constants.HabitStatus.INCOMPLETE,
+            status = Constants.CompletionState.INCOMPLETE,
             title = '',
             description = '',
             remoteImageUrl = '',

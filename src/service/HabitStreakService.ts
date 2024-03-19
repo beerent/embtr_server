@@ -3,11 +3,13 @@ import { HabitStreak, HabitStreakResult } from '@resources/types/dto/HabitStreak
 import { Context } from '@src/general/auth/Context';
 import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
-import { PlannedDay, Property } from '@resources/schema';
+import { PlannedDay, Property, ScheduledHabit } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyKey, UserPropertyService } from './UserPropertyService';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { DateUtility } from '@src/utility/date/DateUtility';
+import { PlannedDayCommonService } from './common/PlannedDayCommonService';
+import { ScheduledHabitService } from './ScheduledHabitService';
 
 // "comment" - stronkbad - 2024-03-13
 
@@ -23,22 +25,29 @@ export class HabitStreakService {
         const medianDate = new Date(endDate);
         medianDate.setDate(endDate.getDate() - Math.floor(days / 2));
 
-        const plannedDaysInDateRange = await PlannedDayService.getInDateRange(
-            context,
-            userId,
-            startDate,
-            endDate
-        );
+        // 1. get streak constants, schedules and plannedDays
+        const [currentHabitStreak, lonestHabitStreak, plannedDays, scheduledHabits] =
+            await Promise.all([
+                this.getCurrentHabitStreak(context, userId),
+                this.getLongestHabitStreak(context, userId),
+                PlannedDayService.getAllInDateRange(context, userId, startDate, endDate),
+                ScheduledHabitService.getAllForUserInDateRange(
+                    context,
+                    userId,
+                    PureDate.fromDateOnServer(startDate),
+                    PureDate.fromDateOnServer(endDate)
+                ),
+            ]);
 
+        // 2. calculate the data for the habit graph
         const habitStreakResults: HabitStreakResult[] = await this.getHabitStreak(
             startDate,
             endDate,
-            plannedDaysInDateRange
+            scheduledHabits,
+            plannedDays
         );
 
-        const currentHabitStreak = await this.getCurrentHabitStreak(context, userId);
-        const lonestHabitStreak = await this.getLongestHabitStreak(context, userId);
-
+        // 3. send it on back
         const habitStreak: HabitStreak = {
             startDate: PureDate.fromDateOnServer(startDate),
             medianDate: PureDate.fromDateOnServer(medianDate),
@@ -53,6 +62,7 @@ export class HabitStreakService {
         return habitStreak;
     }
 
+    // todo - consider passing in the statuses so we don't repeat the query
     public static async fullPopulateCurrentStreak(context: Context, userId: number) {
         let startDate = await this.getStartDateForUser(context, userId);
         const endDate = await this.getEndDateForUser(context, userId);
@@ -69,9 +79,10 @@ export class HabitStreakService {
 
         let completionCount = 0;
         for (const status of statuses) {
+            console.log('status', status);
             if (status.status === Constants.CompletionState.COMPLETE) {
                 completionCount++;
-            } else if (status.status === Constants.CompletionState.INVALID) {
+            } else if (status.status === Constants.CompletionState.NO_SCHEDULE) {
                 continue;
             } else {
                 break;
@@ -109,7 +120,7 @@ export class HabitStreakService {
                 if (currentStreak > longestStreak) {
                     longestStreak = currentStreak;
                 }
-            } else if (status.status === Constants.CompletionState.INVALID) {
+            } else if (status.status === Constants.CompletionState.NO_SCHEDULE) {
                 continue;
             } else {
                 currentStreak = 0;
@@ -146,6 +157,7 @@ export class HabitStreakService {
             const dayKey = DayKeyUtility.getDayKey(date);
             const plannedDayExists = await PlannedDayService.exists(context, userId, dayKey);
             if (!plannedDayExists) {
+                console.log('No planned day for', dayKey);
                 continue;
             }
 
@@ -191,22 +203,28 @@ export class HabitStreakService {
         return utc14Date;
     }
 
-    private static async getHabitStreak(startDate: Date, endDate: Date, plannedDays: PlannedDay[]) {
-        const endDateUtc = new Date(endDate);
-        endDateUtc.setUTCHours(0, 0, 0, 0);
-
-        const startDateUtc = new Date(startDate);
-        startDateUtc.setUTCHours(0, 0, 0, 0);
-
+    private static async getHabitStreak(
+        startDate: Date,
+        endDate: Date,
+        scheduledHabits: ScheduledHabit[],
+        plannedDays: PlannedDay[]
+    ) {
         const habitStreakResult: HabitStreakResult[] = [];
-        for (let d = new Date(startDateUtc); d <= endDateUtc; d.setDate(d.getDate() + 1)) {
-            const day = plannedDays.find(
-                (plannedDay) => plannedDay.date?.toDateString() === d.toDateString()
+        for (let date = new Date(startDate); date <= endDate; date.setDate(date.getDate() + 1)) {
+            const plannedDay = plannedDays.find(
+                (plannedDay) => plannedDay.date?.toDateString() === date.toDateString()
+            );
+
+            const dayKey = DayKeyUtility.getDayKey(date);
+            const completionState = this.getCompletionStateForPlannedDay(
+                scheduledHabits,
+                date,
+                plannedDay
             );
 
             habitStreakResult.push({
-                dayKey: DayKeyUtility.getDayKey(d),
-                result: Constants.getCompletionState(day?.status ?? ''),
+                dayKey: dayKey,
+                result: completionState,
             });
         }
 
@@ -253,5 +271,27 @@ export class HabitStreakService {
         }
 
         return value;
+    }
+
+    private static getCompletionStateForPlannedDay(
+        scheduledHabits: ScheduledHabit[],
+        date: Date,
+        plannedDay?: PlannedDay
+    ) {
+        if (plannedDay?.status) {
+            return Constants.getCompletionState(plannedDay.status);
+        }
+
+        // at this point we do not have a planned day, so if we have *any* scheduled habit, we have failed
+        const scheduledHabitCount = PlannedDayCommonService.getScheduledActiveHabitCount(
+            scheduledHabits,
+            date
+        );
+
+        if (scheduledHabitCount > 0) {
+            return Constants.CompletionState.FAILED;
+        }
+
+        return Constants.CompletionState.NO_SCHEDULE;
     }
 }

@@ -183,8 +183,14 @@ describe('DailyHistoryService', () => {
                 await Promise.all(taskGenerations);
 
             const taskUpdates = [
-                PlannedHabitDao.update({ id: createdTask1!.id, status: Constants.HabitStatus.COMPLETE }),
-                PlannedHabitDao.update({ id: createdTask2!.id, status: Constants.HabitStatus.COMPLETE }),
+                PlannedHabitDao.update({
+                    id: createdTask1!.id,
+                    status: Constants.CompletionState.COMPLETE,
+                }),
+                PlannedHabitDao.update({
+                    id: createdTask2!.id,
+                    status: Constants.CompletionState.COMPLETE,
+                }),
             ];
             await Promise.all(taskUpdates);
         });

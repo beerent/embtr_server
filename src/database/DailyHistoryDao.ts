@@ -52,7 +52,7 @@ export class DailyHistoryDao {
                     day.plannedTasks.length > 0 &&
                     day.plannedTasks.every((task) => {
                         return (
-                            task.status !== Constants.HabitStatus.FAILED &&
+                            task.status !== Constants.CompletionState.FAILED &&
                             task.quantity &&
                             task.completedQuantity &&
                             task.quantity > 0 &&
