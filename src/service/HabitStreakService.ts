@@ -168,7 +168,8 @@ export class HabitStreakService {
 
             if (
                 completionStatus === Constants.CompletionState.COMPLETE ||
-                completionStatus === Constants.CompletionState.INVALID
+                completionStatus === Constants.CompletionState.NO_SCHEDULE ||
+                completionStatus === Constants.CompletionState.FAILED
             ) {
                 currentDate = date;
                 break;

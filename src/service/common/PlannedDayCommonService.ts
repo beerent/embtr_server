@@ -55,7 +55,7 @@ export class PlannedDayCommonService {
             return Constants.CompletionState.COMPLETE;
         }
 
-        return Constants.CompletionState.FAILED;
+        return Constants.CompletionState.INCOMPLETE;
     }
 
     // this should live in SchedukedHabitService
