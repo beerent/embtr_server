@@ -79,7 +79,6 @@ export class HabitStreakService {
 
         let completionCount = 0;
         for (const status of statuses) {
-            console.log('status', status);
             if (status.status === Constants.CompletionState.COMPLETE) {
                 completionCount++;
             } else if (status.status === Constants.CompletionState.NO_SCHEDULE) {
