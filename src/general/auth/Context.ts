@@ -5,6 +5,7 @@ export interface Context {
     userUid: string;
     userEmail: string;
     userRoles: Role[];
+    dayKey: string;
 }
 
 export interface NewUserContext {

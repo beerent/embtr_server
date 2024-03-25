@@ -4,7 +4,7 @@ import { Event } from '../events';
 
 export namespace PlannedHabitEventDispatcher {
     export const onUpdated = (context: Context, id: number) => {
-        const type: Event.Event = {
+        const type: Event.PlannedHabit.Event = {
             context,
             id,
         };
@@ -13,7 +13,7 @@ export namespace PlannedHabitEventDispatcher {
     };
 
     export const onCreated = (context: Context, id: number) => {
-        const type: Event.Event = {
+        const type: Event.PlannedHabit.Event = {
             context,
             id,
         };

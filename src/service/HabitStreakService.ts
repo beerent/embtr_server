@@ -10,6 +10,7 @@ import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { ScheduledHabitService } from './ScheduledHabitService';
+import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
 
 // "comment" - stronkbad - 2024-03-13
 
@@ -24,6 +25,8 @@ export class HabitStreakService {
 
         const medianDate = new Date(endDate);
         medianDate.setDate(endDate.getDate() - Math.floor(days / 2));
+
+        HabitStreakEventDispatcher.onRefresh(context, userId);
 
         // 1. get streak constants, schedules and plannedDays
         const [currentHabitStreak, lonestHabitStreak, plannedDays, scheduledHabits] =
@@ -81,7 +84,10 @@ export class HabitStreakService {
         for (const status of statuses) {
             if (status.status === Constants.CompletionState.COMPLETE) {
                 completionCount++;
-            } else if (status.status === Constants.CompletionState.NO_SCHEDULE) {
+            } else if (
+                status.status === Constants.CompletionState.NO_SCHEDULE ||
+                status.status === null
+            ) {
                 continue;
             } else {
                 break;
@@ -119,7 +125,10 @@ export class HabitStreakService {
                 if (currentStreak > longestStreak) {
                     longestStreak = currentStreak;
                 }
-            } else if (status.status === Constants.CompletionState.NO_SCHEDULE) {
+            } else if (
+                status.status === Constants.CompletionState.NO_SCHEDULE ||
+                status.status === null
+            ) {
                 continue;
             } else {
                 currentStreak = 0;
@@ -156,7 +165,6 @@ export class HabitStreakService {
             const dayKey = DayKeyUtility.getDayKey(date);
             const plannedDayExists = await PlannedDayService.exists(context, userId, dayKey);
             if (!plannedDayExists) {
-                console.log('No planned day for', dayKey);
                 continue;
             }
 

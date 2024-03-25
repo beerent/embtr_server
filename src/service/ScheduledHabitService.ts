@@ -9,6 +9,8 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
+import { DateUtility } from '@src/utility/date/DateUtility';
+import { PlannedHabitService } from './PlannedHabitService';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -52,17 +54,47 @@ export class ScheduledHabitService {
                 'scheduled habit not found'
             );
         }
+
         const existingScheduledHabitModel: ScheduledHabit =
             ModelConverter.convert(existingScheduledHabit);
-        const updatedHabit: ScheduledHabit = {
+
+        const clientDayKey = context.dayKey;
+        const clientDayKeyDate = DateUtility.getDate(clientDayKey);
+
+        const isModified = await PlannedHabitService.existsByDayKeyAndScheduledHabitId(
+            context,
+            context.dayKey,
+            scheduledHabit.id
+        );
+
+        let endDate = DateUtility.getDayBefore(clientDayKeyDate);
+        let newStartDate = clientDayKeyDate;
+        if (isModified) {
+            endDate = clientDayKeyDate;
+            newStartDate = DateUtility.getDayAfter(clientDayKeyDate);
+        }
+
+        // 1. set end date on current scheduled habit
+        existingScheduledHabitModel.endDate = endDate;
+
+        // 2. create new scheduled habit with updated values and dates
+        const updatedScheduledHabitModal: ScheduledHabit = {
             ...existingScheduledHabitModel,
             ...scheduledHabit,
         };
+        updatedScheduledHabitModal.startDate = newStartDate;
+        updatedScheduledHabitModal.endDate = undefined;
 
-        const updatedScheduledHabit = await ScheduledHabitDao.update(context.userId, updatedHabit);
+        const promises = [
+            ScheduledHabitDao.update(context.userId, existingScheduledHabitModel),
+            ScheduledHabitDao.create(context.userId, updatedScheduledHabitModal),
+        ];
+
+        const [_, updatedScheduledHabit] = await Promise.all(promises);
 
         const updatedScheduledHabitModel: ScheduledHabit =
             ModelConverter.convert(updatedScheduledHabit);
+
         return updatedScheduledHabitModel;
     }
 

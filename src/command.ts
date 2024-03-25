@@ -16,6 +16,7 @@ const adminContext: Context = {
     userUid: 'hello',
     userEmail: 'bnren',
     userRoles: [],
+    dayKey: '04-04-2021',
 };
 
 const handleCommandGetRoles = async (email: string) => {
@@ -138,6 +139,16 @@ const handleCommandUpdateAllPlannedDayStatusesForAllUsers = async () => {
 
         await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
     }
+};
+
+const handleCommandUpdateMissingPlannedDayStatusesForUser = async (email: string) => {
+    const user = await UserService.getByUsername(email);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
 };
 
 const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) => {
@@ -268,6 +279,10 @@ const processCommand = async (command: string) => {
             break;
 
         case 'updateUserPlannedDayStatuses':
+            await handleCommandUpdateAllPlannedDayStatusesForUser(email);
+            break;
+
+        case 'updateUserMissingPlannedDayStatuses':
             await handleCommandUpdateAllPlannedDayStatusesForUser(email);
             break;
 

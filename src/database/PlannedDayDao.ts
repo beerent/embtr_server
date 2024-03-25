@@ -89,31 +89,18 @@ export class PlannedDayDao {
         return plannedDay !== null;
     }
 
-    //todo - fix this
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
-        const date = new Date(dayKey);
-
-        const plannedDayUpsert = await prisma.plannedDay.upsert({
+        const results = await prisma.plannedDay.findUnique({
             where: {
                 unique_user_daykey: {
                     userId,
                     dayKey,
                 },
             },
-            update: {},
-            create: {
-                user: {
-                    connect: {
-                        id: userId,
-                    },
-                },
-                dayKey,
-                date,
-            },
-            include: PlannedDayInclude,
+            include: PlannedDayGetInclude,
         });
 
-        return plannedDayUpsert;
+        return results;
     }
 
     public static async getOrCreateByUserAndDayKey(userId: number, dayKey: string) {
@@ -183,6 +170,20 @@ export class PlannedDayDao {
         });
     }
 
+    public static async getPlannedDayIdsWithMissingStatusesForUser(userId: number) {
+        const plannedDays = await prisma.plannedDay.findMany({
+            where: {
+                userId,
+                status: null,
+            },
+            select: {
+                id: true,
+            },
+        });
+
+        return plannedDays.map((plannedDay) => plannedDay.id);
+    }
+
     public static async getPlannedDayIdsForUser(userId: number): Promise<number[]> {
         const plannedDays = await prisma.plannedDay.findMany({
             where: {
@@ -245,6 +246,7 @@ export class PlannedDayDao {
                 ORDER BY all_dates.date ASC;
             `
         );
+
         return results;
     }
 }

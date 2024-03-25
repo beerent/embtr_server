@@ -4,9 +4,12 @@ import { Request } from 'express';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { logger } from '@src/common/logger/Logger';
+import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 
 export class ContextService {
     public static async get(request: Request): Promise<Context> {
+        const dayKey = this.getDayKey(request);
+
         const getUserId = AuthorizationDao.getUserIdFromToken(request.headers.authorization!);
         const getUserUid = AuthorizationDao.getUidFromToken(request.headers.authorization!);
         const getUserEmail = AuthorizationDao.getEmailFromToken(request.headers.authorization!);
@@ -24,7 +27,13 @@ export class ContextService {
             throw new Error('ContextService: invalid state');
         }
 
-        return { userId, userUid: userUid, userEmail: userEmail, userRoles: userRoles };
+        return {
+            userId,
+            userUid: userUid,
+            userEmail: userEmail,
+            userRoles: userRoles,
+            dayKey: dayKey,
+        };
     }
 
     public static async getNewUserContext(request: Request): Promise<NewUserContext> {
@@ -39,5 +48,17 @@ export class ContextService {
         }
 
         return { userUid: userUid, userEmail: userEmail };
+    }
+
+    private static getDayKey(request: Request): string {
+        let dayKey = request.headers['client-dayKey'] as string;
+
+        // this can go away after client version 2.0.17 if we
+        // make it a forced update
+        if (!dayKey) {
+            dayKey = DayKeyUtility.getTodayKey();
+        }
+
+        return dayKey;
     }
 }

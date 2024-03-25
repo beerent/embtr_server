@@ -2,7 +2,7 @@ import eventBus from '../eventBus';
 import { Event } from '../events';
 import { PlannedDayEventHandler } from './PlannedDayEventHandler';
 
-eventBus.on(Event.PlannedDay.Updated, async (event: Event.Event) => {
+eventBus.on(Event.PlannedDay.Updated, async (event: Event.PlannedDay.Event) => {
     try {
         await PlannedDayEventHandler.onUpdated(event);
     } catch (e) {

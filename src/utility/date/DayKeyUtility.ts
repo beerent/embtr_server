@@ -15,4 +15,8 @@ export class DayKeyUtility {
     public static getDayKeyFromPureDate(date: PureDate): string {
         return date.toString();
     }
+
+    public static getTodayKey(): string {
+        return this.getDayKey(new Date());
+    }
 }

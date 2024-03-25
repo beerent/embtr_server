@@ -58,7 +58,7 @@ export class PlannedHabitService {
         dayKey: string,
         plannedTask: PlannedTask
     ): Promise<PlannedTask> {
-        const plannedDay = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
+        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(context.userId, dayKey);
         if (!plannedDay || plannedDay.userId !== context.userId) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
@@ -108,6 +108,23 @@ export class PlannedHabitService {
         //     await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
 
         return updatedPlannedTaskModel;
+    }
+
+    public static async existsByDayKeyAndScheduledHabitId(
+        context: Context,
+        dayKey: string,
+        scheduledHabitId: number
+    ): Promise<boolean> {
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
+        if (!plannedDay) {
+            return false;
+        }
+
+        const exists = plannedDay.plannedTasks.some((plannedTask) => {
+            return plannedTask.scheduledHabitId === scheduledHabitId;
+        });
+
+        return exists;
     }
 
     private static getUpdatedStatus(plannedTask: PlannedTask): string {

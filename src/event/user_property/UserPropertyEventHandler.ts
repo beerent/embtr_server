@@ -5,7 +5,7 @@ import { UserPropertyKey } from '@src/service/UserPropertyService';
 import { Event } from '../events';
 
 export class UserPropertyEventHandler {
-    public static async onMissing(event: Event.ResourceEvent) {
+    public static async onMissing(event: Event.UserProperty.Event) {
         switch (event.key) {
             case UserPropertyKey.HABIT_STREAK_CURRENT:
                 this.currentHabitStreakMissing(event.context, event.context.userId);

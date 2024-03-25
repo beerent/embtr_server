@@ -7,19 +7,38 @@ export namespace DateUtility {
     };
 
     export const getYesterday = (): Date => {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setUTCHours(0, 0, 0, 0);
+        const today = new Date();
+        const yesterday = getDayBefore(today);
 
         return yesterday;
     };
 
+    export const getDayBefore = (date: Date): Date => {
+        const dayBefore = new Date(date);
+        dayBefore.setDate(dayBefore.getDate() - 1);
+        dayBefore.setUTCHours(0, 0, 0, 0);
+
+        return dayBefore;
+    };
+
+    export const getDayAfter = (date: Date): Date => {
+        const dayAfter = new Date(date);
+        dayAfter.setDate(dayAfter.getDate() + 1);
+        dayAfter.setUTCHours(0, 0, 0, 0);
+
+        return dayAfter;
+    };
+
     export const getOptionalDate = (date?: string) => {
         if (date) {
-            return new Date(date);
+            return getDate(date);
         }
 
         return new Date();
+    };
+
+    export const getDate = (date: string): Date => {
+        return new Date(date);
     };
 
     export const getAllDatesInBetween = (startDate: Date, endDate: Date): Date[] => {

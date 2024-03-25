@@ -30,12 +30,12 @@ export class PlannedDayService {
         dayKey: string
     ): Promise<PlannedDayModel> {
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
-        if (plannedDay) {
-            const plannedDayModel: PlannedDayModel = ModelConverter.convert(plannedDay);
-            return plannedDayModel;
+        if (!plannedDay) {
+            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
-        throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+        const plannedDayModel: PlannedDayModel = ModelConverter.convert(plannedDay);
+        return plannedDayModel;
     }
 
     public static async getById(context: Context, id: number): Promise<PlannedDayModel> {
@@ -69,6 +69,10 @@ export class PlannedDayService {
         }
 
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+        if (!plannedDay) {
+            return Constants.CompletionState.INVALID;
+        }
+
         const plannedHabits = await PlannedHabitDao.getAllByPlannedDayId(plannedDay.id);
         const plannedHabitModels: PlannedTask[] = ModelConverter.convertAll(plannedHabits);
 
@@ -93,7 +97,7 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<PlannedDay> {
-        const plannedDay = await PlannedDayDao.getOrCreateByUserAndDayKey(userId, dayKey);
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (!plannedDay) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
@@ -229,8 +233,8 @@ export class PlannedDayService {
             );
         }
 
-        const plannedDayModel: PlannedDayModel = ModelConverter.convert(createdPlannedDay);
-        return plannedDayModel;
+        const plannedDayWithData = await this.getByUser(context, context.userId, dayKey);
+        return plannedDayWithData;
     }
 
     public static async exists(context: Context, userId: number, dayKey: string): Promise<boolean> {
@@ -350,6 +354,10 @@ export class PlannedDayService {
             throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day id required');
         }
 
+        if (!plannedDay.userId) {
+            throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day is malformed');
+        }
+
         const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
         if (!updatedPlannedDay) {
             throw new ServiceException(
@@ -359,7 +367,7 @@ export class PlannedDayService {
             );
         }
 
-        PlannedDayEventDispatcher.onUpdated(context, plannedDay.id);
+        PlannedDayEventDispatcher.onUpdated(context, plannedDay.userId, plannedDay.id);
 
         const plannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
         return plannedDayModel;
@@ -369,12 +377,36 @@ export class PlannedDayService {
         context: Context,
         userId: number
     ): Promise<number[]> {
-        const plannedDayKeys = await PlannedDayDao.getPlannedDayIdsForUser(userId);
-        return plannedDayKeys;
+        const plannedDayIds = await PlannedDayDao.getPlannedDayIdsForUser(userId);
+        return plannedDayIds;
+    }
+
+    public static async getPlannedDayIdsWithMissingStatusesForUser(
+        context: Context,
+        userId: number
+    ): Promise<number[]> {
+        const plannedDayIds =
+            await PlannedDayDao.getPlannedDayIdsWithMissingStatusesForUser(userId);
+        return plannedDayIds;
     }
 
     public static async backPopulateCompletionStatuses(context: Context, userId: number) {
         const plannedDayIds = await PlannedDayService.getPlannedDayIdsForUser(context, userId);
+        for (const plannedDayId of plannedDayIds) {
+            try {
+                await this.updateCompletionStatusByPlannedDayId(context, plannedDayId);
+            } catch (error) {
+                console.error('error updating planned day', plannedDayId);
+            }
+        }
+    }
+
+    public static async backPopulateMissingCompletionStatuses(context: Context, userId: number) {
+        const plannedDayIds = await PlannedDayService.getPlannedDayIdsWithMissingStatusesForUser(
+            context,
+            userId
+        );
+
         for (const plannedDayId of plannedDayIds) {
             try {
                 await this.updateCompletionStatusByPlannedDayId(context, plannedDayId);

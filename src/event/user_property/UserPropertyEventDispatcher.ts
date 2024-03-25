@@ -4,7 +4,7 @@ import { Event } from '../events';
 
 export namespace UserPropertyEventDispatcher {
     export const onMissing = (context: Context, key: string) => {
-        const type: Event.ResourceEvent = {
+        const type: Event.UserProperty.Event = {
             context,
             key,
         };

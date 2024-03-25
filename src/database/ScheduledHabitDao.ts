@@ -162,6 +162,13 @@ export class ScheduledHabitDao {
             };
         }
 
+        let endDate = {};
+        if (scheduledHabit.endDate) {
+            endDate = {
+                endDate: scheduledHabit.endDate,
+            };
+        }
+
         return prisma.scheduledHabit.update({
             where: {
                 id: scheduledHabit.id,
@@ -183,6 +190,7 @@ export class ScheduledHabitDao {
                 ...timesOfDayEnabledData,
                 ...daysOfWeekEnabledData,
                 ...detailsEnabledData,
+                ...endDate,
             },
             include: {
                 task: true,
@@ -384,32 +392,7 @@ export class ScheduledHabitDao {
         return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
-                AND: [
-                    {
-                        OR: [
-                            {
-                                endDate: null,
-                            },
-                            {
-                                endDate: {
-                                    gte: date + 'T00:00:00.000Z',
-                                },
-                            },
-                        ],
-                    },
-                    {
-                        OR: [
-                            {
-                                startDate: null,
-                            },
-                            {
-                                startDate: {
-                                    lte: date + 'T00:00:00.000Z',
-                                },
-                            },
-                        ],
-                    },
-                ],
+                endDate: null,
             },
             include: {
                 task: true,
