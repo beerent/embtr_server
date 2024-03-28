@@ -1,20 +1,16 @@
 import { QuoteOfTheDay } from '@resources/schema';
-import {
-    CreateQuoteOfTheDayRequest,
-    CreateQuoteOfTheDayResponse,
-    GetQuoteOfTheDayResponse,
-} from '@resources/types/requests/QuoteOfTheDayTypes';
-import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { MetadataDao } from '@src/database/MetadataDao';
 import { QuoteOfTheDayDao } from '@src/database/QuoteOfTheDayDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 
 export class QuoteOfTheDayService {
+    public static async count(context: Context): Promise<number> {
+        return await QuoteOfTheDayDao.countByUser(context.userId);
+    }
+
     public static async add(
         context: Context,
         quote: string,

@@ -14,6 +14,8 @@ import { BlockUserService } from './BlockUserService';
 import { UserRoleService } from '@src/service/UserRoleService';
 import { ImageDetectionService } from './ImageService';
 import { RevenueCatService } from './internal/RevenueCatService';
+import { NewUserChecklist } from '@resources/types/dto/NewUserChecklist';
+import { NewUserChecklistService } from './feature/NewUserChecklistService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {

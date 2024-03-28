@@ -1,15 +1,15 @@
+import { Constants } from '@resources/types/constants/constants';
 import { Context } from '@src/general/auth/Context';
 import { HabitStreakService } from '@src/service/HabitStreakService';
 import { PlannedDayService } from '@src/service/PlannedDayService';
-import { UserPropertyKey } from '@src/service/UserPropertyService';
 import { Event } from '../events';
 
 export class UserPropertyEventHandler {
     public static async onMissing(event: Event.UserProperty.Event) {
         switch (event.key) {
-            case UserPropertyKey.HABIT_STREAK_CURRENT:
+            case Constants.UserPropertyKey.HABIT_STREAK_CURRENT:
                 this.currentHabitStreakMissing(event.context, event.context.userId);
-            case UserPropertyKey.HABIT_STREAK_LONGEST:
+            case Constants.UserPropertyKey.HABIT_STREAK_LONGEST:
                 this.longestHabitStreakMissing(event.context, event.context.userId);
         }
     }

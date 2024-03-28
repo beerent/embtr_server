@@ -86,6 +86,17 @@ export class UserPostDao {
         });
     }
 
+    public static async count(userId: number) {
+        return await prisma.userPost.count({
+            where: {
+                user: {
+                    id: userId,
+                },
+                active: true,
+            },
+        });
+    }
+
     public static async existsById(id: number) {
         return (await this.getById(id)) !== null;
     }

@@ -209,6 +209,15 @@ export class PlannedDayDao {
         });
     }
 
+    public static async countComplete(userId: number) {
+        return await prisma.plannedDay.count({
+            where: {
+                userId,
+                status: 'COMPLETE',
+            },
+        });
+    }
+
     public static async getCompletionStatusesForDateRange(
         userId: number,
         startDate: Date,

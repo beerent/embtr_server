@@ -184,6 +184,16 @@ export class PlannedHabitDao {
         });
     }
 
+    public static async count(userId: number): Promise<number> {
+        return prisma.plannedTask.count({
+            where: {
+                plannedDay: {
+                    userId,
+                },
+            },
+        });
+    }
+
     public static async deleteByUserIdAndPlannedDayIdAndTaskId(
         userId: number,
         plannedDayId: number,

@@ -171,4 +171,15 @@ export class PlannedDayResultDao {
             include: PlannedDayResultInclude,
         });
     }
+
+    public static async count(userId: number) {
+        return await prisma.plannedDayResult.count({
+            where: {
+                plannedDay: {
+                    userId,
+                },
+                active: true,
+            },
+        });
+    }
 }

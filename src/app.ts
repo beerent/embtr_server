@@ -23,6 +23,7 @@ import reportRouter from './endpoints/report/ReportRouter';
 import scheduledHabitRouter from './endpoints/scheduled_habit/ScheduledHabitRouter';
 import habitStreakRouter from './endpoints/habit_streak/HabitStreakRouter';
 import '@src/event/event_listener_imports';
+import newUserRouter from './endpoints/new_user/NewUserRouter';
 
 const cors = require('cors');
 const app = express();
@@ -72,6 +73,7 @@ app.use('/', marketingRouter);
 app.use('/', timelineRouter);
 app.use('/', reportRouter);
 app.use('/', habitStreakRouter);
+app.use('/', newUserRouter);
 app.use('/', healthRouter);
 
 app.use(handleError);
