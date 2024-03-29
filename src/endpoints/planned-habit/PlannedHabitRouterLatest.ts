@@ -1,5 +1,8 @@
 import express from 'express';
-import { GetPlannedHabitResponse } from '@resources/types/requests/PlannedTaskTypes';
+import {
+    GetPlannedHabitCountResponse,
+    GetPlannedHabitResponse,
+} from '@resources/types/requests/PlannedTaskTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
@@ -8,10 +11,24 @@ import { validateGetById } from '@src/middleware/planned_day/PlannedDayValidatio
 import { ContextService } from '@src/service/ContextService';
 import { PlannedHabitService } from '@src/service/PlannedHabitService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
-import plannedHabitRouterV1 from './PlannedHabitRouterV1';
 
 const plannedHabitRouterLatest = express.Router();
 const v = '✓';
+
+plannedHabitRouterLatest.get(
+    '/count',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const count = await PlannedHabitService.count(context);
+
+        const response: GetPlannedHabitCountResponse = {
+            ...SUCCESS,
+            count: count,
+        };
+        res.json(response);
+    })
+);
 
 plannedHabitRouterLatest.get(
     '/:id',
@@ -31,7 +48,5 @@ plannedHabitRouterLatest.get(
         res.json(response);
     })
 );
-
-plannedHabitRouterLatest.use('/', plannedHabitRouterV1);
 
 export default plannedHabitRouterLatest;

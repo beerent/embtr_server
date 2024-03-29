@@ -5,7 +5,7 @@ import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDay, Property, ScheduledHabit } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
-import { UserPropertyKey, UserPropertyService } from './UserPropertyService';
+import { UserPropertyService } from './UserPropertyService';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedDayCommonService } from './common/PlannedDayCommonService';
@@ -94,7 +94,7 @@ export class HabitStreakService {
             }
         }
 
-        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_CURRENT;
+        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_CURRENT;
         const property: Property = {
             key,
             value: completionCount.toString(),
@@ -135,7 +135,7 @@ export class HabitStreakService {
             }
         }
 
-        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_LONGEST;
+        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_LONGEST;
         const property: Property = {
             key,
             value: longestStreak.toString(),
@@ -240,7 +240,7 @@ export class HabitStreakService {
     }
 
     private static async getCurrentHabitStreak(context: Context, userId: number): Promise<number> {
-        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_CURRENT;
+        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_CURRENT;
         const currentStreakProperty = await UserPropertyService.get(context, userId, key);
 
         if (currentStreakProperty === undefined) {
@@ -261,7 +261,7 @@ export class HabitStreakService {
     }
 
     private static async getLongestHabitStreak(context: Context, userId: number): Promise<number> {
-        const key: UserPropertyKey = UserPropertyKey.HABIT_STREAK_LONGEST;
+        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_LONGEST;
         const longestStreakProperty = await UserPropertyService.get(context, userId, key);
 
         if (longestStreakProperty === undefined) {

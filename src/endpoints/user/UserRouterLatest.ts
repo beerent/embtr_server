@@ -9,6 +9,7 @@ import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/
 import {
     CreateBlockUserRequest,
     CreatePropertyRequest,
+    GetNewUserChecklistResponse,
     GetPropertiesResponse,
     GetPropertyResponse,
     GetUserResponse,
@@ -41,6 +42,7 @@ import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
 import { UserPropertyService } from '@src/service/UserPropertyService';
+import { NewUserChecklistService } from '@src/service/feature/NewUserChecklistService';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -84,21 +86,6 @@ userRouterLatest.get(
 
         const exists = await UserService.exists(context, username);
         const response: GetBooleanResponse = { ...SUCCESS, result: exists };
-        res.json(response);
-    })
-);
-
-userRouterLatest.get(
-    '/:uid',
-    routeLogger(v),
-    authenticate,
-    authorize,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-        const uid = req.params.uid;
-
-        const user = await UserService.get(context, uid);
-        const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
 );
@@ -446,6 +433,21 @@ userRouterLatest.post(
 
         await PushNotificationTokenService.register(context, token);
         res.status(200).json(SUCCESS);
+    })
+);
+
+userRouterLatest.get(
+    '/:uid',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const uid = req.params.uid;
+
+        const user = await UserService.get(context, uid);
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
     })
 );
 

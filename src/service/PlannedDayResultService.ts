@@ -230,6 +230,10 @@ export class PlannedDayResultService {
         return plannedDayResultModel;
     }
 
+    public static async count(context: Context): Promise<number> {
+        return await PlannedDayResultDao.count(context.userId);
+    }
+
     private static getCompletedHabits(plannedDayResult: PlannedDayResultType): CompletedHabit[] {
         if (!plannedDayResult?.plannedDay) {
             return [];

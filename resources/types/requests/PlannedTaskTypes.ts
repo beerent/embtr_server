@@ -1,5 +1,5 @@
-import { Challenge, PlannedTask as PlannedTaskModel } from "../../schema";
-import { Response } from "./RequestTypes";
+import { Challenge, PlannedTask as PlannedTaskModel } from '../../schema';
+import { Response } from './RequestTypes';
 
 export interface GetPlannedHabitResponse extends Response {
   plannedHabit?: PlannedTaskModel;
@@ -29,4 +29,8 @@ export interface CreateOrReplacePlannedTaskRequest {
 
 export interface CreateOrReplacePlannedTaskResponse extends Response {
   plannedTask?: PlannedTaskModel;
+}
+
+export interface GetPlannedHabitCountResponse extends Response {
+  count?: number;
 }

@@ -1,5 +1,6 @@
 import { Property, User as UserModel } from '../../schema';
 import { Response } from './RequestTypes';
+import { NewUserChecklist } from '../dto/NewUserChecklist';
 
 export interface GetUserResponse extends Response {
     user?: UserModel;
@@ -45,4 +46,8 @@ export interface CreatePropertyRequest {
 
 export interface CreatePropertyResponse extends Response {
     property?: Property;
+}
+
+export interface GetNewUserChecklistResponse extends Response {
+    checklist?: NewUserChecklist;
 }

@@ -267,4 +267,8 @@ export class ScheduledHabitService {
 
         await ScheduledHabitDao.archive(context.userId, id, utcDate);
     }
+
+    public static async count(context: Context): Promise<number> {
+        return ScheduledHabitDao.count(context.userId);
+    }
 }

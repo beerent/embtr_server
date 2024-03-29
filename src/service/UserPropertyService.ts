@@ -5,11 +5,6 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 
-export enum UserPropertyKey {
-    HABIT_STREAK_CURRENT = 'HABIT_STREAK_CURRENT',
-    HABIT_STREAK_LONGEST = 'HABIT_STREAK_LONGEST',
-}
-
 export class UserPropertyService {
     public static async get(
         context: Context,

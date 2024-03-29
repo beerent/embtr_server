@@ -67,4 +67,12 @@ export class QuoteOfTheDayDao {
 
         return quoteOfTheDay[0];
     }
+
+    public static async countByUser(userId: number) {
+        return await prisma.quoteOfTheDay.count({
+            where: {
+                userId,
+            },
+        });
+    }
 }

@@ -390,6 +390,11 @@ export class PlannedDayService {
         return plannedDayIds;
     }
 
+    public static async countComplete(context: Context): Promise<number> {
+        const count = await PlannedDayDao.countComplete(context.userId);
+        return count;
+    }
+
     public static async backPopulateCompletionStatuses(context: Context, userId: number) {
         const plannedDayIds = await PlannedDayService.getPlannedDayIdsForUser(context, userId);
         for (const plannedDayId of plannedDayIds) {

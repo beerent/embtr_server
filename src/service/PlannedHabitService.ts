@@ -127,6 +127,14 @@ export class PlannedHabitService {
         return exists;
     }
 
+    public static async count(context: Context): Promise<number> {
+        return await PlannedHabitDao.count(context.userId);
+    }
+
+    public static async hasCompleted(context: Context): Promise<boolean> {
+        return await PlannedHabitDao.completedExists(context.userId);
+    }
+
     private static getUpdatedStatus(plannedTask: PlannedTask): string {
         if (
             (plannedTask.status ?? Constants.CompletionState.INCOMPLETE) ===
