@@ -436,46 +436,6 @@ userRouterLatest.post(
     })
 );
 
-/*
- * NEW USER CHECKLIST
- */
-userRouterLatest.get(
-    '/new-user-checklist',
-    routeLogger(v),
-    authenticate,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-
-        const checklist = await NewUserChecklistService.get(context);
-        const response: GetNewUserChecklistResponse = { ...SUCCESS, checklist };
-        res.json(response);
-    })
-);
-
-userRouterLatest.get(
-    '/new-user-checklist/dismiss',
-    routeLogger(v),
-    authenticate,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-
-        await NewUserChecklistService.dismiss(context);
-        res.json(SUCCESS);
-    })
-);
-
-userRouterLatest.get(
-    '/new-user-checklist/complete',
-    routeLogger(v),
-    authenticate,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-
-        await NewUserChecklistService.complete(context);
-        res.json(SUCCESS);
-    })
-);
-
 userRouterLatest.get(
     '/:uid',
     routeLogger(v),
