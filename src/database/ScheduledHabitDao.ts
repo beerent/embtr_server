@@ -520,4 +520,12 @@ export class ScheduledHabitDao {
             },
         });
     }
+
+    public static async count(userId: number) {
+        return prisma.scheduledHabit.count({
+            where: {
+                userId: userId,
+            },
+        });
+    }
 }

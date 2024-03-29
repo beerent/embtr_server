@@ -194,6 +194,24 @@ export class PlannedHabitDao {
         });
     }
 
+    public static async completedExists(userId: number): Promise<boolean> {
+        const results = await prisma.plannedTask.findMany({
+            where: {
+                plannedDay: {
+                    userId,
+                },
+            },
+        });
+
+        for (const result of results) {
+            if ((result.completedQuantity ?? 0) >= (result.quantity ?? 1)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static async deleteByUserIdAndPlannedDayIdAndTaskId(
         userId: number,
         plannedDayId: number,

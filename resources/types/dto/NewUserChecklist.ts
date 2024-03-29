@@ -1,6 +1,8 @@
 export interface NewUserChecklistElement {
     title: string;
     description: string;
+    tab: string;
+    steps: string[];
     complete: boolean;
 }
 

@@ -1,5 +1,5 @@
 import { Code } from '@resources/codes';
-import { Property, User } from '@resources/schema';
+import { Property } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { NewUserChecklist, NewUserChecklistElement } from '@resources/types/dto/NewUserChecklist';
 import { HttpCode } from '@src/common/RequestResponses';
@@ -8,8 +8,7 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { PlannedDayResultService } from '../PlannedDayResultService';
 import { PlannedDayService } from '../PlannedDayService';
 import { PlannedHabitService } from '../PlannedHabitService';
-import { QuoteOfTheDayService } from '../QuoteOfTheDayService';
-import { UserPostService } from '../UserPostService';
+import { ScheduledHabitService } from '../ScheduledHabitService';
 import { UserPropertyService } from '../UserPropertyService';
 import { UserService } from '../UserService';
 
@@ -55,12 +54,10 @@ export class NewUserChecklistService {
         const incomplete: NewUserChecklistElement[] = [];
 
         const optionPromises = [
-            this.profileIsSetup(user),
             this.firstHabitCreated(context),
+            this.firstHabitCompleted(context),
             this.firstDayCompleted(context),
-            this.firstPostShared(context),
             this.firstPlannedDayResultShared(context),
-            this.firstQuoteOfTheDayAdded(context),
         ];
         const options = await Promise.all(optionPromises);
 
@@ -80,31 +77,29 @@ export class NewUserChecklistService {
         return checklist;
     }
 
-    private static async profileIsSetup(user: User): Promise<NewUserChecklistElement> {
-        const complete =
-            !!user.username &&
-            !!user.displayName &&
-            !!user.bio &&
-            user.bio !== 'welcome to embtr!' &&
-            user.photoUrl !== null &&
-            !user.photoUrl?.includes('default');
+    public static async firstHabitCreated(context: Context): Promise<NewUserChecklistElement> {
+        const count = await ScheduledHabitService.count(context);
+        const complete = count > 0;
 
         const element: NewUserChecklistElement = {
-            title: 'Setup Your Profile',
-            description: 'Setup your profile to add a personal touch to your space!',
+            title: 'Create Your First Habit',
+            description: 'Start your embtr journey by creating your first habit!',
+            tab: 'MY_HABITS',
+            steps: ['Click the Add New Habit button'],
             complete,
         };
 
         return element;
     }
 
-    public static async firstHabitCreated(context: Context): Promise<NewUserChecklistElement> {
-        const count = await PlannedHabitService.count(context);
-        const complete = count > 0;
+    public static async firstHabitCompleted(context: Context): Promise<NewUserChecklistElement> {
+        const complete = await PlannedHabitService.hasCompleted(context);
 
         const element: NewUserChecklistElement = {
-            title: 'Create Your First Habit',
-            description: 'Start your journey by creating your first habit!',
+            title: 'Complete Your First Habit',
+            description: "It all starts with the first step - Let's complete your first habit!",
+            tab: 'TODAY',
+            steps: ['Swipe right on your habit to complete it'],
             complete,
         };
 
@@ -117,20 +112,9 @@ export class NewUserChecklistService {
 
         const element: NewUserChecklistElement = {
             title: 'Complete Your First Day',
-            description: 'Start your habit streak by completing your first day!',
-            complete,
-        };
-
-        return element;
-    }
-
-    public static async firstPostShared(context: Context): Promise<NewUserChecklistElement> {
-        const count = await UserPostService.count(context);
-        const complete = count > 0;
-
-        const element: NewUserChecklistElement = {
-            title: 'Share Your First Post',
-            description: 'Share your first post to start your journey!',
+            description: 'Knock out all of your habits to complete your day!',
+            tab: 'TODAY',
+            steps: ['Complete each habit for the day'],
             complete,
         };
 
@@ -144,23 +128,10 @@ export class NewUserChecklistService {
         const complete = count > 0;
 
         const element: NewUserChecklistElement = {
-            title: 'Share Your First Day Result',
-            description: 'Share your first day result to start your journey!',
-            complete,
-        };
-
-        return element;
-    }
-
-    public static async firstQuoteOfTheDayAdded(
-        context: Context
-    ): Promise<NewUserChecklistElement> {
-        const count = await QuoteOfTheDayService.count(context);
-        const complete = count > 0;
-
-        const element: NewUserChecklistElement = {
-            title: 'Add Your First Quote of the Day',
-            description: 'Inspire others by sharing your first quote of the day!',
+            title: 'Share Your First Successful Day',
+            description: "You've done it! Let others know by sharing your results!",
+            tab: 'TODAY',
+            steps: ["Click the 'Share Your Results' button"],
             complete,
         };
 
