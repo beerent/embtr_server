@@ -6,6 +6,7 @@ import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { GetNewUserChecklistResponse } from '@resources/types/requests/UserTypes';
 import { NewUserChecklistService } from '@src/service/feature/NewUserChecklistService';
+import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 
 const newUserRouterLatest = express.Router();
 const v = '✓';
@@ -45,6 +46,32 @@ newUserRouterLatest.post(
     await NewUserChecklistService.complete(context);
 
     res.json(SUCCESS);
+  })
+);
+
+newUserRouterLatest.get(
+  '/checklist/dismissed',
+  routeLogger(v),
+  authenticate,
+  runEndpoint(async (req, res) => {
+    const context = await ContextService.get(req);
+    const isDismissed = await NewUserChecklistService.getIsDismissed(context);
+
+    const response: GetBooleanResponse = { ...SUCCESS, result: isDismissed };
+    res.json(response);
+  })
+);
+
+newUserRouterLatest.get(
+  '/checklist/completed',
+  routeLogger(v),
+  authenticate,
+  runEndpoint(async (req, res) => {
+    const context = await ContextService.get(req);
+    const isCompleted = await NewUserChecklistService.getIsCompleted(context);
+
+    const response: GetBooleanResponse = { ...SUCCESS, result: isCompleted };
+    res.json(response);
   })
 );
 

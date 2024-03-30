@@ -40,6 +40,26 @@ export class NewUserChecklistService {
         await UserPropertyService.set(context, context.userId, property);
     }
 
+    public static async getIsDismissed(context: Context): Promise<boolean> {
+        const property = await UserPropertyService.get(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.NEW_USER_CHECKLIST_DISMISSED
+        );
+
+        return !!property;
+    }
+
+    public static async getIsCompleted(context: Context): Promise<boolean> {
+        const property = await UserPropertyService.get(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.NEW_USER_CHECKLIST_COMPLETED
+        );
+
+        return !!property;
+    }
+
     public static async get(context: Context): Promise<NewUserChecklist> {
         const user = await UserService.get(context, context.userUid);
         if (!user?.id) {

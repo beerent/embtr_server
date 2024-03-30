@@ -9,7 +9,6 @@ import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/
 import {
     CreateBlockUserRequest,
     CreatePropertyRequest,
-    GetNewUserChecklistResponse,
     GetPropertiesResponse,
     GetPropertyResponse,
     GetUserResponse,
@@ -42,7 +41,6 @@ import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
 import { UserPropertyService } from '@src/service/UserPropertyService';
-import { NewUserChecklistService } from '@src/service/feature/NewUserChecklistService';
 
 const userRouterLatest = express.Router();
 const v = '✓';

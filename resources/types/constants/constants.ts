@@ -6,6 +6,8 @@ export namespace Constants {
         NEW_USER_CHECKLIST_DISMISSED = 'NEW_USER_CHECKLIST_DISMISSED',
         NEW_USER_CHECKLIST_COMPLETED = 'NEW_USER_CHECKLIST_COMPLETED',
         INTRO_ACKNOWLEDGED = 'INTRO_ACKNOWLEDGED',
+        SOCIAL_NOTIFICATIONS_SETTING = 'SOCIAL_NOTIFICATIONS_SETTING',
+        REMINDER_NOTIFICATIONS_SETTING = 'REMINDER_NOTIFICATIONS_SETTING',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -28,6 +30,9 @@ export namespace Constants {
         }
     };
 
+    /*
+     * COMPLETION STATES
+     */
     export enum CompletionState {
         INVALID = 'INVALID',
         COMPLETE = 'COMPLETE',
@@ -36,7 +41,6 @@ export namespace Constants {
         SKIPPED = 'SKIPPED',
         NO_SCHEDULE = 'NO_SCHEDULE',
     }
-
     export const getCompletionState = (state: string): CompletionState => {
         switch (state) {
             case 'COMPLETE':
@@ -52,6 +56,53 @@ export namespace Constants {
 
             default:
                 return CompletionState.INVALID;
+        }
+    };
+
+    /*
+     * SOCIAL NOTIFICATIONS SETTING
+     */
+    export enum SocialNotificationsSetting {
+        INVALID = 'INVALID',
+        ENABLED = 'ENABLED',
+        DISABLED = 'DISABLED',
+    }
+
+    export const getSocialNotificationsSetting = (state: string): SocialNotificationsSetting => {
+        switch (state) {
+            case 'ENABLED':
+                return SocialNotificationsSetting.ENABLED;
+            case 'DISABLED':
+                return SocialNotificationsSetting.DISABLED;
+
+            default:
+                return SocialNotificationsSetting.INVALID;
+        }
+    };
+
+    /*
+     * REMINDER NOTIFICATIONS SETTING
+     */
+    export enum ReminderNotificationsSetting {
+        INVALID = 'INVALID',
+        DISABLED = 'DISABLED',
+        DAILY = 'DAILY',
+        PERIODICALLY = 'PERIODICALLY',
+    }
+
+    export const getReminderNotificationsSetting = (
+        state: string
+    ): ReminderNotificationsSetting => {
+        switch (state) {
+            case 'DISABLED':
+                return ReminderNotificationsSetting.DISABLED;
+            case 'DAILY':
+                return ReminderNotificationsSetting.DAILY;
+            case 'PERIODICALLY':
+                return ReminderNotificationsSetting.PERIODICALLY;
+
+            default:
+                return ReminderNotificationsSetting.INVALID;
         }
     };
 }
