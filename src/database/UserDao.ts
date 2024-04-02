@@ -1,6 +1,7 @@
 import { User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
+import { Constants } from '@resources/types/constants/constants';
 
 export class UserDao {
     public static async getByUid(uid: string): Promise<User | null> {
@@ -248,5 +249,27 @@ export class UserDao {
         });
 
         return updatedUser;
+    }
+
+    public static async getUsersWithProperty(
+        key: Constants.UserPropertyKey,
+        value: string
+    ): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                properties: {
+                    some: {
+                        key: key,
+                        value: value,
+                    },
+                },
+            },
+            include: {
+                properties: true,
+                pushNotificationTokens: true,
+            },
+        });
+
+        return users;
     }
 }

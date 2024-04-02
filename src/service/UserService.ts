@@ -14,6 +14,7 @@ import { BlockUserService } from './BlockUserService';
 import { UserRoleService } from '@src/service/UserRoleService';
 import { ImageDetectionService } from './ImageService';
 import { RevenueCatService } from './internal/RevenueCatService';
+import { Constants } from '@resources/types/constants/constants';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -218,6 +219,17 @@ export class UserService {
 
         const userModel: User = ModelConverter.convert(user);
         return userModel;
+    }
+
+    public static async getUsersWithProperty(
+        context: Context,
+        key: Constants.UserPropertyKey,
+        value: string
+    ): Promise<User[]> {
+        const users = await UserDao.getUsersWithProperty(key, value);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
     }
 
     private static async markUserAsSetupComplete(user: User) {

@@ -19,4 +19,11 @@ export class DayKeyUtility {
     public static getTodayKey(): string {
         return this.getDayKey(new Date());
     }
+
+    public static getDayKeyFromTimezone(timezone: string): string {
+        const dateWithTimezone = new Date().toLocaleString('en-US', { timeZone: timezone });
+        const date = new Date(dateWithTimezone);
+
+        return this.getDayKey(date);
+    }
 }

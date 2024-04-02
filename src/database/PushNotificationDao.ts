@@ -1,25 +1,39 @@
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
-import { Notification as NotificationModel, PushNotificationToken } from '@resources/schema';
-import { prisma } from '@database/prisma';
+import { Notification, PushNotificationToken, User } from '@resources/schema';
 import { logger } from '@src/common/logger/Logger';
 
 export class PushNotificationDao {
-    public static async send(notification: NotificationModel) {
+    public static async sendSocialNotification(notification: Notification) {
         try {
-            await this.sendNotification(notification);
+            await this.sendSocialNotification2(notification);
         } catch (error) {
             logger.error('Error sending push notification: ' + error);
         }
     }
 
-    private static async sendNotification(notification: NotificationModel) {
+    public static async sendGenericNotification(toUser: User, message: string) {
+        await this.sendSocialNotification3(toUser, message);
+    }
+
+    private static async sendSocialNotification2(notification: Notification) {
+        const fromUser = notification.fromUser;
+        const toUser = notification.toUser;
+        const summary = notification.summary;
+
+        if (!fromUser || !toUser || !summary) {
+            return;
+        }
+
+        const body = fromUser?.displayName + ' ' + summary;
+        await this.sendSocialNotification3(toUser, body);
+    }
+
+    private static async sendSocialNotification3(toUser: User, body: string) {
         // Create a new Expo SDK client
         // optionally providing an access token if you have enabled push security
         let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
 
-        const fromUser = notification.fromUser;
-        const recieverTokens: PushNotificationToken[] =
-            notification.toUser?.pushNotificationTokens || [];
+        const recieverTokens: PushNotificationToken[] = toUser?.pushNotificationTokens || [];
 
         // Create the messages that you want to send to clients
         let messages: ExpoPushMessage[] = [];
@@ -36,7 +50,7 @@ export class PushNotificationDao {
             messages.push({
                 to: pushToken.token,
                 sound: 'default',
-                body: fromUser?.displayName + ' ' + notification.summary,
+                body: body,
                 data: { withSome: 'data' },
             });
         }

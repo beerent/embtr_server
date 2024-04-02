@@ -45,7 +45,7 @@ export class NotificationService {
         const notificationModel: Notification = ModelConverter.convert(notification);
 
         // 2. send push notification
-        PushNotificationDao.send(notificationModel);
+        PushNotificationDao.sendSocialNotification(notificationModel);
 
         return notification;
     }

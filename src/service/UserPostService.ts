@@ -11,6 +11,8 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { BlockUserService } from './BlockUserService';
 import { ApiAlertsService } from './ApiAlertsService';
+import { UserPropertyService } from './UserPropertyService';
+import { Constants } from '@resources/types/constants/constants';
 
 export class UserPostService {
     public static async create(context: Context, userPost: UserPost): Promise<UserPost> {

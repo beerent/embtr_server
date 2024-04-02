@@ -1,6 +1,6 @@
 export namespace Constants {
     export enum UserPropertyKey {
-        TIME_ZONE = 'TIME_ZONE',
+        TIMEZONE = 'TIMEZONE',
         HABIT_STREAK_CURRENT = 'HABIT_STREAK_CURRENT',
         HABIT_STREAK_LONGEST = 'HABIT_STREAK_LONGEST',
         NEW_USER_CHECKLIST_DISMISSED = 'NEW_USER_CHECKLIST_DISMISSED',
@@ -8,12 +8,13 @@ export namespace Constants {
         INTRO_ACKNOWLEDGED = 'INTRO_ACKNOWLEDGED',
         SOCIAL_NOTIFICATIONS_SETTING = 'SOCIAL_NOTIFICATIONS_SETTING',
         REMINDER_NOTIFICATIONS_SETTING = 'REMINDER_NOTIFICATIONS_SETTING',
+        WARNING_NOTIFICATIONS_SETTING = 'WARNING_NOTIFICATIONS_SETTING',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
         switch (key) {
             case 'TIME_ZONE':
-                return UserPropertyKey.TIME_ZONE;
+                return UserPropertyKey.TIMEZONE;
             case 'HABIT_STREAK_CURRENT':
                 return UserPropertyKey.HABIT_STREAK_CURRENT;
             case 'HABIT_STREAK_LONGEST':
@@ -62,47 +63,90 @@ export namespace Constants {
     /*
      * SOCIAL NOTIFICATIONS SETTING
      */
-    export enum SocialNotificationsSetting {
+    export enum SocialNotificationSetting {
         INVALID = 'INVALID',
         ENABLED = 'ENABLED',
         DISABLED = 'DISABLED',
     }
 
-    export const getSocialNotificationsSetting = (state: string): SocialNotificationsSetting => {
+    export const getSocialNotificationsSetting = (state: string): SocialNotificationSetting => {
         switch (state) {
             case 'ENABLED':
-                return SocialNotificationsSetting.ENABLED;
+                return SocialNotificationSetting.ENABLED;
             case 'DISABLED':
-                return SocialNotificationsSetting.DISABLED;
+                return SocialNotificationSetting.DISABLED;
 
             default:
-                return SocialNotificationsSetting.INVALID;
+                return SocialNotificationSetting.INVALID;
         }
     };
 
     /*
      * REMINDER NOTIFICATIONS SETTING
      */
-    export enum ReminderNotificationsSetting {
+    export enum ReminderNotificationSetting {
         INVALID = 'INVALID',
         DISABLED = 'DISABLED',
         DAILY = 'DAILY',
         PERIODICALLY = 'PERIODICALLY',
     }
 
-    export const getReminderNotificationsSetting = (
-        state: string
-    ): ReminderNotificationsSetting => {
+    export const getReminderNotificationsSetting = (state: string): ReminderNotificationSetting => {
         switch (state) {
             case 'DISABLED':
-                return ReminderNotificationsSetting.DISABLED;
+                return ReminderNotificationSetting.DISABLED;
             case 'DAILY':
-                return ReminderNotificationsSetting.DAILY;
+                return ReminderNotificationSetting.DAILY;
             case 'PERIODICALLY':
-                return ReminderNotificationsSetting.PERIODICALLY;
+                return ReminderNotificationSetting.PERIODICALLY;
 
             default:
-                return ReminderNotificationsSetting.INVALID;
+                return ReminderNotificationSetting.INVALID;
+        }
+    };
+
+    export enum WarningNotificationSetting {
+        INVALID = 'INVALID',
+        DISABLED = 'DISABLED',
+        DAILY = 'DAILY',
+        PERIODICALLY = 'PERIODICALLY',
+    }
+
+    export const getWarningNotificationSetting = (state: string): WarningNotificationSetting => {
+        switch (state) {
+            case 'DISABLED':
+                return WarningNotificationSetting.DISABLED;
+            case 'DAILY':
+                return WarningNotificationSetting.DAILY;
+            case 'PERIODICALLY':
+                return WarningNotificationSetting.PERIODICALLY;
+
+            default:
+                return WarningNotificationSetting.INVALID;
+        }
+    };
+
+    export enum Period {
+        INVALID = 'INVALID',
+        MORNING = 'MORNING',
+        AFTERNOON = 'AFTERNOON',
+        EVENING = 'EVENING',
+        NIGHT = 'NIGHT',
+    }
+
+    export const getPeriod = (period: string): Period => {
+        switch (period) {
+            case 'MORNING':
+                return Period.MORNING;
+            case 'AFTERNOON':
+                return Period.AFTERNOON;
+            case 'EVENING':
+                return Period.EVENING;
+            case 'NIGHT':
+                return Period.NIGHT;
+
+            default:
+                return Period.INVALID;
         }
     };
 }

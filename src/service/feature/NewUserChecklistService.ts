@@ -1,6 +1,4 @@
 import { Code } from '@resources/codes';
-import { Property } from '@resources/schema';
-import { Constants } from '@resources/types/constants/constants';
 import { NewUserChecklist, NewUserChecklistElement } from '@resources/types/dto/NewUserChecklist';
 import { HttpCode } from '@src/common/RequestResponses';
 import { Context } from '@src/general/auth/Context';
@@ -14,12 +12,7 @@ import { UserService } from '../UserService';
 
 export class NewUserChecklistService {
     public static async dismiss(context: Context): Promise<void> {
-        const property: Property = {
-            key: Constants.UserPropertyKey.NEW_USER_CHECKLIST_DISMISSED,
-            value: context.dayKey,
-        };
-
-        await UserPropertyService.set(context, context.userId, property);
+        await UserPropertyService.setNewUserChecklistDismissed(context);
     }
 
     public static async complete(context: Context): Promise<void> {
@@ -32,32 +25,17 @@ export class NewUserChecklistService {
             );
         }
 
-        const property: Property = {
-            key: Constants.UserPropertyKey.NEW_USER_CHECKLIST_COMPLETED,
-            value: context.dayKey,
-        };
-
-        await UserPropertyService.set(context, context.userId, property);
+        await UserPropertyService.setNewUserChecklistCompleted(context);
     }
 
     public static async getIsDismissed(context: Context): Promise<boolean> {
-        const property = await UserPropertyService.get(
-            context,
-            context.userId,
-            Constants.UserPropertyKey.NEW_USER_CHECKLIST_DISMISSED
-        );
-
-        return !!property;
+        const dismissed = await UserPropertyService.getNewUserChecklistDismissed(context);
+        return dismissed;
     }
 
     public static async getIsCompleted(context: Context): Promise<boolean> {
-        const property = await UserPropertyService.get(
-            context,
-            context.userId,
-            Constants.UserPropertyKey.NEW_USER_CHECKLIST_COMPLETED
-        );
-
-        return !!property;
+        const completed = await UserPropertyService.getNewUserChecklistCompleted(context);
+        return completed;
     }
 
     public static async get(context: Context): Promise<NewUserChecklist> {

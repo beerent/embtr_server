@@ -94,14 +94,8 @@ export class HabitStreakService {
             }
         }
 
-        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_CURRENT;
-        const property: Property = {
-            key,
-            value: completionCount.toString(),
-        };
-
         console.log('Setting current habit streak to', completionCount);
-        UserPropertyService.set(context, userId, property);
+        UserPropertyService.setCurrentHabitStreak(context, userId, completionCount);
     }
 
     public static async fullPopulateLongestStreak(context: Context, userId: number) {
@@ -135,14 +129,8 @@ export class HabitStreakService {
             }
         }
 
-        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_LONGEST;
-        const property: Property = {
-            key,
-            value: longestStreak.toString(),
-        };
-
         console.log('Setting longest habit streak to', longestStreak);
-        UserPropertyService.set(context, userId, property);
+        UserPropertyService.setLongestHabitStreak(context, userId, longestStreak);
     }
 
     private static async getStartDateForUser(context: Context, userId: number) {
@@ -240,45 +228,23 @@ export class HabitStreakService {
     }
 
     private static async getCurrentHabitStreak(context: Context, userId: number): Promise<number> {
-        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_CURRENT;
-        const currentStreakProperty = await UserPropertyService.get(context, userId, key);
+        const currentStreak = await UserPropertyService.getCurrentHabitStreak(context, userId);
 
-        if (currentStreakProperty === undefined) {
+        if (currentStreak) {
             return 0;
         }
 
-        const valueString = currentStreakProperty.value;
-        if (valueString === undefined) {
-            return 0;
-        }
-
-        const value = parseInt(valueString);
-        if (isNaN(value)) {
-            return 0;
-        }
-
-        return value;
+        return currentStreak;
     }
 
     private static async getLongestHabitStreak(context: Context, userId: number): Promise<number> {
-        const key: Constants.UserPropertyKey = Constants.UserPropertyKey.HABIT_STREAK_LONGEST;
-        const longestStreakProperty = await UserPropertyService.get(context, userId, key);
+        const longestStreak = await UserPropertyService.getLongestHabitStreak(context, userId);
 
-        if (longestStreakProperty === undefined) {
+        if (longestStreak === undefined) {
             return 0;
         }
 
-        const valueString = longestStreakProperty.value;
-        if (valueString === undefined) {
-            return 0;
-        }
-
-        const value = parseInt(valueString);
-        if (isNaN(value)) {
-            return 0;
-        }
-
-        return value;
+        return longestStreak;
     }
 
     private static getCompletionStateForPlannedDay(

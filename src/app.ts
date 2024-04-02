@@ -24,6 +24,7 @@ import scheduledHabitRouter from './endpoints/scheduled_habit/ScheduledHabitRout
 import habitStreakRouter from './endpoints/habit_streak/HabitStreakRouter';
 import '@src/event/event_listener_imports';
 import newUserRouter from './endpoints/new_user/NewUserRouter';
+import jobRouter from './endpoints/job/JobRouter';
 
 const cors = require('cors');
 const app = express();
@@ -75,6 +76,7 @@ app.use('/', reportRouter);
 app.use('/', habitStreakRouter);
 app.use('/', newUserRouter);
 app.use('/', healthRouter);
+app.use('/', jobRouter);
 
 app.use(handleError);
 
@@ -88,6 +90,5 @@ app.use((req, res, next) => {
 // ###############################
 //app.use('/widget', widgetRouterV1);
 //app.use('/challenge', challengeRouterV1);
-//app.use('/admin', adminRouter);
 
 export default app;
