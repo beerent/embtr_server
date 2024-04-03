@@ -10,6 +10,7 @@ import { UserService } from './service/UserService';
 import { RevenueCatService } from './service/internal/RevenueCatService';
 import { PlannedDayService } from './service/PlannedDayService';
 import { HabitStreakService } from './service/HabitStreakService';
+import { ReminderService } from './service/feature/ReminderService';
 
 const adminContext: Context = {
     userId: 1,
@@ -188,6 +189,22 @@ const handleCommandUpdateAllUserStreaks = async () => {
     }
 };
 
+const handleCommandSendDailyReminders = async () => {
+    await ReminderService.sendDailyReminders(adminContext);
+};
+
+const handleCommandSendPeriodicReminders = async () => {
+    await ReminderService.sendPeriodicReminders(adminContext);
+};
+
+const handleCommandSendDailyWarnings = async () => {
+    await ReminderService.sendDailyWarnings(adminContext);
+};
+
+const handleCommandSendPeriodicWarnings = async () => {
+    await ReminderService.sendPeriodicWarnings(adminContext);
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -292,6 +309,22 @@ const processCommand = async (command: string) => {
 
         case 'updateAllUserStreaks':
             await handleCommandUpdateAllUserStreaks();
+            break;
+
+        case 'sendDailyReminders':
+            handleCommandSendDailyReminders();
+            break;
+
+        case 'sendPeriodicReminders':
+            handleCommandSendPeriodicReminders();
+            break;
+
+        case 'sendDailyWarnings':
+            handleCommandSendDailyWarnings();
+            break;
+
+        case 'sendPeriodicWarnings':
+            handleCommandSendPeriodicWarnings();
             break;
 
         default:
