@@ -1,5 +1,5 @@
 import { Response } from "./RequestTypes";
-import { Comment } from "../../schema";
+import { Comment, Like } from "../../schema";
 
 export interface CreateCommentRequest {
   comment: string
@@ -15,4 +15,8 @@ export interface DeleteCommentRequest {
 
 export interface GetBooleanResponse extends Response {
   result?: boolean;
+}
+
+export interface CreateLikeResponse extends Response {
+  like?: Like
 }

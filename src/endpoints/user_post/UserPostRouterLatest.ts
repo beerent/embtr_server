@@ -27,6 +27,9 @@ import { LikeService } from '@src/service/LikeService';
 import { UserPostService } from '@src/service/UserPostService';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import {
+    CreateCommentRequest, CreateCommentResponse, CreateLikeResponse
+} from '@resources/types/requests/GeneralTypes';
 
 const userPostRouterLatest = express.Router();
 const v = '✓';
@@ -105,7 +108,11 @@ userPostRouterLatest.post(
     authorize,
     validateLike,
     runEndpoint(async (req, res) => {
-        const response = await LikeService.create(Interactable.USER_POST, req);
+        const context = await ContextService.get(req);
+        const targetId = Number(req.params.id);
+
+        const like = await LikeService.create(context, Interactable.USER_POST, targetId);
+        const response: CreateLikeResponse = { ...SUCCESS, like };
         res.status(response.httpCode).json(response);
     })
 );
@@ -117,7 +124,14 @@ userPostRouterLatest.post(
     authorize,
     validateCommentPost,
     runEndpoint(async (req, res) => {
-        const response = await CommentService.create(Interactable.USER_POST, req);
+        const context = await ContextService.get(req);
+        const targetId = Number(req.params.id);
+        const request: CreateCommentRequest = req.body;
+        const comment = request.comment;
+
+        const createdComment = await CommentService.create(context, Interactable.USER_POST, targetId, comment);
+        const response: CreateCommentResponse = { ...SUCCESS, comment: createdComment };
+
         res.status(response.httpCode).json(response);
     })
 );
@@ -129,8 +143,11 @@ userPostRouterLatest.delete(
     authorize,
     validateCommentDelete,
     runEndpoint(async (req, res) => {
-        const response = await CommentService.delete(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        await CommentService.delete(context, id);
+        res.json(SUCCESS);
     })
 );
 

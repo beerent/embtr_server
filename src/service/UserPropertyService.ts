@@ -36,11 +36,14 @@ export class UserPropertyService {
     public static async getSocialNotification(
         context: Context
     ): Promise<Constants.SocialNotificationSetting | undefined> {
-        const property = await this.get(
-            context,
-            context.userId,
-            Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING
-        );
+        return this.getSocialNotificationForUser(context, context.userId);
+    }
+
+    public static async getSocialNotificationForUser(
+        context: Context,
+        userId: number
+    ): Promise<Constants.SocialNotificationSetting | undefined> {
+        const property = await this.get(context, userId, Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING);
 
         if (!property?.value) {
             return undefined;

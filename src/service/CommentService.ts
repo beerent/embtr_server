@@ -1,92 +1,74 @@
 import {
-    CreateCommentRequest,
-    CreateCommentResponse,
-} from '@resources/types/requests/GeneralTypes';
-import { Response } from '@resources/types/requests/RequestTypes';
-import {
-    CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
-    GENERAL_FAILURE,
-    INVALID_REQUEST,
-    RESOURCE_NOT_FOUND,
-    SUCCESS,
+    HttpCode,
 } from '@src/common/RequestResponses';
-import { Request } from 'express';
 import { NotificationService, NotificationType } from './NotificationService';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Comment } from '@resources/schema';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
 import { ChallengeDao } from '@src/database/ChallengeDao';
 import { CreateCommentResult, CommentDao } from '@src/database/CommentDao';
 import { PlannedDayResultDao } from '@src/database/PlannedDayResultDao';
 import { UserPostDao } from '@src/database/UserPostDao';
+import { Context } from '@src/general/auth/Context';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { Code } from '@resources/codes';
 
 export class CommentService {
     public static async create(
+        context: Context,
         interactable: Interactable,
-        request: Request
-    ): Promise<CreateCommentResponse> {
-        const targetId = Number(request.params.id);
-        const comment = (request.body as CreateCommentRequest).comment;
-
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID;
-        }
-
+        targetId: number,
+        comment: string
+    ): Promise<Comment> {
         const exists = await this.exists(interactable, targetId);
         if (!exists) {
-            return { ...RESOURCE_NOT_FOUND, message: 'target does not exist' };
+            throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.RESOURCE_NOT_FOUND, 'resource not found');
         }
 
         const result: CreateCommentResult = await CommentDao.create(
             interactable,
-            userId,
+            context.userId,
             targetId,
             comment
         );
 
         if (!result) {
-            return { ...GENERAL_FAILURE, message: 'unknown error' };
+            throw new ServiceException(HttpCode.GENERAL_FAILURE, Code.GENERIC_ERROR, 'failed to save comment');
         }
 
         const commentModel: Comment = ModelConverter.convert(result);
 
-        const notification = await NotificationService.createNotification(
+        // todo run this as a background job
+        await NotificationService.createNotification(
+            context,
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? result.plannedDayResults[0].plannedDay.userId
                 : interactable === Interactable.USER_POST
-                  ? result.userPosts[0].userId
-                  : result.challenges[0].creatorId,
-            userId,
+                    ? result.userPosts[0].userId
+                    : result.challenges[0].creatorId,
+            context.userId,
             interactable === Interactable.PLANNED_DAY_RESULT
                 ? NotificationType.PLANNED_DAY_RESULT_COMMENT
                 : interactable === Interactable.USER_POST
-                  ? NotificationType.TIMELINE_COMMENT
-                  : NotificationType.CHALLENGE_COMMENT,
+                    ? NotificationType.TIMELINE_COMMENT
+                    : NotificationType.CHALLENGE_COMMENT,
             targetId
         );
-        return { ...SUCCESS, comment: commentModel };
+
+        return commentModel;
     }
 
-    public static async delete(request: Request): Promise<Response> {
-        const id = Number(request.params.id);
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-        if (!userId) {
-            return { ...INVALID_REQUEST, message: 'invalid request' };
+    public static async delete(context: Context, id: number): Promise<void> {
+        const comment = await CommentDao.get(id);
+        if (!comment) {
+            throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.RESOURCE_NOT_FOUND, 'comment not found');
         }
 
-        const comment = await CommentDao.get(id);
-        if (!comment || comment.userId !== userId) {
-            return { ...RESOURCE_NOT_FOUND, message: 'comment does not exist' };
+        if (comment.userId !== context.userId) {
+            throw new ServiceException(HttpCode.UNAUTHORIZED, Code.UNAUTHORIZED, 'unauthorized');
         }
 
         await CommentDao.delete(id);
-        return SUCCESS;
     }
 
     private static async exists(interactable: Interactable, targetId: number): Promise<boolean> {

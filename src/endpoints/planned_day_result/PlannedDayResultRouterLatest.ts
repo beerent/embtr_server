@@ -1,6 +1,7 @@
 import { PlannedDayResult } from '@resources/schema';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { PlannedDayResultSummary } from '@resources/types/planned_day_result/PlannedDayResult';
+import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import {
     CreatePlannedDayResultResponse,
     GetPlannedDayResultResponse,
@@ -10,6 +11,7 @@ import {
     UpdatePlannedDayResultResponse,
 } from '@resources/types/requests/PlannedDayResultTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
+import { Context } from '@src/general/auth/Context';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { authorize } from '@src/middleware/general/GeneralAuthorization';
@@ -175,7 +177,13 @@ plannedDayResultRouterLatest.post(
     authorize,
     validateCommentPost,
     runEndpoint(async (req, res) => {
-        const response = await CommentService.create(Interactable.PLANNED_DAY_RESULT, req);
+        const context = await ContextService.get(req);
+        const interactable = Interactable.PLANNED_DAY_RESULT;
+        const targetId = Number(req.params.id);
+        const comment = req.body.comment;
+
+        const createdComment = await CommentService.create(context, interactable, targetId, comment);
+        const response = { ...SUCCESS, comment: createdComment };
         res.status(response.httpCode).json(response);
     })
 );
@@ -187,8 +195,11 @@ plannedDayResultRouterLatest.delete(
     authorize,
     validateCommentDelete,
     runEndpoint(async (req, res) => {
-        const response = await CommentService.delete(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const targetId = Number(req.params.id);
+
+        await CommentService.delete(context, targetId);
+        res.json(SUCCESS);
     })
 );
 
@@ -199,7 +210,12 @@ plannedDayResultRouterLatest.post(
     authorize,
     validateLikePost,
     runEndpoint(async (req, res) => {
-        const response = await LikeService.create(Interactable.PLANNED_DAY_RESULT, req);
+        const context: Context = await ContextService.get(req);
+        const targetId = parseInt(req.params.id);
+        const interactable = Interactable.PLANNED_DAY_RESULT;
+
+        const like = await LikeService.create(context, interactable, targetId);
+        const response: CreateLikeResponse = { ...SUCCESS, like };
         res.status(response.httpCode).json(response);
     })
 );

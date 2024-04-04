@@ -1,9 +1,9 @@
 import { Notification, NotificationTargetPage } from '@resources/schema';
 import { NotificationDao } from '@src/database/NotificationDao';
-import { PushNotificationDao } from '@src/database/PushNotificationDao';
 import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { BlockUserService } from './BlockUserService';
+import { PushNotificationService } from './PushNotificationService';
 
 export enum NotificationType {
     TIMELINE_COMMENT,
@@ -24,6 +24,7 @@ export enum NotificationType {
 
 export class NotificationService {
     public static async createNotification(
+        context: Context,
         toUserId: number,
         fromUserId: number,
         notificationType: NotificationType,
@@ -45,7 +46,8 @@ export class NotificationService {
         const notificationModel: Notification = ModelConverter.convert(notification);
 
         // 2. send push notification
-        PushNotificationDao.sendSocialNotification(notificationModel);
+        // todo - run as background job
+        PushNotificationService.sendSocialNotification(context, notificationModel);
 
         return notification;
     }

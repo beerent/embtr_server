@@ -13,6 +13,10 @@ import { LikeService } from '@src/service/LikeService';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { CommentService } from '@src/service/CommentService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import { ContextService } from '@src/service/ContextService';
+import { Context } from '@src/general/auth/Context';
+import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
+import { SUCCESS } from '@src/common/RequestResponses';
 
 const challengeRouterV1 = express.Router();
 const v = 'v1';
@@ -57,7 +61,12 @@ challengeRouterV1.post(
     authorize,
     validateLikePost,
     runEndpoint(async (req, res) => {
-        const response = await LikeService.create(Interactable.CHALLENGE, req);
+        const context: Context = await ContextService.get(req);
+        const targetId = Number(req.params.id);
+        const interactable = Interactable.CHALLENGE;
+
+        const like = await LikeService.create(context, interactable, targetId);
+        const response: CreateLikeResponse = { ...SUCCESS, like };
         res.status(response.httpCode).json(response);
     })
 );
@@ -69,7 +78,13 @@ challengeRouterV1.post(
     authorize,
     validateCommentPost,
     runEndpoint(async (req, res) => {
-        const response = await CommentService.create(Interactable.CHALLENGE, req);
+        const context = await ContextService.get(req);
+        const interactable = Interactable.CHALLENGE;
+        const targetId = Number(req.params.id);
+        const comment = req.body.comment;
+
+        const createdComment = await CommentService.create(context, interactable, targetId, comment);
+        const response = { ...SUCCESS, comment: createdComment };
         res.status(response.httpCode).json(response);
     })
 );
@@ -81,8 +96,11 @@ challengeRouterV1.delete(
     authorize,
     validateCommentDelete,
     runEndpoint(async (req, res) => {
-        const response = await CommentService.delete(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        await CommentService.delete(context, id);
+        res.json(SUCCESS);
     })
 );
 

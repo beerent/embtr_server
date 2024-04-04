@@ -1,21 +1,26 @@
 import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
 import { Notification, PushNotificationToken, User } from '@resources/schema';
+import { Context } from '@src/general/auth/Context';
+import { UserPropertyService } from './UserPropertyService';
+import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
 
-export class PushNotificationDao {
-    public static async sendSocialNotification(notification: Notification) {
-        try {
-            await this.sendSocialNotification2(notification);
-        } catch (error) {
-            logger.error('Error sending push notification: ' + error);
+export class PushNotificationService {
+    public static async sendGenericNotification(context: Context, toUser: User, message: string) {
+        await this.sendNotification(context, toUser, message);
+    }
+
+    public static async sendSocialNotification(context: Context, notification: Notification) {
+        if (!notification.toUserId) {
+            return;
         }
-    }
 
-    public static async sendGenericNotification(toUser: User, message: string) {
-        await this.sendSocialNotification3(toUser, message);
-    }
+        const socialNotificationsEnabled = await this.socialNotificationsEnabled(context, notification.toUserId);
+        if (!socialNotificationsEnabled) {
+            logger.info('skipping social notification, setting is disabled');
+            return;
+        }
 
-    private static async sendSocialNotification2(notification: Notification) {
         const fromUser = notification.fromUser;
         const toUser = notification.toUser;
         const summary = notification.summary;
@@ -25,10 +30,15 @@ export class PushNotificationDao {
         }
 
         const body = fromUser?.displayName + ' ' + summary;
-        await this.sendSocialNotification3(toUser, body);
+        await this.sendNotification(context, toUser, body);
     }
 
-    private static async sendSocialNotification3(toUser: User, body: string) {
+    public static async socialNotificationsEnabled(context: Context, userId: number): Promise<boolean> {
+        const property = await UserPropertyService.getSocialNotificationForUser(context, userId);
+        return property === Constants.SocialNotificationSetting.ENABLED;
+    }
+
+    private static async sendNotification(context: Context, toUser: User, body: string) {
         // Create a new Expo SDK client
         // optionally providing an access token if you have enabled push security
         let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });

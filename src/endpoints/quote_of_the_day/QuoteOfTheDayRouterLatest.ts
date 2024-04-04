@@ -15,6 +15,8 @@ import {
 } from '@resources/types/requests/QuoteOfTheDayTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
+import { Context } from '@src/general/auth/Context';
 
 const quoteOfTheDayRouterLatest = express.Router();
 const v = '✓';
@@ -58,7 +60,13 @@ quoteOfTheDayRouterLatest.post(
     authorize,
     validateLikePost,
     runEndpoint(async (req, res) => {
-        const response = await LikeService.create(Interactable.QUOTE_OF_THE_DAY, req);
+        const context: Context = await ContextService.get(req);
+        const interactable = Interactable.QUOTE_OF_THE_DAY;
+        const targetId = parseInt(req.params.id);
+
+        const like = await LikeService.create(context, interactable, targetId);
+
+        const response: CreateLikeResponse = { ...SUCCESS, like };
         res.status(response.httpCode).json(response);
     })
 );

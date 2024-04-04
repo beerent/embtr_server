@@ -1,12 +1,12 @@
 import { PlannedTask } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
-import { PushNotificationDao } from '@src/database/PushNotificationDao';
 import { Context } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { TimeOfDayUtility } from '@src/utility/TimeOfDayUtility';
 import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 import { PlannedDayService } from '../PlannedDayService';
+import { PushNotificationService } from '../PushNotificationService';
 import { UserService } from '../UserService';
 
 export class ReminderService {
@@ -53,7 +53,7 @@ export class ReminderService {
             const habit = incompleteCount === 1 ? 'habit' : 'habits';
             const message = `You have ${incompleteCount} ${habit} to complete today!`;
 
-            PushNotificationDao.sendGenericNotification(user, message);
+            PushNotificationService.sendGenericNotification(context, user, message);
         }
 
         logger.info(`Sent daily reminders to ${usersNotifiedCount} users.`);
@@ -110,7 +110,7 @@ export class ReminderService {
             const habit = incompleteCount === 1 ? 'habit' : 'habits';
             const message = `You have ${incompleteCount} ${habit} to complete this ${periodPretty}!`;
 
-            PushNotificationDao.sendGenericNotification(user, message);
+            PushNotificationService.sendGenericNotification(context, user, message);
         }
 
         logger.info(`Sent periodic reminders to ${usersNotifiedCount} users.`);
@@ -159,7 +159,7 @@ export class ReminderService {
             const habit = incompleteCount === 1 ? 'habit' : 'habits';
             const message = `Heads up! You have ${incompleteCount} ${habit} remaining today.`;
 
-            PushNotificationDao.sendGenericNotification(user, message);
+            PushNotificationService.sendGenericNotification(context, user, message);
         }
 
         logger.info(`Sent daily warnings to ${usersNotifiedCount} users.`);
@@ -216,7 +216,7 @@ export class ReminderService {
             const habit = incompleteCount === 1 ? 'habit' : 'habits';
             const message = `Heads up! You have ${incompleteCount} ${habit} remaining this ${periodPretty}.`;
 
-            PushNotificationDao.sendGenericNotification(user, message);
+            PushNotificationService.sendGenericNotification(context, user, message);
         }
 
         logger.info(`Sent periodic warnings to ${usersNotifiedCount} users.`);
