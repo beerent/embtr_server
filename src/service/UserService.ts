@@ -15,6 +15,7 @@ import { UserRoleService } from '@src/service/UserRoleService';
 import { ImageDetectionService } from './ImageService';
 import { RevenueCatService } from './internal/RevenueCatService';
 import { Constants } from '@resources/types/constants/constants';
+import { UserPropertyService } from './UserPropertyService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -81,7 +82,11 @@ export class UserService {
 
     public static async setup(context: Context, user: User): Promise<User> {
         const setupUser = await this.update(context, user);
-        await this.markUserAsSetupComplete(setupUser);
+        await this.markUserAsSetupComplete(context, setupUser);
+
+        if (setupUser.id) {
+            await UserPropertyService.setDefaultProperties(context, setupUser.id);
+        }
 
         ApiAlertsService.sendAlert(`New user created: ${setupUser.username}`);
 
@@ -162,6 +167,11 @@ export class UserService {
         return user;
     }
 
+    public static async isPremium(context: Context, userId: number): Promise<boolean> {
+        const isPremium = await UserRoleService.hasPremiumRole(context, userId);
+        return isPremium;
+    }
+
     public static async exists(context: Context, username: string): Promise<boolean> {
         const user = await this.getByUsername(username);
         const exists = !!user;
@@ -232,7 +242,17 @@ export class UserService {
         return userModels;
     }
 
-    private static async markUserAsSetupComplete(user: User) {
+    public static async getUsersWithoutProperty(
+        context: Context,
+        key: Constants.UserPropertyKey
+    ): Promise<User[]> {
+        const users = await UserDao.getUsersWithoutProperty(key);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
+    private static async markUserAsSetupComplete(context: Context, user: User) {
         const updatedUser = await UserDao.update(user.uid!, {
             accountSetup: true,
         });

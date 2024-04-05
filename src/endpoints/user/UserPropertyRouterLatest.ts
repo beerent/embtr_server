@@ -62,7 +62,7 @@ userPropertyRouterLatest.get(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const setting = await UserPropertyService.getSocialNotification(context);
+        const setting = await UserPropertyService.getSocialNotification(context, context.userId);
         const response: GetUserSocialNotificationResponse = { ...SUCCESS, setting };
 
         res.json(response);
@@ -79,7 +79,7 @@ userPropertyRouterLatest.post(
         const request: SetUserSocialNotificationRequest = req.body;
 
         const setting = request.setting;
-        await UserPropertyService.setSocialNotification(context, setting);
+        await UserPropertyService.setSocialNotification(context, context.userId, setting);
         const response: SetUserSocialNotificationResponse = { ...SUCCESS, setting };
 
         res.json(response);
@@ -93,7 +93,7 @@ userPropertyRouterLatest.get(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const setting = await UserPropertyService.getReminderNotification(context);
+        const setting = await UserPropertyService.getReminderNotification(context, context.userId);
         const response: GetUserReminderNotificationResponse = { ...SUCCESS, setting };
 
         res.json(response);
@@ -110,7 +110,7 @@ userPropertyRouterLatest.post(
         const request: SetUserReminderNotificationRequest = req.body;
 
         const setting = request.setting;
-        await UserPropertyService.setReminderNotification(context, setting);
+        await UserPropertyService.setReminderNotification(context, context.userId, setting);
         const response: SetUserReminderNotificationResponse = { ...SUCCESS, setting };
 
         res.json(response);
@@ -141,7 +141,7 @@ userPropertyRouterLatest.post(
         const request: SetUserWarningNotificationRequest = req.body;
         const setting = request.setting;
 
-        await UserPropertyService.setWarningNotification(context, setting);
+        await UserPropertyService.setWarningNotification(context, context.userId, setting);
         const response: SetUserWarningNotificationResponse = { ...SUCCESS, setting };
 
         res.json(response);

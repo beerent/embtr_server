@@ -75,10 +75,13 @@ export class UserDao {
         return !!user;
     }
 
-    public static async getById(id: number): Promise<User | null> {
+    public static async getById(id: number) {
         const user = await prisma.user.findUnique({
             where: {
                 id: id,
+            },
+            include: {
+                roles: true,
             },
         });
 
@@ -261,6 +264,24 @@ export class UserDao {
                     some: {
                         key: key,
                         value: value,
+                    },
+                },
+            },
+            include: {
+                properties: true,
+                pushNotificationTokens: true,
+            },
+        });
+
+        return users;
+    }
+
+    public static async getUsersWithoutProperty(key: Constants.UserPropertyKey): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                properties: {
+                    none: {
+                        key: key,
                     },
                 },
             },

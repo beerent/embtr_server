@@ -11,6 +11,10 @@ import { RevenueCatService } from './service/internal/RevenueCatService';
 import { PlannedDayService } from './service/PlannedDayService';
 import { HabitStreakService } from './service/HabitStreakService';
 import { ReminderService } from './service/feature/ReminderService';
+import { Constants } from '@resources/types/constants/constants';
+import { UserPropertyService } from './service/UserPropertyService';
+
+// ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
 const adminContext: Context = {
     userId: 1,
@@ -18,6 +22,21 @@ const adminContext: Context = {
     userEmail: 'bnren',
     userRoles: [],
     dayKey: '04-04-2021',
+};
+
+const handleCommandGetProperties = async (email: string) => {
+    const user = await UserService.getByEmail(email);
+    if (!user.id) {
+        console.log('user not found');
+        return;
+    }
+
+    const properties = await UserPropertyService.getAll(adminContext, user.id);
+    const propertyStrings = properties.map((property) => {
+        return `${property.key}: ${property.value}`;
+    });
+
+    console.log(propertyStrings);
 };
 
 const handleCommandGetRoles = async (email: string) => {
@@ -205,6 +224,49 @@ const handleCommandSendPeriodicWarnings = async () => {
     await ReminderService.sendPeriodicWarnings(adminContext);
 };
 
+const handleCommandSetDefaultSocialNotificationsSettingsForAllUsers = async () => {
+    const users = await UserService.getUsersWithoutProperty(adminContext, Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING);
+
+    for (const user of users) {
+        if (user.id) {
+            console.log('setting social notifications for user', user.id);
+            UserPropertyService.setSocialNotification(adminContext, user.id, Constants.SocialNotificationSetting.ENABLED);
+        }
+    }
+}
+
+const handleCommandSetDefaultReminderNotificationsSettingsForAllUsers = async () => {
+    const users = await UserService.getUsersWithoutProperty(adminContext, Constants.UserPropertyKey.REMINDER_NOTIFICATIONS_SETTING);
+
+    for (const user of users) {
+        if (user.id) {
+            console.log('setting reminder notifications for user', user.id);
+            const isPremium = await UserService.isPremium(adminContext, user.id);
+            if (isPremium) {
+                UserPropertyService.setReminderNotification(adminContext, user.id, Constants.ReminderNotificationSetting.PERIODICALLY);
+            } else {
+                UserPropertyService.setReminderNotification(adminContext, user.id, Constants.ReminderNotificationSetting.DAILY);
+            }
+        }
+    }
+}
+
+const handleCommandSetDefaultWarmingNotificationsSettingsForAllUsers = async () => {
+    const users = await UserService.getUsersWithoutProperty(adminContext, Constants.UserPropertyKey.WARNING_NOTIFICATIONS_SETTING);
+
+    for (const user of users) {
+        if (user.id) {
+            console.log('setting warning notifications for user', user.id);
+            const isPremium = await UserService.isPremium(adminContext, user.id);
+            if (isPremium) {
+                UserPropertyService.setWarningNotification(adminContext, user.id, Constants.WarningNotificationSetting.PERIODICALLY);
+            } else {
+                UserPropertyService.setWarningNotification(adminContext, user.id, Constants.WarningNotificationSetting.DISABLED);
+            }
+        }
+    }
+}
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -216,6 +278,10 @@ const processCommand = async (command: string) => {
     switch (cmd) {
         case 'exit':
             process.exit(0);
+
+        case 'getProperties':
+            await handleCommandGetProperties(email);
+            break;
 
         case 'getRoles':
             await handleCommandGetRoles(email);
@@ -325,6 +391,18 @@ const processCommand = async (command: string) => {
 
         case 'sendPeriodicWarnings':
             handleCommandSendPeriodicWarnings();
+            break;
+
+        case 'setDefaultSocial':
+            handleCommandSetDefaultSocialNotificationsSettingsForAllUsers();
+            break;
+
+        case 'setDefaultReminder':
+            handleCommandSetDefaultReminderNotificationsSettingsForAllUsers();
+            break;
+
+        case 'setDefaultWarning':
+            handleCommandSetDefaultWarmingNotificationsSettingsForAllUsers();
             break;
 
         default:

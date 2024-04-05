@@ -5,8 +5,17 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Constants } from '@resources/types/constants/constants';
+import { Roles } from '@src/roles/Roles';
+import { HttpCode } from '@src/common/RequestResponses';
 
 export class UserPropertyService {
+    public static async getAll(context: Context, userId: number): Promise<Property[]> {
+        const properties = await UserPropertyDao.getAll(userId);
+        const propertyModels: Property[] = properties.map((property) => ModelConverter.convert(property));
+
+        return propertyModels;
+    }
+
     /* TIMEZONE */
     public static async getTimezone(context: Context): Promise<string> {
         const timezone = await this.get(
@@ -34,14 +43,8 @@ export class UserPropertyService {
 
     /* NOTIFICATION SOCIAL */
     public static async getSocialNotification(
-        context: Context
-    ): Promise<Constants.SocialNotificationSetting | undefined> {
-        return this.getSocialNotificationForUser(context, context.userId);
-    }
-
-    public static async getSocialNotificationForUser(
         context: Context,
-        userId: number
+        userId: number,
     ): Promise<Constants.SocialNotificationSetting | undefined> {
         const property = await this.get(context, userId, Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING);
 
@@ -52,10 +55,10 @@ export class UserPropertyService {
         return Constants.getSocialNotificationsSetting(property.value);
     }
 
-    public static async setSocialNotification(context: Context, value: string): Promise<Property> {
+    public static async setSocialNotification(context: Context, userId: number, value: string): Promise<Property> {
         return this.set(
             context,
-            context.userId,
+            userId,
             Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING,
             value
         );
@@ -63,11 +66,12 @@ export class UserPropertyService {
 
     /* REMINDER NOTIFICATION */
     public static async getReminderNotification(
-        context: Context
+        context: Context,
+        userId: number
     ): Promise<Constants.ReminderNotificationSetting | undefined> {
         const property = await this.get(
             context,
-            context.userId,
+            userId,
             Constants.UserPropertyKey.REMINDER_NOTIFICATIONS_SETTING
         );
 
@@ -80,13 +84,25 @@ export class UserPropertyService {
 
     public static async setReminderNotification(
         context: Context,
-        value: string
+        userId: number,
+        setting: Constants.ReminderNotificationSetting
     ): Promise<Property> {
+        const premiumSettings = [Constants.ReminderNotificationSetting.PERIODICALLY];
+        const isPremiumSetting = premiumSettings.includes(setting);
+        const isPremiumUser = Roles.isPremium(context.userRoles);
+        if (isPremiumSetting && !isPremiumUser) {
+            throw new ServiceException(
+                HttpCode.UNAUTHORIZED,
+                Code.MISSING_PREMIUM,
+                'premium required'
+            );
+        }
+
         return this.set(
             context,
-            context.userId,
+            userId,
             Constants.UserPropertyKey.REMINDER_NOTIFICATIONS_SETTING,
-            value
+            setting
         );
     }
 
@@ -107,12 +123,23 @@ export class UserPropertyService {
         return Constants.getWarningNotificationSetting(property.value);
     }
 
-    public static async setWarningNotification(context: Context, value: string): Promise<Property> {
+    public static async setWarningNotification(context: Context, userId: number, setting: Constants.WarningNotificationSetting): Promise<Property> {
+        const premiumSettings = [Constants.WarningNotificationSetting.DAILY, Constants.WarningNotificationSetting.PERIODICALLY];
+        const isPremiumSetting = premiumSettings.includes(setting);
+        const isPremiumUser = Roles.isPremium(context.userRoles);
+        if (isPremiumSetting && !isPremiumUser) {
+            throw new ServiceException(
+                HttpCode.UNAUTHORIZED,
+                Code.MISSING_PREMIUM,
+                'premium required'
+            );
+        }
+
         return this.set(
             context,
-            context.userId,
+            userId,
             Constants.UserPropertyKey.WARNING_NOTIFICATIONS_SETTING,
-            value
+            setting
         );
     }
 
@@ -206,6 +233,27 @@ export class UserPropertyService {
         );
 
         return !!property;
+    }
+
+    public static async setDefaultProperties(context: Context, userId: number): Promise<void> {
+        const promises = [
+            this.getSocialNotification(context, userId),
+            this.getWarningNotification(context),
+            this.getReminderNotification(context, userId)
+        ];
+
+        const [social, warning, reminder] = await Promise.all(promises);
+        if (!social) {
+            this.setSocialNotification(context, userId, Constants.SocialNotificationSetting.ENABLED);
+        }
+
+        if (!reminder) {
+            this.setReminderNotification(context, userId, Constants.ReminderNotificationSetting.DAILY);
+        }
+
+        if (!warning) {
+            this.setWarningNotification(context, userId, Constants.WarningNotificationSetting.DISABLED);
+        }
     }
 
     private static async get(

@@ -89,6 +89,23 @@ export class UserRoleService {
         }
     }
 
+    public static async hasPremiumRole(context: Context, userId: number): Promise<boolean> {
+        return this.hasRole(context, userId, Role.PREMIUM);
+    }
+
+    public static async hasRole(context: Context, userId: number, role: Role): Promise<boolean> {
+        const user = await UserDao.getById(userId);
+        if (!user) {
+            return false;
+        }
+
+        const hasRole = user.roles.some((userRole) => {
+            return userRole.name === role;
+        });
+
+        return hasRole;
+    }
+
     public static async isAdmin(email: string): Promise<boolean> {
         const account = await AccountDao.getByEmail(email);
         const isAdmin = account?.customClaims?.roles?.includes(Role.ADMIN);
