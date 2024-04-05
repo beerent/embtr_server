@@ -1,4 +1,5 @@
 import { Context } from '@src/general/auth/Context';
+import { NotificationType } from '@src/service/NotificationService';
 
 export namespace Event {
     export namespace PlannedDay {
@@ -37,5 +38,21 @@ export namespace Event {
             context: Context;
             userId: number;
         }
+    }
+
+    export namespace Comment {
+        export const Created = 'COMMENT_CREATED';
+
+        export interface Event {
+            context: Context;
+            notificationType: NotificationType;
+            fromUserId: number;
+            toUserId: number;
+            targetId: number;
+        }
+    }
+
+    export namespace Like {
+        export const Created = 'LIKE_CREATED';
     }
 }
