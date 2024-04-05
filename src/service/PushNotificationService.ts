@@ -34,7 +34,7 @@ export class PushNotificationService {
     }
 
     public static async socialNotificationsEnabled(context: Context, userId: number): Promise<boolean> {
-        const property = await UserPropertyService.getSocialNotificationForUser(context, userId);
+        const property = await UserPropertyService.getSocialNotification(context, userId);
         return property === Constants.SocialNotificationSetting.ENABLED;
     }
 
