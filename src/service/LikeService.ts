@@ -83,14 +83,14 @@ export class LikeService {
 
     private static getNotificationType(interactable: Interactable): NotificationType {
         if (interactable === Interactable.USER_POST) {
-            return NotificationType.TIMELINE_COMMENT;
+            return NotificationType.TIMELINE_LIKE;
         }
 
         if (interactable === Interactable.CHALLENGE) {
-            return NotificationType.CHALLENGE_COMMENT;
+            return NotificationType.CHALLENGE_LIKE;
         }
 
-        return NotificationType.PLANNED_DAY_RESULT_COMMENT;
+        return NotificationType.PLANNED_DAY_RESULT_LIKE;
     }
 
 }
