@@ -1,4 +1,4 @@
-import { NotificationService, NotificationType } from './NotificationService';
+import { NotificationType } from './NotificationService';
 import {
     HttpCode,
 } from '@src/common/RequestResponses';
@@ -13,6 +13,7 @@ import { Like } from '@resources/schema';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { LikeEventDispatcher } from '@src/event/like/LikeEventDispatcher';
 
 export class LikeService {
     public static async create(context: Context, interactable: Interactable, targetId: number): Promise<Like> {
@@ -32,24 +33,10 @@ export class LikeService {
         }
         const likeModel: Like = ModelConverter.convert(like);
 
-        const toUserId =
-            interactable === Interactable.USER_POST
-                ? like.userPosts[0].userId
-                : interactable === Interactable.PLANNED_DAY_RESULT
-                    ? like.plannedDayResults[0].plannedDay.userId
-                    : interactable === Interactable.QUOTE_OF_THE_DAY
-                        ? like.quoteOfTheDays[0].userId
-                        : like.challenges[0].creatorId;
 
-        const notificationType =
-            interactable === Interactable.PLANNED_DAY_RESULT
-                ? NotificationType.PLANNED_DAY_RESULT_LIKE
-                : interactable === Interactable.USER_POST
-                    ? NotificationType.TIMELINE_LIKE
-                    : interactable === Interactable.QUOTE_OF_THE_DAY
-                        ? NotificationType.QUOTE_LIKE
-                        : NotificationType.CHALLENGE_LIKE;
-        await NotificationService.createNotification(context, toUserId, context.userId, notificationType, targetId);
+        const toUserId = this.getToUserId(interactable, likeModel);
+        const notificationType = this.getNotificationType(interactable);
+        LikeEventDispatcher.onCreated(context, notificationType, context.userId, toUserId, targetId);
 
         return likeModel;
     }
@@ -77,4 +64,33 @@ export class LikeService {
 
         return exists;
     }
+
+    private static getToUserId(interactable: Interactable, like: Like): number {
+        if (interactable === Interactable.USER_POST) {
+            return like.userPosts?.[0].userId ?? 0;
+        }
+
+        if (interactable === Interactable.CHALLENGE) {
+            return like.challenges?.[0].creatorId ?? 0;
+        }
+
+        if (interactable === Interactable.PLANNED_DAY_RESULT) {
+            return like.plannedDayResults?.[0].plannedDay?.userId ?? 0;
+        }
+
+        return 0;
+    }
+
+    private static getNotificationType(interactable: Interactable): NotificationType {
+        if (interactable === Interactable.USER_POST) {
+            return NotificationType.TIMELINE_COMMENT;
+        }
+
+        if (interactable === Interactable.CHALLENGE) {
+            return NotificationType.CHALLENGE_COMMENT;
+        }
+
+        return NotificationType.PLANNED_DAY_RESULT_COMMENT;
+    }
+
 }

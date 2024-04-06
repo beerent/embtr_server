@@ -54,5 +54,13 @@ export namespace Event {
 
     export namespace Like {
         export const Created = 'LIKE_CREATED';
+
+        export interface Event {
+            context: Context;
+            notificationType: NotificationType;
+            fromUserId: number;
+            toUserId: number;
+            targetId: number;
+        }
     }
 }
