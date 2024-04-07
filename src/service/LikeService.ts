@@ -33,7 +33,6 @@ export class LikeService {
         }
         const likeModel: Like = ModelConverter.convert(like);
 
-
         const toUserId = this.getToUserId(interactable, likeModel);
         const notificationType = this.getNotificationType(interactable);
         LikeEventDispatcher.onCreated(context, notificationType, context.userId, toUserId, targetId);
@@ -76,6 +75,10 @@ export class LikeService {
 
         if (interactable === Interactable.PLANNED_DAY_RESULT) {
             return like.plannedDayResults?.[0].plannedDay?.userId ?? 0;
+        }
+
+        if (interactable === Interactable.QUOTE_OF_THE_DAY) {
+            return like.quoteOfTheDays?.[0].userId ?? 0;
         }
 
         return 0;
