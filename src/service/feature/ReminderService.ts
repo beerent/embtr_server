@@ -230,7 +230,7 @@ export class ReminderService {
             timeZone: timezone,
         }).format(currentTime);
 
-        return usersHour === '04';
+        return usersHour === '11';
     }
 
     private static isDailyWarningLocalTime(timezone: string) {
