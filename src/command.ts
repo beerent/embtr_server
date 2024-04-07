@@ -24,9 +24,9 @@ const adminContext: Context = {
     dayKey: '04-04-2021',
 };
 
-const handleCommandGetProperties = async (email: string) => {
-    const user = await UserService.getByEmail(email);
-    if (!user.id) {
+const handleCommandGetProperties = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
         console.log('user not found');
         return;
     }
@@ -181,8 +181,8 @@ const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) =>
     await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
 };
 
-const handleCommandUpdateUserStreaks = async (email: string) => {
-    const user = await UserService.getByUsername(email);
+const handleCommandUpdateUserStreaks = async (username: string) => {
+    const user = await UserService.getByUsername(username);
     if (!user?.id) {
         console.log('user not found');
         return;

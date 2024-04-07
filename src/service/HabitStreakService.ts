@@ -230,7 +230,7 @@ export class HabitStreakService {
     private static async getCurrentHabitStreak(context: Context, userId: number): Promise<number> {
         const currentStreak = await UserPropertyService.getCurrentHabitStreak(context, userId);
 
-        if (currentStreak) {
+        if (!currentStreak) {
             return 0;
         }
 
@@ -240,7 +240,7 @@ export class HabitStreakService {
     private static async getLongestHabitStreak(context: Context, userId: number): Promise<number> {
         const longestStreak = await UserPropertyService.getLongestHabitStreak(context, userId);
 
-        if (longestStreak === undefined) {
+        if (!longestStreak) {
             return 0;
         }
 
