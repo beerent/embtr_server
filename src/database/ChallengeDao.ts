@@ -157,6 +157,13 @@ export class ChallengeDao {
         return [];
     }
 
+    /*
+    * this manual query to calculate the progress of a challenge requirement
+    * 
+    * the general logic is to get one line item per "interval".
+    * an interval would be 1 if it was for a daily challenge such as take cold shower every day for a month. 
+    * an interval would be 7 if it was run 3 times a week for a month.
+    */
     private static async getTaskBasedChallengeRequirementProgess(
         startDate: Date,
         endDate: Date,
@@ -169,12 +176,18 @@ export class ChallengeDao {
 
         const result: ChallengeRequirementResults[] = await prisma.$queryRaw(
             Prisma.sql`
-            SELECT floor((DATEDIFF(planned_day.date, '1971-01-01') - DATEDIFF(${startDateString}, '1971-01-01')) / ${interval}) AS intervalIndex,
-            MIN(planned_day.date)                                                                 AS intervalStartDate,
-            SUM(completedQuantity)                                                                AS totalCompleted
+            SELECT floor(
+                (
+                    DATEDIFF(planned_day.date, '1971-01-01') - DATEDIFF(${startDateString}, '1971-01-01')
+                ) / ${interval}
+            ) AS intervalIndex,
+
+            MIN(planned_day.date) AS intervalStartDate,
+            SUM(completedQuantity) AS totalCompleted
      FROM planned_task
               JOIN planned_day ON plannedDayId = planned_day.id
-     WHERE userId = ${userId}
+              JOIN scheduled_habit ON scheduledHabitId = scheduled_habit.id
+     WHERE planned_day.userId = ${userId}
        AND taskId = ${taskId}
        AND planned_task.active = true
        AND planned_day.date >= ${startDateString}
@@ -205,7 +218,6 @@ export class ChallengeDao {
      WHERE userId = ${userId}
        AND planned_task.active = true
        AND planned_day.date >= ${startDateString}
-       AND planned_day.date < ${endDateString}
      group by intervalIndex; 
             `
         );

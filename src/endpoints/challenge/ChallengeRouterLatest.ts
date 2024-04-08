@@ -17,16 +17,17 @@ import { ContextService } from '@src/service/ContextService';
 import { Context } from '@src/general/auth/Context';
 import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
+import { GetChallengeResponse } from '@resources/types/requests/ChallengeTypes';
 
-const challengeRouterV1 = express.Router();
-const v = 'v1';
+const challengeRouterLatest = express.Router();
+const v = '✓';
 
-challengeRouterV1.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
+challengeRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
     const response = await ChallengeService.getAll();
     res.status(response.httpCode).json(response);
 });
 
-challengeRouterV1.get(
+challengeRouterLatest.get(
     '/recently-joined',
     routeLogger(v),
     authenticate,
@@ -37,24 +38,31 @@ challengeRouterV1.get(
     }
 );
 
-challengeRouterV1.get('/:id', routeLogger(v), authenticate, authorize, async (req, res) => {
-    const response = await ChallengeService.get(req);
+challengeRouterLatest.get('/:id', routeLogger(v), authenticate, authorize, async (req, res) => {
+    const context = await ContextService.get(req);
+    const id = Number(req.params.id);
+
+    const challenge = await ChallengeService.get(context, id);
+    const response: GetChallengeResponse = { ...SUCCESS, challenge };
     res.status(response.httpCode).json(response);
 });
 
-challengeRouterV1.post(
+challengeRouterLatest.post(
     '/:id/register',
     routeLogger(v),
     authenticate,
     authorize,
     validateChallengeRegister,
     runEndpoint(async (req, res) => {
-        const response = await ChallengeService.register(req);
-        res.status(response.httpCode).json(response);
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        await ChallengeService.register(context, id);
+        res.json(SUCCESS);
     })
 );
 
-challengeRouterV1.post(
+challengeRouterLatest.post(
     '/:id/like',
     routeLogger(v),
     authenticate,
@@ -71,7 +79,7 @@ challengeRouterV1.post(
     })
 );
 
-challengeRouterV1.post(
+challengeRouterLatest.post(
     '/:id/comment/',
     routeLogger(v),
     authenticate,
@@ -89,7 +97,7 @@ challengeRouterV1.post(
     })
 );
 
-challengeRouterV1.delete(
+challengeRouterLatest.delete(
     '/comment/:id',
     routeLogger(v),
     authenticate,
@@ -104,4 +112,4 @@ challengeRouterV1.delete(
     })
 );
 
-export default challengeRouterV1;
+export default challengeRouterLatest;

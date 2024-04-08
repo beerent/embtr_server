@@ -2,6 +2,7 @@ import { User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
 import { Constants } from '@resources/types/constants/constants';
+import { Role } from '@src/roles/Roles';
 
 export class UserDao {
     public static async getByUid(uid: string): Promise<User | null> {
@@ -252,6 +253,25 @@ export class UserDao {
         });
 
         return updatedUser;
+    }
+
+    public static async getUsersWithRole(
+        role: Role
+    ): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                roles: {
+                    some: {
+                        name: role
+                    },
+                },
+            },
+            include: {
+                roles: true,
+            },
+        });
+
+        return users;
     }
 
     public static async getUsersWithProperty(

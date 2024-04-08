@@ -472,11 +472,18 @@ export class ScheduledHabitDao {
         return prisma.scheduledHabit.findMany({
             where: {
                 userId: userId,
-                daysOfWeek: {
-                    some: {
-                        id: dayOfWeek,
+                OR: [
+                    {
+                        daysOfWeek: {
+                            some: {
+                                id: dayOfWeek,
+                            },
+                        },
                     },
-                },
+                    {
+                        daysOfWeekEnabled: false,
+                    }
+                ],
                 AND: [
                     {
                         OR: [

@@ -120,6 +120,13 @@ export class UserRoleService {
         return isAdmin;
     }
 
+    public static async isPremium(email: string): Promise<boolean> {
+        const account = await AccountDao.getByEmail(email);
+        const isPremium = account?.customClaims?.roles?.includes(Role.PREMIUM);
+
+        return isPremium;
+    }
+
     public static async getRoles(email: string) {
         const user = await UserDao.getByEmail(email);
         const account = await AccountDao.getByEmail(email);

@@ -149,4 +149,22 @@ export namespace Constants {
                 return Period.INVALID;
         }
     };
+
+    export enum ScheduledHabitType {
+        INVALID = 'INVALID',
+        DEFAULT = 'DEFAULT',
+        CHALLENGE = 'CHALLENGE'
+    }
+
+    export const getScheduledHabitType = (type: ScheduledHabitType): ScheduledHabitType => {
+        switch (type) {
+            case 'DEFAULT':
+                return ScheduledHabitType.DEFAULT;
+            case 'CHALLENGE':
+                return ScheduledHabitType.CHALLENGE;
+        }
+
+        return ScheduledHabitType.INVALID;
+    }
+
 }

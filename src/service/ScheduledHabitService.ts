@@ -1,4 +1,4 @@
-import { ScheduledHabit } from '@resources/schema';
+import { Challenge, ScheduledHabit, TimeOfDay } from '@resources/schema';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Context } from '@src/general/auth/Context';
 import { HabitSummary } from '@resources/types/habit/Habit';
@@ -11,6 +11,7 @@ import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedHabitService } from './PlannedHabitService';
+import { HttpCode } from '@src/common/RequestResponses';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -22,6 +23,37 @@ export class ScheduledHabitService {
         }
 
         return this.create(context, scheduledHabit);
+    }
+
+    public static async createFromChallenge(context: Context, challenge: Challenge): Promise<ScheduledHabit[]> {
+        const scheduledHabits: ScheduledHabit[] = [];
+
+        for (const requirement of challenge.challengeRequirements ?? []) {
+            const task = requirement.task;
+
+            if (!task?.id) {
+                throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.RESOURCE_NOT_FOUND, "failure creating scheduledHabit from challenge");
+            }
+
+            const defaultTimeOfDay: TimeOfDay = {
+                id: 5
+            };
+
+            const scheduledHabit: ScheduledHabit = {
+                taskId: task?.id,
+                detailsEnabled: false,
+                daysOfWeekEnabled: false,
+                timesOfDayEnabled: false,
+                timesOfDay: [defaultTimeOfDay],
+                startDate: challenge.start,
+                endDate: challenge.end,
+            }
+
+            const createdScheduledHabit = await this.create(context, scheduledHabit);
+            scheduledHabits.push(createdScheduledHabit);
+        }
+
+        return scheduledHabits;
     }
 
     public static async create(

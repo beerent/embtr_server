@@ -51,4 +51,15 @@ jobRouterLatest.get(
     })
 );
 
+jobRouterLatest.get(
+    '/refresh-premium-users',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        await JobService.refreshPremiumUsers(context);
+
+        res.status(200).send('OK');
+    })
+);
+
 export default jobRouterLatest;

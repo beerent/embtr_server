@@ -25,6 +25,7 @@ import habitStreakRouter from './endpoints/habit_streak/HabitStreakRouter';
 import '@src/event/event_listener_imports';
 import newUserRouter from './endpoints/new_user/NewUserRouter';
 import jobRouter from './endpoints/job/JobRouter';
+import challengeRouter from './endpoints/challenge/ChallengeRouter';
 
 const cors = require('cors');
 const app = express();
@@ -77,6 +78,7 @@ app.use('/', habitStreakRouter);
 app.use('/', newUserRouter);
 app.use('/', healthRouter);
 app.use('/', jobRouter);
+app.use('/', challengeRouter);
 
 app.use(handleError);
 
@@ -89,6 +91,5 @@ app.use((req, res, next) => {
 // # ENDPOINT GRAVEYARD (R.I.P.) #
 // ###############################
 //app.use('/widget', widgetRouterV1);
-//app.use('/challenge', challengeRouterV1);
 
 export default app;

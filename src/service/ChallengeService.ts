@@ -1,3 +1,4 @@
+import { Code } from '@resources/codes';
 import {
     Challenge,
     ChallengeCalculationType,
@@ -9,17 +10,17 @@ import {
 } from '@resources/schema';
 import {
     GetChallengeParticipationResponse,
-    GetChallengeResponse,
     GetChallengesResponse,
     GetJoinedChallengesResponse,
 } from '@resources/types/requests/ChallengeTypes';
-import { Response } from '@resources/types/requests/RequestTypes';
-import { GENERAL_FAILURE, SUCCESS } from '@src/common/RequestResponses';
-import { AuthorizationDao } from '@src/database/AuthorizationDao';
+import { GENERAL_FAILURE, HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
 import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
+import { Context } from '@src/general/auth/Context';
+import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Request } from 'express';
+import { ScheduledHabitService } from './ScheduledHabitService';
 
 export class ChallengeService {
     public static async getAll(): Promise<GetChallengesResponse> {
@@ -27,6 +28,20 @@ export class ChallengeService {
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
         return { ...SUCCESS, challenges: challengeModels };
+    }
+
+    public static async get(context: Context, id: number): Promise<Challenge> {
+        const challenge = await ChallengeDao.get(id);
+        if (!challenge) {
+            throw new ServiceException(
+                HttpCode.RESOURCE_NOT_FOUND,
+                Code.RESOURCE_NOT_FOUND,
+                'challenge not found'
+            );
+        }
+
+        const challengeModel: Challenge = ModelConverter.convert(challenge);
+        return challengeModel;
     }
 
     public static async getRecentJoins(request: Request): Promise<GetJoinedChallengesResponse> {
@@ -101,40 +116,17 @@ export class ChallengeService {
         return { ...SUCCESS, challengeParticipation: models };
     }
 
-    public static async get(request: Request): Promise<GetChallengeResponse> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
+    public static async register(context: Context, id: number) {
+        const challenge = await this.get(context, id);
 
-        const id = Number(request.params.id);
-
-        const challenge = await ChallengeDao.get(id);
-        if (!challenge) {
-            return { ...GENERAL_FAILURE, message: 'challenge not found' };
-        }
-
-        const challengeModel: Challenge = ModelConverter.convert(challenge);
-
-        return { ...SUCCESS, challenge: challengeModel };
-    }
-
-    public static async register(request: Request): Promise<Response> {
-        const userId: number = (await AuthorizationDao.getUserIdFromToken(
-            request.headers.authorization!
-        )) as number;
-
-        if (!userId) {
-            return { ...GENERAL_FAILURE, message: 'invalid request' };
-        }
-
-        const challengeId = Number(request.params.id);
-
-        const challenge = await ChallengeDao.get(challengeId);
-        if (challenge?.challengeParticipants.some((participant) => participant.userId === userId)) {
+        //todo - use query, don't be a moron
+        if (challenge?.challengeParticipants?.some((participant) => participant.userId === context.userId)) {
             return { ...GENERAL_FAILURE, message: 'user already registered for challenge' };
         }
 
-        const response = await ChallengeDao.register(userId, challengeId);
+        await ChallengeDao.register(context.userId, id);
+        await ScheduledHabitService.createFromChallenge(context, challenge);
+
         return SUCCESS;
     }
 
@@ -142,7 +134,7 @@ export class ChallengeService {
         plannedTask: PlannedTask
     ): Promise<Challenge[]> {
         const userId = plannedTask.plannedDay?.userId;
-        const taskId = 0;
+        const taskId = plannedTask.scheduledHabit?.taskId;
         const date = plannedTask.plannedDay?.date;
         if (!userId || !taskId || !date) {
             return [];
@@ -208,7 +200,7 @@ export class ChallengeService {
                 if (
                     previousCompletionState !== participant.challengeRequirementCompletionState &&
                     participant.challengeRequirementCompletionState ===
-                        ChallengeRequirementCompletionState.COMPLETED
+                    ChallengeRequirementCompletionState.COMPLETED
                 ) {
                     completedChallenges.push(challenge);
                 }

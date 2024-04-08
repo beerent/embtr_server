@@ -62,6 +62,7 @@ export interface Task {
   user?: User;
   habitCategoryId?: number;
   habitCategory?: HabitCategory;
+  type?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

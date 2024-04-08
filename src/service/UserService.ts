@@ -16,6 +16,7 @@ import { ImageDetectionService } from './ImageService';
 import { RevenueCatService } from './internal/RevenueCatService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './UserPropertyService';
+import { HttpCode } from '@src/common/RequestResponses';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -38,6 +39,13 @@ export class UserService {
 
     public static async getAll(context: Context): Promise<User[]> {
         const users = await UserDao.getAll();
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
+    public static async getAllPremium(context: Context): Promise<User[]> {
+        const users = await UserDao.getUsersWithRole(Role.PREMIUM);
         const userModels: User[] = ModelConverter.convertAll(users);
 
         return userModels;
@@ -88,7 +96,7 @@ export class UserService {
             await UserPropertyService.setDefaultProperties(context, setupUser.id);
         }
 
-        ApiAlertsService.sendAlert(`New user created: ${setupUser.username}`);
+        ApiAlertsService.sendAlert(`New user created!`);
 
         return setupUser;
     }
@@ -153,17 +161,42 @@ export class UserService {
         return userModels;
     }
 
-    public static async updatePremiumStatus(context: Context) {
-        const isPremium = await RevenueCatService.isPremium(context.userUid);
+    public static async refreshPremiumUsers(context: Context) {
+        const users = await this.getAllPremium(context);
+        console.log(`found ${users.length} premium users`);
 
-        if (isPremium) {
-            await UserRoleService.addUserRole(context, context.userEmail, Role.PREMIUM);
-            ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
-        } else {
-            await UserRoleService.removeUserRole(context, context.userEmail, Role.PREMIUM);
+        for (const user of users) {
+            if (!user.uid) {
+                continue;
+            }
+
+            await this.updatePremiumStatus(context, user.uid);
+        }
+    }
+
+    public static async updatePremiumStatus(context: Context, uid: string) {
+        const account = await AccountDao.getByUid(uid);
+        if (!account?.email || !account.customClaims?.userId) {
+            throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.USER_NOT_FOUND, 'user not found');
         }
 
-        const user = await this.getByUid(context.userUid);
+        const isPremium = await RevenueCatService.isPremium(uid);
+        const hasPremiumRole = await this.isPremium(context, account.customClaims.userId);
+        if (isPremium) {
+            if (!hasPremiumRole) {
+                await UserRoleService.addUserRole(context, account.email, Role.PREMIUM);
+                await UserRoleService.removeUserRole(context, account.email, Role.FREE);
+                ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
+            }
+        } else {
+            if (hasPremiumRole) {
+                await UserRoleService.addUserRole(context, account.email, Role.FREE);
+                await UserRoleService.removeUserRole(context, account.email, Role.PREMIUM);
+                ApiAlertsService.sendAlert('we lost a premium user 😢');
+            }
+        }
+
+        const user = await this.getByUid(uid);
         return user;
     }
 

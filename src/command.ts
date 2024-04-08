@@ -267,6 +267,10 @@ const handleCommandSetDefaultWarmingNotificationsSettingsForAllUsers = async () 
     }
 }
 
+const handleCommandRefreshPremiumUsers = async () => {
+    await UserService.refreshPremiumUsers(adminContext);
+}
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -403,6 +407,10 @@ const processCommand = async (command: string) => {
 
         case 'setDefaultWarning':
             handleCommandSetDefaultWarmingNotificationsSettingsForAllUsers();
+            break;
+
+        case 'refreshPremiumUsers':
+            handleCommandRefreshPremiumUsers();
             break;
 
         default:
