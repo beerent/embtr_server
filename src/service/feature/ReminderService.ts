@@ -1,6 +1,6 @@
-import { PlannedTask } from '@resources/schema';
-import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
+import { PlannedTask, User } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 import { Context } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { TimeOfDayUtility } from '@src/utility/TimeOfDayUtility';
@@ -17,46 +17,13 @@ export class ReminderService {
             Constants.ReminderNotificationSetting.DAILY
         );
 
-        let usersNotifiedCount = 0;
         for (const user of users) {
-            if (!user.id) {
-                continue;
+            try {
+                await this.sendUserDailyReminder(context, user);
+            } catch (e) {
+                logger.error("failed to send user daily reminder", e);
             }
-
-            const timezone = UserPropertyUtility.getProperty(
-                user,
-                Constants.UserPropertyKey.TIMEZONE
-            );
-            if (!timezone?.value) {
-                continue;
-            }
-
-            const isDailyReminderLocalTime = this.isDailyReminderLocalTime(timezone.value);
-            if (!isDailyReminderLocalTime) {
-                continue;
-            }
-
-            const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-            const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
-            const plannedTasks = plannedDay.plannedTasks;
-            if (!plannedTasks) {
-                continue;
-            }
-
-            const incompleteCount = this.getIncompleteCount(plannedTasks);
-            if (incompleteCount === 0) {
-                continue;
-            }
-
-            usersNotifiedCount++;
-
-            const habit = incompleteCount === 1 ? 'habit' : 'habits';
-            const message = `You have ${incompleteCount} ${habit} to complete today!`;
-
-            PushNotificationService.sendGenericNotification(context, user, message);
         }
-
-        logger.info(`Sent daily reminders to ${usersNotifiedCount} users.`);
     }
 
     public static async sendPeriodicReminders(context: Context): Promise<void> {
@@ -66,54 +33,13 @@ export class ReminderService {
             Constants.ReminderNotificationSetting.PERIODICALLY
         );
 
-        let usersNotifiedCount = 0;
         for (const user of users) {
-            if (!user.id) {
-                continue;
+            try {
+                this.sendUserPeriodicReminder(context, user);
+            } catch (e) {
+                logger.error("failed to send user periodic reminder", e);
             }
-
-            const timezone = UserPropertyUtility.getProperty(
-                user,
-                Constants.UserPropertyKey.TIMEZONE
-            );
-            if (!timezone?.value) {
-                continue;
-            }
-
-            const period = this.getUserPeriod(timezone.value);
-            if (!period) {
-                continue;
-            }
-
-            const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-            const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
-            if (!plannedDay?.plannedTasks) {
-                continue;
-            }
-
-            const plannedTasks = plannedDay.plannedTasks.filter(
-                (task) => task.timeOfDay?.period === period
-            );
-
-            if (plannedTasks.length === 0) {
-                continue;
-            }
-
-            const incompleteCount = this.getIncompleteCount(plannedTasks);
-            if (incompleteCount === 0) {
-                continue;
-            }
-
-            usersNotifiedCount++;
-
-            const periodPretty = TimeOfDayUtility.getPeriodPretty(period);
-            const habit = incompleteCount === 1 ? 'habit' : 'habits';
-            const message = `You have ${incompleteCount} ${habit} to complete this ${periodPretty}!`;
-
-            PushNotificationService.sendGenericNotification(context, user, message);
         }
-
-        logger.info(`Sent periodic reminders to ${usersNotifiedCount} users.`);
     }
 
     public static async sendDailyWarnings(context: Context) {
@@ -123,46 +49,13 @@ export class ReminderService {
             Constants.WarningNotificationSetting.DAILY
         );
 
-        let usersNotifiedCount = 0;
         for (const user of users) {
-            if (!user.id) {
-                continue;
+            try {
+                this.sendUserDailyWarning(context, user);
+            } catch (e) {
+                logger.error("failed to send user daily warning", e);
             }
-
-            const timezone = UserPropertyUtility.getProperty(
-                user,
-                Constants.UserPropertyKey.TIMEZONE
-            );
-            if (!timezone?.value) {
-                continue;
-            }
-
-            const isDailyWarningLocalTime = this.isDailyWarningLocalTime(timezone.value);
-            if (!isDailyWarningLocalTime) {
-                continue;
-            }
-
-            const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-            const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
-            const plannedTasks = plannedDay.plannedTasks;
-            if (!plannedTasks) {
-                continue;
-            }
-
-            const incompleteCount = this.getIncompleteCount(plannedTasks);
-            if (incompleteCount === 0) {
-                continue;
-            }
-
-            usersNotifiedCount++;
-
-            const habit = incompleteCount === 1 ? 'habit' : 'habits';
-            const message = `Heads up! You have ${incompleteCount} ${habit} remaining today.`;
-
-            PushNotificationService.sendGenericNotification(context, user, message);
         }
-
-        logger.info(`Sent daily warnings to ${usersNotifiedCount} users.`);
     }
 
     public static async sendPeriodicWarnings(context: Context): Promise<void> {
@@ -172,54 +65,13 @@ export class ReminderService {
             Constants.WarningNotificationSetting.PERIODICALLY
         );
 
-        let usersNotifiedCount = 0;
         for (const user of users) {
-            if (!user.id) {
-                continue;
+            try {
+                this.sendUserPeriodicWarning(context, user);
+            } catch (e) {
+                logger.error("failed to send periodic warning", e);
             }
-
-            const timezone = UserPropertyUtility.getProperty(
-                user,
-                Constants.UserPropertyKey.TIMEZONE
-            );
-            if (!timezone?.value) {
-                continue;
-            }
-
-            const period = this.getUserWarningPeriod(timezone.value);
-            if (!period) {
-                continue;
-            }
-
-            const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-            const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
-            if (!plannedDay?.plannedTasks) {
-                continue;
-            }
-
-            const plannedTasks = plannedDay.plannedTasks.filter(
-                (task) => task.timeOfDay?.period === period
-            );
-
-            if (plannedTasks.length === 0) {
-                continue;
-            }
-
-            const incompleteCount = this.getIncompleteCount(plannedTasks);
-            if (incompleteCount === 0) {
-                continue;
-            }
-
-            usersNotifiedCount++;
-
-            const periodPretty = TimeOfDayUtility.getPeriodPretty(period);
-            const habit = incompleteCount === 1 ? 'habit' : 'habits';
-            const message = `Heads up! You have ${incompleteCount} ${habit} remaining this ${periodPretty}.`;
-
-            PushNotificationService.sendGenericNotification(context, user, message);
         }
-
-        logger.info(`Sent periodic warnings to ${usersNotifiedCount} users.`);
     }
 
     private static isDailyReminderLocalTime(timezone: string) {
@@ -316,5 +168,165 @@ export class ReminderService {
         const unfinishedHabitCount = totalHabitCount - finshedHabitCount;
 
         return unfinishedHabitCount;
+    }
+
+    private static async sendUserDailyReminder(context: Context, user: User): Promise<void> {
+        if (!user.id) {
+            return;
+        }
+
+        const timezone = UserPropertyUtility.getProperty(
+            user,
+            Constants.UserPropertyKey.TIMEZONE
+        );
+        if (!timezone?.value) {
+            return;
+        }
+
+        const isDailyReminderLocalTime = this.isDailyReminderLocalTime(timezone.value);
+        if (!isDailyReminderLocalTime) {
+            return;
+        }
+
+        const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
+        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        const plannedTasks = plannedDay.plannedTasks;
+        if (!plannedTasks) {
+            return;
+        }
+
+        const incompleteCount = this.getIncompleteCount(plannedTasks);
+        if (incompleteCount === 0) {
+            return;
+        }
+
+        const habit = incompleteCount === 1 ? 'habit' : 'habits';
+        const message = `You have ${incompleteCount} ${habit} to complete today!`;
+
+        PushNotificationService.sendGenericNotification(context, user, message);
+    }
+
+    private static async sendUserPeriodicReminder(context: Context, user: User) {
+        if (!user.id) {
+            return;
+        }
+
+        const timezone = UserPropertyUtility.getProperty(
+            user,
+            Constants.UserPropertyKey.TIMEZONE
+        );
+        if (!timezone?.value) {
+            return;
+        }
+
+        const period = this.getUserPeriod(timezone.value);
+        if (!period) {
+            return;
+        }
+
+        const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
+        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        if (!plannedDay?.plannedTasks) {
+            return;
+        }
+
+        const plannedTasks = plannedDay.plannedTasks.filter(
+            (task) => task.timeOfDay?.period === period
+        );
+
+        if (plannedTasks.length === 0) {
+            return;
+        }
+
+        const incompleteCount = this.getIncompleteCount(plannedTasks);
+        if (incompleteCount === 0) {
+            return;
+        }
+
+        const periodPretty = TimeOfDayUtility.getPeriodPretty(period);
+        const habit = incompleteCount === 1 ? 'habit' : 'habits';
+        const message = `You have ${incompleteCount} ${habit} to complete this ${periodPretty}!`;
+
+        PushNotificationService.sendGenericNotification(context, user, message);
+    }
+
+    private static async sendUserDailyWarning(context: Context, user: User) {
+        if (!user.id) {
+            return;
+        }
+
+        const timezone = UserPropertyUtility.getProperty(
+            user,
+            Constants.UserPropertyKey.TIMEZONE
+        );
+        if (!timezone?.value) {
+            return;
+        }
+
+        const isDailyWarningLocalTime = this.isDailyWarningLocalTime(timezone.value);
+        if (!isDailyWarningLocalTime) {
+            return;
+        }
+
+        const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
+        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        const plannedTasks = plannedDay.plannedTasks;
+        if (!plannedTasks) {
+            return;
+        }
+
+        const incompleteCount = this.getIncompleteCount(plannedTasks);
+        if (incompleteCount === 0) {
+            return;
+        }
+
+        const habit = incompleteCount === 1 ? 'habit' : 'habits';
+        const message = `Heads up! You have ${incompleteCount} ${habit} remaining today.`;
+
+        PushNotificationService.sendGenericNotification(context, user, message);
+    }
+
+    private static async sendUserPeriodicWarning(context: Context, user: User) {
+        if (!user.id) {
+            return;
+        }
+
+        const timezone = UserPropertyUtility.getProperty(
+            user,
+            Constants.UserPropertyKey.TIMEZONE
+        );
+        if (!timezone?.value) {
+            return;
+        }
+
+        const period = this.getUserWarningPeriod(timezone.value);
+        if (!period) {
+            return;
+        }
+
+        const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
+        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        if (!plannedDay?.plannedTasks) {
+            return;
+        }
+
+        const plannedTasks = plannedDay.plannedTasks.filter(
+            (task) => task.timeOfDay?.period === period
+        );
+
+        if (plannedTasks.length === 0) {
+            return;
+        }
+
+        const incompleteCount = this.getIncompleteCount(plannedTasks);
+        if (incompleteCount === 0) {
+            return;
+        }
+
+        const periodPretty = TimeOfDayUtility.getPeriodPretty(period);
+        const habit = incompleteCount === 1 ? 'habit' : 'habits';
+        const message = `Heads up! You have ${incompleteCount} ${habit} remaining this ${periodPretty}.`;
+
+        PushNotificationService.sendGenericNotification(context, user, message);
     }
 }
