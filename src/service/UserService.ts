@@ -163,7 +163,7 @@ export class UserService {
 
     public static async refreshPremiumUsers(context: Context) {
         const users = await this.getAllPremium(context);
-        console.log(`found ${users.length} premium users`);
+        logger.info(`found ${users.length} premium users`);
 
         for (const user of users) {
             if (!user.uid) {
