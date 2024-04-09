@@ -35,7 +35,7 @@ export class ReminderService {
 
         for (const user of users) {
             try {
-                this.sendUserPeriodicReminder(context, user);
+                await this.sendUserPeriodicReminder(context, user);
             } catch (e) {
                 logger.error("failed to send user periodic reminder", e);
             }
@@ -51,7 +51,7 @@ export class ReminderService {
 
         for (const user of users) {
             try {
-                this.sendUserDailyWarning(context, user);
+                await this.sendUserDailyWarning(context, user);
             } catch (e) {
                 logger.error("failed to send user daily warning", e);
             }
@@ -67,7 +67,7 @@ export class ReminderService {
 
         for (const user of users) {
             try {
-                this.sendUserPeriodicWarning(context, user);
+                await this.sendUserPeriodicWarning(context, user);
             } catch (e) {
                 logger.error("failed to send periodic warning", e);
             }
