@@ -1,7 +1,6 @@
 import express from 'express';
 import {
     GetChallengeParticipationResponse,
-    GetChallengesResponse,
 } from '@resources/types/requests/ChallengeTypes';
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
@@ -359,10 +358,11 @@ userRouterLatest.get(
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        const response: GetChallengesResponse =
-            await ChallengeService.getCompletedChallengesForUser(userId);
+        //const response: GetChallengesResponse =
+        //    await ChallengeService.getCompletedChallengesForUser(userId);
+        res.status(200).json(SUCCESS);
 
-        res.status(response.httpCode).json(response);
+        //res.status(response.httpCode).json(response);
     })
 );
 

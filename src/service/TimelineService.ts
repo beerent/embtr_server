@@ -10,6 +10,8 @@ import { PlannedDayResult, UserPost } from '@resources/schema';
 import { TimelineDao } from '@src/database/custom/TimelineDao';
 import { Context } from '@src/general/auth/Context';
 import { BlockUserService } from '@src/service/BlockUserService';
+import { ChallengeService } from './ChallengeService';
+import { ChallengeRecentlyJoined } from '@resources/types/dto/Challenge';
 
 export class TimelineService {
     public static async get(
@@ -29,9 +31,10 @@ export class TimelineService {
             timelineRequestCursor.limit
         );
 
-        let [userPosts, plannedDayResults] = await Promise.all([
+        let [userPosts, plannedDayResults, recentlyJoinedChallenges] = await Promise.all([
             UserPostService.getAllByIds(context, queryData.userPostIds),
             PlannedDayResultService.getAllByIds(context, queryData.plannedDayResultIds),
+            ChallengeService.getAllRecentlyJoinedByParticipantIds(context, queryData.challengeParticipantIds),
         ]);
 
         userPosts = userPosts.filter(
@@ -45,6 +48,7 @@ export class TimelineService {
         const elements: TimelineElement[] = [
             ...TimelineService.createUserPostTimelineElements(userPosts ?? []),
             ...TimelineService.createPlannedDayResultTimelineElements(plannedDayResults ?? []),
+            ...TimelineService.createRecentlyJoinedChallengeTimelineElements(recentlyJoinedChallenges ?? [])
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
@@ -148,6 +152,20 @@ export class TimelineService {
                 type: TimelineElementType.PLANNED_DAY_RESULT,
                 createdAt: plannedDayResult.createdAt ?? new Date(),
                 plannedDayResult,
+            });
+        }
+
+        return elements;
+    }
+
+    private static createRecentlyJoinedChallengeTimelineElements(challengesRecentlyJoined: ChallengeRecentlyJoined[]) {
+        const elements: TimelineElement[] = [];
+
+        for (const challengeRecentlyJoined of challengesRecentlyJoined) {
+            elements.push({
+                type: TimelineElementType.RECENTLY_JOINED_CHALLENGE,
+                createdAt: challengeRecentlyJoined.latestParticipant.createdAt ?? new Date(),
+                challengeRecentlyJoined: challengeRecentlyJoined
             });
         }
 

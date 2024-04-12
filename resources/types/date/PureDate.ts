@@ -37,11 +37,17 @@ export class PureDate {
 
     public static fromString(date: string): PureDate {
         const dateParts = date.trim().split('-');
-        return new PureDate(
-            Number(dateParts[0].trim()),
-            Number(dateParts[1].trim()),
-            Number(dateParts[2].trim())
-        );
+        let year = Number(dateParts[0]);
+        let month = Number(dateParts[1]);
+        let day = Number(dateParts[2]);
+
+        if (dateParts[2].length === 4) {
+            year = Number(dateParts[2]);
+            month = Number(dateParts[1]);
+            day = Number(dateParts[0]);
+        }
+
+        return new PureDate(year, month, day);
     }
 
     public static fromNumbers(year: number, month: number, day: number): PureDate {

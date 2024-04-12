@@ -124,12 +124,6 @@ export class UserService {
             }
         }
 
-        if (userToUpdate.photoUrl) {
-            userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
-                userToUpdate.photoUrl
-            );
-        }
-
         let updatedUser = undefined;
         try {
             updatedUser = await UserDao.update(context.userUid, userToUpdate);
@@ -177,7 +171,11 @@ export class UserService {
     public static async updatePremiumStatus(context: Context, uid: string) {
         const account = await AccountDao.getByUid(uid);
         if (!account?.email || !account.customClaims?.userId) {
-            throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.USER_NOT_FOUND, 'user not found');
+            throw new ServiceException(
+                HttpCode.RESOURCE_NOT_FOUND,
+                Code.USER_NOT_FOUND,
+                'user not found'
+            );
         }
 
         const isPremium = await RevenueCatService.isPremium(uid);

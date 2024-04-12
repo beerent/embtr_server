@@ -20,8 +20,8 @@ export class ChallengeDao {
                         unit: true,
                     },
                 },
-                challengeRewards: true,
                 challengeParticipants: true,
+                challengeRewards: true,
                 creator: true,
                 likes: {
                     include: {
@@ -54,10 +54,45 @@ export class ChallengeDao {
                         unit: true,
                     },
                 },
-                challengeRewards: true,
                 challengeParticipants: true,
+                challengeRewards: true,
                 creator: true,
-                likes: true,
+                likes: {
+                    where: {
+                        active: true,
+                    },
+                },
+                comments: {
+                    where: {
+                        active: true,
+                    },
+                },
+            },
+        });
+    }
+
+    public static async getAllByIds(ids: number[]) {
+        return prisma.challenge.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            include: {
+                challengeRequirements: {
+                    include: {
+                        task: true,
+                        unit: true,
+                    },
+                },
+                challengeParticipants: true,
+                challengeRewards: true,
+                creator: true,
+                likes: {
+                    where: {
+                        active: true,
+                    },
+                },
                 comments: {
                     where: {
                         active: true,
@@ -157,13 +192,34 @@ export class ChallengeDao {
         return [];
     }
 
+    public static async getParticipantCount(id: number) {
+        return await prisma.challengeParticipant.count({
+            where: {
+                challengeId: id,
+            },
+        });
+    }
+
+    public static async isParticipant(id: number, userId: number) {
+        const result = await prisma.challengeParticipant.findUnique({
+            where: {
+                unique_challenge_participant: {
+                    challengeId: id,
+                    userId: userId,
+                },
+            },
+        });
+
+        return !!result;
+    }
+
     /*
-    * this manual query to calculate the progress of a challenge requirement
-    * 
-    * the general logic is to get one line item per "interval".
-    * an interval would be 1 if it was for a daily challenge such as take cold shower every day for a month. 
-    * an interval would be 7 if it was run 3 times a week for a month.
-    */
+     * this manual query to calculate the progress of a challenge requirement
+     *
+     * the general logic is to get one line item per "interval".
+     * an interval would be 1 if it was for a daily challenge such as take cold shower every day for a month.
+     * an interval would be 7 if it was run 3 times a week for a month.
+     */
     private static async getTaskBasedChallengeRequirementProgess(
         startDate: Date,
         endDate: Date,

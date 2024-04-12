@@ -102,6 +102,19 @@ export class ChallengeParticipantDao {
         });
     }
 
+    public static async getAllByIds(ids: number[]) {
+        return prisma.challengeParticipant.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            include: {
+                user: true,
+            },
+        });
+    }
+
     public static async update(participant: ChallengeParticipant) {
         return prisma.challengeParticipant.update({
             where: {

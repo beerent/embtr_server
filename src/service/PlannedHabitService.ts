@@ -7,6 +7,7 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
+import { ChallengeService } from './ChallengeService';
 
 export class PlannedHabitService {
     public static async getById(context: Context, id: number): Promise<PlannedTask> {
@@ -76,6 +77,11 @@ export class PlannedHabitService {
         PlannedHabitEventDispatcher.onCreated(context, createdPlannedTask.id);
 
         const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
+
+        //todo - dispatch me, brah
+        const completedChallenges =
+            await ChallengeService.updateChallengeRequirementProgress(plannedTaskModel);
+
         return plannedTaskModel;
     }
 
@@ -104,8 +110,10 @@ export class PlannedHabitService {
         PlannedHabitEventDispatcher.onUpdated(context, existingPlannedTask.id);
 
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
-        // const completedChallenges =
-        //     await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
+
+        //todo - dispatch me, brah
+        const completedChallenges =
+            await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
 
         return updatedPlannedTaskModel;
     }

@@ -5,29 +5,67 @@ import {
     ChallengeParticipant,
     ChallengeRequirement,
     ChallengeRequirementCompletionState,
-    JoinedChallenge,
     PlannedTask,
 } from '@resources/schema';
-import {
-    GetChallengeParticipationResponse,
-    GetChallengesResponse,
-    GetJoinedChallengesResponse,
-} from '@resources/types/requests/ChallengeTypes';
+import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
+import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { GENERAL_FAILURE, HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
 import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { Request } from 'express';
 import { ScheduledHabitService } from './ScheduledHabitService';
 
 export class ChallengeService {
-    public static async getAll(): Promise<GetChallengesResponse> {
+    public static async getSummary(context: Context, id: number): Promise<ChallengeSummary> {
+        const challenge = await this.get(context, id);
+        const challengeSummary = this.getSummaryFromChallenge(context, challenge);
+
+        return challengeSummary;
+    }
+
+    public static async getAllSummaries(context: Context): Promise<ChallengeSummary[]> {
+        const challenges = await this.getAll(context);
+        const challengeSummaries: ChallengeSummary[] = [];
+        for (const challenge of challenges) {
+            const challengeSummary = this.getSummaryFromChallenge(context, challenge);
+            challengeSummaries.push(challengeSummary);
+        }
+
+        return challengeSummaries;
+    }
+
+    public static async getDetails(context: Context, id: number): Promise<ChallengeDetails> {
+        const challenge = await this.get(context, id);
+        const challengeDetails = this.getDetailsFromChallenge(context, challenge);
+
+        return challengeDetails;
+    }
+
+    public static async getAllDetails(context: Context): Promise<ChallengeDetails[]> {
+        const challenges = await this.getAll(context);
+        const allChallengeDetails: ChallengeDetails[] = [];
+        for (const challenge of challenges) {
+            const challengeDetails = this.getDetailsFromChallenge(context, challenge);
+            allChallengeDetails.push(challengeDetails);
+        }
+
+        return allChallengeDetails;
+    }
+
+    public static async getAll(context: Context): Promise<Challenge[]> {
         const challenges = await ChallengeDao.getAll();
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
-        return { ...SUCCESS, challenges: challengeModels };
+        return challengeModels;
+    }
+
+    public static async getAllByIds(context: Context, ids: number[]): Promise<Challenge[]> {
+        const challenges = await ChallengeDao.getAllByIds(ids);
+        const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
+
+        return challengeModels;
     }
 
     public static async get(context: Context, id: number): Promise<Challenge> {
@@ -44,44 +82,59 @@ export class ChallengeService {
         return challengeModel;
     }
 
-    public static async getRecentJoins(request: Request): Promise<GetJoinedChallengesResponse> {
-        let upperBound = new Date();
-        if (request.query.upperBound) {
-            upperBound = new Date(request.query.upperBound as string);
-        }
+    public static async getAllParticipantsByIds(
+        context: Context,
+        ids: number[]
+    ): Promise<ChallengeParticipant[]> {
+        const challengeParticipants = await ChallengeParticipantDao.getAllByIds(ids);
+        const challengeParticipantModels: ChallengeParticipant[] =
+            ModelConverter.convertAll(challengeParticipants);
 
-        let lowerBound = new Date(new Date().setMonth(new Date().getMonth() - 300));
-        if (request.query.lowerBound) {
-            lowerBound = new Date(request.query.lowerBound as string);
-        }
+        return challengeParticipantModels;
+    }
 
-        const challenges = await ChallengeDao.getAllRecentJoins(upperBound, lowerBound);
-        const models: Challenge[] = ModelConverter.convertAll(challenges);
+    public static async getAllRecentlyJoinedByParticipantIds(
+        context: Context,
+        participantIds: number[]
+    ): Promise<ChallengeSummary[]> {
+        const challengeParticipants = await this.getAllParticipantsByIds(context, participantIds);
 
-        const joinedChallenges: JoinedChallenge[] = [];
-        for (const challenge of models) {
-            const participants: ChallengeParticipant[] = [];
-            for (const participant of challenge.challengeParticipants ?? []) {
-                if (!participant.createdAt) {
-                    continue;
-                }
-                if (
-                    participant.createdAt.getTime() >= lowerBound.getTime() &&
-                    participant.createdAt.getTime() <= upperBound.getTime()
-                ) {
-                    participants.push(participant as ChallengeParticipant);
-                }
+        const challengeIds = challengeParticipants.flatMap((challengeParticipant) => [
+            challengeParticipant.challengeId ?? 0,
+        ]);
+        const challenges = await this.getAllByIds(context, challengeIds);
+
+        const challengeSummaries: ChallengeSummary[] = [];
+        for (const challengeParticipant of challengeParticipants) {
+            const challenge = challenges.find(
+                (challenge) => challenge.id === challengeParticipant.challengeId
+            );
+            if (!challenge) {
+                continue;
             }
 
-            const joinedChallenge: JoinedChallenge = {
-                challenge,
-                participants,
-            };
+            const existingMapping = challengeSummaries.find((challengeSummary) => {
+                return challengeSummary.id === challengeParticipant.challengeId;
+            });
 
-            joinedChallenges.push(joinedChallenge);
+            if (existingMapping) {
+                existingMapping.participantCount += 1;
+                if (
+                    (existingMapping.latestParticipant?.createdAt ?? new Date()) >
+                    (challengeParticipant.createdAt ?? new Date())
+                ) {
+                    existingMapping.latestParticipant = challengeParticipant;
+                }
+            } else {
+                const challengeSummary = this.getSummaryFromChallenge(context, challenge);
+                challengeSummary.latestParticipant = challengeParticipant;
+                challengeSummary.participantCount = 1;
+
+                challengeSummaries.push(challengeSummary);
+            }
         }
 
-        return { ...SUCCESS, joinedChallenges };
+        return challengeSummaries;
     }
 
     public static async getChallengeParticipationForUser(
@@ -96,9 +149,7 @@ export class ChallengeService {
     public static async getActiveChallengeParticipationForUser(
         userId: number
     ): Promise<GetChallengeParticipationResponse> {
-        const challengeParticipation = await ChallengeParticipantDao.getAllActiveForUser(
-            userId
-        );
+        const challengeParticipation = await ChallengeParticipantDao.getAllActiveForUser(userId);
         const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
 
         return { ...SUCCESS, challengeParticipation: models };
@@ -120,7 +171,12 @@ export class ChallengeService {
         const challenge = await this.get(context, id);
 
         //todo - use query, don't be a moron
-        if (challenge?.challengeParticipants?.some((participant) => participant.userId === context.userId)) {
+        if (
+            challenge?.challengeParticipants?.some(
+                (participant) => participant.userId === context.userId
+            )
+        ) {
+            // throw exception here
             return { ...GENERAL_FAILURE, message: 'user already registered for challenge' };
         }
 
@@ -229,13 +285,7 @@ export class ChallengeService {
         }
 
         const results: ChallengeRequirementResults[] =
-            await ChallengeDao.getChallengeRequirementProgess(
-                start,
-                end,
-                userId,
-                interval,
-                taskId
-            );
+            await ChallengeDao.getChallengeRequirementProgess(start, end, userId, interval, taskId);
 
         let amountComplete = 0;
 
@@ -250,5 +300,88 @@ export class ChallengeService {
         }
 
         return amountComplete;
+    }
+
+    private static getSummaryFromChallenge(
+        context: Context,
+        challenge: Challenge
+    ): ChallengeSummary {
+        const challengeSummary: ChallengeSummary = {
+            id: challenge.id ?? 0,
+            name: challenge.name ?? '',
+            description: challenge.description ?? '',
+            challengeRewards:
+                challenge.challengeRewards?.map((reward) => {
+                    return {
+                        id: reward.id ?? 0,
+                        name: reward.name ?? '',
+                        description: reward.description ?? '',
+                        remoteImageUrl: reward.remoteImageUrl ?? '',
+                        localImage: reward.localImage ?? '',
+                    };
+                }) ?? [],
+            likeCount: challenge.likes?.length ?? 0,
+            participantCount: challenge.challengeParticipants?.length ?? 0,
+            start: challenge.start ?? new Date(),
+            end: challenge.end ?? new Date(),
+            isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
+            isParticipant:
+                challenge.challengeParticipants?.some(
+                    (participant) => participant.userId === context.userId
+                ) ?? false,
+            commentCount: challenge.comments?.length ?? 0,
+            latestParticipant: challenge.challengeParticipants![0],
+        };
+
+        return challengeSummary;
+    }
+
+    private static getDetailsFromChallenge(
+        context: Context,
+        challenge: Challenge
+    ): ChallengeDetails {
+        const challengeDetails: ChallengeDetails = {
+            id: challenge.id ?? 0,
+            name: challenge.name ?? '',
+            description: challenge.description ?? '',
+
+            challengeRewards:
+                challenge.challengeRewards?.map((reward) => {
+                    return {
+                        id: reward.id ?? 0,
+                        name: reward.name ?? '',
+                        description: reward.description ?? '',
+                        remoteImageUrl: reward.remoteImageUrl ?? '',
+                        localImage: reward.localImage ?? '',
+                    };
+                }) ?? [],
+
+            likeCount: challenge.likes?.length ?? 0,
+            participantCount: challenge.challengeParticipants?.length ?? 0,
+            start: challenge.start ?? new Date(),
+            end: challenge.end ?? new Date(),
+            isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
+            isParticipant:
+                challenge.challengeParticipants?.some(
+                    (participant) => participant.userId === context.userId
+                ) ?? false,
+            comments:
+                challenge.comments?.map((comment) => {
+                    return {
+                        id: comment.id ?? 0,
+                        comment: comment.comment ?? '',
+                        userId: comment.userId ?? 0,
+                        user: {
+                            id: comment.user?.id ?? 0,
+                            uid: comment.user?.uid ?? '',
+                            username: comment.user?.username ?? '',
+                            displayName: comment.user?.displayName ?? '',
+                            photoUrl: comment.user?.photoUrl ?? '',
+                        },
+                    };
+                }) ?? [],
+        };
+
+        return challengeDetails;
     }
 }

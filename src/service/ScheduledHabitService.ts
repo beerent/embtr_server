@@ -1,4 +1,4 @@
-import { Challenge, ScheduledHabit, TimeOfDay } from '@resources/schema';
+import { Challenge, ChallengeCalculationType, ScheduledHabit, TimeOfDay } from '@resources/schema';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Context } from '@src/general/auth/Context';
 import { HabitSummary } from '@resources/types/habit/Habit';
@@ -39,13 +39,21 @@ export class ScheduledHabitService {
                 id: 5
             };
 
+            const clientDay: PureDate = PureDate.fromString(context.dayKey);
+            const challengeStartDate: PureDate = PureDate.fromDateFromServer(challenge.start ?? new Date());
+            const challengeIsOlder = clientDay.compare(challengeStartDate) > 0;
+            const startDate = challengeIsOlder ? clientDay.toUtcDate() : challengeStartDate.toUtcDate();
+
             const scheduledHabit: ScheduledHabit = {
                 taskId: task?.id,
-                detailsEnabled: false,
+                quantity: requirement.calculationType === ChallengeCalculationType.UNIQUE ? requirement.requiredTaskQuantity : 1,
+                unitId: requirement.unitId,
+                detailsEnabled: true,
                 daysOfWeekEnabled: false,
                 timesOfDayEnabled: false,
                 timesOfDay: [defaultTimeOfDay],
-                startDate: challenge.start,
+                startDate: startDate,
+                //TODO THIS DOES NOT POPULATE
                 endDate: challenge.end,
             }
 

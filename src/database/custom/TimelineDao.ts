@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 export interface TimelineQueryData {
     userPostIds: number[];
     plannedDayResultIds: number[];
+    challengeParticipantIds: number[];
 }
 
 interface QueryResults {
@@ -96,11 +97,19 @@ export class TimelineDao {
                 WHERE createdAt < ${date}
                   AND active = true
                 UNION ALL
+
                 SELECT id, 'USER_POST' AS source, createdAt
                 FROM user_post
                 WHERE createdAt < ${date}
                   AND active = true
+                UNION ALL
+
+                SELECT id, 'RECENTLY_JOINED_CHALLENGE' AS source, createdAt
+                FROM challenge_participant
+                WHERE createdAt < ${date}
+                  AND active = true
                 ORDER BY createdAt DESC LIMIT ${limit}`
+
         );
         const results = this.buildResults(result);
         return results;
@@ -109,18 +118,22 @@ export class TimelineDao {
     private static buildResults = (queryResults: QueryResults[]) => {
         const userPostIds: number[] = [];
         const plannedDayResultIds: number[] = [];
+        const challengeParticipantIds: number[] = [];
 
         for (const queryResult of queryResults) {
             if (queryResult.source === TimelineElementType.PLANNED_DAY_RESULT) {
                 plannedDayResultIds.push(queryResult.id);
-            } else {
+            } else if (queryResult.source === TimelineElementType.USER_POST) {
                 userPostIds.push(queryResult.id);
+            } else if (queryResult.source === TimelineElementType.RECENTLY_JOINED_CHALLENGE) {
+                challengeParticipantIds.push(queryResult.id);
             }
         }
 
         return {
             userPostIds,
             plannedDayResultIds,
+            challengeParticipantIds,
         };
     };
 }

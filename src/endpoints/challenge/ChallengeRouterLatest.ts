@@ -17,35 +17,73 @@ import { ContextService } from '@src/service/ContextService';
 import { Context } from '@src/general/auth/Context';
 import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
-import { GetChallengeResponse } from '@resources/types/requests/ChallengeTypes';
+import {
+    GetChallengeDetailsResponse,
+    GetChallengesDetailsResponse,
+    GetChallengesSummariesResponse,
+    GetChallengeSummaryResponse,
+} from '@resources/types/requests/ChallengeTypes';
 
 const challengeRouterLatest = express.Router();
 const v = '✓';
 
-challengeRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, res) => {
-    const response = await ChallengeService.getAll();
+challengeRouterLatest.get('/summary', routeLogger(v), authenticate, authorize, async (req, res) => {
+    const context = await ContextService.get(req);
+
+    const challengeSummaries = await ChallengeService.getAllSummaries(context);
+    const response: GetChallengesSummariesResponse = {
+        ...SUCCESS,
+        challengesSummaries: challengeSummaries,
+    };
     res.status(response.httpCode).json(response);
 });
 
 challengeRouterLatest.get(
-    '/recently-joined',
+    '/:id/summary',
     routeLogger(v),
     authenticate,
     authorize,
     async (req, res) => {
-        const response = await ChallengeService.getRecentJoins(req);
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const challengeSummary = await ChallengeService.getSummary(context, id);
+        const response: GetChallengeSummaryResponse = {
+            ...SUCCESS,
+            challengeSummary: challengeSummary,
+        };
         res.status(response.httpCode).json(response);
     }
 );
 
-challengeRouterLatest.get('/:id', routeLogger(v), authenticate, authorize, async (req, res) => {
+challengeRouterLatest.get('/details', routeLogger(v), authenticate, authorize, async (req, res) => {
     const context = await ContextService.get(req);
-    const id = Number(req.params.id);
 
-    const challenge = await ChallengeService.get(context, id);
-    const response: GetChallengeResponse = { ...SUCCESS, challenge };
+    const challengesDetails = await ChallengeService.getAllDetails(context);
+    const response: GetChallengesDetailsResponse = {
+        ...SUCCESS,
+        challengesDetails: challengesDetails,
+    };
     res.status(response.httpCode).json(response);
 });
+
+challengeRouterLatest.get(
+    '/:id/details',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const challengeDetails = await ChallengeService.getDetails(context, id);
+        const response: GetChallengeDetailsResponse = {
+            ...SUCCESS,
+            challengeDetails: challengeDetails,
+        };
+        res.status(response.httpCode).json(response);
+    }
+);
 
 challengeRouterLatest.post(
     '/:id/register',
@@ -91,7 +129,12 @@ challengeRouterLatest.post(
         const targetId = Number(req.params.id);
         const comment = req.body.comment;
 
-        const createdComment = await CommentService.create(context, interactable, targetId, comment);
+        const createdComment = await CommentService.create(
+            context,
+            interactable,
+            targetId,
+            comment
+        );
         const response = { ...SUCCESS, comment: createdComment };
         res.status(response.httpCode).json(response);
     })

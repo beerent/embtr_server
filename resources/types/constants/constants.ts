@@ -150,21 +150,21 @@ export namespace Constants {
         }
     };
 
-    export enum ScheduledHabitType {
+    export enum TaskType {
         INVALID = 'INVALID',
         DEFAULT = 'DEFAULT',
         CHALLENGE = 'CHALLENGE'
     }
 
-    export const getScheduledHabitType = (type: ScheduledHabitType): ScheduledHabitType => {
+    export const getScheduledHabitType = (type: TaskType): TaskType => {
         switch (type) {
             case 'DEFAULT':
-                return ScheduledHabitType.DEFAULT;
+                return TaskType.DEFAULT;
             case 'CHALLENGE':
-                return ScheduledHabitType.CHALLENGE;
+                return TaskType.CHALLENGE;
         }
 
-        return ScheduledHabitType.INVALID;
+        return TaskType.INVALID;
     }
 
 }
