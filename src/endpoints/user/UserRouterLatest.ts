@@ -73,6 +73,21 @@ userRouterLatest.get(
 );
 
 userRouterLatest.get(
+    '/all',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const users: User[] = await UserService.getAll(context)
+        const response: GetUsersResponse = { ...SUCCESS, users };
+        res.json(response);
+    })
+);
+
+
+userRouterLatest.get(
     '/search/',
     routeLogger(v),
     authenticate,
