@@ -44,6 +44,18 @@ export class UserService {
         return userModels;
     }
 
+    public static async getAllUserCount(context: Context): Promise<number> {
+        const count = await UserDao.getAllUserCount();
+
+        return count;
+    }
+
+    public static async getAllPremiumUserCount(context: Context): Promise<number> {
+        const count = await UserDao.getAllPremiumUserCount();
+
+        return count;
+    }
+
     public static async getAllPremium(context: Context): Promise<User[]> {
         const users = await UserDao.getUsersWithRole(Role.PREMIUM);
         const userModels: User[] = ModelConverter.convertAll(users);

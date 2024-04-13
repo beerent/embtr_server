@@ -66,6 +66,24 @@ export class UserDao {
         return users;
     }
 
+    public static async getAllUserCount(): Promise<number> {
+        const count = await prisma.user.count();
+        return count;
+    }
+
+    public static async getAllPremiumUserCount(): Promise<number> {
+        const count = await prisma.user.count({
+            where: {
+                roles: {
+                    some: {
+                        name: "premium"
+                    },
+                },
+            },
+        });
+        return count;
+    }
+
     public static async existsByUid(uid: string): Promise<boolean> {
         const user = await prisma.user.findUnique({
             where: {

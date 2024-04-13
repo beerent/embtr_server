@@ -10,6 +10,11 @@ export interface GetUsersResponse extends Response {
     users?: UserModel[];
 }
 
+export interface GetUserStatsResponse extends Response {
+  totalUsers: number
+  premiumUsers: number
+}
+
 export interface CreateUserRequest { }
 
 export interface CreateUserResponse extends Response {

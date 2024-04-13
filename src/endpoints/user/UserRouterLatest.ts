@@ -10,6 +10,7 @@ import {
     CreateBlockUserRequest,
     GetUserResponse,
     GetUsersResponse,
+    GetUserStatsResponse,
     UpdatePremiumStatusResponse,
     UpdateUserRequest,
 } from '@resources/types/requests/UserTypes';
@@ -51,6 +52,22 @@ userRouterLatest.get(
 
         const user = await UserService.getCurrent(newUserContext);
         const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+userRouterLatest.get(
+    '/stats',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const totalUsers = await UserService.getAllUserCount(context)
+        const premiumUsers = await UserService.getAllPremiumUserCount(context)
+
+        const response: GetUserStatsResponse = { ...SUCCESS, totalUsers, premiumUsers };
         res.json(response);
     })
 );
