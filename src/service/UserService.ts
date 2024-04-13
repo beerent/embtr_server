@@ -124,6 +124,12 @@ export class UserService {
             }
         }
 
+        if (userToUpdate.photoUrl) {
+            userToUpdate.photoUrl = await ImageDetectionService.filterUrlImage(
+                userToUpdate.photoUrl
+            );
+        }
+
         let updatedUser = undefined;
         try {
             updatedUser = await UserDao.update(context.userUid, userToUpdate);
