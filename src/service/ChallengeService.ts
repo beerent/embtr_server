@@ -33,6 +33,10 @@ export class ChallengeService {
             challengeSummaries.push(challengeSummary);
         }
 
+        challengeSummaries.sort((a, b) => {
+            return a.start.getTime() - b.start.getTime();
+        });
+
         return challengeSummaries;
     }
 
