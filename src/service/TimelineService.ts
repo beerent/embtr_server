@@ -31,10 +31,10 @@ export class TimelineService {
             timelineRequestCursor.limit
         );
 
-        let [userPosts, plannedDayResults, recentlyJoinedChallenges] = await Promise.all([
+        let [userPosts, plannedDayResults, challengeSummaries] = await Promise.all([
             UserPostService.getAllByIds(context, queryData.userPostIds),
             PlannedDayResultService.getAllByIds(context, queryData.plannedDayResultIds),
-            ChallengeService.getAllRecentlyJoinedByParticipantIds(context, queryData.challengeParticipantIds),
+            ChallengeService.getChallengeSummariesByIds(context, queryData.challengeIds),
         ]);
 
         userPosts = userPosts.filter(
@@ -48,7 +48,9 @@ export class TimelineService {
         const elements: TimelineElement[] = [
             ...TimelineService.createUserPostTimelineElements(userPosts ?? []),
             ...TimelineService.createPlannedDayResultTimelineElements(plannedDayResults ?? []),
-            ...TimelineService.createRecentlyJoinedChallengeTimelineElements(recentlyJoinedChallenges ?? [])
+            ...TimelineService.createRecentlyJoinedChallengeTimelineElements(
+                challengeSummaries ?? []
+            ),
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
@@ -158,14 +160,16 @@ export class TimelineService {
         return elements;
     }
 
-    private static createRecentlyJoinedChallengeTimelineElements(challengesRecentlyJoined: ChallengeRecentlyJoined[]) {
+    private static createRecentlyJoinedChallengeTimelineElements(
+        challengesRecentlyJoined: ChallengeRecentlyJoined[]
+    ) {
         const elements: TimelineElement[] = [];
 
         for (const challengeRecentlyJoined of challengesRecentlyJoined) {
             elements.push({
                 type: TimelineElementType.RECENTLY_JOINED_CHALLENGE,
-                createdAt: challengeRecentlyJoined.latestParticipant.createdAt ?? new Date(),
-                challengeRecentlyJoined: challengeRecentlyJoined
+                createdAt: challengeRecentlyJoined.timelineTimestamp ?? new Date(),
+                challengeRecentlyJoined: challengeRecentlyJoined,
             });
         }
 

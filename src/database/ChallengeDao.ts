@@ -1,5 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
+import { Challenge } from '@resources/schema';
 
 export interface ChallengeRequirementResults {
     intervalIndex: number;
@@ -85,7 +86,11 @@ export class ChallengeDao {
                         unit: true,
                     },
                 },
-                challengeParticipants: true,
+                challengeParticipants: {
+                    include: {
+                        user: true,
+                    },
+                },
                 challengeRewards: true,
                 creator: true,
                 likes: {
@@ -100,6 +105,19 @@ export class ChallengeDao {
                 },
             },
         });
+    }
+
+    public static async update(challenge: Challenge) {
+        const result = await prisma.challenge.update({
+            where: {
+                id: challenge.id,
+            },
+            data: {
+                timelineTimestamp: challenge.timelineTimestamp,
+            },
+        });
+
+        return result;
     }
 
     public static async getAllRecentJoins(upperBound: Date, lowerBound: Date) {

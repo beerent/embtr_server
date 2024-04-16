@@ -33,6 +33,7 @@ interface ChallengeBase {
 
     start: Date;
     end: Date;
+    timelineTimestamp: Date;
 
     isLiked: boolean;
     isParticipant: boolean;

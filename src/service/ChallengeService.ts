@@ -97,50 +97,6 @@ export class ChallengeService {
         return challengeParticipantModels;
     }
 
-    public static async getAllRecentlyJoinedByParticipantIds(
-        context: Context,
-        participantIds: number[]
-    ): Promise<ChallengeSummary[]> {
-        const challengeParticipants = await this.getAllParticipantsByIds(context, participantIds);
-
-        const challengeIds = challengeParticipants.flatMap((challengeParticipant) => [
-            challengeParticipant.challengeId ?? 0,
-        ]);
-        const challenges = await this.getAllByIds(context, challengeIds);
-
-        const challengeSummaries: ChallengeSummary[] = [];
-        for (const challengeParticipant of challengeParticipants) {
-            const challenge = challenges.find(
-                (challenge) => challenge.id === challengeParticipant.challengeId
-            );
-            if (!challenge) {
-                continue;
-            }
-
-            const existingMapping = challengeSummaries.find((challengeSummary) => {
-                return challengeSummary.id === challengeParticipant.challengeId;
-            });
-
-            if (existingMapping) {
-                existingMapping.participantCount += 1;
-                if (
-                    (existingMapping.latestParticipant?.createdAt ?? new Date()) >
-                    (challengeParticipant.createdAt ?? new Date())
-                ) {
-                    existingMapping.latestParticipant = challengeParticipant;
-                }
-            } else {
-                const challengeSummary = this.getSummaryFromChallenge(context, challenge);
-                challengeSummary.latestParticipant = challengeParticipant;
-                challengeSummary.participantCount = 1;
-
-                challengeSummaries.push(challengeSummary);
-            }
-        }
-
-        return challengeSummaries;
-    }
-
     public static async getChallengeParticipationForUser(
         userId: number
     ): Promise<GetChallengeParticipationResponse> {
@@ -186,6 +142,7 @@ export class ChallengeService {
 
         await ChallengeDao.register(context.userId, id);
         await ScheduledHabitService.createFromChallenge(context, challenge);
+        await this.refreshTimelineTimestamp(challenge);
 
         return SUCCESS;
     }
@@ -306,6 +263,38 @@ export class ChallengeService {
         return amountComplete;
     }
 
+    public static async getChallengeSummariesByIds(
+        context: Context,
+        ids: number[]
+    ): Promise<ChallengeSummary[]> {
+        const challenges = await this.getAllByIds(context, ids);
+
+        const challengeSummaries: ChallengeSummary[] = [];
+        for (const challenge of challenges) {
+            const challengeSummary = this.getSummaryFromChallenge(context, challenge);
+            challengeSummaries.push(challengeSummary);
+        }
+
+        return challengeSummaries;
+    }
+
+    private static async refreshTimelineTimestamp(challenge: Challenge) {
+        const now = new Date();
+        const currentTimelineTimestamp = challenge.timelineTimestamp;
+        if (!currentTimelineTimestamp) {
+            return;
+        }
+
+        //if timelinetimestamp is 36 hours old, update it
+        const timeDifference = now.getTime() - currentTimelineTimestamp.getTime();
+        if (timeDifference < 1000 * 60 * 60 * 36) {
+            return;
+        }
+
+        challenge.timelineTimestamp = now;
+        await ChallengeDao.update(challenge);
+    }
+
     private static getSummaryFromChallenge(
         context: Context,
         challenge: Challenge
@@ -328,6 +317,7 @@ export class ChallengeService {
             participantCount: challenge.challengeParticipants?.length ?? 0,
             start: challenge.start ?? new Date(),
             end: challenge.end ?? new Date(),
+            timelineTimestamp: challenge.timelineTimestamp ?? new Date(),
             isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
             isParticipant:
                 challenge.challengeParticipants?.some(
@@ -364,6 +354,7 @@ export class ChallengeService {
             participantCount: challenge.challengeParticipants?.length ?? 0,
             start: challenge.start ?? new Date(),
             end: challenge.end ?? new Date(),
+            timelineTimestamp: challenge.timelineTimestamp ?? new Date(),
             isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
             isParticipant:
                 challenge.challengeParticipants?.some(

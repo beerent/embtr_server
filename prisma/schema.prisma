@@ -321,6 +321,7 @@ model Challenge {
     challengeRewards      ChallengeReward[]
     start                 DateTime               @db.Date
     end                   DateTime               @db.Date
+    timelineTimestamp     DateTime               @default(now())
     active                Boolean                @default(true)
     images                Image[]
     likes                 Like[]

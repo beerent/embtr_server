@@ -235,6 +235,7 @@ export interface Challenge {
   challengeRewards?: ChallengeReward[];
   start?: Date;
   end?: Date;
+  timelineTimestamp?: Date;
   active?: boolean;
   images?: Image[];
   likes?: Like[];
