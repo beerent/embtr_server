@@ -90,6 +90,9 @@ export class ChallengeDao {
                     include: {
                         user: true,
                     },
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
                 },
                 challengeRewards: true,
                 creator: true,
