@@ -23,6 +23,9 @@ import {
     GetChallengesSummariesResponse,
     GetChallengeSummaryResponse,
 } from '@resources/types/requests/ChallengeTypes';
+import { PureDate } from '@resources/types/date/PureDate';
+
+// WARNING: Must be a level 12+ Engineer to refactor this file. - TheCaptainCoder - 2024-04-19
 
 const challengeRouterLatest = express.Router();
 const v = '✓';
@@ -96,6 +99,21 @@ challengeRouterLatest.post(
         const id = Number(req.params.id);
 
         await ChallengeService.register(context, id);
+        res.json(SUCCESS);
+    })
+);
+
+challengeRouterLatest.post(
+    '/:id/leave',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+        const dayKey = context.dayKey;
+
+        await ChallengeService.leave(context, id);
         res.json(SUCCESS);
     })
 );

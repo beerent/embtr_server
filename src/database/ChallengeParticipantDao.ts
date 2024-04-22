@@ -2,6 +2,30 @@ import { prisma } from '@database/prisma';
 import { ChallengeParticipant, ChallengeRequirementCompletionState } from '@resources/schema';
 
 export class ChallengeParticipantDao {
+    public static async getForUserAndChallenge(userId: number, challengeId: number) {
+        return prisma.challengeParticipant.findUnique({
+            where: {
+                unique_challenge_participant: {
+                    userId,
+                    challengeId,
+                },
+            },
+            include: {
+                challenge: {
+                    include: {
+                        challengeRewards: true,
+                        challengeRequirements: {
+                            include: {
+                                task: true,
+                                unit: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
     public static async getAllForUserAndTaskAndDate(userId: number, taskId: number, date: Date) {
         return prisma.challengeParticipant.findMany({
             where: {
@@ -48,6 +72,7 @@ export class ChallengeParticipantDao {
         return prisma.challengeParticipant.findMany({
             where: {
                 userId,
+                active: true,
                 challenge: {
                     start: {
                         lte: new Date(),
@@ -116,6 +141,8 @@ export class ChallengeParticipantDao {
     }
 
     public static async update(participant: ChallengeParticipant) {
+        const active = participant.active !== undefined ? { active: participant.active } : {};
+
         return prisma.challengeParticipant.update({
             where: {
                 id: participant.id,
@@ -125,6 +152,18 @@ export class ChallengeParticipantDao {
                 amountComplete: participant.amountComplete,
                 challengeRequirementCompletionState:
                     participant.challengeRequirementCompletionState,
+                ...active,
+            },
+        });
+    }
+
+    public static async archive(id: number) {
+        return prisma.challengeParticipant.update({
+            where: {
+                id: id,
+            },
+            data: {
+                active: false,
             },
         });
     }

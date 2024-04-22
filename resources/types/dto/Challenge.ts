@@ -12,6 +12,7 @@ interface ChallengeComment {
     id: number;
     userId: number;
     comment: string;
+    createdAt: Date;
     user: ChallengeUser;
 }
 

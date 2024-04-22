@@ -1,4 +1,10 @@
-import { Challenge, ChallengeCalculationType, ScheduledHabit, TimeOfDay } from '@resources/schema';
+import {
+    Challenge,
+    ChallengeCalculationType,
+    DayOfWeek,
+    ScheduledHabit,
+    TimeOfDay,
+} from '@resources/schema';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Context } from '@src/general/auth/Context';
 import { HabitSummary } from '@resources/types/habit/Habit';
@@ -19,43 +25,91 @@ export class ScheduledHabitService {
         scheduledHabit: ScheduledHabit
     ): Promise<ScheduledHabit> {
         if (scheduledHabit.id) {
-            return this.update(context, scheduledHabit);
+            return this.replace(context, scheduledHabit);
         }
 
         return this.create(context, scheduledHabit);
     }
 
-    public static async createFromChallenge(context: Context, challenge: Challenge): Promise<ScheduledHabit[]> {
+    public static async unarchiveFromChallenge(
+        context: Context,
+        challenge: Challenge
+    ): Promise<ScheduledHabit[]> {
+        const scheduledHabits: ScheduledHabit[] = [];
+
+        for (const requirement of challenge.challengeRequirements ?? []) {
+            const task = requirement.task;
+            if (!task?.id) {
+                continue;
+            }
+
+            const scheduledHabitsForTask = await this.getAllByTaskId(context, task.id);
+            for (const scheduledHabit of scheduledHabitsForTask) {
+                scheduledHabit.endDate = challenge.end ?? new Date();
+
+                const updatedScheduledHabit = await this.update(context, scheduledHabit);
+                scheduledHabits.push(updatedScheduledHabit);
+            }
+        }
+
+        return scheduledHabits;
+    }
+
+    public static async createFromChallenge(
+        context: Context,
+        challenge: Challenge
+    ): Promise<ScheduledHabit[]> {
         const scheduledHabits: ScheduledHabit[] = [];
 
         for (const requirement of challenge.challengeRequirements ?? []) {
             const task = requirement.task;
 
             if (!task?.id) {
-                throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.RESOURCE_NOT_FOUND, "failure creating scheduledHabit from challenge");
+                throw new ServiceException(
+                    HttpCode.RESOURCE_NOT_FOUND,
+                    Code.RESOURCE_NOT_FOUND,
+                    'failure creating scheduledHabit from challenge'
+                );
             }
 
             const defaultTimeOfDay: TimeOfDay = {
-                id: 5
+                id: 5,
             };
 
+            const defaultDaysOfWeek: DayOfWeek[] = [
+                { id: 1 },
+                { id: 2 },
+                { id: 3 },
+                { id: 4 },
+                { id: 5 },
+                { id: 6 },
+                { id: 7 },
+            ];
             const clientDay: PureDate = PureDate.fromString(context.dayKey);
-            const challengeStartDate: PureDate = PureDate.fromDateFromServer(challenge.start ?? new Date());
+            const challengeStartDate: PureDate = PureDate.fromDateFromServer(
+                challenge.start ?? new Date()
+            );
             const challengeIsOlder = clientDay.compare(challengeStartDate) > 0;
-            const startDate = challengeIsOlder ? clientDay.toUtcDate() : challengeStartDate.toUtcDate();
+            const startDate = challengeIsOlder
+                ? clientDay.toUtcDate()
+                : challengeStartDate.toUtcDate();
 
             const scheduledHabit: ScheduledHabit = {
                 taskId: task?.id,
-                quantity: requirement.calculationType === ChallengeCalculationType.UNIQUE ? requirement.requiredTaskQuantity : 1,
+                quantity:
+                    requirement.calculationType === ChallengeCalculationType.UNIQUE
+                        ? requirement.requiredTaskQuantity
+                        : 1,
                 unitId: requirement.unitId,
                 detailsEnabled: true,
                 daysOfWeekEnabled: false,
+                daysOfWeek: defaultDaysOfWeek,
                 timesOfDayEnabled: false,
                 timesOfDay: [defaultTimeOfDay],
                 startDate: startDate,
                 //TODO THIS DOES NOT POPULATE
                 endDate: challenge.end,
-            }
+            };
 
             const createdScheduledHabit = await this.create(context, scheduledHabit);
             scheduledHabits.push(createdScheduledHabit);
@@ -79,6 +133,38 @@ export class ScheduledHabitService {
     }
 
     public static async update(
+        context: Context,
+        scheduledHabit: ScheduledHabit
+    ): Promise<ScheduledHabit> {
+        if (!scheduledHabit.id) {
+            throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
+        }
+
+        const existingScheduledHabit = await ScheduledHabitDao.get(scheduledHabit.id);
+        if (!existingScheduledHabit) {
+            throw new ServiceException(
+                404,
+                Code.SCHEDULED_HABIT_NOT_FOUND,
+                'scheduled habit not found'
+            );
+        }
+
+        if (context.userId !== existingScheduledHabit.userId) {
+            throw new ServiceException(403, Code.UNAUTHORIZED, 'unauthorized');
+        }
+
+        const updatedScheduledHabit = await ScheduledHabitDao.update(
+            context.userId,
+            scheduledHabit
+        );
+
+        const updatedScheduledHabitModel: ScheduledHabit =
+            ModelConverter.convert(updatedScheduledHabit);
+
+        return updatedScheduledHabitModel;
+    }
+
+    public static async replace(
         context: Context,
         scheduledHabit: ScheduledHabit
     ): Promise<ScheduledHabit> {
@@ -136,14 +222,6 @@ export class ScheduledHabitService {
             ModelConverter.convert(updatedScheduledHabit);
 
         return updatedScheduledHabitModel;
-    }
-
-    public static async replace(
-        context: Context,
-        scheduledHabit: ScheduledHabit
-    ): Promise<ScheduledHabit> {
-        const updatedScheduledHabit = this.update(context, scheduledHabit);
-        return updatedScheduledHabit;
     }
 
     public static async getAllByHabit(
@@ -293,15 +371,25 @@ export class ScheduledHabitService {
         return habitSummaries[0];
     }
 
+    public static async archiveAll(context: Context, ids: number[], date: PureDate): Promise<void> {
+        const promises = ids.map((id) => this.archive(context, id, date));
+        await Promise.all(promises);
+    }
+
     public static async archive(context: Context, id: number, date: PureDate): Promise<void> {
         const dayKey = DayKeyUtility.getDayKeyFromPureDate(date);
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
-        const plannedTaskHasScheduledHabit = plannedDay?.plannedTasks?.some((task) => {
-            return task.scheduledHabitId === id;
-        });
+        const plannedTaskFromScheduledHabitOnDate = plannedDay?.plannedTasks?.find(
+            (plannedTask) => {
+                return plannedTask.scheduledHabitId === id;
+            }
+        );
+
+        const isChallenge =
+            plannedTaskFromScheduledHabitOnDate?.scheduledHabit?.task.type === 'CHALLENGE';
 
         const utcDate = date.toUtcDate();
-        if (!plannedTaskHasScheduledHabit) {
+        if (isChallenge || !plannedTaskFromScheduledHabitOnDate) {
             utcDate.setDate(utcDate.getDate() - 1);
         }
 
@@ -310,5 +398,18 @@ export class ScheduledHabitService {
 
     public static async count(context: Context): Promise<number> {
         return ScheduledHabitDao.count(context.userId);
+    }
+
+    public static async getAllByTaskId(
+        context: Context,
+        taskId: number
+    ): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitDao.getAllByUserIdAndTaskId(
+            context.userId,
+            taskId
+        );
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+
+        return scheduledHabitModels;
     }
 }

@@ -63,4 +63,15 @@ export namespace Event {
             targetId: number;
         }
     }
+
+    export namespace Challenge {
+        export const Joined = 'CHALLENGE_CREATED';
+        export const Left = 'CHALLENGE_LEFT';
+
+        export interface Event {
+            context: Context;
+            userId: number;
+            id: number;
+        }
+    }
 }

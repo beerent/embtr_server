@@ -90,6 +90,9 @@ export class ChallengeDao {
                     include: {
                         user: true,
                     },
+                    where: {
+                        active: true,
+                    },
                     orderBy: {
                         createdAt: 'desc',
                     },
@@ -183,10 +186,20 @@ export class ChallengeDao {
     }
 
     public static async register(userId: number, challengeId: number) {
-        const result = await prisma.challengeParticipant.create({
-            data: {
+        const result = await prisma.challengeParticipant.upsert({
+            where: {
+                unique_challenge_participant: {
+                    userId,
+                    challengeId,
+                },
+            },
+            update: {
+                active: true,
+            },
+            create: {
                 userId,
                 challengeId,
+                active: true,
             },
         });
 

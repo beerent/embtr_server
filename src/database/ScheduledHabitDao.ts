@@ -287,7 +287,15 @@ export class ScheduledHabitDao {
                 id: id,
             },
             include: {
-                task: true,
+                task: {
+                    include: {
+                        challengeRequirements: {
+                            select: {
+                                challengeId: true,
+                            },
+                        },
+                    },
+                },
                 unit: true,
                 daysOfWeek: true,
                 timesOfDay: true,
@@ -542,6 +550,21 @@ export class ScheduledHabitDao {
         return prisma.scheduledHabit.count({
             where: {
                 userId: userId,
+            },
+        });
+    }
+
+    public static async getAllByUserIdAndTaskId(userId: number, taskId: number) {
+        return prisma.scheduledHabit.findMany({
+            where: {
+                userId: userId,
+                taskId: taskId,
+            },
+            include: {
+                task: true,
+                unit: true,
+                daysOfWeek: true,
+                timesOfDay: true,
             },
         });
     }

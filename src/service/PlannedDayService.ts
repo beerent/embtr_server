@@ -170,6 +170,11 @@ export class PlannedDayService {
             const placeHolderPlannedTask: PlannedTask = {
                 plannedDayId: plannedDay?.id,
                 scheduledHabitId: timeOfDayScheduledHabit.scheduledHabit?.id,
+                scheduledHabit: {
+                    task: {
+                        type: timeOfDayScheduledHabit.scheduledHabit?.task?.type,
+                    },
+                },
                 title: ScheduledHabitUtil.getTitle(timeOfDayScheduledHabit.scheduledHabit),
                 description: ScheduledHabitUtil.getDescription(
                     timeOfDayScheduledHabit.scheduledHabit
@@ -303,6 +308,23 @@ export class PlannedDayService {
         return complete;
     }
 
+    public static async updateCompletionStatusByDayKey(context: Context, dayKey: string) {
+        const plannedDay = await PlannedDayService.getByUserIdAndDayKey(
+            context,
+            context.userId,
+            dayKey
+        );
+        if (!plannedDay.id) {
+            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+        }
+
+        try {
+            return this.updateCompletionStatusByPlannedDayId(context, plannedDay.id);
+        } catch (error) {
+            console.error('error updating planned day', plannedDay.id);
+        }
+    }
+
     public static async updateCompletionStatusByPlannedHabitId(
         context: Context,
         plannedHabitId: number
@@ -337,6 +359,8 @@ export class PlannedDayService {
             plannedDay.userId,
             plannedDay.dayKey
         );
+
+        console.log('COMPLETE', completionStatus);
 
         if (plannedDay.status === completionStatus) {
             return plannedDay;

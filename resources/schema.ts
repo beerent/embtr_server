@@ -22,7 +22,7 @@ export interface User {
   widgets?: Widget[];
   quoteOfTheDay?: QuoteOfTheDay[];
   challenges?: Challenge[];
-  ChallengeParticipant?: ChallengeParticipant[];
+  challengeParticipant?: ChallengeParticipant[];
   userAchievements?: UserAchievement[];
   tasks?: Task[];
   scheduledHabits?: ScheduledHabit[];
@@ -66,7 +66,7 @@ export interface Task {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  ChallengeRequirement?: ChallengeRequirement[];
+  challengeRequirements?: ChallengeRequirement[];
   scheduledHabits?: ScheduledHabit[];
 }
 

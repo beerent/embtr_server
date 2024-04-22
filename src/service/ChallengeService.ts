@@ -5,15 +5,19 @@ import {
     ChallengeParticipant,
     ChallengeRequirement,
     ChallengeRequirementCompletionState,
+    ScheduledHabit,
     PlannedTask,
 } from '@resources/schema';
+import { PureDate } from '@resources/types/date/PureDate';
 import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
 import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { GENERAL_FAILURE, HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
 import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
+import { ChallengeEventDispatcher } from '@src/event/challenge/ChallengeEventDispatcher';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
+import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ScheduledHabitService } from './ScheduledHabitService';
 
@@ -129,20 +133,23 @@ export class ChallengeService {
 
     public static async register(context: Context, id: number) {
         const challenge = await this.get(context, id);
-
-        //todo - use query, don't be a moron
-        if (
-            challenge?.challengeParticipants?.some(
-                (participant) => participant.userId === context.userId
-            )
-        ) {
-            // throw exception here
-            return { ...GENERAL_FAILURE, message: 'user already registered for challenge' };
+        const participant = await this.getParticipantForUserAndChallenge(context.userId, id);
+        if (!participant) {
+            await ChallengeDao.register(context.userId, id);
+            await ScheduledHabitService.createFromChallenge(context, challenge);
+            await this.refreshTimelineTimestamp(challenge);
+        } else if (participant.active) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'user is already registered'
+            );
+        } else if (participant.active === false) {
+            await ChallengeDao.register(context.userId, id);
+            await ScheduledHabitService.unarchiveFromChallenge(context, challenge);
         }
 
-        await ChallengeDao.register(context.userId, id);
-        await ScheduledHabitService.createFromChallenge(context, challenge);
-        await this.refreshTimelineTimestamp(challenge);
+        ChallengeEventDispatcher.onJoined(context, context.userId, id);
 
         return SUCCESS;
     }
@@ -278,6 +285,61 @@ export class ChallengeService {
         return challengeSummaries;
     }
 
+    public static async leave(context: Context, id: number) {
+        const challenge = await this.get(context, id);
+
+        for (const challengeRequirement of challenge.challengeRequirements ?? []) {
+            const challengeTaskId = challengeRequirement.taskId;
+            if (!challengeTaskId) {
+                continue;
+            }
+
+            const challengeScheduledHabits = await ScheduledHabitService.getAllByTaskId(
+                context,
+                challengeTaskId
+            );
+            const challengeScheduledHabitIds = challengeScheduledHabits
+                .map((habit) => habit.id ?? 0)
+                .filter(Boolean);
+
+            await ScheduledHabitService.archiveAll(
+                context,
+                challengeScheduledHabitIds,
+                PureDate.fromString(context.dayKey)
+            );
+        }
+
+        const participant = await this.getParticipantForUserAndChallenge(context.userId, id);
+        if (!participant) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'user is not registered'
+            );
+        }
+
+        participant.active = false;
+        await ChallengeParticipantDao.update(participant);
+
+        ChallengeEventDispatcher.onLeft(context, context.userId, id);
+    }
+
+    static async getParticipantForUserAndChallenge(
+        userId: number,
+        challengeId: number
+    ): Promise<ChallengeParticipant | undefined> {
+        const participant = await ChallengeParticipantDao.getForUserAndChallenge(
+            userId,
+            challengeId
+        );
+        if (!participant) {
+            return undefined;
+        }
+
+        const participantModel: ChallengeParticipant = ModelConverter.convert(participant);
+        return participantModel;
+    }
+
     private static async refreshTimelineTimestamp(challenge: Challenge) {
         const now = new Date();
         const currentTimelineTimestamp = challenge.timelineTimestamp;
@@ -319,10 +381,12 @@ export class ChallengeService {
             end: challenge.end ?? new Date(),
             timelineTimestamp: challenge.timelineTimestamp ?? new Date(),
             isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
+
             isParticipant:
-                challenge.challengeParticipants?.some(
-                    (participant) => participant.userId === context.userId
-                ) ?? false,
+                challenge.challengeParticipants?.some((participant) => {
+                    return participant.userId === context.userId && participant.active === true;
+                }) ?? false,
+
             commentCount: challenge.comments?.length ?? 0,
             latestParticipant: challenge.challengeParticipants![0],
         };
@@ -356,14 +420,17 @@ export class ChallengeService {
             end: challenge.end ?? new Date(),
             timelineTimestamp: challenge.timelineTimestamp ?? new Date(),
             isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
+
             isParticipant:
-                challenge.challengeParticipants?.some(
-                    (participant) => participant.userId === context.userId
-                ) ?? false,
+                challenge.challengeParticipants?.some((participant) => {
+                    return participant.userId === context.userId && participant.active === true;
+                }) ?? false,
+
             comments:
                 challenge.comments?.map((comment) => {
                     return {
                         id: comment.id ?? 0,
+                        createdAt: comment.createdAt ?? new Date(),
                         comment: comment.comment ?? '',
                         userId: comment.userId ?? 0,
                         user: {
