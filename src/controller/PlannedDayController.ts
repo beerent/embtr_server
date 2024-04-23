@@ -10,7 +10,7 @@ export class PlannedDayController {
         userId: number,
         dayKey: string
     ): Promise<PlannedDay> {
-        const plannedDay = await PlannedDayService.getByUser(context, userId, dayKey);
+        const plannedDay = await PlannedDayService.getFullyPopulatedByUser(context, userId, dayKey);
         if (!plannedDay) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }

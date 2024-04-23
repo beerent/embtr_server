@@ -49,6 +49,20 @@ export class PlannedDayService {
         throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'user not found');
     }
 
+    public static async getByUser(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDay | undefined> {
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+        if (!plannedDay) {
+            return undefined;
+        }
+
+        const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
+        return plannedDayModel;
+    }
+
     public static async getIsComplete(
         context: Context,
         userId: number,
@@ -92,131 +106,35 @@ export class PlannedDayService {
         return completionState;
     }
 
-    public static async getByUser(
+    public static async getFullyPopulatedByUser(
         context: Context,
         userId: number,
         dayKey: string
     ): Promise<PlannedDay | undefined> {
-        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+        const plannedDay = await this.getByUser(context, userId, dayKey);
         if (!plannedDay) {
             return undefined;
         }
 
-        const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
+        const populatedPlannedDay = await this.populatePlannedDay(context, userId, plannedDay);
+        return populatedPlannedDay;
+    }
 
-        const plannedDayDate = plannedDay?.date ?? new Date();
-        const dayOfWeek = plannedDay?.date.getUTCDay() + 1 ?? 0;
-        let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
-            userId,
-            dayOfWeek,
-            plannedDayDate
-        );
+    public static async getFullyPopulatedPlaceholderByUser(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDay> {
+        const plannedDay: PlannedDay = {
+            id: 0,
+            userId: userId,
+            date: new Date(dayKey),
+            dayKey: dayKey,
+            plannedTasks: [],
+        };
 
-        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
-
-        // 1. find what tasks the user currently has
-        // a mapping of each scheduled habit to all of their time of days
-        const plannedScheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] =
-            plannedDayModel.plannedTasks
-                ? plannedDayModel.plannedTasks?.map((plannedTask) => {
-                    return {
-                        scheduledHabit: plannedTask.scheduledHabit ?? undefined,
-                        timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
-                    };
-                })
-                : [];
-
-        // 2. find what tasks the user should have
-        // scheduled habit id w/ time of day id for scheduled habits
-        const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = scheduledHabitModels.flatMap(
-            (scheduledHabit) => {
-                if (scheduledHabit.timesOfDay && scheduledHabit.timesOfDay.length > 0) {
-                    return scheduledHabit.timesOfDay.map((timeOfDay) => {
-                        const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
-                            scheduledHabit: scheduledHabit,
-                            timeOfDay: timeOfDay,
-                        };
-
-                        return scheduledHabitTimeOfDay;
-                    });
-                } else {
-                    const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
-                        scheduledHabit: scheduledHabit,
-                        timeOfDay: undefined,
-                    };
-
-                    return [scheduledHabitTimeOfDay];
-                }
-            }
-        );
-
-        // 3. find what tasks the user should have but does not (the diff)
-        // get all scheduled habits w/ time of day that do not exist in planned tasks
-        const scheduledHabitsWithoutPlannedTasks: ScheduledHabitTimeOfDay[] =
-            scheduledHabitTimeOfDays.filter((scheduledHabitTimeOfDay) => {
-                return !plannedScheduledHabitTimeOfDays.some((plannedScheduledHabitTimeOfDay) => {
-                    return (
-                        scheduledHabitTimeOfDay.scheduledHabit?.id ===
-                        plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
-                        scheduledHabitTimeOfDay.timeOfDay?.id ===
-                        plannedScheduledHabitTimeOfDay.timeOfDay?.id
-                    );
-                });
-            });
-
-        // 4. create placeholder planned tasks from the diff
-        const placeHolderPlannedTasks: PlannedTask[] = [];
-        for (const timeOfDayScheduledHabit of scheduledHabitsWithoutPlannedTasks) {
-            const placeHolderPlannedTask: PlannedTask = {
-                plannedDayId: plannedDay?.id,
-                scheduledHabitId: timeOfDayScheduledHabit.scheduledHabit?.id,
-                scheduledHabit: {
-                    task: {
-                        type: timeOfDayScheduledHabit.scheduledHabit?.task?.type,
-                    },
-                },
-                title: ScheduledHabitUtil.getTitle(timeOfDayScheduledHabit.scheduledHabit),
-                description: ScheduledHabitUtil.getDescription(
-                    timeOfDayScheduledHabit.scheduledHabit
-                ),
-                remoteImageUrl: ScheduledHabitUtil.getRemoteImageUrl(
-                    timeOfDayScheduledHabit.scheduledHabit
-                ),
-                localImage: ScheduledHabitUtil.getLocalImage(
-                    timeOfDayScheduledHabit.scheduledHabit
-                ),
-                unitId: timeOfDayScheduledHabit.scheduledHabit?.unitId ?? 0,
-                unit: timeOfDayScheduledHabit.scheduledHabit?.unit ?? undefined,
-                quantity: timeOfDayScheduledHabit.scheduledHabit?.quantity ?? 1,
-                timeOfDayId: timeOfDayScheduledHabit.timeOfDay?.id,
-                timeOfDay: timeOfDayScheduledHabit.timeOfDay,
-                originalTimeOfDayId: timeOfDayScheduledHabit.timeOfDay?.id,
-                originalTimeOfDay: timeOfDayScheduledHabit.timeOfDay,
-                completedQuantity: 0,
-                active: true,
-            };
-
-            placeHolderPlannedTasks.push(placeHolderPlannedTask);
-        }
-
-        const convertedPlannedDay: PlannedDayModel = ModelConverter.convert(plannedDay);
-        convertedPlannedDay.plannedTasks = [
-            ...(convertedPlannedDay.plannedTasks?.filter((plannedTask) => plannedTask.active) ??
-                []),
-            ...placeHolderPlannedTasks,
-        ];
-
-        convertedPlannedDay.plannedTasks = convertedPlannedDay.plannedTasks?.sort((a, b) => {
-            if (a.timeOfDay === b.timeOfDay) {
-                return 0;
-            }
-
-            const aRank = a.timeOfDay?.id === undefined ? 0 : a.timeOfDay.id;
-            const bRank = b.timeOfDay?.id === undefined ? 0 : b.timeOfDay.id;
-            return aRank < bRank ? -1 : 1;
-        });
-
-        return convertedPlannedDay;
+        const populatedPlannedDay = await this.populatePlannedDay(context, userId, plannedDay);
+        return populatedPlannedDay;
     }
 
     public static async create(context: Context, dayKey: string): Promise<PlannedDay> {
@@ -238,7 +156,11 @@ export class PlannedDayService {
             );
         }
 
-        const plannedDayWithData = await this.getByUser(context, context.userId, dayKey);
+        const plannedDayWithData = await this.getFullyPopulatedByUser(
+            context,
+            context.userId,
+            dayKey
+        );
         if (!plannedDayWithData) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
@@ -447,5 +369,123 @@ export class PlannedDayService {
                 console.error('error updating planned day', plannedDayId);
             }
         }
+    }
+
+    private static async populatePlannedDay(
+        context: Context,
+        userId: number,
+        plannedDay: PlannedDay
+    ): Promise<PlannedDay> {
+        const plannedDayDate = plannedDay?.date ?? new Date();
+        const dayOfWeek = plannedDay.date!.getUTCDay() + 1 ?? 0;
+        let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
+            userId,
+            dayOfWeek,
+            plannedDayDate
+        );
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+
+        // 1. find what tasks the user currently has
+        // a mapping of each scheduled habit to all of their time of days
+        const plannedScheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = plannedDay.plannedTasks
+            ? plannedDay.plannedTasks?.map((plannedTask) => {
+                return {
+                    scheduledHabit: plannedTask.scheduledHabit ?? undefined,
+                    timeOfDay: plannedTask.originalTimeOfDay ?? undefined,
+                };
+            })
+            : [];
+
+        // 2. find what tasks the user should have
+        // scheduled habit id w/ time of day id for scheduled habits
+        const scheduledHabitTimeOfDays: ScheduledHabitTimeOfDay[] = scheduledHabitModels.flatMap(
+            (scheduledHabit) => {
+                if (scheduledHabit.timesOfDay && scheduledHabit.timesOfDay.length > 0) {
+                    return scheduledHabit.timesOfDay.map((timeOfDay) => {
+                        const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
+                            scheduledHabit: scheduledHabit,
+                            timeOfDay: timeOfDay,
+                        };
+
+                        return scheduledHabitTimeOfDay;
+                    });
+                } else {
+                    const scheduledHabitTimeOfDay: ScheduledHabitTimeOfDay = {
+                        scheduledHabit: scheduledHabit,
+                        timeOfDay: undefined,
+                    };
+
+                    return [scheduledHabitTimeOfDay];
+                }
+            }
+        );
+
+        // 3. find what tasks the user should have but does not (the diff)
+        // get all scheduled habits w/ time of day that do not exist in planned tasks
+        const scheduledHabitsWithoutPlannedTasks: ScheduledHabitTimeOfDay[] =
+            scheduledHabitTimeOfDays.filter((scheduledHabitTimeOfDay) => {
+                return !plannedScheduledHabitTimeOfDays.some((plannedScheduledHabitTimeOfDay) => {
+                    return (
+                        scheduledHabitTimeOfDay.scheduledHabit?.id ===
+                        plannedScheduledHabitTimeOfDay.scheduledHabit?.id &&
+                        scheduledHabitTimeOfDay.timeOfDay?.id ===
+                        plannedScheduledHabitTimeOfDay.timeOfDay?.id
+                    );
+                });
+            });
+
+        // 4. create placeholder planned tasks from the diff
+        const placeHolderPlannedTasks: PlannedTask[] = [];
+        for (const timeOfDayScheduledHabit of scheduledHabitsWithoutPlannedTasks) {
+            const placeHolderPlannedTask: PlannedTask = {
+                plannedDayId: plannedDay?.id,
+                scheduledHabitId: timeOfDayScheduledHabit.scheduledHabit?.id,
+                scheduledHabit: {
+                    task: {
+                        type: timeOfDayScheduledHabit.scheduledHabit?.task?.type,
+                    },
+                },
+                title: ScheduledHabitUtil.getTitle(timeOfDayScheduledHabit.scheduledHabit),
+                description: ScheduledHabitUtil.getDescription(
+                    timeOfDayScheduledHabit.scheduledHabit
+                ),
+                remoteImageUrl: ScheduledHabitUtil.getRemoteImageUrl(
+                    timeOfDayScheduledHabit.scheduledHabit
+                ),
+                localImage: ScheduledHabitUtil.getLocalImage(
+                    timeOfDayScheduledHabit.scheduledHabit
+                ),
+                unitId: timeOfDayScheduledHabit.scheduledHabit?.unitId ?? 0,
+                unit: timeOfDayScheduledHabit.scheduledHabit?.unit ?? undefined,
+                quantity: timeOfDayScheduledHabit.scheduledHabit?.quantity ?? 1,
+                timeOfDayId: timeOfDayScheduledHabit.timeOfDay?.id,
+                timeOfDay: timeOfDayScheduledHabit.timeOfDay,
+                originalTimeOfDayId: timeOfDayScheduledHabit.timeOfDay?.id,
+                originalTimeOfDay: timeOfDayScheduledHabit.timeOfDay,
+                completedQuantity: 0,
+                active: true,
+            };
+
+            placeHolderPlannedTasks.push(placeHolderPlannedTask);
+        }
+
+        const clonedPlannedDay = { ...plannedDay };
+        clonedPlannedDay.plannedTasks = [
+            ...(clonedPlannedDay.plannedTasks?.filter((plannedTask) => plannedTask.active) ?? []),
+            ...placeHolderPlannedTasks,
+        ];
+
+        clonedPlannedDay.plannedTasks = clonedPlannedDay.plannedTasks?.sort((a, b) => {
+            if (a.timeOfDay === b.timeOfDay) {
+                return 0;
+            }
+
+            const aRank = a.timeOfDay?.id === undefined ? 0 : a.timeOfDay.id;
+            const bRank = b.timeOfDay?.id === undefined ? 0 : b.timeOfDay.id;
+            return aRank < bRank ? -1 : 1;
+        });
+
+        return clonedPlannedDay;
     }
 }

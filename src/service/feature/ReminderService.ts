@@ -1,5 +1,5 @@
 import { logger } from '@src/common/logger/Logger';
-import { PlannedTask, User } from '@resources/schema';
+import { PlannedDay, PlannedTask, User } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { Context } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
@@ -8,6 +8,8 @@ import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 import { PlannedDayService } from '../PlannedDayService';
 import { PushNotificationService } from '../PushNotificationService';
 import { UserService } from '../UserService';
+import { Code } from '@resources/codes';
+import { ServiceException } from '@src/general/exception/ServiceException';
 
 export class ReminderService {
     public static async sendDailyReminders(context: Context): Promise<void> {
@@ -21,7 +23,7 @@ export class ReminderService {
             try {
                 await this.sendUserDailyReminder(context, user);
             } catch (e) {
-                logger.error("failed to send user daily reminder", e);
+                logger.error('failed to send user daily reminder', e);
             }
         }
     }
@@ -37,7 +39,7 @@ export class ReminderService {
             try {
                 await this.sendUserPeriodicReminder(context, user);
             } catch (e) {
-                logger.error("failed to send user periodic reminder", e);
+                logger.error('failed to send user periodic reminder', e);
             }
         }
     }
@@ -53,7 +55,7 @@ export class ReminderService {
             try {
                 await this.sendUserDailyWarning(context, user);
             } catch (e) {
-                logger.error("failed to send user daily warning", e);
+                logger.error('failed to send user daily warning', e);
             }
         }
     }
@@ -69,7 +71,7 @@ export class ReminderService {
             try {
                 await this.sendUserPeriodicWarning(context, user);
             } catch (e) {
-                logger.error("failed to send periodic warning", e);
+                logger.error('failed to send periodic warning', e);
             }
         }
     }
@@ -170,15 +172,12 @@ export class ReminderService {
         return unfinishedHabitCount;
     }
 
-    private static async sendUserDailyReminder(context: Context, user: User): Promise<void> {
+    public static async sendUserDailyReminder(context: Context, user: User): Promise<void> {
         if (!user.id) {
             return;
         }
 
-        const timezone = UserPropertyUtility.getProperty(
-            user,
-            Constants.UserPropertyKey.TIMEZONE
-        );
+        const timezone = UserPropertyUtility.getProperty(user, Constants.UserPropertyKey.TIMEZONE);
         if (!timezone?.value) {
             return;
         }
@@ -189,7 +188,11 @@ export class ReminderService {
         }
 
         const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        const plannedDay = await this.getFullyPopulatedPlannedDayOrPlaceholder(
+            context,
+            user,
+            dayKey
+        );
         const plannedTasks = plannedDay.plannedTasks;
         if (!plannedTasks) {
             return;
@@ -206,15 +209,12 @@ export class ReminderService {
         PushNotificationService.sendGenericNotification(context, user, message);
     }
 
-    private static async sendUserPeriodicReminder(context: Context, user: User) {
+    public static async sendUserPeriodicReminder(context: Context, user: User) {
         if (!user.id) {
             return;
         }
 
-        const timezone = UserPropertyUtility.getProperty(
-            user,
-            Constants.UserPropertyKey.TIMEZONE
-        );
+        const timezone = UserPropertyUtility.getProperty(user, Constants.UserPropertyKey.TIMEZONE);
         if (!timezone?.value) {
             return;
         }
@@ -225,7 +225,11 @@ export class ReminderService {
         }
 
         const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        const plannedDay = await this.getFullyPopulatedPlannedDayOrPlaceholder(
+            context,
+            user,
+            dayKey
+        );
         if (!plannedDay?.plannedTasks) {
             return;
         }
@@ -250,15 +254,12 @@ export class ReminderService {
         PushNotificationService.sendGenericNotification(context, user, message);
     }
 
-    private static async sendUserDailyWarning(context: Context, user: User) {
+    public static async sendUserDailyWarning(context: Context, user: User) {
         if (!user.id) {
             return;
         }
 
-        const timezone = UserPropertyUtility.getProperty(
-            user,
-            Constants.UserPropertyKey.TIMEZONE
-        );
+        const timezone = UserPropertyUtility.getProperty(user, Constants.UserPropertyKey.TIMEZONE);
         if (!timezone?.value) {
             return;
         }
@@ -269,7 +270,11 @@ export class ReminderService {
         }
 
         const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        const plannedDay = await this.getFullyPopulatedPlannedDayOrPlaceholder(
+            context,
+            user,
+            dayKey
+        );
         const plannedTasks = plannedDay.plannedTasks;
         if (!plannedTasks) {
             return;
@@ -286,15 +291,12 @@ export class ReminderService {
         PushNotificationService.sendGenericNotification(context, user, message);
     }
 
-    private static async sendUserPeriodicWarning(context: Context, user: User) {
+    public static async sendUserPeriodicWarning(context: Context, user: User) {
         if (!user.id) {
             return;
         }
 
-        const timezone = UserPropertyUtility.getProperty(
-            user,
-            Constants.UserPropertyKey.TIMEZONE
-        );
+        const timezone = UserPropertyUtility.getProperty(user, Constants.UserPropertyKey.TIMEZONE);
         if (!timezone?.value) {
             return;
         }
@@ -305,7 +307,11 @@ export class ReminderService {
         }
 
         const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone.value);
-        const plannedDay = await PlannedDayService.getByUser(context, user.id, dayKey);
+        const plannedDay = await this.getFullyPopulatedPlannedDayOrPlaceholder(
+            context,
+            user,
+            dayKey
+        );
         if (!plannedDay?.plannedTasks) {
             return;
         }
@@ -328,5 +334,31 @@ export class ReminderService {
         const message = `Heads up! You have ${incompleteCount} ${habit} remaining this ${periodPretty}.`;
 
         PushNotificationService.sendGenericNotification(context, user, message);
+    }
+
+    private static async getFullyPopulatedPlannedDayOrPlaceholder(
+        context: Context,
+        user: User,
+        dayKey: string
+    ): Promise<PlannedDay> {
+        if (!user.id) {
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
+        }
+
+        const plannedDay = await PlannedDayService.getFullyPopulatedByUser(
+            context,
+            user.id,
+            dayKey
+        );
+        if (plannedDay) {
+            return plannedDay;
+        }
+
+        const plannedDayPlaceholder = await PlannedDayService.getFullyPopulatedPlaceholderByUser(
+            context,
+            user.id,
+            dayKey
+        );
+        return plannedDayPlaceholder;
     }
 }

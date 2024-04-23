@@ -96,6 +96,7 @@ export class UserDao {
             },
             include: {
                 properties: true,
+                pushNotificationTokens: true,
             },
         });
 
