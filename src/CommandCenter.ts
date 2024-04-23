@@ -215,6 +215,46 @@ const handleCommandUpdateAllUserStreaks = async () => {
     }
 };
 
+const handleCommandSendUserDailyReminders = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserDailyReminder(adminContext, user);
+};
+
+const handleCommandSendUserPeriodicReminders = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserPeriodicReminder(adminContext, user);
+};
+
+const handleCommandSendUserDailyWarnings = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserDailyWarning(adminContext, user);
+};
+
+const handleCommandSendUserPeriodicWarnings = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserPeriodicWarning(adminContext, user);
+};
+
 const handleCommandSendDailyReminders = async () => {
     await ReminderService.sendDailyReminders(adminContext);
 };
@@ -482,6 +522,22 @@ const processCommand = async (command: string) => {
 
         case 'sendPeriodicWarnings':
             handleCommandSendPeriodicWarnings();
+            break;
+
+        case 'sendUserDailyReminders':
+            await handleCommandSendUserDailyReminders(email);
+            break;
+
+        case 'sendUserPeriodicReminders':
+            await handleCommandSendUserPeriodicReminders(email);
+            break;
+
+        case 'sendUserDailyWarnings':
+            await handleCommandSendUserDailyWarnings(email);
+            break;
+
+        case 'sendUserPeriodicWarnings':
+            await handleCommandSendUserPeriodicWarnings(email);
             break;
 
         case 'setDefaultSocial':
