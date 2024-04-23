@@ -94,6 +94,9 @@ export class UserDao {
             where: {
                 username: username,
             },
+            include: {
+                properties: true,
+            },
         });
 
         return user;
@@ -255,14 +258,12 @@ export class UserDao {
         return updatedUser;
     }
 
-    public static async getUsersWithRole(
-        role: Role
-    ): Promise<User[]> {
+    public static async getUsersWithRole(role: Role): Promise<User[]> {
         const users = await prisma.user.findMany({
             where: {
                 roles: {
                     some: {
-                        name: role
+                        name: role,
                     },
                 },
             },
