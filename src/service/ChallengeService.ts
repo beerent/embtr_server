@@ -302,11 +302,7 @@ export class ChallengeService {
                 .map((habit) => habit.id ?? 0)
                 .filter(Boolean);
 
-            await ScheduledHabitService.archiveAll(
-                context,
-                challengeScheduledHabitIds,
-                PureDate.fromString(context.dayKey)
-            );
+            await ScheduledHabitService.archiveAll(context, challengeScheduledHabitIds);
         }
 
         const participant = await this.getParticipantForUserAndChallenge(context.userId, id);

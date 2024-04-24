@@ -28,10 +28,10 @@ export class PlannedDayService {
         context: Context,
         userId: number,
         dayKey: string
-    ): Promise<PlannedDayModel> {
+    ): Promise<PlannedDayModel | undefined> {
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (!plannedDay) {
-            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+            return undefined;
         }
 
         const plannedDayModel: PlannedDayModel = ModelConverter.convert(plannedDay);
@@ -240,7 +240,8 @@ export class PlannedDayService {
             context.userId,
             dayKey
         );
-        if (!plannedDay.id) {
+
+        if (!plannedDay?.id) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 

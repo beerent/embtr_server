@@ -13,8 +13,6 @@ import { ScheduledHabitSummaryProvider } from '@src/provider/ScheduledHabitSumma
 import { ScheduledHabitDao } from '@src/database/ScheduledHabitDao';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
-import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
-import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedHabitService } from './PlannedHabitService';
 import { HttpCode } from '@src/common/RequestResponses';
@@ -43,13 +41,15 @@ export class ScheduledHabitService {
                 continue;
             }
 
-            const scheduledHabitsForTask = await this.getAllByTaskId(context, task.id);
-            for (const scheduledHabit of scheduledHabitsForTask) {
-                scheduledHabit.endDate = challenge.end ?? new Date();
-
-                const updatedScheduledHabit = await this.update(context, scheduledHabit);
-                scheduledHabits.push(updatedScheduledHabit);
+            const scheduledHabit = await this.getLatestVersionByTaskId(context, task.id);
+            if (!scheduledHabit) {
+                continue;
             }
+
+            scheduledHabit.endDate = challenge.end ?? new Date();
+
+            const updatedScheduledHabit = await this.update(context, scheduledHabit);
+            scheduledHabits.push(updatedScheduledHabit);
         }
 
         return scheduledHabits;
@@ -196,7 +196,6 @@ export class ScheduledHabitService {
         let endDate = DateUtility.getDayBefore(clientDayKeyDate);
         let newStartDate = clientDayKeyDate;
         if (isModified) {
-            endDate = clientDayKeyDate;
             newStartDate = DateUtility.getDayAfter(clientDayKeyDate);
         }
 
@@ -371,29 +370,17 @@ export class ScheduledHabitService {
         return habitSummaries[0];
     }
 
-    public static async archiveAll(context: Context, ids: number[], date: PureDate): Promise<void> {
-        const promises = ids.map((id) => this.archive(context, id, date));
+    public static async archiveAll(context: Context, ids: number[]): Promise<void> {
+        const promises = ids.map((id) => this.archive(context, id));
         await Promise.all(promises);
     }
 
-    public static async archive(context: Context, id: number, date: PureDate): Promise<void> {
-        const dayKey = DayKeyUtility.getDayKeyFromPureDate(date);
-        const plannedDay = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
-        const plannedTaskFromScheduledHabitOnDate = plannedDay?.plannedTasks?.find(
-            (plannedTask) => {
-                return plannedTask.scheduledHabitId === id;
-            }
-        );
+    public static async archive(context: Context, id: number): Promise<void> {
+        const date = new Date(context.dayKey);
+        date.setDate(date.getDate() - 1);
+        date.setHours(0, 0, 0, 0);
 
-        const isChallenge =
-            plannedTaskFromScheduledHabitOnDate?.scheduledHabit?.task.type === 'CHALLENGE';
-
-        const utcDate = date.toUtcDate();
-        if (isChallenge || !plannedTaskFromScheduledHabitOnDate) {
-            utcDate.setDate(utcDate.getDate() - 1);
-        }
-
-        await ScheduledHabitDao.archive(context.userId, id, utcDate);
+        await ScheduledHabitDao.archive(context.userId, id, date);
     }
 
     public static async count(context: Context): Promise<number> {
@@ -409,7 +396,31 @@ export class ScheduledHabitService {
             taskId
         );
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
-
         return scheduledHabitModels;
+    }
+
+    public static async getLatestVersionByTaskId(
+        context: Context,
+        taskId: number
+    ): Promise<ScheduledHabit> {
+        const scheduledHabits = await ScheduledHabitDao.getAllByUserIdAndTaskId(
+            context.userId,
+            taskId
+        );
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+
+        scheduledHabitModels.sort((a, b) => {
+            return (a.id ?? 0) > (b.id ?? 0) ? -1 : 1;
+        });
+
+        if (scheduledHabitModels.length === 0) {
+            throw new ServiceException(
+                404,
+                Code.SCHEDULED_HABIT_NOT_FOUND,
+                'scheduled habit not found'
+            );
+        }
+
+        return scheduledHabitModels[0];
     }
 }

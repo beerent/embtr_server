@@ -143,6 +143,11 @@ export class PlannedHabitService {
         return await PlannedHabitDao.completedExists(context.userId);
     }
 
+    public static async archive(context: Context, plannedTask: PlannedTask): Promise<void> {
+        plannedTask.active = false;
+        await this.update(context, plannedTask);
+    }
+
     private static getUpdatedStatus(plannedTask: PlannedTask): string {
         if (
             (plannedTask.status ?? Constants.CompletionState.INCOMPLETE) ===

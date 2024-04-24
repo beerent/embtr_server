@@ -234,9 +234,13 @@ export class ReminderService {
             return;
         }
 
-        const plannedTasks = plannedDay.plannedTasks.filter(
-            (task) => task.timeOfDay?.period === period
-        );
+        const plannedTasks = plannedDay.plannedTasks.filter((task) => {
+            return (
+                task.timeOfDay?.period === period ||
+                task.timeOfDay?.period === undefined ||
+                task.timeOfDay.period === Constants.Period.DEFAULT
+            );
+        });
 
         if (plannedTasks.length === 0) {
             return;
@@ -316,9 +320,13 @@ export class ReminderService {
             return;
         }
 
-        const plannedTasks = plannedDay.plannedTasks.filter(
-            (task) => task.timeOfDay?.period === period
-        );
+        const plannedTasks = plannedDay.plannedTasks.filter((task) => {
+            return (
+                task.timeOfDay?.period === period ||
+                task.timeOfDay?.period === undefined ||
+                task.timeOfDay.period === Constants.Period.DEFAULT
+            );
+        });
 
         if (plannedTasks.length === 0) {
             return;

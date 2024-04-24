@@ -154,7 +154,15 @@ export class PlannedHabitDao {
                 id,
             },
             include: {
-                ...includes,
+                plannedDay: true,
+                scheduledHabit: {
+                    include: {
+                        task: true,
+                    },
+                },
+                timeOfDay: true,
+                originalTimeOfDay: true,
+                unit: true,
             },
         });
     }

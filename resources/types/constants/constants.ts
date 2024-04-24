@@ -132,6 +132,7 @@ export namespace Constants {
         AFTERNOON = 'AFTERNOON',
         EVENING = 'EVENING',
         NIGHT = 'NIGHT',
+        DEFAULT = 'DEFAULT',
     }
 
     export const getPeriod = (period: string): Period => {
@@ -144,6 +145,8 @@ export namespace Constants {
                 return Period.EVENING;
             case 'NIGHT':
                 return Period.NIGHT;
+            case 'DEFAULT':
+                return Period.DEFAULT;
 
             default:
                 return Period.INVALID;
@@ -153,7 +156,7 @@ export namespace Constants {
     export enum TaskType {
         INVALID = 'INVALID',
         DEFAULT = 'DEFAULT',
-        CHALLENGE = 'CHALLENGE'
+        CHALLENGE = 'CHALLENGE',
     }
 
     export const getScheduledHabitType = (type: TaskType): TaskType => {
@@ -165,6 +168,5 @@ export namespace Constants {
         }
 
         return TaskType.INVALID;
-    }
-
+    };
 }
