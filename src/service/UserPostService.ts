@@ -30,15 +30,16 @@ export class UserPostService {
         return createdUserPostModel;
     }
 
-    public static async getAllForUser(userId: number): Promise<GetAllUserPostResponse> {
+    public static async getAllForUser(userId: number): Promise<UserPost[]> {
         const user = await UserDao.getById(userId);
         if (!user) {
-            return { ...RESOURCE_NOT_FOUND, message: 'user not found' };
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
         }
 
         const userPosts = await UserPostDao.getAllForUser(userId);
-        const convertedUserPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
-        return { ...SUCCESS, userPosts: convertedUserPostModels };
+        const userPostModels: UserPost[] = ModelConverter.convertAll(userPosts);
+
+        return userPostModels;
     }
 
     public static async count(context: Context): Promise<number> {

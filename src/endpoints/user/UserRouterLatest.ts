@@ -1,7 +1,5 @@
 import express from 'express';
-import {
-    GetChallengeParticipationResponse,
-} from '@resources/types/requests/ChallengeTypes';
+import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
@@ -37,6 +35,7 @@ import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
 import userPropertyRouterLatest from './UserPropertyRouterLatest';
+import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -205,7 +204,9 @@ userRouterLatest.get(
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        const response = await UserPostService.getAllForUser(userId);
+        const userPosts = await UserPostService.getAllForUser(userId);
+
+        const response: GetAllUserPostResponse = { ...SUCCESS, userPosts };
         res.status(response.httpCode).json(response);
     })
 );

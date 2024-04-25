@@ -48,6 +48,9 @@ export class UserPostDao {
                 },
                 active: true,
             },
+            orderBy: {
+                id: 'desc',
+            },
             include: UserPostInclude,
         });
     }
