@@ -1,6 +1,4 @@
 import { UserPost } from '@resources/schema';
-import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
-import { RESOURCE_NOT_FOUND, SUCCESS } from '@src/common/RequestResponses';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ImageDetectionService } from './ImageService';
 import { UserPostDao } from '@src/database/UserPostDao';

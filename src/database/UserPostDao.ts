@@ -105,7 +105,6 @@ export class UserPostDao {
     }
 
     public static async create(userPost: UserPost) {
-        const title = userPost.title ? { title: userPost.title } : {};
         const body = userPost.body ? { body: userPost.body } : {};
         const active = userPost.active ? { active: userPost.active } : {};
         const images = CommonUpserts.createImagesInserts(userPost.images ?? []);
@@ -119,7 +118,6 @@ export class UserPostDao {
                         id: userPost.userId!,
                     },
                 },
-                ...title,
                 ...body,
                 ...active,
                 images,
