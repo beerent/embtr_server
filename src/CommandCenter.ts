@@ -168,16 +168,6 @@ const handleCommandUpdateAllPlannedDayStatusesForAllUsers = async () => {
     }
 };
 
-const handleCommandUpdateMissingPlannedDayStatusesForUser = async (email: string) => {
-    const user = await UserService.getByUsername(email);
-    if (!user?.id) {
-        console.log('user not found');
-        return;
-    }
-
-    await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
-};
-
 const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) => {
     const user = await UserService.getByUsername(email);
     if (!user?.id) {
@@ -493,10 +483,6 @@ const processCommand = async (command: string) => {
             break;
 
         case 'updateUserPlannedDayStatuses':
-            await handleCommandUpdateAllPlannedDayStatusesForUser(email);
-            break;
-
-        case 'updateUserMissingPlannedDayStatuses':
             await handleCommandUpdateAllPlannedDayStatusesForUser(email);
             break;
 
