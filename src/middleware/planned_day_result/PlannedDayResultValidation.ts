@@ -1,13 +1,14 @@
 import z from 'zod';
 import { NextFunction, Request, Response } from 'express';
 import {
-    CREATE_PLANNED_DAY_RESULT_COMMENT_INVALID,
-    DELETE_PLANNED_DAY_RESULT_COMMENT_INVALID,
     GENERAL_FAILURE,
     GET_DAY_RESULT_INVALID,
     UPDATE_PLANNED_DAY_RESULT_INVALID,
 } from '@src/common/RequestResponses';
-import { UpdatePlannedDayResultRequest } from '@resources/types/requests/PlannedDayResultTypes';
+import {
+    CreatePlannedDayResultRequest,
+    UpdatePlannedDayResultRequest,
+} from '@resources/types/requests/PlannedDayResultTypes';
 
 const dayResultGetById = z.object({
     id: z.coerce.number(),
@@ -36,12 +37,11 @@ export const validateGetByUser = (req: Request, res: Response, next: NextFunctio
     next();
 };
 
-const dayResultPost = z.object({
-    plannedDayId: z.coerce.number(),
-});
+const dayResultPost = z.object({});
 export const validatePost = (req: Request, res: Response, next: NextFunction) => {
     try {
-        dayResultPost.parse(req.body);
+        const request: CreatePlannedDayResultRequest = req.body;
+        dayResultPost.parse(request);
     } catch (error) {
         return res.status(GET_DAY_RESULT_INVALID.httpCode).json(GET_DAY_RESULT_INVALID);
     }

@@ -159,7 +159,7 @@ export namespace Constants {
         CHALLENGE = 'CHALLENGE',
     }
 
-    export const getScheduledHabitType = (type: TaskType): TaskType => {
+    export const getScheduledHabitType = (type: string): TaskType => {
         switch (type) {
             case 'DEFAULT':
                 return TaskType.DEFAULT;

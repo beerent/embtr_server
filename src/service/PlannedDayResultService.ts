@@ -16,8 +16,11 @@ import { BlockUserService } from './BlockUserService';
 import { ApiAlertsService } from './ApiAlertsService';
 
 export class PlannedDayResultService {
-    public static async create(context: Context, plannedDayId: number): Promise<PlannedDayResult> {
-        const plannedDay = await PlannedDayDao.get(plannedDayId);
+    public static async create(
+        context: Context,
+        plannedDayResult: PlannedDayResult
+    ): Promise<PlannedDayResult> {
+        const plannedDay = await PlannedDayDao.get(plannedDayResult.plannedDayId ?? 0);
         if (!plannedDay) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
@@ -26,12 +29,13 @@ export class PlannedDayResultService {
             throw new ServiceException(404, Code.FORBIDDEN, 'planned day does not belong to user');
         }
 
-        const plannedDayResult = await PlannedDayResultDao.create(
-            plannedDayId,
-            this.getRandomSuccessMessage()
+        const createdPlannedDayResult = await PlannedDayResultDao.create(
+            plannedDayResult.plannedDayId ?? 0,
+            plannedDayResult.description ?? '',
+            plannedDayResult.images ?? []
         );
 
-        if (!plannedDayResult) {
+        if (!createdPlannedDayResult) {
             throw new ServiceException(
                 500,
                 Code.PLANNED_DAY_RESULT_NOT_CREATED,
@@ -41,7 +45,8 @@ export class PlannedDayResultService {
 
         ApiAlertsService.sendAlert('new planned day result was created!');
 
-        const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        const plannedDayResultModel: PlannedDayResult =
+            ModelConverter.convert(createdPlannedDayResult);
         return plannedDayResultModel;
     }
 
@@ -282,32 +287,5 @@ export class PlannedDayResultService {
         });
 
         return completedHabits;
-    }
-
-    private static getRandomSuccessMessage(): string {
-        const variations = [
-            'Day conquered! Congrats!',
-            'Tasks nailed! Bravo!',
-            'Success! Well done!',
-            'All done! Congrats!',
-            'Daily goals crushed!',
-            'You did it! Kudos!',
-            'Productive day! Congrats!',
-            'Champion of the day!',
-            'Taskmaster! Congrats!',
-            'Victory achieved!',
-            'Goal slayer! Congrats!',
-            'Great job today!',
-            "Day's triumph! Congrats!",
-            'Mission complete!',
-            'Tasks tackled! Bravo!',
-            'Awesome work! Congrats!',
-            'Winning day! Well done!',
-            'Efficiency unlocked!',
-            'Task wizard! Congrats!',
-            'Daily success! Bravo!',
-        ];
-
-        return variations[Math.floor(Math.random() * variations.length)];
     }
 }

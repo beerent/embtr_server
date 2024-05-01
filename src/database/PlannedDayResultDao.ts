@@ -1,6 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
-import { PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { Image, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
 import { CommonUpserts } from './CommonUpserts';
 
 export const PlannedDayResultInclude = {
@@ -70,18 +70,18 @@ export type PlannedDayResultsType = Prisma.PromiseReturnType<typeof PlannedDayRe
 export type PlannedDayResultType = Prisma.PromiseReturnType<typeof PlannedDayResultDao.getById>;
 
 export class PlannedDayResultDao {
-    public static async create(plannedDayId: number, title?: string) {
-        return prisma.plannedDayResult.create({
+    public static async create(plannedDayId: number, description: string, images: Image[]) {
+        const imageInserts = CommonUpserts.createImagesInserts(images ?? []);
+
+        const result = await prisma.plannedDayResult.create({
             data: {
-                title,
-                plannedDay: {
-                    connect: {
-                        id: plannedDayId,
-                    },
-                },
+                plannedDayId,
+                description,
+                images: imageInserts,
             },
-            include: PlannedDayResultInclude,
         });
+
+        return result;
     }
 
     public static async getAllByIds(ids: number[]) {
