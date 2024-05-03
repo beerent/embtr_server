@@ -23,7 +23,6 @@ import {
     GetChallengesSummariesResponse,
     GetChallengeSummaryResponse,
 } from '@resources/types/requests/ChallengeTypes';
-import { PureDate } from '@resources/types/date/PureDate';
 
 // WARNING: Must be a level 12+ Engineer to refactor this file. - TheCaptainCoder - 2024-04-19
 

@@ -5,10 +5,13 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { logger } from '@src/common/logger/Logger';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
+import { toZonedTime } from 'date-fns-tz';
 
 export class ContextService {
     public static async get(request: Request): Promise<Context> {
         const dayKey = this.getDayKey(request);
+        const timezone = this.getTimezone(request);
+        const dateTime = this.getDateTime(timezone);
 
         const getUserId = AuthorizationDao.getUserIdFromToken(request.headers.authorization!);
         const getUserUid = AuthorizationDao.getUidFromToken(request.headers.authorization!);
@@ -33,6 +36,8 @@ export class ContextService {
             userEmail: userEmail,
             userRoles: userRoles,
             dayKey: dayKey,
+            timeZone: timezone,
+            dateTime: dateTime,
         };
     }
 
@@ -60,5 +65,24 @@ export class ContextService {
         }
 
         return dayKey;
+    }
+
+    private static getTimezone(request: Request): string {
+        let timezone = request.headers['client-timezone'] as string;
+
+        // this can go away after client version 3.0.1 if we
+        // make it a forced update
+        if (!timezone) {
+            timezone = 'America/New_York';
+        }
+
+        return timezone;
+    }
+
+    private static getDateTime(timeZone: string): Date {
+        const date = new Date();
+        const zonedDate = toZonedTime(date, timeZone);
+
+        return zonedDate;
     }
 }

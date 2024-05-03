@@ -41,6 +41,37 @@ export class ChallengeDao {
         });
     }
 
+    public static async getAllWhereEndDateGreaterThan(date: Date) {
+        return prisma.challenge.findMany({
+            where: {
+                end: {
+                    gte: date,
+                },
+            },
+            include: {
+                challengeRequirements: {
+                    include: {
+                        task: true,
+                        unit: true,
+                    },
+                },
+                challengeParticipants: true,
+                challengeRewards: true,
+                creator: true,
+                likes: {
+                    where: {
+                        active: true,
+                    },
+                },
+                comments: {
+                    where: {
+                        active: true,
+                    },
+                },
+            },
+        });
+    }
+
     public static async existsById(id: number) {
         const result = await this.get(id);
         return !!result;

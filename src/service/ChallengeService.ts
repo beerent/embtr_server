@@ -5,19 +5,16 @@ import {
     ChallengeParticipant,
     ChallengeRequirement,
     ChallengeRequirementCompletionState,
-    ScheduledHabit,
     PlannedTask,
 } from '@resources/schema';
-import { PureDate } from '@resources/types/date/PureDate';
 import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
 import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
-import { GENERAL_FAILURE, HttpCode, SUCCESS } from '@src/common/RequestResponses';
+import { HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
 import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
 import { ChallengeEventDispatcher } from '@src/event/challenge/ChallengeEventDispatcher';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
-import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ScheduledHabitService } from './ScheduledHabitService';
 
@@ -30,7 +27,7 @@ export class ChallengeService {
     }
 
     public static async getAllSummaries(context: Context): Promise<ChallengeSummary[]> {
-        const challenges = await this.getAll(context);
+        const challenges = await this.getAllOpen(context);
         const challengeSummaries: ChallengeSummary[] = [];
         for (const challenge of challenges) {
             const challengeSummary = this.getSummaryFromChallenge(context, challenge);
@@ -64,6 +61,13 @@ export class ChallengeService {
 
     public static async getAll(context: Context): Promise<Challenge[]> {
         const challenges = await ChallengeDao.getAll();
+        const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
+
+        return challengeModels;
+    }
+
+    public static async getAllOpen(context: Context): Promise<Challenge[]> {
+        const challenges = await ChallengeDao.getAllWhereEndDateGreaterThan(context.dateTime);
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
         return challengeModels;

@@ -1,5 +1,3 @@
-import { Context } from 'src/general/auth/Context';
-
 export namespace DateUtility {
     export const getToday = (): Date => {
         const today = new Date();
@@ -54,5 +52,15 @@ export namespace DateUtility {
         }
 
         return dates;
+    };
+
+    export const getDateWithTimezone = (date: Date, timezone: string) => {
+        const x = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            timeStyle: 'short',
+            dateStyle: 'short',
+        }).format(date);
+
+        return new Date(x);
     };
 }
