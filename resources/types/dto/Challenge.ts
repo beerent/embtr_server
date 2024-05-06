@@ -16,19 +16,11 @@ interface ChallengeComment {
     user: ChallengeUser;
 }
 
-interface ChallengeChallengeReward {
-    id: number;
-    name: string;
-    description: string;
-    remoteImageUrl: string;
-    localImage: string;
-}
-
 interface ChallengeBase {
     id: number;
     name: string;
     description: string;
-    challengeRewards: ChallengeChallengeReward[];
+    award: Award;
     likeCount: number;
     participantCount: number;
 
@@ -38,6 +30,14 @@ interface ChallengeBase {
 
     isLiked: boolean;
     isParticipant: boolean;
+}
+
+export interface Award {
+    id: number;
+    name: string;
+    description: string;
+    remoteImageUrl: string;
+    localImage: string;
 }
 
 export interface ChallengeRecentlyJoined extends ChallengeSummary { }

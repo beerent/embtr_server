@@ -13,7 +13,7 @@ export class ChallengeParticipantDao {
             include: {
                 challenge: {
                     include: {
-                        challengeRewards: true,
+                        award: true,
                         challengeRequirements: {
                             include: {
                                 task: true,
@@ -55,7 +55,7 @@ export class ChallengeParticipantDao {
             include: {
                 challenge: {
                     include: {
-                        challengeRewards: true,
+                        award: true,
                         challengeRequirements: {
                             include: {
                                 task: true,
@@ -85,7 +85,7 @@ export class ChallengeParticipantDao {
             include: {
                 challenge: {
                     include: {
-                        challengeRewards: true,
+                        award: true,
                         challengeRequirements: {
                             include: {
                                 task: true,
@@ -114,7 +114,7 @@ export class ChallengeParticipantDao {
             include: {
                 challenge: {
                     include: {
-                        challengeRewards: true,
+                        award: true,
                         challengeRequirements: {
                             include: {
                                 task: true,

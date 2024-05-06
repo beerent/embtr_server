@@ -115,12 +115,13 @@ export class ChallengeService {
     }
 
     public static async getActiveChallengeParticipationForUser(
+        context: Context,
         userId: number
-    ): Promise<GetChallengeParticipationResponse> {
+    ): Promise<ChallengeParticipant[]> {
         const challengeParticipation = await ChallengeParticipantDao.getAllActiveForUser(userId);
         const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
 
-        return { ...SUCCESS, challengeParticipation: models };
+        return models;
     }
 
     public static async getCompletedChallengesForUser(
@@ -365,16 +366,14 @@ export class ChallengeService {
             id: challenge.id ?? 0,
             name: challenge.name ?? '',
             description: challenge.description ?? '',
-            challengeRewards:
-                challenge.challengeRewards?.map((reward) => {
-                    return {
-                        id: reward.id ?? 0,
-                        name: reward.name ?? '',
-                        description: reward.description ?? '',
-                        remoteImageUrl: reward.remoteImageUrl ?? '',
-                        localImage: reward.localImage ?? '',
-                    };
-                }) ?? [],
+
+            award: {
+                id: challenge.awardId ?? 0,
+                name: challenge.award?.name ?? '',
+                description: challenge.award?.description ?? '',
+                remoteImageUrl: challenge.award?.remoteImageUrl ?? '',
+                localImage: challenge.award?.localImage ?? '',
+            },
             likeCount: challenge.likes?.length ?? 0,
             participantCount: challenge.challengeParticipants?.length ?? 0,
             start: challenge.start ?? new Date(),
@@ -402,17 +401,13 @@ export class ChallengeService {
             id: challenge.id ?? 0,
             name: challenge.name ?? '',
             description: challenge.description ?? '',
-
-            challengeRewards:
-                challenge.challengeRewards?.map((reward) => {
-                    return {
-                        id: reward.id ?? 0,
-                        name: reward.name ?? '',
-                        description: reward.description ?? '',
-                        remoteImageUrl: reward.remoteImageUrl ?? '',
-                        localImage: reward.localImage ?? '',
-                    };
-                }) ?? [],
+            award: {
+                id: challenge.awardId ?? 0,
+                name: challenge.award?.name ?? '',
+                description: challenge.award?.description ?? '',
+                remoteImageUrl: challenge.award?.remoteImageUrl ?? '',
+                localImage: challenge.award?.localImage ?? '',
+            },
 
             likeCount: challenge.likes?.length ?? 0,
             participantCount: challenge.challengeParticipants?.length ?? 0,

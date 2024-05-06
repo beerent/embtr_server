@@ -22,7 +22,7 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
-                challengeRewards: true,
+                award: true,
                 creator: true,
                 likes: {
                     include: {
@@ -56,7 +56,7 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
-                challengeRewards: true,
+                award: true,
                 creator: true,
                 likes: {
                     where: {
@@ -87,7 +87,7 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
-                challengeRewards: true,
+                award: true,
                 creator: true,
                 likes: {
                     where: {
@@ -128,7 +128,7 @@ export class ChallengeDao {
                         createdAt: 'desc',
                     },
                 },
-                challengeRewards: true,
+                award: true,
                 creator: true,
                 likes: {
                     where: {
@@ -186,7 +186,7 @@ export class ChallengeDao {
                         user: true,
                     },
                 },
-                challengeRewards: true,
+                award: true,
             },
         });
     }
@@ -207,7 +207,7 @@ export class ChallengeDao {
                         unit: true,
                     },
                 },
-                challengeRewards: true,
+                award: true,
                 challengeParticipants: true,
                 creator: true,
                 likes: true,

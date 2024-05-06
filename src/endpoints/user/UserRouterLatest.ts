@@ -21,7 +21,7 @@ import { HabitJourneyService } from '@src/service/HabitJourneyService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { UserPostService } from '@src/service/UserPostService';
 import { ContextService } from '@src/service/ContextService';
-import { User } from '@resources/schema';
+import { ChallengeParticipant, User } from '@resources/schema';
 import { UserService } from '@src/service/UserService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
@@ -328,9 +328,15 @@ userRouterLatest.get(
     authorize,
     validateGetUserData,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const userId = Number(req.params.userId);
-        const response: GetChallengeParticipationResponse =
-            await ChallengeService.getActiveChallengeParticipationForUser(userId);
+
+        const participation: ChallengeParticipant[] =
+            await ChallengeService.getActiveChallengeParticipationForUser(context, userId);
+        const response: GetChallengeParticipationResponse = {
+            ...SUCCESS,
+            challengeParticipation: participation,
+        };
 
         res.status(response.httpCode).json(response);
     })

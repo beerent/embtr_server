@@ -35,7 +35,7 @@ export const PlannedDayResultInclude = {
                 include: {
                     challenge: {
                         include: {
-                            challengeRewards: true,
+                            award: true,
                         },
                     },
                 },

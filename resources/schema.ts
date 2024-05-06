@@ -23,7 +23,7 @@ export interface User {
   quoteOfTheDay?: QuoteOfTheDay[];
   challenges?: Challenge[];
   challengeParticipant?: ChallengeParticipant[];
-  userAchievements?: UserAchievement[];
+  userAwards?: UserAward[];
   tasks?: Task[];
   scheduledHabits?: ScheduledHabit[];
   blockingUsers?: BlockedUser[];
@@ -225,14 +225,15 @@ export interface Season {
   updatedAt?: Date;
 }
 
-export interface Challenge {
+export interface Challenge extends ChallengeCustom {
   id?: number;
   name?: string;
   description?: string;
   creator?: User;
   creatorId?: number;
   challengeRequirements?: ChallengeRequirement[];
-  challengeRewards?: ChallengeReward[];
+  awardId?: number;
+  award?: Award;
   start?: Date;
   end?: Date;
   timelineTimestamp?: Date;
@@ -262,18 +263,6 @@ export interface ChallengeRequirement {
   updatedAt?: Date;
 }
 
-export interface ChallengeReward {
-  id?: number;
-  name?: string;
-  description?: string;
-  remoteImageUrl?: string;
-  localImage?: string;
-  active?: boolean;
-  challenge?: Challenge[];
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
 export interface ChallengeParticipant {
   id?: number;
   user?: User;
@@ -289,23 +278,25 @@ export interface ChallengeParticipant {
   updatedAt?: Date;
 }
 
-export interface Achievement {
+export interface Award {
   id?: number;
   name?: string;
+  description?: string;
   remoteImageUrl?: string;
   localImage?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  userAchievements?: UserAchievement[];
+  userAwards?: UserAward[];
+  challenges?: Challenge[];
 }
 
-export interface UserAchievement {
+export interface UserAward {
   id?: number;
   user?: User;
   userId?: number;
-  achievement?: Achievement;
-  achievementId?: number;
+  awardId?: number;
+  award?: Award;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -442,3 +433,15 @@ export enum ChallengeRequirementCompletionState {
   COMPLETED = 'COMPLETED',
 }
 
+export interface ChallengeCustom {
+    challengeRewards?: {
+        id?: number;
+        name?: string;
+        description?: string;
+        remoteImageUrl?: string;
+        localImage?: string;
+        active?: boolean;
+        createdAt?: Date;
+        updatedAt?: Date;
+    }[];
+}
