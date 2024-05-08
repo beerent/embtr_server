@@ -14,6 +14,9 @@ import { ReminderService } from './service/feature/ReminderService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './service/UserPropertyService';
 import { UserDao } from './database/UserDao';
+import { UserAwardService } from './service/UserAwardService';
+import { User } from '@resources/schema';
+import { DayKeyUtility } from './utility/date/DayKeyUtility';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -23,6 +26,22 @@ const adminContext: Context = {
     userEmail: 'bnren',
     userRoles: [],
     dayKey: '04-04-2021',
+    timeZone: 'America/New_York',
+    dateTime: new Date(),
+};
+
+const impersonateContext = (user: User): Context => {
+    const context: Context = {
+        userId: user.id || 0,
+        userUid: user.uid || '',
+        userEmail: user.email || '',
+        userRoles: [],
+        dayKey: DayKeyUtility.getTodayKey(),
+        timeZone: 'America/New_York',
+        dateTime: new Date(),
+    };
+
+    return context;
 };
 
 const handleCommandGetProperties = async (username: string) => {
@@ -36,8 +55,6 @@ const handleCommandGetProperties = async (username: string) => {
     const propertyStrings = properties.map((property) => {
         return `${property.key}: ${property.value}`;
     });
-
-    console.log(propertyStrings);
 };
 
 const handleCommandGetRoles = async (email: string) => {
@@ -243,6 +260,33 @@ const handleCommandSendUserPeriodicWarnings = async (username: string) => {
     }
 
     await ReminderService.sendUserPeriodicWarning(adminContext, user);
+};
+
+const handleCommandUpdateAllAwardsForAllUsers = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+    for (const user of users) {
+        if (!user.id) {
+            continue;
+        }
+
+        count++;
+        console.log('updating (', count, '/', users.length, ')');
+
+        const context: Context = impersonateContext(user);
+        await UserAwardService.refreshAwardsFromChallenges(context);
+    }
+};
+
+const handleCommandUpdateAllAwardsForUser = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    const context: Context = impersonateContext(user);
+    await UserAwardService.refreshAwardsFromChallenges(context);
 };
 
 const handleCommandSendDailyReminders = async () => {
@@ -544,6 +588,14 @@ const processCommand = async (command: string) => {
 
         case 'refreshPremiumUser':
             await handleCommandRefreshPremiumUser(email);
+            break;
+
+        case 'updateAllAwardsForAllUsers':
+            await handleCommandUpdateAllAwardsForAllUsers();
+            break;
+
+        case 'updateAllAwardsForUser':
+            await handleCommandUpdateAllAwardsForUser(email);
             break;
 
         default:

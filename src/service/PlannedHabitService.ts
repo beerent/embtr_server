@@ -77,11 +77,6 @@ export class PlannedHabitService {
         PlannedHabitEventDispatcher.onCreated(context, createdPlannedTask.id);
 
         const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
-
-        //todo - dispatch me, brah
-        const completedChallenges =
-            await ChallengeService.updateChallengeRequirementProgress(plannedTaskModel);
-
         return plannedTaskModel;
     }
 
@@ -110,11 +105,6 @@ export class PlannedHabitService {
         PlannedHabitEventDispatcher.onUpdated(context, existingPlannedTask.id);
 
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
-
-        //todo - dispatch me, brah
-        const completedChallenges =
-            await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
-
         return updatedPlannedTaskModel;
     }
 

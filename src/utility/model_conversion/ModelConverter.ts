@@ -17,6 +17,8 @@ import {
     TimeOfDay,
     DayOfWeek,
     Property,
+    Award,
+    UserAward,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -41,7 +43,9 @@ type PrismaModel =
     | ScheduledHabit
     | TimeOfDay
     | DayOfWeek
-    | Property;
+    | Property
+    | Award
+    | UserAward;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

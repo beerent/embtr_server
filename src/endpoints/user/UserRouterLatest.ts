@@ -365,11 +365,14 @@ userRouterLatest.get(
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        //const response: GetChallengesResponse =
-        //    await ChallengeService.getCompletedChallengesForUser(userId);
-        res.status(200).json(SUCCESS);
+        const challengeParticipation = await ChallengeService.getCompletedChallengesForUser(userId);
 
-        //res.status(response.httpCode).json(response);
+        const response: GetChallengeParticipationResponse = {
+            ...SUCCESS,
+            challengeParticipation,
+        };
+
+        res.status(response.httpCode).json(response);
     })
 );
 

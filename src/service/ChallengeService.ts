@@ -16,6 +16,7 @@ import { ChallengeEventDispatcher } from '@src/event/challenge/ChallengeEventDis
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { PlannedHabitService } from './PlannedHabitService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 
 export class ChallengeService {
@@ -124,16 +125,25 @@ export class ChallengeService {
         return models;
     }
 
+    public static async getAllChallengeParticipationForUser(
+        context: Context,
+        userId: number
+    ): Promise<ChallengeParticipant[]> {
+        const challengeParticipation = await ChallengeParticipantDao.getAllForUser(userId);
+        const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
+
+        return models;
+    }
+
     public static async getCompletedChallengesForUser(
         userId: number
-    ): Promise<GetChallengeParticipationResponse> {
+    ): Promise<ChallengeParticipant[]> {
         const challengeParticipation = await ChallengeParticipantDao.getAllForUser(
             userId,
             ChallengeRequirementCompletionState.COMPLETED
         );
         const models: ChallengeParticipant[] = ModelConverter.convertAll(challengeParticipation);
-
-        return { ...SUCCESS, challengeParticipation: models };
+        return models;
     }
 
     public static async register(context: Context, id: number) {
@@ -154,22 +164,26 @@ export class ChallengeService {
             await ScheduledHabitService.unarchiveFromChallenge(context, challenge);
         }
 
-        ChallengeEventDispatcher.onJoined(context, context.userId, id);
+        ChallengeEventDispatcher.onJoined(context, id);
 
         return SUCCESS;
     }
 
     public static async updateChallengeRequirementProgress(
-        plannedTask: PlannedTask
-    ): Promise<Challenge[]> {
+        context: Context,
+        plannedTaskId: number
+    ) {
+        const plannedTask = await PlannedHabitService.getById(context, plannedTaskId);
+        if (!plannedTask) {
+            return [];
+        }
+
         const userId = plannedTask.plannedDay?.userId;
         const taskId = plannedTask.scheduledHabit?.taskId;
         const date = plannedTask.plannedDay?.date;
         if (!userId || !taskId || !date) {
             return [];
         }
-
-        const completedChallenges = [];
 
         const participants = await ChallengeParticipantDao.getAllForUserAndTaskAndDate(
             userId,
@@ -226,18 +240,29 @@ export class ChallengeService {
 
                 promises.push(ChallengeParticipantDao.update(participant));
 
-                if (
-                    previousCompletionState !== participant.challengeRequirementCompletionState &&
-                    participant.challengeRequirementCompletionState ===
-                    ChallengeRequirementCompletionState.COMPLETED
-                ) {
-                    completedChallenges.push(challenge);
+                if (participant.challengeRequirementCompletionState !== previousCompletionState) {
+                    this.dispatchChallengeStateChange(
+                        context,
+                        challenge.id ?? 0,
+                        participant.challengeRequirementCompletionState
+                    );
                 }
             }
         }
-        await Promise.all(promises);
 
-        return completedChallenges;
+        await Promise.all(promises);
+    }
+
+    private static dispatchChallengeStateChange(
+        context: Context,
+        challengeId: number,
+        completionState: ChallengeRequirementCompletionState
+    ) {
+        if (completionState === ChallengeRequirementCompletionState.COMPLETED) {
+            ChallengeEventDispatcher.onComplete(context, challengeId);
+        } else {
+            ChallengeEventDispatcher.onIncomplete(context, challengeId);
+        }
     }
 
     public static async getChallengeRequirementAmountComplete(
@@ -322,7 +347,7 @@ export class ChallengeService {
         participant.active = false;
         await ChallengeParticipantDao.update(participant);
 
-        ChallengeEventDispatcher.onLeft(context, context.userId, id);
+        ChallengeEventDispatcher.onLeft(context, id);
     }
 
     static async getParticipantForUserAndChallenge(

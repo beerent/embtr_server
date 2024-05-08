@@ -67,10 +67,11 @@ export namespace Event {
     export namespace Challenge {
         export const Joined = 'CHALLENGE_CREATED';
         export const Left = 'CHALLENGE_LEFT';
+        export const Completed = 'CHALLENGE_COMPLETED';
+        export const Incompleted = 'CHALLENGE_INCOMPLETED';
 
         export interface Event {
             context: Context;
-            userId: number;
             id: number;
         }
     }
