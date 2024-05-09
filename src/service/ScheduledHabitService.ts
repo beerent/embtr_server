@@ -122,6 +122,9 @@ export class ScheduledHabitService {
         context: Context,
         scheduledHabit: ScheduledHabit
     ): Promise<ScheduledHabit> {
+        scheduledHabit.startDate = context.dateTime;
+        console.log('creating with start date', scheduledHabit.startDate);
+
         const createdScheduledHabit = await ScheduledHabitDao.create(
             context.userId,
             scheduledHabit
