@@ -30,6 +30,7 @@ export interface User {
   blockedUsers?: BlockedUser[];
   roles?: Role[];
   properties?: Property[];
+  userMilestones?: UserMilestone[];
 }
 
 export interface Property {
@@ -82,6 +83,7 @@ export interface PlannedDay {
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
   challengeParticipant?: ChallengeParticipant[];
+  userMilestones?: UserMilestone[];
 }
 
 export interface PlannedTask {
@@ -134,6 +136,31 @@ export interface PlannedDayResult {
   images?: Image[];
   likes?: Like[];
   comments?: Comment[];
+}
+
+export interface Milestone {
+  id?: number;
+  title?: string;
+  description?: string;
+  localImage?: string;
+  remoteImageUrl?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  userMilestones?: UserMilestone[];
+}
+
+export interface UserMilestone {
+  id?: number;
+  userId?: number;
+  user?: User;
+  milestone?: Milestone;
+  milestoneId?: number;
+  plannedDayId?: number;
+  plannedDay?: PlannedDay;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Comment {

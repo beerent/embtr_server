@@ -1,5 +1,6 @@
-import { PlannedDayResult, UserPost } from '../../schema';
+import { UserPost } from '../../schema';
 import { ChallengeRecentlyJoined } from '../dto/Challenge';
+import { PlannedDayTimelineElementDto } from '../dto/PlannedDay';
 import { Response } from './RequestTypes';
 
 export enum TimelineElementType {
@@ -17,7 +18,7 @@ export interface TimelineElement {
   type: TimelineElementType;
   createdAt: Date;
   userPost?: UserPost;
-  plannedDayResult?: PlannedDayResult;
+  plannedDayResult?: PlannedDayTimelineElementDto;
   challengeRecentlyJoined?: ChallengeRecentlyJoined;
 }
 

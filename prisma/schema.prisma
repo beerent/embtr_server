@@ -40,6 +40,7 @@ model User {
     blockedUsers           BlockedUser[]           @relation("blockedUser")
     roles                  Role[]
     properties             Property[]
+    userMilestones         UserMilestone[]
 
     @@index([username])
     @@map("user")
@@ -106,6 +107,7 @@ model PlannedDay {
     plannedTasks         PlannedTask[]
     plannedDayResults    PlannedDayResult[]
     challengeParticipant ChallengeParticipant[]
+    userMilestones       UserMilestone[]
 
     @@unique([userId, dayKey], name: "unique_user_daykey")
     @@map("planned_day")
@@ -176,6 +178,38 @@ model PlannedDayResult {
 
     @@index([plannedDayId])
     @@map("planned_day_result")
+}
+
+model Milestone {
+    id             Int             @id @default(autoincrement())
+    title          String          @db.VarChar(255)
+    description    String?         @db.VarChar(255)
+    localImage     String?         @db.VarChar(255)
+    remoteImageUrl String?         @db.VarChar(255)
+    active         Boolean         @default(true)
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @default(now()) @updatedAt
+    userMilestones UserMilestone[]
+
+    @@map("milestone")
+}
+
+model UserMilestone {
+    id           Int        @id @default(autoincrement())
+    userId       Int        @db.Int
+    user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+    milestone    Milestone  @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+    milestoneId  Int        @db.Int
+    plannedDayId Int        @db.Int
+    plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+    active       Boolean    @default(true)
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @default(now()) @updatedAt
+
+    @@index([userId])
+    @@index([milestoneId])
+    @@index([plannedDayId])
+    @@map("user_milestone")
 }
 
 model Comment {

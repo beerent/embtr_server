@@ -12,6 +12,7 @@ import { Context } from '@src/general/auth/Context';
 import { BlockUserService } from '@src/service/BlockUserService';
 import { ChallengeService } from './ChallengeService';
 import { ChallengeRecentlyJoined } from '@resources/types/dto/Challenge';
+import { PlannedDayTimelineElementDto } from '@resources/types/dto/PlannedDay';
 
 export class TimelineService {
     public static async get(
@@ -150,10 +151,11 @@ export class TimelineService {
         const elements: TimelineElement[] = [];
 
         for (const plannedDayResult of plannedDayResults) {
+            const timelineElement: PlannedDayTimelineElementDto = plannedDayResult;
             elements.push({
                 type: TimelineElementType.PLANNED_DAY_RESULT,
                 createdAt: plannedDayResult.createdAt ?? new Date(),
-                plannedDayResult,
+                plannedDayResult: timelineElement,
             });
         }
 
