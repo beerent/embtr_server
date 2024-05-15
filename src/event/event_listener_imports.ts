@@ -5,3 +5,4 @@ import '@src/event/habit_streak/HabitStreakEventListener';
 import '@src/event/comment/CommentEventListener';
 import '@src/event/like/LikeEventListener';
 import '@src/event/challenge/ChallengeEventListener';
+import '@src/event/challenge_participant/ChallengeParticipantEventListener';

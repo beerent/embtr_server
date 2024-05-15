@@ -30,7 +30,6 @@ export interface User {
   blockedUsers?: BlockedUser[];
   roles?: Role[];
   properties?: Property[];
-  userMilestones?: UserMilestone[];
 }
 
 export interface Property {
@@ -83,7 +82,7 @@ export interface PlannedDay {
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
   challengeParticipant?: ChallengeParticipant[];
-  userMilestones?: UserMilestone[];
+  plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
 }
 
 export interface PlannedTask {
@@ -140,22 +139,37 @@ export interface PlannedDayResult {
 
 export interface Milestone {
   id?: number;
-  title?: string;
+  key?: string;
   description?: string;
   localImage?: string;
+  metric?: number;
+  ordinal?: number;
   remoteImageUrl?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  userMilestones?: UserMilestone[];
+  challengeRequirements?: ChallengeRequirement[];
+  challengeMilestones?: ChallengeMilestone[];
 }
 
-export interface UserMilestone {
+export interface ChallengeMilestone {
   id?: number;
-  userId?: number;
-  user?: User;
-  milestone?: Milestone;
+  challengeId?: number;
+  challenge?: Challenge;
   milestoneId?: number;
+  milestone?: Milestone;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
+}
+
+export interface PlannedDayChallengeMilestone {
+  id?: number;
+  challengeMilestoneId?: number;
+  challengeMilestone?: ChallengeMilestone;
+  challengeParticipantId?: number;
+  challengeParticipant?: ChallengeParticipant;
   plannedDayId?: number;
   plannedDay?: PlannedDay;
   active?: boolean;
@@ -271,6 +285,7 @@ export interface Challenge extends ChallengeCustom {
   createdAt?: Date;
   updatedAt?: Date;
   challengeParticipants?: ChallengeParticipant[];
+  challengeMilestones?: ChallengeMilestone[];
 }
 
 export interface ChallengeRequirement {
@@ -288,6 +303,7 @@ export interface ChallengeRequirement {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  milestones?: Milestone[];
 }
 
 export interface ChallengeParticipant {
@@ -303,6 +319,7 @@ export interface ChallengeParticipant {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
 }
 
 export interface Award {

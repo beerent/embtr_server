@@ -75,4 +75,14 @@ export namespace Event {
             id: number;
         }
     }
+
+    export namespace ChallengeParticipant {
+        export const Updated = 'CHALLENGE_PARTICIPANT_UPDATED';
+
+        export interface Event {
+            context: Context;
+            plannedDayId: number;
+            id: number;
+        }
+    }
 }

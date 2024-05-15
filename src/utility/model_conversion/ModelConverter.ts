@@ -19,6 +19,9 @@ import {
     Property,
     Award,
     UserAward,
+    Milestone,
+    ChallengeMilestone,
+    PlannedDayChallengeMilestone,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -45,7 +48,10 @@ type PrismaModel =
     | DayOfWeek
     | Property
     | Award
-    | UserAward;
+    | UserAward
+    | Milestone
+    | ChallengeMilestone
+    | PlannedDayChallengeMilestone;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

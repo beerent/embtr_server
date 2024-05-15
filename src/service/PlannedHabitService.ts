@@ -7,7 +7,6 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
-import { ChallengeService } from './ChallengeService';
 
 export class PlannedHabitService {
     public static async getById(context: Context, id: number): Promise<PlannedTask> {

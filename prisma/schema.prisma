@@ -40,7 +40,6 @@ model User {
     blockedUsers           BlockedUser[]           @relation("blockedUser")
     roles                  Role[]
     properties             Property[]
-    userMilestones         UserMilestone[]
 
     @@index([username])
     @@map("user")
@@ -96,18 +95,18 @@ model Task {
 }
 
 model PlannedDay {
-    id                   Int                    @id @default(autoincrement())
-    user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId               Int                    @db.Int
-    dayKey               String                 @db.VarChar(10)
-    date                 DateTime               @db.Date
-    status               String?                @db.VarChar(225)
-    createdAt            DateTime               @default(now())
-    updatedAt            DateTime               @default(now()) @updatedAt
-    plannedTasks         PlannedTask[]
-    plannedDayResults    PlannedDayResult[]
-    challengeParticipant ChallengeParticipant[]
-    userMilestones       UserMilestone[]
+    id                            Int                            @id @default(autoincrement())
+    user                          User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId                        Int                            @db.Int
+    dayKey                        String                         @db.VarChar(10)
+    date                          DateTime                       @db.Date
+    status                        String?                        @db.VarChar(225)
+    createdAt                     DateTime                       @default(now())
+    updatedAt                     DateTime                       @default(now()) @updatedAt
+    plannedTasks                  PlannedTask[]
+    plannedDayResults             PlannedDayResult[]
+    challengeParticipant          ChallengeParticipant[]
+    plannedDayChallengeMilestones PlannedDayChallengeMilestone[]
 
     @@unique([userId, dayKey], name: "unique_user_daykey")
     @@map("planned_day")
@@ -181,35 +180,55 @@ model PlannedDayResult {
 }
 
 model Milestone {
-    id             Int             @id @default(autoincrement())
-    title          String          @db.VarChar(255)
-    description    String?         @db.VarChar(255)
-    localImage     String?         @db.VarChar(255)
-    remoteImageUrl String?         @db.VarChar(255)
-    active         Boolean         @default(true)
-    createdAt      DateTime        @default(now())
-    updatedAt      DateTime        @default(now()) @updatedAt
-    userMilestones UserMilestone[]
+    id                    Int                    @id @default(autoincrement())
+    key                   String                 @unique @db.VarChar(255)
+    description           String?                @db.VarChar(255)
+    localImage            String?                @db.VarChar(255)
+    metric                Int                    @db.Int
+    ordinal               Int                    @db.Int
+    remoteImageUrl        String?                @db.VarChar(255)
+    active                Boolean                @default(true)
+    createdAt             DateTime               @default(now())
+    updatedAt             DateTime               @default(now()) @updatedAt
+    challengeRequirements ChallengeRequirement[]
+    challengeMilestones   ChallengeMilestone[]
 
     @@map("milestone")
 }
 
-model UserMilestone {
-    id           Int        @id @default(autoincrement())
-    userId       Int        @db.Int
-    user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-    milestone    Milestone  @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
-    milestoneId  Int        @db.Int
-    plannedDayId Int        @db.Int
-    plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
-    active       Boolean    @default(true)
-    createdAt    DateTime   @default(now())
-    updatedAt    DateTime   @default(now()) @updatedAt
+model ChallengeMilestone {
+    id                            Int                            @id @default(autoincrement())
+    challengeId                   Int                            @db.Int
+    challenge                     Challenge                      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+    milestoneId                   Int                            @db.Int
+    milestone                     Milestone                      @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+    active                        Boolean                        @default(true)
+    createdAt                     DateTime                       @default(now())
+    updatedAt                     DateTime                       @default(now()) @updatedAt
+    plannedDayChallengeMilestones PlannedDayChallengeMilestone[]
 
-    @@index([userId])
+    @@index([challengeId])
     @@index([milestoneId])
+    @@map("challenge_milestone")
+}
+
+model PlannedDayChallengeMilestone {
+    id                     Int                  @id @default(autoincrement())
+    challengeMilestoneId   Int                  @db.Int
+    challengeMilestone     ChallengeMilestone   @relation(fields: [challengeMilestoneId], references: [id], onDelete: Cascade)
+    challengeParticipantId Int                  @db.Int
+    challengeParticipant   ChallengeParticipant @relation(fields: [challengeParticipantId], references: [id], onDelete: Cascade)
+    plannedDayId           Int                  @db.Int
+    plannedDay             PlannedDay           @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+    active                 Boolean              @default(true)
+    createdAt              DateTime             @default(now())
+    updatedAt              DateTime             @default(now()) @updatedAt
+
+    @@unique([challengeMilestoneId, challengeParticipantId], name: "unique_challenge_milestone_participant")
+    @@index([challengeMilestoneId])
     @@index([plannedDayId])
-    @@map("user_milestone")
+    @@index([challengeParticipantId])
+    @@map("planned_day_challenge_milestone")
 }
 
 model Comment {
@@ -364,6 +383,7 @@ model Challenge {
     createdAt             DateTime               @default(now())
     updatedAt             DateTime               @default(now()) @updatedAt
     challengeParticipants ChallengeParticipant[]
+    challengeMilestones   ChallengeMilestone[]
 
     @@index([creatorId])
     @@index([awardId])
@@ -387,15 +407,17 @@ model ChallengeRequirement {
     unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
     unitId Int?  @db.Int
 
-    calculationType          ChallengeCalculationType @default(INVALID)
-    calculationIntervalDays  Int?                     @db.Int
-    requiredIntervalQuantity Int?                     @db.Int
+    calculationType ChallengeCalculationType @default(INVALID)
+
+    calculationIntervalDays  Int? @db.Int
+    requiredIntervalQuantity Int? @db.Int
 
     requiredTaskQuantity Int? @db.Int
 
-    active    Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+    active     Boolean     @default(true)
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @default(now()) @updatedAt
+    milestones Milestone[]
 
     @@index([taskId])
     @@index([unitId])
@@ -416,6 +438,7 @@ model ChallengeParticipant {
     active                              Boolean                             @default(true)
     createdAt                           DateTime                            @default(now())
     updatedAt                           DateTime                            @default(now()) @updatedAt
+    plannedDayChallengeMilestones       PlannedDayChallengeMilestone[]
 
     @@unique([userId, challengeId], name: "unique_challenge_participant")
     @@index([userId])

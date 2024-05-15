@@ -278,6 +278,27 @@ export class ChallengeDao {
         return !!result;
     }
 
+    public static async getAllByTaskId(taskId: number) {
+        const result = await prisma.challenge.findMany({
+            where: {
+                challengeRequirements: {
+                    some: {
+                        taskId,
+                    },
+                },
+            },
+            include: {
+                challengeMilestones: {
+                    include: {
+                        challenge: true,
+                    },
+                },
+            },
+        });
+
+        return result;
+    }
+
     /*
      * this manual query to calculate the progress of a challenge requirement
      *

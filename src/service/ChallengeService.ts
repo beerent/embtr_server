@@ -13,6 +13,7 @@ import { HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
 import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
 import { ChallengeEventDispatcher } from '@src/event/challenge/ChallengeEventDispatcher';
+import { ChallengeParticipantEventDispatcher } from '@src/event/challenge_participant/ChallengeParticipantEventDispatcher';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
@@ -192,12 +193,12 @@ export class ChallengeService {
         );
         const participantModels: ChallengeParticipant[] = ModelConverter.convertAll(participants);
 
-        const promises = [];
         for (const participant of participantModels) {
             if (!participant.challenge?.challengeRequirements) {
                 continue;
             }
 
+            const previousAmountComplete = participant.amountComplete;
             const previousCompletionState = participant.challengeRequirementCompletionState;
 
             const challenge = participant.challenge;
@@ -238,7 +239,16 @@ export class ChallengeService {
                         ? ChallengeRequirementCompletionState.COMPLETED
                         : ChallengeRequirementCompletionState.IN_PROGRESS;
 
-                promises.push(ChallengeParticipantDao.update(participant));
+                await ChallengeParticipantDao.update(participant);
+
+                // dipatch events
+                if (participant.amountComplete !== previousAmountComplete) {
+                    this.dispatchChallengeParticipationStateChange(
+                        context,
+                        plannedTask,
+                        participant
+                    );
+                }
 
                 if (participant.challengeRequirementCompletionState !== previousCompletionState) {
                     this.dispatchChallengeStateChange(
@@ -249,8 +259,25 @@ export class ChallengeService {
                 }
             }
         }
+    }
 
-        await Promise.all(promises);
+    public static async getAllByTaskId(context: Context, taskId: number): Promise<Challenge[]> {
+        const challenges = await ChallengeDao.getAllByTaskId(taskId);
+        const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
+
+        return challengeModels;
+    }
+
+    private static dispatchChallengeParticipationStateChange(
+        context: Context,
+        plannedTask: PlannedTask,
+        participant: ChallengeParticipant
+    ) {
+        ChallengeParticipantEventDispatcher.onUpdated(
+            context,
+            plannedTask.plannedDayId ?? 0,
+            participant.id ?? 0
+        );
     }
 
     private static dispatchChallengeStateChange(

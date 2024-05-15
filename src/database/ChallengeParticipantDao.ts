@@ -2,6 +2,41 @@ import { prisma } from '@database/prisma';
 import { ChallengeParticipant, ChallengeRequirementCompletionState } from '@resources/schema';
 
 export class ChallengeParticipantDao {
+    public static async getById(id: number) {
+        return prisma.challengeParticipant.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                plannedDayChallengeMilestones: {
+                    include: {
+                        challengeMilestone: {
+                            include: {
+                                milestone: true,
+                            },
+                        },
+                    },
+                },
+                challenge: {
+                    include: {
+                        award: true,
+                        challengeRequirements: {
+                            include: {
+                                task: true,
+                                unit: true,
+                            },
+                        },
+                        challengeMilestones: {
+                            include: {
+                                milestone: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+
     public static async getForUserAndChallenge(userId: number, challengeId: number) {
         return prisma.challengeParticipant.findUnique({
             where: {

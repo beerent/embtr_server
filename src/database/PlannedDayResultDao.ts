@@ -31,7 +31,6 @@ export const PlannedDayResultInclude = {
     },
     plannedDay: {
         include: {
-            userMilestones: true,
             challengeParticipant: {
                 include: {
                     challenge: {
