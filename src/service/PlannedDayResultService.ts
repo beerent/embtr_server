@@ -14,6 +14,7 @@ import { ImageDetectionService } from './ImageService';
 import { ImageDao } from '@src/database/ImageDao';
 import { BlockUserService } from './BlockUserService';
 import { ApiAlertsService } from './ApiAlertsService';
+import { PlannedDayAttribute, PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 
 export class PlannedDayResultService {
     public static async create(
@@ -132,7 +133,9 @@ export class PlannedDayResultService {
 
         const plannedDayResultsModels: PlannedDayResult[] =
             ModelConverter.convertAll(plannedDayResults);
-        return plannedDayResultsModels;
+        const plannedDayResultDtos: PlannedDayResultDto[] = plannedDayResultsModels;
+        this.addAttributes(plannedDayResultDtos);
+        return plannedDayResultDtos;
     }
 
     public static async getAllSummaries(
@@ -197,7 +200,7 @@ export class PlannedDayResultService {
         return summary;
     }
 
-    public static async getById(context: Context, id: number): Promise<PlannedDayResult> {
+    public static async getById(context: Context, id: number): Promise<PlannedDayResultDto> {
         const plannedDayResult = await PlannedDayResultDao.getById(id);
 
         if (!plannedDayResult) {
@@ -214,6 +217,9 @@ export class PlannedDayResultService {
         );
 
         const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        const plannedDayResultDto: PlannedDayResultDto = plannedDayResultModel;
+        this.addAttribute(plannedDayResultDto);
+
         return plannedDayResultModel;
     }
 
@@ -237,6 +243,56 @@ export class PlannedDayResultService {
 
     public static async count(context: Context): Promise<number> {
         return await PlannedDayResultDao.count(context.userId);
+    }
+
+    private static addAttributes(plannedDayResultDtos: PlannedDayResultDto[]): void {
+        plannedDayResultDtos.forEach((plannedDayResultDto) => {
+            this.addAttribute(plannedDayResultDto);
+        });
+    }
+
+    private static addAttribute(plannedDayResultDto: PlannedDayResultDto): void {
+        const plannedDayAttribute = this.getPlannedDayAttribute(plannedDayResultDto);
+        if (plannedDayAttribute) {
+            plannedDayResultDto.attribute = plannedDayAttribute;
+        }
+    }
+
+    private static getPlannedDayAttribute(
+        plannedDayResultDto: PlannedDayResultDto
+    ): PlannedDayAttribute | undefined {
+        const milestones = plannedDayResultDto.plannedDay?.plannedDayChallengeMilestones;
+        if (milestones?.length == 0) {
+            return undefined;
+        }
+
+        milestones?.sort(
+            (a, b) =>
+                (a.challengeMilestone?.milestone?.ordinal ?? 0) -
+                (b.challengeMilestone?.milestone?.ordinal ?? 0)
+        );
+
+        const firstMilestone = milestones?.[0];
+
+        let description = firstMilestone?.challengeMilestone?.milestone?.description ?? '';
+        description = description.replace(
+            '_USERNAME_',
+            plannedDayResultDto.plannedDay?.user?.username ?? ''
+        );
+        description = description.replace(
+            '_CHALLENGE_',
+            firstMilestone?.challengeMilestone?.challenge?.name ?? ''
+        );
+
+        const attribute: PlannedDayAttribute = {
+            body: description,
+            ionicon: {
+                name: 'flash',
+                color: '#FF6712',
+            },
+        };
+
+        return attribute;
     }
 
     private static getCompletedHabits(plannedDayResult: PlannedDayResultType): CompletedHabit[] {

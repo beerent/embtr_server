@@ -12,7 +12,7 @@ import { Context } from '@src/general/auth/Context';
 import { BlockUserService } from '@src/service/BlockUserService';
 import { ChallengeService } from './ChallengeService';
 import { ChallengeRecentlyJoined } from '@resources/types/dto/Challenge';
-import { PlannedDayAttribute, PlannedDayTimelineElementDto } from '@resources/types/dto/PlannedDay';
+import { PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 
 export class TimelineService {
     public static async get(
@@ -151,29 +151,16 @@ export class TimelineService {
         const elements: TimelineElement[] = [];
 
         for (const plannedDayResult of plannedDayResults) {
-            const plannedDayTimelineElementDto: PlannedDayTimelineElementDto = plannedDayResult;
-            plannedDayTimelineElementDto.attribute = this.getPlannedDayAttribute(plannedDayResult);
+            const plannedDayResultDto: PlannedDayResultDto = plannedDayResult;
 
             elements.push({
                 type: TimelineElementType.PLANNED_DAY_RESULT,
                 createdAt: plannedDayResult.createdAt ?? new Date(),
-                plannedDayResult: plannedDayTimelineElementDto,
+                plannedDayResult: plannedDayResultDto,
             });
         }
 
         return elements;
-    }
-
-    private static getPlannedDayAttribute(
-        plannedDayResult: PlannedDayResult
-    ): PlannedDayAttribute | undefined {
-        // challenge logic
-        //
-        // achievement logic
-        //
-        // milestone logic
-
-        return undefined;
     }
 
     private static createRecentlyJoinedChallengeTimelineElements(

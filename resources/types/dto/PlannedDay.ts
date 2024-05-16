@@ -12,8 +12,12 @@ export interface PlannedDayAttribute {
     body: string;
     remoteImageUrl?: string;
     localImage?: string;
+    ionicon?: {
+        name: string;
+        color: string;
+    };
 }
 
-export interface PlannedDayTimelineElementDto extends PlannedDayResult {
+export interface PlannedDayResultDto extends PlannedDayResult {
     attribute?: PlannedDayAttribute;
 }

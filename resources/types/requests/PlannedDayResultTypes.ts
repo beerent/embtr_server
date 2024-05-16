@@ -1,9 +1,10 @@
 import { PlannedDayResult } from '../../schema';
 import { Response } from './RequestTypes';
 import { PlannedDayResultSummary } from '../planned_day_result/PlannedDayResult';
+import { PlannedDayResultDto } from '../dto/PlannedDay';
 
 export interface GetPlannedDayResultResponse extends Response {
-  plannedDayResult?: PlannedDayResult;
+  plannedDayResult?: PlannedDayResultDto;
 }
 
 export interface GetPlannedDayResultRequest {

@@ -31,6 +31,16 @@ export const PlannedDayResultInclude = {
     },
     plannedDay: {
         include: {
+            plannedDayChallengeMilestones: {
+                include: {
+                    challengeMilestone: {
+                        include: {
+                            challenge: true,
+                            milestone: true,
+                        },
+                    },
+                },
+            },
             challengeParticipant: {
                 include: {
                     challenge: {
