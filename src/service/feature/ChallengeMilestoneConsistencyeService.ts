@@ -9,7 +9,7 @@ import { ChallengeParticipantService } from '../ChallengeParticipantService';
 import { PlannedDayChallengeMilestoneService } from '../PlannedDayChallengeMilestoneService';
 
 export class ChallengeMilestoneConsistencyService {
-    public static async consistChallengeMilestones(
+    public static async recalculateMilestonesOnIncrease(
         context: Context,
         plannedDayId: number,
         challengeParticipantId: number
@@ -33,7 +33,9 @@ export class ChallengeMilestoneConsistencyService {
         const unachievedPlannedDayChallengeMilestones =
             this.getUnachievedPlannedDayChallengeMilestones(
                 initialAchievedPlannedDayChallengeMilestones,
-                percentComplete
+                true,
+                percentComplete,
+                plannedDayId
             );
         if (unachievedPlannedDayChallengeMilestones.length > 0) {
             console.log(
@@ -49,17 +51,20 @@ export class ChallengeMilestoneConsistencyService {
             unachievedPlannedDayChallengeMilestones
         );
 
+        // milestones that are stil achieved
         const remainingAchievedPlannedDayChallengeMilestones =
             this.getRemainingAchievedPlannedDayChallengeMilestones(
                 initialAchievedPlannedDayChallengeMilestones,
                 unachievedPlannedDayChallengeMilestones
             );
 
+        // milestones that are not achieved, but could be
         const possiblePlannedDayChallengeMilestones = this.getPossiblePlannedDayChallengeMilestones(
             allChallengeMilestones,
             remainingAchievedPlannedDayChallengeMilestones
         );
 
+        // milestones that are now in fact achieved
         const achievedPlannedDayChallengeMilestones = this.getAchivedPlannedDayChallengeMilestones(
             possiblePlannedDayChallengeMilestones,
             percentComplete
@@ -77,6 +82,47 @@ export class ChallengeMilestoneConsistencyService {
             plannedDayId,
             challengeParticipantId,
             achievedPlannedDayChallengeMilestones
+        );
+    }
+
+    public static async recalculateMilestonesOnDecrease(
+        context: Context,
+        plannedDayId: number,
+        challengeParticipantId: number
+    ) {
+        const challengeParticipant = await ChallengeParticipantService.get(
+            context,
+            challengeParticipantId
+        );
+
+        if (!challengeParticipant) {
+            throw new Error('Challenge participant not found');
+        }
+
+        const percentComplete = this.getPercentComplete(challengeParticipant);
+
+        const initialAchievedPlannedDayChallengeMilestones =
+            challengeParticipant?.plannedDayChallengeMilestones ?? [];
+
+        const unachievedPlannedDayChallengeMilestones =
+            this.getUnachievedPlannedDayChallengeMilestones(
+                initialAchievedPlannedDayChallengeMilestones,
+                false,
+                percentComplete,
+                plannedDayId
+            );
+        if (unachievedPlannedDayChallengeMilestones.length > 0) {
+            console.log(
+                'unachievedPlannedDayChallengeMilestones',
+                unachievedPlannedDayChallengeMilestones.map(
+                    (m) => m.challengeMilestone?.milestone?.key
+                )
+            );
+        }
+
+        await this.deleteUnachievedPlannedDayChallengeMilestones(
+            context,
+            unachievedPlannedDayChallengeMilestones
         );
     }
 
@@ -129,11 +175,24 @@ export class ChallengeMilestoneConsistencyService {
 
     private static getUnachievedPlannedDayChallengeMilestones(
         currentPlannedDayChallengeMilestones: PlannedDayChallengeMilestone[],
-        percent: number
+        allowEquals: boolean,
+        percent: number,
+        plannedDayId: number
     ) {
         const plannedDayChallengeMilestonesToDelete = currentPlannedDayChallengeMilestones.filter(
-            (plannedDayChallengeMilestone) =>
-                (plannedDayChallengeMilestone.challengeMilestone?.milestone?.metric ?? 0) >= percent
+            (plannedDayChallengeMilestone) => {
+                if (allowEquals) {
+                    return (
+                        (plannedDayChallengeMilestone.challengeMilestone?.milestone?.metric ?? 0) >=
+                        percent || plannedDayChallengeMilestone.plannedDayId === plannedDayId
+                    );
+                }
+
+                return (
+                    (plannedDayChallengeMilestone.challengeMilestone?.milestone?.metric ?? 0) >
+                    percent || plannedDayChallengeMilestone.plannedDayId === plannedDayId
+                );
+            }
         );
 
         return plannedDayChallengeMilestonesToDelete;
@@ -143,13 +202,28 @@ export class ChallengeMilestoneConsistencyService {
         allChallengeMilestones: ChallengeMilestone[],
         currentPlannedDayChallengeMilestones: PlannedDayChallengeMilestone[]
     ) {
-        const remainingChallengeMilestones = allChallengeMilestones.filter(
-            (challengeMilestone) =>
-                !currentPlannedDayChallengeMilestones.some(
-                    (currentPlannedDayMilestone) =>
-                        currentPlannedDayMilestone.challengeMilestoneId === challengeMilestone.id
-                )
+        // highest ordinal achieved milestone
+        const highestOrdinalAchievedMilestone = currentPlannedDayChallengeMilestones.reduce(
+            (highestOrdinal, plannedDayChallengeMilestone) => {
+                return Math.max(
+                    highestOrdinal,
+                    plannedDayChallengeMilestone.challengeMilestone?.milestone?.ordinal ?? 0
+                );
+            },
+            0
         );
+
+        const remainingChallengeMilestones = allChallengeMilestones.filter((challengeMilestone) => {
+            const isNotCurrentlyAchieved = !currentPlannedDayChallengeMilestones.some(
+                (currentPlannedDayMilestone) =>
+                    currentPlannedDayMilestone.challengeMilestoneId === challengeMilestone.id
+            );
+
+            const isHigherThanHighestOrdinal =
+                (challengeMilestone.milestone?.ordinal ?? 0) > highestOrdinalAchievedMilestone;
+
+            return isNotCurrentlyAchieved && isHigherThanHighestOrdinal;
+        });
 
         return remainingChallengeMilestones;
     }

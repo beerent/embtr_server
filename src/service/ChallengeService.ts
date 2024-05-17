@@ -242,13 +242,13 @@ export class ChallengeService {
                 await ChallengeParticipantDao.update(participant);
 
                 // dipatch events
-                if (participant.amountComplete !== previousAmountComplete) {
-                    this.dispatchChallengeParticipationStateChange(
-                        context,
-                        plannedTask,
-                        participant
-                    );
-                }
+                this.dispatchChallengeParticipationStateChange(
+                    context,
+                    plannedTask,
+                    participant,
+                    participant.amountComplete ?? 0,
+                    previousAmountComplete ?? 0
+                );
 
                 if (participant.challengeRequirementCompletionState !== previousCompletionState) {
                     this.dispatchChallengeStateChange(
@@ -271,13 +271,25 @@ export class ChallengeService {
     private static dispatchChallengeParticipationStateChange(
         context: Context,
         plannedTask: PlannedTask,
-        participant: ChallengeParticipant
+        participant: ChallengeParticipant,
+        currentAmountComplete: number,
+        previousAmountComplete: number
     ) {
-        ChallengeParticipantEventDispatcher.onUpdated(
-            context,
-            plannedTask.plannedDayId ?? 0,
-            participant.id ?? 0
-        );
+        if (currentAmountComplete > previousAmountComplete) {
+            ChallengeParticipantEventDispatcher.onProgressIncreased(
+                context,
+                plannedTask.plannedDayId ?? 0,
+                participant.id ?? 0
+            );
+        }
+
+        if (currentAmountComplete < previousAmountComplete) {
+            ChallengeParticipantEventDispatcher.onProgressDecreased(
+                context,
+                plannedTask.plannedDayId ?? 0,
+                participant.id ?? 0
+            );
+        }
     }
 
     private static dispatchChallengeStateChange(
@@ -486,6 +498,7 @@ export class ChallengeService {
                             username: comment.user?.username ?? '',
                             displayName: comment.user?.displayName ?? '',
                             photoUrl: comment.user?.photoUrl ?? '',
+                            roles: comment.user?.roles ?? [],
                         },
                     };
                 }) ?? [],

@@ -1,4 +1,4 @@
-import { ChallengeParticipant } from '../../schema';
+import { ChallengeParticipant, Role } from '../../schema';
 
 interface ChallengeUser {
     id: number;
@@ -6,6 +6,7 @@ interface ChallengeUser {
     username: string;
     displayName: string;
     photoUrl: string;
+    roles: Role[];
 }
 
 interface ChallengeComment {

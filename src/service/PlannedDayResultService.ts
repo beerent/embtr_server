@@ -268,8 +268,8 @@ export class PlannedDayResultService {
 
         milestones?.sort(
             (a, b) =>
-                (a.challengeMilestone?.milestone?.ordinal ?? 0) -
-                (b.challengeMilestone?.milestone?.ordinal ?? 0)
+                (b.challengeMilestone?.milestone?.ordinal ?? 0) -
+                (a.challengeMilestone?.milestone?.ordinal ?? 0)
         );
 
         const firstMilestone = milestones?.[0];
@@ -284,8 +284,13 @@ export class PlannedDayResultService {
             firstMilestone?.challengeMilestone?.challenge?.name ?? ''
         );
 
+        const firstRequirement =
+            firstMilestone?.challengeMilestone?.challenge?.challengeRequirements?.[0];
+
         const attribute: PlannedDayAttribute = {
             body: description,
+            remoteImageUrl: firstRequirement?.task?.remoteImageUrl,
+            localImage: firstRequirement?.task?.localImage,
             ionicon: {
                 name: 'flash',
                 color: '#FF6712',

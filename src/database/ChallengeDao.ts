@@ -34,7 +34,11 @@ export class ChallengeDao {
                         active: true,
                     },
                     include: {
-                        user: true,
+                        user: {
+                            include: {
+                                roles: true,
+                            },
+                        },
                     },
                 },
             },

@@ -77,7 +77,8 @@ export namespace Event {
     }
 
     export namespace ChallengeParticipant {
-        export const Updated = 'CHALLENGE_PARTICIPANT_UPDATED';
+        export const ProgressIncreased = 'CHALLENGE_PARTICIPANT_PROGRESS_INCREASED';
+        export const ProgressDecreased = 'CHALLENGE_PARTICIPANT_PROGRESS_DECREASED';
 
         export interface Event {
             context: Context;
