@@ -5,6 +5,7 @@ import {
     CreateUserPostResponse,
     GetAllUserPostResponse,
     GetUserPostResponse,
+    GetUserPostsCountResponse,
     UpdateUserPostRequest,
 } from '@resources/types/requests/UserPostTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
@@ -67,6 +68,21 @@ userPostRouterLatest.get(
         res.json(response);
     })
 );
+
+userPostRouterLatest.get(
+    '/stats',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const userPosts = await UserPostService.count(context);
+        const response: GetUserPostsCountResponse = { ...SUCCESS, userPosts };
+        res.json(response);
+    })
+);
+
 
 userPostRouterLatest.get(
     '/:id',

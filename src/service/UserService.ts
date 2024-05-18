@@ -37,8 +37,8 @@ export class UserService {
         return this.getByUid(uid);
     }
 
-    public static async getAll(context: Context): Promise<User[]> {
-        const users = await UserDao.getAll();
+    public static async getAll(context: Context, query?: Record<string, string>): Promise<User[]> {
+        const users = await UserDao.getAll(query);
         const userModels: User[] = ModelConverter.convertAll(users);
 
         return userModels;

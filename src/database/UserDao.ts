@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
 import { Constants } from '@resources/types/constants/constants';
@@ -61,8 +61,19 @@ export class UserDao {
         return user;
     }
 
-    public static async getAll(): Promise<User[]> {
-        const users = await prisma.user.findMany();
+    public static async getAll(query?: Record<string, string>): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            ...(query?.limit && {
+               take: Number(query.limit)
+            }),
+            ...(query?.sort && {
+               orderBy: [
+                  {
+                    createdAt: query.sort as Prisma.SortOrder
+                  }
+               ]
+            })
+        });
         return users;
     }
 

@@ -41,8 +41,8 @@ export class UserPostService {
         return { ...SUCCESS, userPosts: convertedUserPostModels };
     }
 
-    public static async count(context: Context): Promise<number> {
-        return await UserPostDao.count(context.userId);
+    public static async count(): Promise<number> {
+        return await UserPostDao.allPostsCout();
     }
 
     public static async getAllByIds(context: Context, ids: number[]): Promise<UserPost[]> {

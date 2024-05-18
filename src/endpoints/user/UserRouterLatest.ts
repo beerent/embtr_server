@@ -79,8 +79,10 @@ userRouterLatest.get(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
+        const query = req.query as Record<string, string>
+        console.log(query)
 
-        const users: User[] = await UserService.getAll(context)
+        const users: User[] = await UserService.getAll(context, query)
         const response: GetUsersResponse = { ...SUCCESS, users };
         res.json(response);
     })
