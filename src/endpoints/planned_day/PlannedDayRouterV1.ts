@@ -10,7 +10,6 @@ import { ContextService } from '@src/service/ContextService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetPlannedDayResponse } from '@resources/types/requests/PlannedDayTypes';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
-import { PlannedDayService } from '@src/service/PlannedDayService';
 import {
     CreatePlannedTaskResponse,
     UpdatePlannedTaskRequest,
@@ -20,6 +19,7 @@ import { PlannedHabitService } from '@src/service/PlannedHabitService';
 import { PlannedTask } from '@resources/schema';
 import { PlannedDayTransformationServiceV1 } from '@src/transform/PlannedDayTransformationService';
 import { PlannedHabitTransformationServiceV1 } from '@src/transform/PlannedHabitTransformationService';
+import { PlannedDayController } from '@src/controller/PlannedDayController';
 
 const plannedDayRouterV1 = express.Router();
 const v = 'v1';
@@ -100,7 +100,7 @@ plannedDayRouterV1.get(
         const userId = Number(req.params.userId);
         const dayKey = req.params.dayKey;
 
-        const plannedDay = await PlannedDayService.getByUser(context, userId, dayKey);
+        const plannedDay = await PlannedDayController.getByUser(context, userId, dayKey);
         const transformedPlannedDay = plannedDayTransformationService.transformOut(plannedDay);
         const response: GetPlannedDayResponse = { ...SUCCESS, plannedDay: transformedPlannedDay };
         res.json(response);

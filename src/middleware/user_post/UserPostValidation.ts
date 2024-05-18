@@ -4,7 +4,7 @@ import { INVALID_REQUEST } from '@src/common/RequestResponses';
 
 export const validatePost = (req: Request, res: Response, next: NextFunction) => {
     try {
-        z.object({ userPost: z.object({ title: z.string(), body: z.string() }) }).parse(req.body);
+        z.object({ userPost: z.object({ body: z.string() }) }).parse(req.body);
     } catch (error) {
         return res.status(INVALID_REQUEST.httpCode).json(INVALID_REQUEST);
     }

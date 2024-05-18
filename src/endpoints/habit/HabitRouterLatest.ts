@@ -27,7 +27,6 @@ import {
     GetHabitSummaryResponse,
 } from '@resources/types/requests/HabitTypes';
 import {
-    ArchiveScheduledHabitRequest,
     CreateScheduledHabitRequest,
     CreateScheduledHabitResponse,
     GetScheduledHabitResponse,
@@ -195,10 +194,8 @@ habitRouterLatest.post(
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         const id = Number(req.params.id);
-        const request: ArchiveScheduledHabitRequest = req.body;
-        const date: PureDate = PureDate.fromObject(request.date);
 
-        await ScheduledHabitService.archive(context, id, date);
+        await ScheduledHabitService.archive(context, id);
         res.json(SUCCESS);
     })
 );

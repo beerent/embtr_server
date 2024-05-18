@@ -14,10 +14,14 @@ import { ImageDetectionService } from './ImageService';
 import { ImageDao } from '@src/database/ImageDao';
 import { BlockUserService } from './BlockUserService';
 import { ApiAlertsService } from './ApiAlertsService';
+import { PlannedDayAttribute, PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 
 export class PlannedDayResultService {
-    public static async create(context: Context, plannedDayId: number): Promise<PlannedDayResult> {
-        const plannedDay = await PlannedDayDao.get(plannedDayId);
+    public static async create(
+        context: Context,
+        plannedDayResult: PlannedDayResult
+    ): Promise<PlannedDayResult> {
+        const plannedDay = await PlannedDayDao.get(plannedDayResult.plannedDayId ?? 0);
         if (!plannedDay) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
@@ -26,12 +30,13 @@ export class PlannedDayResultService {
             throw new ServiceException(404, Code.FORBIDDEN, 'planned day does not belong to user');
         }
 
-        const plannedDayResult = await PlannedDayResultDao.create(
-            plannedDayId,
-            this.getRandomSuccessMessage()
+        const createdPlannedDayResult = await PlannedDayResultDao.create(
+            plannedDayResult.plannedDayId ?? 0,
+            plannedDayResult.description ?? '',
+            plannedDayResult.images ?? []
         );
 
-        if (!plannedDayResult) {
+        if (!createdPlannedDayResult) {
             throw new ServiceException(
                 500,
                 Code.PLANNED_DAY_RESULT_NOT_CREATED,
@@ -41,7 +46,8 @@ export class PlannedDayResultService {
 
         ApiAlertsService.sendAlert('new planned day result was created!');
 
-        const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        const plannedDayResultModel: PlannedDayResult =
+            ModelConverter.convert(createdPlannedDayResult);
         return plannedDayResultModel;
     }
 
@@ -127,7 +133,9 @@ export class PlannedDayResultService {
 
         const plannedDayResultsModels: PlannedDayResult[] =
             ModelConverter.convertAll(plannedDayResults);
-        return plannedDayResultsModels;
+        const plannedDayResultDtos: PlannedDayResultDto[] = plannedDayResultsModels;
+        this.addAttributes(plannedDayResultDtos);
+        return plannedDayResultDtos;
     }
 
     public static async getAllSummaries(
@@ -192,7 +200,7 @@ export class PlannedDayResultService {
         return summary;
     }
 
-    public static async getById(context: Context, id: number): Promise<PlannedDayResult> {
+    public static async getById(context: Context, id: number): Promise<PlannedDayResultDto> {
         const plannedDayResult = await PlannedDayResultDao.getById(id);
 
         if (!plannedDayResult) {
@@ -209,6 +217,9 @@ export class PlannedDayResultService {
         );
 
         const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        const plannedDayResultDto: PlannedDayResultDto = plannedDayResultModel;
+        this.addAttribute(plannedDayResultDto);
+
         return plannedDayResultModel;
     }
 
@@ -232,6 +243,61 @@ export class PlannedDayResultService {
 
     public static async count(context: Context): Promise<number> {
         return await PlannedDayResultDao.count(context.userId);
+    }
+
+    private static addAttributes(plannedDayResultDtos: PlannedDayResultDto[]): void {
+        plannedDayResultDtos.forEach((plannedDayResultDto) => {
+            this.addAttribute(plannedDayResultDto);
+        });
+    }
+
+    private static addAttribute(plannedDayResultDto: PlannedDayResultDto): void {
+        const plannedDayAttribute = this.getPlannedDayAttribute(plannedDayResultDto);
+        if (plannedDayAttribute) {
+            plannedDayResultDto.attribute = plannedDayAttribute;
+        }
+    }
+
+    private static getPlannedDayAttribute(
+        plannedDayResultDto: PlannedDayResultDto
+    ): PlannedDayAttribute | undefined {
+        const milestones = plannedDayResultDto.plannedDay?.plannedDayChallengeMilestones;
+        if (milestones?.length == 0) {
+            return undefined;
+        }
+
+        milestones?.sort(
+            (a, b) =>
+                (b.challengeMilestone?.milestone?.ordinal ?? 0) -
+                (a.challengeMilestone?.milestone?.ordinal ?? 0)
+        );
+
+        const firstMilestone = milestones?.[0];
+
+        let description = firstMilestone?.challengeMilestone?.milestone?.description ?? '';
+        description = description.replace(
+            '_USERNAME_',
+            plannedDayResultDto.plannedDay?.user?.username ?? ''
+        );
+        description = description.replace(
+            '_CHALLENGE_',
+            firstMilestone?.challengeMilestone?.challenge?.name ?? ''
+        );
+
+        const firstRequirement =
+            firstMilestone?.challengeMilestone?.challenge?.challengeRequirements?.[0];
+
+        const attribute: PlannedDayAttribute = {
+            body: description,
+            remoteImageUrl: firstRequirement?.task?.remoteImageUrl,
+            localImage: firstRequirement?.task?.localImage,
+            ionicon: {
+                name: 'flash',
+                color: '#FF6712',
+            },
+        };
+
+        return attribute;
     }
 
     private static getCompletedHabits(plannedDayResult: PlannedDayResultType): CompletedHabit[] {
@@ -282,32 +348,5 @@ export class PlannedDayResultService {
         });
 
         return completedHabits;
-    }
-
-    private static getRandomSuccessMessage(): string {
-        const variations = [
-            'Day conquered! Congrats!',
-            'Tasks nailed! Bravo!',
-            'Success! Well done!',
-            'All done! Congrats!',
-            'Daily goals crushed!',
-            'You did it! Kudos!',
-            'Productive day! Congrats!',
-            'Champion of the day!',
-            'Taskmaster! Congrats!',
-            'Victory achieved!',
-            'Goal slayer! Congrats!',
-            'Great job today!',
-            "Day's triumph! Congrats!",
-            'Mission complete!',
-            'Tasks tackled! Bravo!',
-            'Awesome work! Congrats!',
-            'Winning day! Well done!',
-            'Efficiency unlocked!',
-            'Task wizard! Congrats!',
-            'Daily success! Bravo!',
-        ];
-
-        return variations[Math.floor(Math.random() * variations.length)];
     }
 }

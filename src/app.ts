@@ -27,6 +27,10 @@ import newUserRouter from './endpoints/new_user/NewUserRouter';
 import jobRouter from './endpoints/job/JobRouter';
 import challengeRouter from './endpoints/challenge/ChallengeRouter';
 
+//  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
+//
+//  - definitelynot_chad - 2024-04-12
+
 const cors = require('cors');
 const app = express();
 

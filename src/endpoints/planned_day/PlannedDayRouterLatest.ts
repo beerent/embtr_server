@@ -25,6 +25,7 @@ import {
     UpdatePlannedTaskResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
+import { PlannedDayController } from '@src/controller/PlannedDayController';
 
 const plannedDayRouterLatest = express.Router();
 const v = '✓';
@@ -56,7 +57,7 @@ plannedDayRouterLatest.get(
         const userId = Number(req.params.userId);
         const dayKey = req.params.dayKey;
 
-        const plannedDay = await PlannedDayService.getByUser(context, userId, dayKey);
+        const plannedDay = await PlannedDayController.getByUser(context, userId, dayKey);
         const response: GetPlannedDayResponse = { ...SUCCESS, plannedDay };
         res.json(response);
     })

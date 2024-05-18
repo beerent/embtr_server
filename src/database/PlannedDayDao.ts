@@ -11,7 +11,15 @@ export const PlannedDayGetInclude = {
     user: true,
     plannedTasks: {
         include: {
-            scheduledHabit: true,
+            scheduledHabit: {
+                include: {
+                    task: {
+                        select: {
+                            type: true,
+                        },
+                    },
+                },
+            },
             plannedDay: true,
             unit: true,
             timeOfDay: true,

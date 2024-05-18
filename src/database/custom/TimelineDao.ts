@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 export interface TimelineQueryData {
     userPostIds: number[];
     plannedDayResultIds: number[];
+    challengeIds: number[];
 }
 
 interface QueryResults {
@@ -91,16 +92,24 @@ export class TimelineDao {
     public static async getByDateAndLimit(date: Date, limit: number): Promise<TimelineQueryData> {
         const result: QueryResults[] = await prisma.$queryRaw(
             Prisma.sql`
-                SELECT id, 'PLANNED_DAY_RESULT' AS source, createdAt
+                SELECT id, 'PLANNED_DAY_RESULT' AS source, createdAt as sortDate
                 FROM planned_day_result
                 WHERE createdAt < ${date}
                   AND active = true
                 UNION ALL
-                SELECT id, 'USER_POST' AS source, createdAt
+
+                SELECT id, 'USER_POST' AS source, createdAt as sortDate
                 FROM user_post
                 WHERE createdAt < ${date}
                   AND active = true
-                ORDER BY createdAt DESC LIMIT ${limit}`
+                UNION ALL
+
+                SELECT id, 'RECENTLY_JOINED_CHALLENGE' AS source, timelineTimestamp as sortDate
+                FROM challenge
+                WHERE timelineTimestamp < ${date}
+                  AND active = true
+
+                ORDER BY sortDate DESC LIMIT ${limit}`
         );
         const results = this.buildResults(result);
         return results;
@@ -109,18 +118,22 @@ export class TimelineDao {
     private static buildResults = (queryResults: QueryResults[]) => {
         const userPostIds: number[] = [];
         const plannedDayResultIds: number[] = [];
+        const challengeIds: number[] = [];
 
         for (const queryResult of queryResults) {
             if (queryResult.source === TimelineElementType.PLANNED_DAY_RESULT) {
                 plannedDayResultIds.push(queryResult.id);
-            } else {
+            } else if (queryResult.source === TimelineElementType.USER_POST) {
                 userPostIds.push(queryResult.id);
+            } else if (queryResult.source === TimelineElementType.RECENTLY_JOINED_CHALLENGE) {
+                challengeIds.push(queryResult.id);
             }
         }
 
         return {
             userPostIds,
             plannedDayResultIds,
+            challengeIds,
         };
     };
 }

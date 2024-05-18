@@ -3,8 +3,6 @@ import { ReminderService } from './feature/ReminderService';
 import { UserService } from './UserService';
 
 export class JobService {
-    public static async dailyReminders(): Promise<void> { }
-
     public static async sendDailyReminders(context: Context): Promise<void> {
         await ReminderService.sendDailyReminders(context);
     }

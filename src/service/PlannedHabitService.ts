@@ -104,9 +104,6 @@ export class PlannedHabitService {
         PlannedHabitEventDispatcher.onUpdated(context, existingPlannedTask.id);
 
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
-        // const completedChallenges =
-        //     await ChallengeService.updateChallengeRequirementProgress(updatedPlannedTaskModel);
-
         return updatedPlannedTaskModel;
     }
 
@@ -133,6 +130,11 @@ export class PlannedHabitService {
 
     public static async hasCompleted(context: Context): Promise<boolean> {
         return await PlannedHabitDao.completedExists(context.userId);
+    }
+
+    public static async archive(context: Context, plannedTask: PlannedTask): Promise<void> {
+        plannedTask.active = false;
+        await this.update(context, plannedTask);
     }
 
     private static getUpdatedStatus(plannedTask: PlannedTask): string {

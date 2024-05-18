@@ -1,8 +1,5 @@
 import express from 'express';
-import {
-    GetChallengeParticipationResponse,
-    GetChallengesResponse,
-} from '@resources/types/requests/ChallengeTypes';
+import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryTypes';
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
@@ -25,7 +22,7 @@ import { HabitJourneyService } from '@src/service/HabitJourneyService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
 import { UserPostService } from '@src/service/UserPostService';
 import { ContextService } from '@src/service/ContextService';
-import { User } from '@resources/schema';
+import { ChallengeParticipant, User } from '@resources/schema';
 import { UserService } from '@src/service/UserService';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
@@ -39,6 +36,7 @@ import { TimelineService } from '@src/service/TimelineService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
 import userPropertyRouterLatest from './UserPropertyRouterLatest';
+import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -240,7 +238,9 @@ userRouterLatest.get(
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        const response = await UserPostService.getAllForUser(userId);
+        const userPosts = await UserPostService.getAllForUser(userId);
+
+        const response: GetAllUserPostResponse = { ...SUCCESS, userPosts };
         res.status(response.httpCode).json(response);
     })
 );
@@ -362,9 +362,15 @@ userRouterLatest.get(
     authorize,
     validateGetUserData,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const userId = Number(req.params.userId);
-        const response: GetChallengeParticipationResponse =
-            await ChallengeService.getActiveChallengeParticipationForUser(userId);
+
+        const participation: ChallengeParticipant[] =
+            await ChallengeService.getActiveChallengeParticipationForUser(context, userId);
+        const response: GetChallengeParticipationResponse = {
+            ...SUCCESS,
+            challengeParticipation: participation,
+        };
 
         res.status(response.httpCode).json(response);
     })
@@ -393,8 +399,12 @@ userRouterLatest.get(
     validateGetUserData,
     runEndpoint(async (req, res) => {
         const userId = Number(req.params.userId);
-        const response: GetChallengesResponse =
-            await ChallengeService.getCompletedChallengesForUser(userId);
+        const challengeParticipation = await ChallengeService.getCompletedChallengesForUser(userId);
+
+        const response: GetChallengeParticipationResponse = {
+            ...SUCCESS,
+            challengeParticipation,
+        };
 
         res.status(response.httpCode).json(response);
     })

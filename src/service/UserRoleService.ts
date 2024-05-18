@@ -6,7 +6,7 @@ import { Role } from '@src/roles/Roles';
 
 export class UserRoleService {
     public static async addUserRole(context: Context | NewUserContext, email: string, role: Role) {
-        this.addUserRoles(context, email, [role]);
+        await this.addUserRoles(context, email, [role]);
     }
 
     public static async addUserRoles(
@@ -50,7 +50,7 @@ export class UserRoleService {
     }
 
     public static async removeUserRole(context: Context, email: string, role: Role) {
-        this.removeUserRoles(context, email, [role]);
+        await this.removeUserRoles(context, email, [role]);
     }
 
     public static async removeUserRoles(context: Context, email: string, roles: Role[]) {

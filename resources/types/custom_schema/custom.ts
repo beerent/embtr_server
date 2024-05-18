@@ -1,11 +1,12 @@
-export interface ChallengeCompletionData {
-  amountComplete: number;
-  amountRequired: number;
-  percentComplete: number;
-  challengeRequirementCompletionState: ChallengeRequirementCompletionState;
-}
-
-export interface JoinedChallenge {
-  challenge: Challenge;
-  participants: ChallengeParticipant[];
+export interface ChallengeCustom {
+    challengeRewards?: {
+        id?: number;
+        name?: string;
+        description?: string;
+        remoteImageUrl?: string;
+        localImage?: string;
+        active?: boolean;
+        createdAt?: Date;
+        updatedAt?: Date;
+    }[];
 }

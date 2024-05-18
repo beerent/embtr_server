@@ -13,6 +13,10 @@ import { HabitStreakService } from './service/HabitStreakService';
 import { ReminderService } from './service/feature/ReminderService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './service/UserPropertyService';
+import { UserDao } from './database/UserDao';
+import { UserAwardService } from './service/UserAwardService';
+import { User } from '@resources/schema';
+import { DayKeyUtility } from './utility/date/DayKeyUtility';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -22,6 +26,22 @@ const adminContext: Context = {
     userEmail: 'bnren',
     userRoles: [],
     dayKey: '04-04-2021',
+    timeZone: 'America/New_York',
+    dateTime: new Date(),
+};
+
+const impersonateContext = (user: User): Context => {
+    const context: Context = {
+        userId: user.id || 0,
+        userUid: user.uid || '',
+        userEmail: user.email || '',
+        userRoles: [],
+        dayKey: DayKeyUtility.getTodayKey(),
+        timeZone: 'America/New_York',
+        dateTime: new Date(),
+    };
+
+    return context;
 };
 
 const handleCommandGetProperties = async (username: string) => {
@@ -35,13 +55,17 @@ const handleCommandGetProperties = async (username: string) => {
     const propertyStrings = properties.map((property) => {
         return `${property.key}: ${property.value}`;
     });
-
-    console.log(propertyStrings);
 };
 
 const handleCommandGetRoles = async (email: string) => {
     try {
-        const roles = await UserRoleService.getRoles(email);
+        const user = await UserDao.getByUsername(email);
+        if (!user?.id) {
+            console.log('user not found');
+            return;
+        }
+
+        const roles = await UserRoleService.getRoles(user.email);
         console.log(roles);
     } catch (error) {
         console.log('[]');
@@ -131,10 +155,10 @@ const handleRevokeToken = async (email: string) => {
     } catch (error) { }
 };
 
-const handleCommandIsPremium = async (email: string) => {
+const handleCommandIsPremium = async (username: string) => {
     try {
-        const user = await UserService.getByEmail(email);
-        if (!user.uid) {
+        const user = await UserService.getByUsername(username);
+        if (!user?.uid) {
             console.log('user not found');
             return;
         }
@@ -159,16 +183,6 @@ const handleCommandUpdateAllPlannedDayStatusesForAllUsers = async () => {
 
         await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
     }
-};
-
-const handleCommandUpdateMissingPlannedDayStatusesForUser = async (email: string) => {
-    const user = await UserService.getByUsername(email);
-    if (!user?.id) {
-        console.log('user not found');
-        return;
-    }
-
-    await PlannedDayService.backPopulateCompletionStatuses(adminContext, user.id);
 };
 
 const handleCommandUpdateAllPlannedDayStatusesForUser = async (email: string) => {
@@ -208,6 +222,73 @@ const handleCommandUpdateAllUserStreaks = async () => {
     }
 };
 
+const handleCommandSendUserDailyReminders = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserDailyReminder(adminContext, user);
+};
+
+const handleCommandSendUserPeriodicReminders = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserPeriodicReminder(adminContext, user);
+};
+
+const handleCommandSendUserDailyWarnings = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserDailyWarning(adminContext, user);
+};
+
+const handleCommandSendUserPeriodicWarnings = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await ReminderService.sendUserPeriodicWarning(adminContext, user);
+};
+
+const handleCommandUpdateAllAwardsForAllUsers = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+    for (const user of users) {
+        if (!user.id) {
+            continue;
+        }
+
+        count++;
+        console.log('updating (', count, '/', users.length, ')');
+
+        const context: Context = impersonateContext(user);
+        await UserAwardService.refreshAwardsFromChallenges(context);
+    }
+};
+
+const handleCommandUpdateAllAwardsForUser = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    const context: Context = impersonateContext(user);
+    await UserAwardService.refreshAwardsFromChallenges(context);
+};
+
 const handleCommandSendDailyReminders = async () => {
     await ReminderService.sendDailyReminders(adminContext);
 };
@@ -225,51 +306,130 @@ const handleCommandSendPeriodicWarnings = async () => {
 };
 
 const handleCommandSetDefaultSocialNotificationsSettingsForAllUsers = async () => {
-    const users = await UserService.getUsersWithoutProperty(adminContext, Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING);
+    const users = await UserService.getUsersWithoutProperty(
+        adminContext,
+        Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING
+    );
 
     for (const user of users) {
         if (user.id) {
             console.log('setting social notifications for user', user.id);
-            UserPropertyService.setSocialNotification(adminContext, user.id, Constants.SocialNotificationSetting.ENABLED);
+            UserPropertyService.setSocialNotification(
+                adminContext,
+                user.id,
+                Constants.SocialNotificationSetting.ENABLED
+            );
         }
     }
-}
+};
 
 const handleCommandSetDefaultReminderNotificationsSettingsForAllUsers = async () => {
-    const users = await UserService.getUsersWithoutProperty(adminContext, Constants.UserPropertyKey.REMINDER_NOTIFICATIONS_SETTING);
+    const users = await UserService.getUsersWithoutProperty(
+        adminContext,
+        Constants.UserPropertyKey.REMINDER_NOTIFICATIONS_SETTING
+    );
 
     for (const user of users) {
         if (user.id) {
             console.log('setting reminder notifications for user', user.id);
             const isPremium = await UserService.isPremium(adminContext, user.id);
             if (isPremium) {
-                UserPropertyService.setReminderNotification(adminContext, user.id, Constants.ReminderNotificationSetting.PERIODICALLY);
+                UserPropertyService.setReminderNotification(
+                    adminContext,
+                    user.id,
+                    Constants.ReminderNotificationSetting.PERIODICALLY
+                );
             } else {
-                UserPropertyService.setReminderNotification(adminContext, user.id, Constants.ReminderNotificationSetting.DAILY);
+                UserPropertyService.setReminderNotification(
+                    adminContext,
+                    user.id,
+                    Constants.ReminderNotificationSetting.DAILY
+                );
             }
         }
     }
-}
+};
 
 const handleCommandSetDefaultWarmingNotificationsSettingsForAllUsers = async () => {
-    const users = await UserService.getUsersWithoutProperty(adminContext, Constants.UserPropertyKey.WARNING_NOTIFICATIONS_SETTING);
+    const users = await UserService.getUsersWithoutProperty(
+        adminContext,
+        Constants.UserPropertyKey.WARNING_NOTIFICATIONS_SETTING
+    );
 
     for (const user of users) {
         if (user.id) {
             console.log('setting warning notifications for user', user.id);
             const isPremium = await UserService.isPremium(adminContext, user.id);
             if (isPremium) {
-                UserPropertyService.setWarningNotification(adminContext, user.id, Constants.WarningNotificationSetting.PERIODICALLY);
+                UserPropertyService.setWarningNotification(
+                    adminContext,
+                    user.id,
+                    Constants.WarningNotificationSetting.PERIODICALLY
+                );
             } else {
-                UserPropertyService.setWarningNotification(adminContext, user.id, Constants.WarningNotificationSetting.DISABLED);
+                UserPropertyService.setWarningNotification(
+                    adminContext,
+                    user.id,
+                    Constants.WarningNotificationSetting.DISABLED
+                );
             }
         }
     }
-}
+};
 
 const handleCommandRefreshPremiumUsers = async () => {
     await UserService.refreshPremiumUsers(adminContext);
-}
+};
+
+const handleCommandRefreshPremiumUser = async (username: string) => {
+    const user = await UserDao.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await UserService.updatePremiumStatus(adminContext, user.uid);
+};
+
+const handleAddPremiumRole = async (username: string) => {
+    const user = await UserDao.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await UserRoleService.addUserRole(adminContext, user.email, Role.PREMIUM);
+};
+
+const handleRemovePremiumRole = async (username: string) => {
+    const user = await UserDao.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await UserRoleService.removeUserRole(adminContext, user.email, Role.PREMIUM);
+};
+
+const handleAddFreeRole = async (username: string) => {
+    const user = await UserDao.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await UserRoleService.addUserRole(adminContext, user.email, Role.FREE);
+};
+
+const handleRemoveFreeRole = async (username: string) => {
+    const user = await UserDao.getByEmail(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    await UserRoleService.removeUserRole(adminContext, user.email, Role.FREE);
+};
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -311,18 +471,19 @@ const processCommand = async (command: string) => {
             break;
 
         case 'addPremiumRole':
-            await UserRoleService.addUserRole(adminContext, email, Role.PREMIUM);
+            await handleAddPremiumRole(email);
             break;
+
         case 'removePremiumRole':
-            await UserRoleService.removeUserRole(adminContext, email, Role.PREMIUM);
+            await handleRemovePremiumRole(email);
             break;
 
         case 'addFreeRole':
-            await UserRoleService.addUserRole(adminContext, email, Role.FREE);
+            await handleAddFreeRole(email);
             break;
 
         case 'removeFreeRole':
-            await UserRoleService.removeUserRole(adminContext, email, Role.FREE);
+            await handleRemoveFreeRole(email);
             break;
 
         case 'removeUserRole':
@@ -369,10 +530,6 @@ const processCommand = async (command: string) => {
             await handleCommandUpdateAllPlannedDayStatusesForUser(email);
             break;
 
-        case 'updateUserMissingPlannedDayStatuses':
-            await handleCommandUpdateAllPlannedDayStatusesForUser(email);
-            break;
-
         case 'updateUserStreaks':
             await handleCommandUpdateUserStreaks(email);
             break;
@@ -397,6 +554,22 @@ const processCommand = async (command: string) => {
             handleCommandSendPeriodicWarnings();
             break;
 
+        case 'sendUserDailyReminders':
+            await handleCommandSendUserDailyReminders(email);
+            break;
+
+        case 'sendUserPeriodicReminders':
+            await handleCommandSendUserPeriodicReminders(email);
+            break;
+
+        case 'sendUserDailyWarnings':
+            await handleCommandSendUserDailyWarnings(email);
+            break;
+
+        case 'sendUserPeriodicWarnings':
+            await handleCommandSendUserPeriodicWarnings(email);
+            break;
+
         case 'setDefaultSocial':
             handleCommandSetDefaultSocialNotificationsSettingsForAllUsers();
             break;
@@ -411,6 +584,18 @@ const processCommand = async (command: string) => {
 
         case 'refreshPremiumUsers':
             handleCommandRefreshPremiumUsers();
+            break;
+
+        case 'refreshPremiumUser':
+            await handleCommandRefreshPremiumUser(email);
+            break;
+
+        case 'updateAllAwardsForAllUsers':
+            await handleCommandUpdateAllAwardsForAllUsers();
+            break;
+
+        case 'updateAllAwardsForUser':
+            await handleCommandUpdateAllAwardsForUser(email);
             break;
 
         default:

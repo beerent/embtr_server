@@ -32,8 +32,8 @@ model User {
     widgets                Widget[]
     quoteOfTheDay          QuoteOfTheDay[]
     challenges             Challenge[]
-    ChallengeParticipant   ChallengeParticipant[]
-    userAchievements       UserAchievement[]
+    challengeParticipant   ChallengeParticipant[]
+    userAwards             UserAward[]
     tasks                  Task[]
     scheduledHabits        ScheduledHabit[]
     blockingUsers          BlockedUser[]           @relation("blockingUser")
@@ -73,21 +73,21 @@ model PushNotificationToken {
 }
 
 model Task {
-    id                   Int                    @id @default(autoincrement())
-    title                String                 @db.VarChar(255)
-    description          String?                @db.VarChar(255)
-    remoteImageUrl       String?                @db.VarChar(255)
-    localImage           String?                @db.VarChar(255)
-    userId               Int?                   @db.Int
-    user                 User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-    habitCategoryId      Int?                   @db.Int
-    habitCategory        HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
-    type                 String                 @default("DEFAULT")
-    active               Boolean                @default(true)
-    createdAt            DateTime               @default(now())
-    updatedAt            DateTime               @default(now()) @updatedAt
-    ChallengeRequirement ChallengeRequirement[]
-    scheduledHabits      ScheduledHabit[]
+    id                    Int                    @id @default(autoincrement())
+    title                 String                 @db.VarChar(255)
+    description           String?                @db.VarChar(255)
+    remoteImageUrl        String?                @db.VarChar(255)
+    localImage            String?                @db.VarChar(255)
+    userId                Int?                   @db.Int
+    user                  User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+    habitCategoryId       Int?                   @db.Int
+    habitCategory         HabitCategory?         @relation(fields: [habitCategoryId], references: [id])
+    type                  String                 @default("DEFAULT")
+    active                Boolean                @default(true)
+    createdAt             DateTime               @default(now())
+    updatedAt             DateTime               @default(now()) @updatedAt
+    challengeRequirements ChallengeRequirement[]
+    scheduledHabits       ScheduledHabit[]
 
     @@index([userId], name: "user_id")
     @@index([habitCategoryId], name: "habit_category_id")
@@ -95,17 +95,18 @@ model Task {
 }
 
 model PlannedDay {
-    id                   Int                    @id @default(autoincrement())
-    user                 User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId               Int                    @db.Int
-    dayKey               String                 @db.VarChar(10)
-    date                 DateTime               @db.Date
-    status               String?                @db.VarChar(225)
-    createdAt            DateTime               @default(now())
-    updatedAt            DateTime               @default(now()) @updatedAt
-    plannedTasks         PlannedTask[]
-    plannedDayResults    PlannedDayResult[]
-    challengeParticipant ChallengeParticipant[]
+    id                            Int                            @id @default(autoincrement())
+    user                          User                           @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId                        Int                            @db.Int
+    dayKey                        String                         @db.VarChar(10)
+    date                          DateTime                       @db.Date
+    status                        String?                        @db.VarChar(225)
+    createdAt                     DateTime                       @default(now())
+    updatedAt                     DateTime                       @default(now()) @updatedAt
+    plannedTasks                  PlannedTask[]
+    plannedDayResults             PlannedDayResult[]
+    challengeParticipant          ChallengeParticipant[]
+    plannedDayChallengeMilestones PlannedDayChallengeMilestone[]
 
     @@unique([userId, dayKey], name: "unique_user_daykey")
     @@map("planned_day")
@@ -167,7 +168,7 @@ model PlannedDayResult {
     plannedDay   PlannedDay @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
     active       Boolean    @default(true)
     title        String?    @db.VarChar(255)
-    description  String?    @db.VarChar(255)
+    description  String?    @db.VarChar(750)
     createdAt    DateTime   @default(now())
     updatedAt    DateTime   @default(now()) @updatedAt
     images       Image[]
@@ -176,6 +177,58 @@ model PlannedDayResult {
 
     @@index([plannedDayId])
     @@map("planned_day_result")
+}
+
+model Milestone {
+    id                    Int                    @id @default(autoincrement())
+    key                   String                 @unique @db.VarChar(255)
+    description           String?                @db.VarChar(255)
+    localImage            String?                @db.VarChar(255)
+    metric                Int                    @db.Int
+    ordinal               Int                    @db.Int
+    remoteImageUrl        String?                @db.VarChar(255)
+    active                Boolean                @default(true)
+    createdAt             DateTime               @default(now())
+    updatedAt             DateTime               @default(now()) @updatedAt
+    challengeRequirements ChallengeRequirement[]
+    challengeMilestones   ChallengeMilestone[]
+
+    @@map("milestone")
+}
+
+model ChallengeMilestone {
+    id                            Int                            @id @default(autoincrement())
+    challengeId                   Int                            @db.Int
+    challenge                     Challenge                      @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+    milestoneId                   Int                            @db.Int
+    milestone                     Milestone                      @relation(fields: [milestoneId], references: [id], onDelete: Cascade)
+    active                        Boolean                        @default(true)
+    createdAt                     DateTime                       @default(now())
+    updatedAt                     DateTime                       @default(now()) @updatedAt
+    plannedDayChallengeMilestones PlannedDayChallengeMilestone[]
+
+    @@index([challengeId])
+    @@index([milestoneId])
+    @@map("challenge_milestone")
+}
+
+model PlannedDayChallengeMilestone {
+    id                     Int                  @id @default(autoincrement())
+    challengeMilestoneId   Int                  @db.Int
+    challengeMilestone     ChallengeMilestone   @relation(fields: [challengeMilestoneId], references: [id], onDelete: Cascade)
+    challengeParticipantId Int                  @db.Int
+    challengeParticipant   ChallengeParticipant @relation(fields: [challengeParticipantId], references: [id], onDelete: Cascade)
+    plannedDayId           Int                  @db.Int
+    plannedDay             PlannedDay           @relation(fields: [plannedDayId], references: [id], onDelete: Cascade)
+    active                 Boolean              @default(true)
+    createdAt              DateTime             @default(now())
+    updatedAt              DateTime             @default(now()) @updatedAt
+
+    @@unique([challengeMilestoneId, challengeParticipantId], name: "unique_challenge_milestone_participant")
+    @@index([challengeMilestoneId])
+    @@index([plannedDayId])
+    @@index([challengeParticipantId])
+    @@map("planned_day_challenge_milestone")
 }
 
 model Comment {
@@ -318,9 +371,11 @@ model Challenge {
     creator               User                   @relation(fields: [creatorId], references: [id], onDelete: Cascade)
     creatorId             Int                    @db.Int
     challengeRequirements ChallengeRequirement[]
-    challengeRewards      ChallengeReward[]
+    awardId               Int?                   @db.Int
+    award                 Award?                 @relation(fields: [awardId], references: [id])
     start                 DateTime               @db.Date
     end                   DateTime               @db.Date
+    timelineTimestamp     DateTime               @default(now())
     active                Boolean                @default(true)
     images                Image[]
     likes                 Like[]
@@ -328,8 +383,10 @@ model Challenge {
     createdAt             DateTime               @default(now())
     updatedAt             DateTime               @default(now()) @updatedAt
     challengeParticipants ChallengeParticipant[]
+    challengeMilestones   ChallengeMilestone[]
 
     @@index([creatorId])
+    @@index([awardId])
     @@map("challenge")
 }
 
@@ -350,34 +407,22 @@ model ChallengeRequirement {
     unit   Unit? @relation(fields: [unitId], references: [id], onDelete: Cascade)
     unitId Int?  @db.Int
 
-    calculationType          ChallengeCalculationType @default(INVALID)
-    calculationIntervalDays  Int?                     @db.Int
-    requiredIntervalQuantity Int?                     @db.Int
+    calculationType ChallengeCalculationType @default(INVALID)
+
+    calculationIntervalDays  Int? @db.Int
+    requiredIntervalQuantity Int? @db.Int
 
     requiredTaskQuantity Int? @db.Int
 
-    active    Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+    active     Boolean     @default(true)
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @default(now()) @updatedAt
+    milestones Milestone[]
 
     @@index([taskId])
     @@index([unitId])
     @@index([challengeId])
     @@map("challenge_requirement")
-}
-
-model ChallengeReward {
-    id             Int         @id @default(autoincrement())
-    name           String      @db.VarChar(255)
-    description    String?     @db.VarChar(255)
-    remoteImageUrl String?     @db.VarChar(255)
-    localImage     String?     @db.VarChar(255)
-    active         Boolean     @default(true)
-    challenge      Challenge[]
-    createdAt      DateTime    @default(now())
-    updatedAt      DateTime    @default(now()) @updatedAt
-
-    @@map("challenge_reward")
 }
 
 model ChallengeParticipant {
@@ -393,6 +438,7 @@ model ChallengeParticipant {
     active                              Boolean                             @default(true)
     createdAt                           DateTime                            @default(now())
     updatedAt                           DateTime                            @default(now()) @updatedAt
+    plannedDayChallengeMilestones       PlannedDayChallengeMilestone[]
 
     @@unique([userId, challengeId], name: "unique_challenge_participant")
     @@index([userId])
@@ -407,33 +453,35 @@ enum ChallengeRequirementCompletionState {
     COMPLETED
 }
 
-model Achievement {
-    id               Int               @id @default(autoincrement())
-    name             String            @db.VarChar(255)
-    remoteImageUrl   String?           @db.VarChar(255)
-    localImage       String?           @db.VarChar(255)
-    active           Boolean           @default(true)
-    createdAt        DateTime          @default(now())
-    updatedAt        DateTime          @default(now()) @updatedAt
-    userAchievements UserAchievement[]
+model Award {
+    id             Int         @id @default(autoincrement())
+    name           String      @db.VarChar(255)
+    description    String?     @db.VarChar(255)
+    remoteImageUrl String?     @db.VarChar(255)
+    localImage     String?     @db.VarChar(255)
+    active         Boolean     @default(true)
+    createdAt      DateTime    @default(now())
+    updatedAt      DateTime    @default(now()) @updatedAt
+    userAwards     UserAward[]
+    challenges     Challenge[]
 
-    @@map("achievement")
+    @@map("award")
 }
 
-model UserAchievement {
-    id            Int         @id @default(autoincrement())
-    user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-    userId        Int         @db.Int
-    achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-    achievementId Int         @db.Int
-    active        Boolean     @default(true)
-    createdAt     DateTime    @default(now())
-    updatedAt     DateTime    @default(now()) @updatedAt
+model UserAward {
+    id        Int      @id @default(autoincrement())
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId    Int      @db.Int
+    awardId   Int      @db.Int
+    award     Award    @relation(fields: [awardId], references: [id], onDelete: Cascade)
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-    @@unique([userId, achievementId], name: "unique_user_achievement")
+    @@unique([userId, awardId], name: "unique_user_award")
     @@index([userId])
-    @@index([achievementId])
-    @@map("user_achievement")
+    @@index([awardId])
+    @@map("user_award")
 }
 
 model Unit {

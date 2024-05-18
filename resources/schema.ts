@@ -22,8 +22,8 @@ export interface User {
   widgets?: Widget[];
   quoteOfTheDay?: QuoteOfTheDay[];
   challenges?: Challenge[];
-  ChallengeParticipant?: ChallengeParticipant[];
-  userAchievements?: UserAchievement[];
+  challengeParticipant?: ChallengeParticipant[];
+  userAwards?: UserAward[];
   tasks?: Task[];
   scheduledHabits?: ScheduledHabit[];
   blockingUsers?: BlockedUser[];
@@ -66,7 +66,7 @@ export interface Task {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  ChallengeRequirement?: ChallengeRequirement[];
+  challengeRequirements?: ChallengeRequirement[];
   scheduledHabits?: ScheduledHabit[];
 }
 
@@ -82,6 +82,7 @@ export interface PlannedDay {
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
   challengeParticipant?: ChallengeParticipant[];
+  plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
 }
 
 export interface PlannedTask {
@@ -134,6 +135,46 @@ export interface PlannedDayResult {
   images?: Image[];
   likes?: Like[];
   comments?: Comment[];
+}
+
+export interface Milestone {
+  id?: number;
+  key?: string;
+  description?: string;
+  localImage?: string;
+  metric?: number;
+  ordinal?: number;
+  remoteImageUrl?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  challengeRequirements?: ChallengeRequirement[];
+  challengeMilestones?: ChallengeMilestone[];
+}
+
+export interface ChallengeMilestone {
+  id?: number;
+  challengeId?: number;
+  challenge?: Challenge;
+  milestoneId?: number;
+  milestone?: Milestone;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
+}
+
+export interface PlannedDayChallengeMilestone {
+  id?: number;
+  challengeMilestoneId?: number;
+  challengeMilestone?: ChallengeMilestone;
+  challengeParticipantId?: number;
+  challengeParticipant?: ChallengeParticipant;
+  plannedDayId?: number;
+  plannedDay?: PlannedDay;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Comment {
@@ -225,16 +266,18 @@ export interface Season {
   updatedAt?: Date;
 }
 
-export interface Challenge {
+export interface Challenge extends ChallengeCustom {
   id?: number;
   name?: string;
   description?: string;
   creator?: User;
   creatorId?: number;
   challengeRequirements?: ChallengeRequirement[];
-  challengeRewards?: ChallengeReward[];
+  awardId?: number;
+  award?: Award;
   start?: Date;
   end?: Date;
+  timelineTimestamp?: Date;
   active?: boolean;
   images?: Image[];
   likes?: Like[];
@@ -242,6 +285,7 @@ export interface Challenge {
   createdAt?: Date;
   updatedAt?: Date;
   challengeParticipants?: ChallengeParticipant[];
+  challengeMilestones?: ChallengeMilestone[];
 }
 
 export interface ChallengeRequirement {
@@ -259,18 +303,7 @@ export interface ChallengeRequirement {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-}
-
-export interface ChallengeReward {
-  id?: number;
-  name?: string;
-  description?: string;
-  remoteImageUrl?: string;
-  localImage?: string;
-  active?: boolean;
-  challenge?: Challenge[];
-  createdAt?: Date;
-  updatedAt?: Date;
+  milestones?: Milestone[];
 }
 
 export interface ChallengeParticipant {
@@ -286,25 +319,28 @@ export interface ChallengeParticipant {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
 }
 
-export interface Achievement {
+export interface Award {
   id?: number;
   name?: string;
+  description?: string;
   remoteImageUrl?: string;
   localImage?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  userAchievements?: UserAchievement[];
+  userAwards?: UserAward[];
+  challenges?: Challenge[];
 }
 
-export interface UserAchievement {
+export interface UserAward {
   id?: number;
   user?: User;
   userId?: number;
-  achievement?: Achievement;
-  achievementId?: number;
+  awardId?: number;
+  award?: Award;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -441,14 +477,15 @@ export enum ChallengeRequirementCompletionState {
   COMPLETED = 'COMPLETED',
 }
 
-export interface ChallengeCompletionData {
-  amountComplete: number;
-  amountRequired: number;
-  percentComplete: number;
-  challengeRequirementCompletionState: ChallengeRequirementCompletionState;
-}
-
-export interface JoinedChallenge {
-  challenge: Challenge;
-  participants: ChallengeParticipant[];
+export interface ChallengeCustom {
+    challengeRewards?: {
+        id?: number;
+        name?: string;
+        description?: string;
+        remoteImageUrl?: string;
+        localImage?: string;
+        active?: boolean;
+        createdAt?: Date;
+        updatedAt?: Date;
+    }[];
 }

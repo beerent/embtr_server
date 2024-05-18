@@ -63,4 +63,27 @@ export namespace Event {
             targetId: number;
         }
     }
+
+    export namespace Challenge {
+        export const Joined = 'CHALLENGE_CREATED';
+        export const Left = 'CHALLENGE_LEFT';
+        export const Completed = 'CHALLENGE_COMPLETED';
+        export const Incompleted = 'CHALLENGE_INCOMPLETED';
+
+        export interface Event {
+            context: Context;
+            id: number;
+        }
+    }
+
+    export namespace ChallengeParticipant {
+        export const ProgressIncreased = 'CHALLENGE_PARTICIPANT_PROGRESS_INCREASED';
+        export const ProgressDecreased = 'CHALLENGE_PARTICIPANT_PROGRESS_DECREASED';
+
+        export interface Event {
+            context: Context;
+            plannedDayId: number;
+            id: number;
+        }
+    }
 }

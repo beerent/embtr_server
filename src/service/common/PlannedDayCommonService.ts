@@ -66,10 +66,15 @@ export class PlannedDayCommonService {
         const plannedDayDayOfWeek = plannedDayDate.getDay() + 1;
 
         // 1. reduce results to the day of the week we are on
-        const scheduledHabitsForDayOfWeek = scheduledHabits.filter(
-            (scheduledHabit) =>
-                scheduledHabit.daysOfWeek?.some((dayOfWeek) => dayOfWeek.id === plannedDayDayOfWeek)
-        );
+        const scheduledHabitsForDayOfWeek = scheduledHabits.filter((scheduledHabit) => {
+            if (scheduledHabit.daysOfWeekEnabled === false) {
+                return true;
+            }
+
+            return scheduledHabit.daysOfWeek?.some((dayOfWeek) => {
+                return dayOfWeek.id === plannedDayDayOfWeek;
+            });
+        });
 
         // 2. reduce results to the date range we are on
         const scheduledHabitsInDateRange = scheduledHabitsForDayOfWeek.filter((scheduledHabit) => {

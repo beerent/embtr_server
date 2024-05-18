@@ -6,6 +6,8 @@ export interface Context {
     userEmail: string;
     userRoles: Role[];
     dayKey: string;
+    timeZone: string;
+    dateTime: Date;
 }
 
 export interface NewUserContext {

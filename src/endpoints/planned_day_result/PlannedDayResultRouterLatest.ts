@@ -9,6 +9,7 @@ import {
     GetPlannedDayResultsResponse,
     UpdatePlannedDayResultRequest,
     UpdatePlannedDayResultResponse,
+    CreatePlannedDayResultRequest,
 } from '@resources/types/requests/PlannedDayResultTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { Context } from '@src/general/auth/Context';
@@ -139,10 +140,17 @@ plannedDayResultRouterLatest.post(
     validatePost,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const plannedDayId = Number(req.body.plannedDayId);
+        const request: CreatePlannedDayResultRequest = req.body;
+        const plannedDayResult = request.plannedDayResult;
 
-        const plannedDayResult = await PlannedDayResultService.create(context, plannedDayId);
-        const response: CreatePlannedDayResultResponse = { ...SUCCESS, plannedDayResult };
+        const createdPlannedDayResult = await PlannedDayResultService.create(
+            context,
+            plannedDayResult
+        );
+        const response: CreatePlannedDayResultResponse = {
+            ...SUCCESS,
+            plannedDayResult: createdPlannedDayResult,
+        };
         res.json(response);
     })
 );
@@ -182,7 +190,12 @@ plannedDayResultRouterLatest.post(
         const targetId = Number(req.params.id);
         const comment = req.body.comment;
 
-        const createdComment = await CommentService.create(context, interactable, targetId, comment);
+        const createdComment = await CommentService.create(
+            context,
+            interactable,
+            targetId,
+            comment
+        );
         const response = { ...SUCCESS, comment: createdComment };
         res.status(response.httpCode).json(response);
     })

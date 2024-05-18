@@ -1,9 +1,12 @@
-import { PlannedDayResult, UserPost } from "../../schema";
-import { Response } from "./RequestTypes";
+import { UserPost } from '../../schema';
+import { ChallengeRecentlyJoined } from '../dto/Challenge';
+import { PlannedDayResultDto } from '../dto/PlannedDay';
+import { Response } from './RequestTypes';
 
 export enum TimelineElementType {
   USER_POST = 'USER_POST',
-  PLANNED_DAY_RESULT = 'PLANNED_DAY_RESULT'
+  PLANNED_DAY_RESULT = 'PLANNED_DAY_RESULT',
+  RECENTLY_JOINED_CHALLENGE = 'RECENTLY_JOINED_CHALLENGE',
 }
 
 export interface TimelineRequestCursor {
@@ -12,29 +15,30 @@ export interface TimelineRequestCursor {
 }
 
 export interface TimelineElement {
-  type: TimelineElementType,
-  createdAt: Date,
-  userPost?: UserPost,
-  plannedDayResult?: PlannedDayResult
+  type: TimelineElementType;
+  createdAt: Date;
+  userPost?: UserPost;
+  plannedDayResult?: PlannedDayResultDto;
+  challengeRecentlyJoined?: ChallengeRecentlyJoined;
 }
 
 export interface TimelineData {
-  elements: TimelineElement[],
-  nextCursor?: TimelineRequestCursor
+  elements: TimelineElement[];
+  nextCursor?: TimelineRequestCursor;
 }
 
 export interface GetTimelineRequest {
-  cursor?: TimelineRequestCursor
+  cursor?: TimelineRequestCursor;
 }
 
 export interface GetTimelineResponse extends Response {
-  timelineData?: TimelineData
+  timelineData?: TimelineData;
 }
 
 export interface GetTimelineUserPostsResponse extends Response {
-  timelineData?: TimelineData
+  timelineData?: TimelineData;
 }
 
 export interface GetTimelinePlannedDayResultsResponse extends Response {
-  timelineData?: TimelineData
+  timelineData?: TimelineData;
 }
