@@ -5,12 +5,13 @@ import {
     CreateUserPostResponse,
     GetAllUserPostResponse,
     GetUserPostResponse,
+    GetUserPostsCountResponse,
     UpdateUserPostRequest,
 } from '@resources/types/requests/UserPostTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import {
     validateCommentDelete,
     validateCommentPost,
@@ -67,6 +68,19 @@ userPostRouterLatest.get(
         res.json(response);
     })
 );
+
+userPostRouterLatest.get(
+    '/stats',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const userPosts = await UserPostService.count();
+        const response: GetUserPostsCountResponse = { ...SUCCESS, userPosts };
+        res.json(response);
+    })
+);
+
 
 userPostRouterLatest.get(
     '/:id',

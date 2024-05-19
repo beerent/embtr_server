@@ -89,6 +89,10 @@ export class UserPostDao {
         });
     }
 
+    public static async allPostsCout() {
+        return await prisma.userPost.count();
+    }
+
     public static async count(userId: number) {
         return await prisma.userPost.count({
             where: {

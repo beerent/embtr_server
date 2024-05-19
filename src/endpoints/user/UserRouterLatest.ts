@@ -7,13 +7,14 @@ import {
     CreateBlockUserRequest,
     GetUserResponse,
     GetUsersResponse,
+    GetUserStatsResponse,
     UpdatePremiumStatusResponse,
     UpdateUserRequest,
 } from '@resources/types/requests/UserTypes';
 import { authenticate, authenticateCreateUser } from '@src/middleware/authentication';
 import { validateGetDailyHistory as validateGetUserDailyHistory } from '@src/middleware/daily_history/DailyHistoryValidation';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { validateGetUserData } from '@src/middleware/user_post/UserPostValidation';
 import { ChallengeService } from '@src/service/ChallengeService';
 import { DailyHistoryService } from '@src/service/DailyHistoryService';
@@ -52,6 +53,38 @@ userRouterLatest.get(
         res.json(response);
     })
 );
+
+userRouterLatest.get(
+    '/stats',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const totalUsers = await UserService.getAllUserCount(context)
+        const premiumUsers = await UserService.getAllPremiumUserCount(context)
+
+        const response: GetUserStatsResponse = { ...SUCCESS, totalUsers, premiumUsers };
+        res.json(response);
+    })
+);
+
+userRouterLatest.get(
+    '/all',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const query = req.query as Record<string, string>
+
+        const users: User[] = await UserService.getAll(context, query)
+        const response: GetUsersResponse = { ...SUCCESS, users };
+        res.json(response);
+    })
+);
+
 
 userRouterLatest.get(
     '/search/',

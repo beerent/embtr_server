@@ -24,3 +24,7 @@ export interface UpdateUserPostRequest {
 export interface UpdateUserPostResponse extends Response {
   userPost?: UserPost
 }
+
+export interface GetUserPostsCountResponse extends Response {
+  userPosts?: number
+}
