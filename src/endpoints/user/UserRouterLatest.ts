@@ -14,7 +14,7 @@ import {
 import { authenticate, authenticateCreateUser } from '@src/middleware/authentication';
 import { validateGetDailyHistory as validateGetUserDailyHistory } from '@src/middleware/daily_history/DailyHistoryValidation';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { validateGetUserData } from '@src/middleware/user_post/UserPostValidation';
 import { ChallengeService } from '@src/service/ChallengeService';
 import { DailyHistoryService } from '@src/service/DailyHistoryService';
@@ -58,7 +58,7 @@ userRouterLatest.get(
     '/stats',
     routeLogger(v),
     authenticate,
-    authorize,
+    authorizeAdmin,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
 
@@ -74,11 +74,10 @@ userRouterLatest.get(
     '/all',
     routeLogger(v),
     authenticate,
-    authorize,
+    authorizeAdmin,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         const query = req.query as Record<string, string>
-        console.log(query)
 
         const users: User[] = await UserService.getAll(context, query)
         const response: GetUsersResponse = { ...SUCCESS, users };

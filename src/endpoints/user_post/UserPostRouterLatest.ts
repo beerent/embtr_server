@@ -11,7 +11,7 @@ import {
 import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import {
     validateCommentDelete,
     validateCommentPost,
@@ -73,11 +73,9 @@ userPostRouterLatest.get(
     '/stats',
     routeLogger(v),
     authenticate,
-    authorize,
+    authorizeAdmin,
     runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-
-        const userPosts = await UserPostService.count(context);
+        const userPosts = await UserPostService.count();
         const response: GetUserPostsCountResponse = { ...SUCCESS, userPosts };
         res.json(response);
     })
