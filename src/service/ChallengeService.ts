@@ -1,13 +1,11 @@
 import { Code } from '@resources/codes';
 import {
-    Award,
     Challenge,
     ChallengeCalculationType,
     ChallengeParticipant,
     ChallengeRequirement,
     ChallengeRequirementCompletionState,
     PlannedTask,
-    Task,
 } from '@resources/schema';
 import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
 import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
@@ -356,15 +354,18 @@ export class ChallengeService {
         return challengeSummaries;
     }
 
-    public static async create(
-        context: Context,
-        challenge: Challenge,
-        award: Award,
-        task: Task,
-        challengeRequirement: ChallengeRequirement,
-        milestoneIds: number[]
-    ): Promise<Challenge> {
-        // todo implement me
+    public static async create(context: Context, challenge: Challenge): Promise<Challenge> {
+        const createdChallenge = await ChallengeDao.create(challenge);
+        if (!createdChallenge) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'challenge create failed'
+            );
+        }
+
+        const challengeModel: Challenge = ModelConverter.convert(createdChallenge);
+        return challengeModel;
     }
 
     public static async leave(context: Context, id: number) {

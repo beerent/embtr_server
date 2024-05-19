@@ -70,7 +70,7 @@ export interface CreateChallengeRequest {
     | 'requiredIntervalQuantity'
     | 'requiredTaskQuantity'
   >;
-  milestoneIds: number[];
+  milestoneKeys: string[];
 }
 
 export interface CreateChallengeResponse extends Response {

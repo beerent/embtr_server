@@ -10,7 +10,8 @@ export async function authorize(req: Request, res: Response, next: NextFunction)
     }
 
     const userRoles = await AuthorizationDao.getRolesFromToken(req.headers.authorization!);
-    if (!userRoles.includes(Role.ADMIN) && !userRoles.includes(Role.USER)) {
+    const isAuthorized = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.USER);
+    if (!isAuthorized) {
         return res.status(FORBIDDEN.httpCode).json(FORBIDDEN);
     }
 

@@ -9,6 +9,27 @@ export interface ChallengeRequirementResults {
 }
 
 export class ChallengeDao {
+    public static async create(challenge: Challenge) {
+        return prisma.challenge.create({
+            data: {
+                name: challenge.name ?? '',
+                description: challenge.description ?? '',
+                start: challenge.start ?? new Date(),
+                end: challenge.end ?? new Date(),
+                award: {
+                    connect: {
+                        id: challenge.awardId,
+                    },
+                },
+                creator: {
+                    connect: {
+                        id: challenge.creatorId,
+                    },
+                },
+            },
+        });
+    }
+
     public static async get(id: number) {
         return prisma.challenge.findUnique({
             where: {

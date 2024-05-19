@@ -25,6 +25,7 @@ import {
     GetChallengesSummariesResponse,
     GetChallengeSummaryResponse,
 } from '@resources/types/requests/ChallengeTypes';
+import { ChallengeCreationService } from '@src/service/feature/ChallengeCreationService';
 
 // WARNING: Must be a level 12+ Engineer to refactor this file. - TheCaptainCoder - 2024-04-19
 
@@ -187,15 +188,15 @@ challengeRouterLatest.post(
         const award = request.award;
         const task = request.task;
         const challengeRequirement = request.challengeRequirement;
-        const milestoneIds = request.milestoneIds;
+        const milestoneKeys = request.milestoneKeys;
 
-        const createdChallenge = await ChallengeService.create(
+        const createdChallenge = await ChallengeCreationService.create(
             context,
             challenge,
             award,
             task,
             challengeRequirement,
-            milestoneIds
+            milestoneKeys
         );
         const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
         res.status(response.httpCode).json(response);
