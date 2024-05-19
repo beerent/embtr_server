@@ -1,5 +1,12 @@
 import { ChallengeSummary, ChallengeDetails, ChallengeRecentlyJoined } from '../dto/Challenge';
-import { ChallengeParticipant } from '../../schema';
+import {
+  Award,
+  Challenge,
+  ChallengeParticipant,
+  ChallengeRequirement,
+  Milestone,
+  Task,
+} from '../../schema';
 import { Response } from './RequestTypes';
 import { PureDate } from '../date/PureDate';
 
@@ -49,4 +56,23 @@ export interface RegisterChallengeRequest {
 
 export interface LeaveChallengeRequest {
   date: PureDate;
+}
+
+export interface CreateChallengeRequest {
+  challenge: Pick<Challenge, 'name' | 'description' | 'start' | 'end'>;
+  award: Pick<Award, 'name' | 'description' | 'remoteImageUrl' | 'localImage'>;
+  task: Pick<Task, 'title' | 'description' | 'remoteImageUrl' | 'localImage'>;
+  challengeRequirement: Pick<
+    ChallengeRequirement,
+    | 'unitId'
+    | 'calculationType'
+    | 'calculationIntervalDays'
+    | 'requiredIntervalQuantity'
+    | 'requiredTaskQuantity'
+  >;
+  milestoneIds: number[];
+}
+
+export interface CreateChallengeResponse extends Response {
+  challenge?: Challenge;
 }

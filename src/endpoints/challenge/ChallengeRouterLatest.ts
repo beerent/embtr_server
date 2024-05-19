@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '@src/middleware/authentication';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { ChallengeService } from '@src/service/ChallengeService';
 import { validateChallengeRegister } from '@src/middleware/challenge/ChallengeValidation';
 import {
@@ -18,6 +18,8 @@ import { Context } from '@src/general/auth/Context';
 import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import {
+    CreateChallengeRequest,
+    CreateChallengeResponse,
     GetChallengeDetailsResponse,
     GetChallengesDetailsResponse,
     GetChallengesSummariesResponse,
@@ -169,6 +171,34 @@ challengeRouterLatest.delete(
 
         await CommentService.delete(context, id);
         res.json(SUCCESS);
+    })
+);
+
+challengeRouterLatest.post(
+    '/',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: CreateChallengeRequest = req.body;
+
+        const challenge = request.challenge;
+        const award = request.award;
+        const task = request.task;
+        const challengeRequirement = request.challengeRequirement;
+        const milestoneIds = request.milestoneIds;
+
+        const createdChallenge = await ChallengeService.create(
+            context,
+            challenge,
+            award,
+            task,
+            challengeRequirement,
+            milestoneIds
+        );
+        const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
+        res.status(response.httpCode).json(response);
     })
 );
 
