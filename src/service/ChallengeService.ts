@@ -354,6 +354,20 @@ export class ChallengeService {
         return challengeSummaries;
     }
 
+    public static async create(context: Context, challenge: Challenge): Promise<Challenge> {
+        const createdChallenge = await ChallengeDao.create(challenge);
+        if (!createdChallenge) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'challenge create failed'
+            );
+        }
+
+        const challengeModel: Challenge = ModelConverter.convert(createdChallenge);
+        return challengeModel;
+    }
+
     public static async leave(context: Context, id: number) {
         const challenge = await this.get(context, id);
 

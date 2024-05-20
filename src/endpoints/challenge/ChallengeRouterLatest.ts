@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '@src/middleware/authentication';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { ChallengeService } from '@src/service/ChallengeService';
 import { validateChallengeRegister } from '@src/middleware/challenge/ChallengeValidation';
 import {
@@ -18,11 +18,14 @@ import { Context } from '@src/general/auth/Context';
 import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import {
+    CreateChallengeRequest,
+    CreateChallengeResponse,
     GetChallengeDetailsResponse,
     GetChallengesDetailsResponse,
     GetChallengesSummariesResponse,
     GetChallengeSummaryResponse,
 } from '@resources/types/requests/ChallengeTypes';
+import { ChallengeCreationService } from '@src/service/feature/ChallengeCreationService';
 
 // WARNING: Must be a level 12+ Engineer to refactor this file. - TheCaptainCoder - 2024-04-19
 
@@ -169,6 +172,34 @@ challengeRouterLatest.delete(
 
         await CommentService.delete(context, id);
         res.json(SUCCESS);
+    })
+);
+
+challengeRouterLatest.post(
+    '/',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: CreateChallengeRequest = req.body;
+
+        const challenge = request.challenge;
+        const award = request.award;
+        const task = request.task;
+        const challengeRequirement = request.challengeRequirement;
+        const milestoneKeys = request.milestoneKeys;
+
+        const createdChallenge = await ChallengeCreationService.create(
+            context,
+            challenge,
+            award,
+            task,
+            challengeRequirement,
+            milestoneKeys
+        );
+        const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
+        res.status(response.httpCode).json(response);
     })
 );
 

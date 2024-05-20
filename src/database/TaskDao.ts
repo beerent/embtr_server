@@ -70,6 +70,7 @@ export class TaskDao {
                 description: task.description,
                 localImage: task.localImage,
                 remoteImageUrl: task.remoteImageUrl,
+                type: task.type,
             },
         });
 

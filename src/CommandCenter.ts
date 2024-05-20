@@ -15,13 +15,15 @@ import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './service/UserPropertyService';
 import { UserDao } from './database/UserDao';
 import { UserAwardService } from './service/UserAwardService';
-import { User } from '@resources/schema';
+import { ChallengeCalculationType, User } from '@resources/schema';
 import { DayKeyUtility } from './utility/date/DayKeyUtility';
+import { ChallengeCreationService } from './service/feature/ChallengeCreationService';
+import { CreateChallengeRequest } from '@resources/types/requests/ChallengeTypes';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
 const adminContext: Context = {
-    userId: 1,
+    userId: 1853,
     userUid: 'hello',
     userEmail: 'bnren',
     userRoles: [],
@@ -431,6 +433,54 @@ const handleRemoveFreeRole = async (username: string) => {
     await UserRoleService.removeUserRole(adminContext, user.email, Role.FREE);
 };
 
+const handleCommandCreateChallenge = async () => {
+    const request: CreateChallengeRequest = {
+        challenge: {
+            name: 'Walk The Dog',
+            description: 'walk the dog every day for a month',
+            start: new Date('2024-05-01'),
+            end: new Date('2024-06-01'),
+        },
+        award: {
+            name: 'Dog Walked Success',
+            description: 'you walked the dog every day for a month!',
+            remoteImageUrl:
+                'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/award%2F002-sheriff.svg?alt=media',
+            localImage: '',
+        },
+        task: {
+            title: 'Walk The Dog',
+            description: 'woof, woof, woof!',
+            remoteImageUrl:
+                'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/award%2F002-sheriff.svg?alt=media',
+            localImage: '',
+        },
+        challengeRequirement: {
+            unitId: 1,
+            calculationType: ChallengeCalculationType.UNIQUE,
+            calculationIntervalDays: 1,
+            requiredIntervalQuantity: 30,
+            requiredTaskQuantity: 1,
+        },
+        milestoneKeys: ['CHALLENGE_PROGRESS_10', 'CHALLENGE_PROGRESS_20', 'CHALLENGE_PROGRESS_30'],
+    };
+
+    const challenge = request.challenge;
+    const award = request.award;
+    const task = request.task;
+    const challengeRequirement = request.challengeRequirement;
+    const milestoneKeys = request.milestoneKeys;
+
+    const createdChallenge = await ChallengeCreationService.create(
+        adminContext,
+        challenge,
+        award,
+        task,
+        challengeRequirement,
+        milestoneKeys
+    );
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -596,6 +646,10 @@ const processCommand = async (command: string) => {
 
         case 'updateAllAwardsForUser':
             await handleCommandUpdateAllAwardsForUser(email);
+            break;
+
+        case 'createChallenge':
+            await handleCommandCreateChallenge();
             break;
 
         default:

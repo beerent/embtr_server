@@ -54,7 +54,7 @@ export class UserAwardService {
     public static async removeAward(context: Context, awardId: number) {
         const userAward = await this.getByAwardId(context, awardId);
         if (!userAward) {
-            throw new ServiceException(404, Code.RESOURCE_NOT_FOUND, 'user award not found');
+            return;
         }
 
         userAward.active = false;
