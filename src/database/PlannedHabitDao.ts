@@ -1,5 +1,5 @@
 import { prisma } from '@database/prisma';
-import { PlannedDay, PlannedTask, Prisma } from '@prisma/client';
+import PrismaClient, { PlannedDay, PlannedTask, Prisma } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 
@@ -267,5 +267,15 @@ order by habitId desc, seasonDate desc;
         });
 
         return formattedResults;
+    }
+
+    public static async countAllCompleted(): Promise<number> {
+      const response = await prisma.$queryRaw(
+        Prisma.sql`
+          SELECT count(*) FROM planned_task WHERE completedQuantity >= quantity
+        `
+      )
+      const result = response as Record<string, string>[]
+      return parseInt(result[0]['count(*)'])
     }
 }

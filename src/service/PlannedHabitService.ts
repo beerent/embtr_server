@@ -128,6 +128,11 @@ export class PlannedHabitService {
         return await PlannedHabitDao.count(context.userId);
     }
 
+    public static async countAllCompleted(): Promise<number> {
+        return await PlannedHabitDao.countAllCompleted()
+    }
+
+
     public static async hasCompleted(context: Context): Promise<boolean> {
         return await PlannedHabitDao.completedExists(context.userId);
     }
