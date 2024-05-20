@@ -34,3 +34,7 @@ export interface CreateOrReplacePlannedTaskResponse extends Response {
 export interface GetPlannedHabitCountResponse extends Response {
   count?: number;
 }
+
+export interface GetPlannedHabitStatsResponse extends Response {
+  completedCount?: number;
+}

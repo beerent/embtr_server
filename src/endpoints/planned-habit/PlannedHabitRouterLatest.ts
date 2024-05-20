@@ -2,11 +2,12 @@ import express from 'express';
 import {
     GetPlannedHabitCountResponse,
     GetPlannedHabitResponse,
+GetPlannedHabitStatsResponse,
 } from '@resources/types/requests/PlannedTaskTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { authenticate } from '@src/middleware/authentication';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { validateGetById } from '@src/middleware/planned_day/PlannedDayValidation';
 import { ContextService } from '@src/service/ContextService';
 import { PlannedHabitService } from '@src/service/PlannedHabitService';
@@ -25,6 +26,22 @@ plannedHabitRouterLatest.get(
         const response: GetPlannedHabitCountResponse = {
             ...SUCCESS,
             count: count,
+        };
+        res.json(response);
+    })
+);
+
+plannedHabitRouterLatest.get(
+    '/stats',
+    authenticate,
+    authorizeAdmin,
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        const count = await PlannedHabitService.countAllCompleted();
+
+        const response: GetPlannedHabitStatsResponse = {
+            ...SUCCESS,
+            completedCount: count,
         };
         res.json(response);
     })
