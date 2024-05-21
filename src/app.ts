@@ -39,6 +39,7 @@ const allowedOrigins = [
     'https://embtr.com',
     'https://app.embtr.com',
     'http://localhost:19006',
+    'https://admin.embtr.com'
 ];
 app.use(
     cors({
