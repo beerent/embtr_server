@@ -9,11 +9,7 @@ export class ScheduledHabitUtil {
         return scheduledHabit?.description ?? scheduledHabit?.task?.description ?? '';
     }
 
-    public static getRemoteImageUrl(scheduledHabit?: ScheduledHabit): string {
-        return scheduledHabit?.remoteImageUrl ?? scheduledHabit?.task?.remoteImageUrl ?? '';
-    }
-
-    public static getLocalImage(scheduledHabit?: ScheduledHabit): string {
-        return scheduledHabit?.localImage ?? scheduledHabit?.task?.localImage ?? '';
+    public static getIcon(scheduledHabit?: ScheduledHabit) {
+        return scheduledHabit?.icon ?? scheduledHabit?.task?.icon;
     }
 }

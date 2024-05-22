@@ -4,6 +4,7 @@ import { Task } from '@resources/schema';
 import { TaskDao } from '@src/database/TaskDao';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
+import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class HabitService {
@@ -25,6 +26,9 @@ export class HabitService {
         }
 
         const taskModel: Task = ModelConverter.convert(task);
+        // deprecated on 4.0.13
+        DeprecatedImageUtility.setTaskImages(taskModel);
+
         return taskModel;
     }
 
@@ -35,6 +39,9 @@ export class HabitService {
         }
 
         const taskModel: Task = ModelConverter.convert(task);
+        // deprecated on 4.0.13
+        DeprecatedImageUtility.setTaskImages(taskModel);
+
         return taskModel;
     }
 
@@ -45,6 +52,10 @@ export class HabitService {
         }
 
         const taskModel: Task = ModelConverter.convert(task);
+
+        // deprecated on 4.0.13
+        DeprecatedImageUtility.setTaskImages(taskModel);
+
         return taskModel;
     }
 }

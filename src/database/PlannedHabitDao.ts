@@ -1,5 +1,5 @@
 import { prisma } from '@database/prisma';
-import PrismaClient, { PlannedDay, PlannedTask, Prisma } from '@prisma/client';
+import { PlannedDay, PlannedTask, Prisma } from '@prisma/client';
 import { PlannedTask as PlannedTaskModel } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 
@@ -26,6 +26,16 @@ export class PlannedHabitDao {
                 unit: {
                     connect: {
                         id: plannedTask.unitId,
+                    },
+                },
+            }
+            : {};
+
+        const icon = plannedTask.iconId
+            ? {
+                icon: {
+                    connect: {
+                        id: plannedTask.iconId,
                     },
                 },
             }
@@ -62,14 +72,13 @@ export class PlannedHabitDao {
                 ...timeOfDay,
                 ...originalTimeOfDay,
                 ...unit,
+                ...icon,
                 title: plannedTask.title,
                 description: plannedTask.description,
                 quantity: plannedTask.quantity ?? 1,
                 completedQuantity: plannedTask.completedQuantity ?? 0,
                 status: plannedTask.status ?? Constants.CompletionState.INCOMPLETE,
                 active: plannedTask.active ?? true,
-                remoteImageUrl: plannedTask.remoteImageUrl,
-                localImage: plannedTask.localImage,
             },
 
             include: {
@@ -84,8 +93,6 @@ export class PlannedHabitDao {
             status = Constants.CompletionState.INCOMPLETE,
             title = '',
             description = '',
-            remoteImageUrl = '',
-            localImage = '',
             quantity = 1,
             completedQuantity = 0,
             unitId,
@@ -104,6 +111,18 @@ export class PlannedHabitDao {
                 },
         };
 
+        const icon = {
+            icon: plannedTask.iconId
+                ? {
+                    connect: {
+                        id: plannedTask.iconId,
+                    },
+                }
+                : {
+                    disconnect: true,
+                },
+        };
+
         const result = await prisma.plannedTask.update({
             where: {
                 id: plannedTask.id,
@@ -113,8 +132,6 @@ export class PlannedHabitDao {
                 status,
                 title,
                 description,
-                remoteImageUrl,
-                localImage,
                 quantity,
                 completedQuantity,
                 timeOfDay: {
@@ -123,6 +140,7 @@ export class PlannedHabitDao {
                     },
                 },
                 ...unit,
+                ...icon,
             },
             include: {
                 ...includes,
@@ -270,12 +288,12 @@ order by habitId desc, seasonDate desc;
     }
 
     public static async countAllCompleted(): Promise<number> {
-      const response = await prisma.$queryRaw(
-        Prisma.sql`
+        const response = await prisma.$queryRaw(
+            Prisma.sql`
           SELECT count(*) FROM planned_task WHERE completedQuantity >= quantity
         `
-      )
-      const result = response as Record<string, string>[]
-      return parseInt(result[0]['count(*)'])
+        );
+        const result = response as Record<string, string>[];
+        return parseInt(result[0]['count(*)']);
     }
 }

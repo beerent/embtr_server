@@ -78,6 +78,8 @@ model Task {
     description           String?                @db.VarChar(255)
     remoteImageUrl        String?                @db.VarChar(255)
     localImage            String?                @db.VarChar(255)
+    iconId                Int?                   @db.Int
+    icon                  Icon?                  @relation(fields: [iconId], references: [id])
     userId                Int?                   @db.Int
     user                  User?                  @relation(fields: [userId], references: [id], onDelete: Cascade)
     habitCategoryId       Int?                   @db.Int
@@ -91,6 +93,7 @@ model Task {
 
     @@index([userId], name: "user_id")
     @@index([habitCategoryId], name: "habit_category_id")
+    @@index([iconId], name: "icon_id")
     @@map("task")
 }
 
@@ -126,6 +129,8 @@ model PlannedTask {
     description         String?         @db.VarChar(255)
     remoteImageUrl      String?         @db.VarChar(255)
     localImage          String?         @db.VarChar(255)
+    iconId              Int?            @db.Int
+    icon                Icon?           @relation(fields: [iconId], references: [id])
     unitId              Int?            @db.Int
     unit                Unit?           @relation(fields: [unitId], references: [id])
     quantity            Float?          @db.Double
@@ -142,6 +147,7 @@ model PlannedTask {
     @@index([unitId], name: "unit_id")
     @@index([timeOfDayId], name: "time_of_day_id")
     @@index([originalTimeOfDayId], name: "original_time_of_day_id")
+    @@index([iconId], name: "icon_id")
     @@map("planned_task")
 }
 
@@ -547,6 +553,8 @@ model ScheduledHabit {
     description       String?       @db.VarChar(255)
     remoteImageUrl    String?       @db.VarChar(255)
     localImage        String?       @db.VarChar(255)
+    iconId            Int?          @db.Int
+    icon              Icon?         @relation(fields: [iconId], references: [id])
     daysOfWeekEnabled Boolean       @default(true)
     daysOfWeek        DayOfWeek[]
     timesOfDayEnabled Boolean       @default(true)
@@ -565,6 +573,7 @@ model ScheduledHabit {
     @@index([taskId])
     @@index([unitId])
     @@index([userId])
+    @@index([iconId])
     @@map("scheduled_habit")
 }
 
@@ -603,4 +612,45 @@ model Role {
     targetFeatures    Feature[] @relation("FeatureToTargetRole")
 
     @@map("role")
+}
+
+model Icon {
+    id             Int              @id @default(autoincrement())
+    name           String           @db.VarChar(255)
+    key            String           @db.VarChar(255)
+    remoteImageUrl String?          @db.VarChar(255)
+    localImage     String?          @db.VarChar(255)
+    active         Boolean          @default(true)
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @default(now()) @updatedAt
+    tags           Tag[]
+    categories     IconCategory[]
+    plannedTasks   PlannedTask[]
+    ScheduledHabit ScheduledHabit[]
+    Task           Task[]
+
+    @@map("icon")
+}
+
+model Tag {
+    id        Int      @id @default(autoincrement())
+    name      String   @db.VarChar(255)
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+    icons     Icon[]
+
+    @@unique([name])
+    @@map("tag")
+}
+
+model IconCategory {
+    id        Int      @id @default(autoincrement())
+    name      String   @db.VarChar(255)
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+    icons     Icon[]
+
+    @@map("icon_category")
 }

@@ -17,6 +17,7 @@ import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { PlannedDayEventDispatcher } from '@src/event/planned_day/PlannedDayEventDispatcher';
 import { PlannedHabitService } from './PlannedHabitService';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
+import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -60,6 +61,12 @@ export class PlannedDayService {
         }
 
         const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
+
+        //deprecated in 4.0.13
+        plannedDayModel.plannedTasks?.forEach((plannedTask) => {
+            DeprecatedImageUtility.setPlannedTaskImages(plannedTask);
+        });
+
         return plannedDayModel;
     }
 
@@ -451,12 +458,11 @@ export class PlannedDayService {
                 description: ScheduledHabitUtil.getDescription(
                     timeOfDayScheduledHabit.scheduledHabit
                 ),
-                remoteImageUrl: ScheduledHabitUtil.getRemoteImageUrl(
-                    timeOfDayScheduledHabit.scheduledHabit
-                ),
-                localImage: ScheduledHabitUtil.getLocalImage(
-                    timeOfDayScheduledHabit.scheduledHabit
-                ),
+                icon: ScheduledHabitUtil.getIcon(timeOfDayScheduledHabit.scheduledHabit),
+                remoteImageUrl: ScheduledHabitUtil.getIcon(timeOfDayScheduledHabit.scheduledHabit)
+                    ?.remoteImageUrl,
+                localImage: ScheduledHabitUtil.getIcon(timeOfDayScheduledHabit.scheduledHabit)
+                    ?.localImage,
                 unitId: timeOfDayScheduledHabit.scheduledHabit?.unitId ?? 0,
                 unit: timeOfDayScheduledHabit.scheduledHabit?.unit ?? undefined,
                 quantity: timeOfDayScheduledHabit.scheduledHabit?.quantity ?? 1,
@@ -468,6 +474,7 @@ export class PlannedDayService {
                 active: true,
             };
 
+            console.log('remote image: ', placeHolderPlannedTask.remoteImageUrl);
             placeHolderPlannedTasks.push(placeHolderPlannedTask);
         }
 

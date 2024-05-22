@@ -10,8 +10,10 @@ export interface PlannedDayCompletionStatus {
 
 export interface PlannedDayAttribute {
     body: string;
-    remoteImageUrl?: string;
-    localImage?: string;
+    icon?: {
+        remoteImageUrl?: string;
+        localImage?: string;
+    };
     ionicon?: {
         name: string;
         color: string;

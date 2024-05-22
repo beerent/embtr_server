@@ -39,6 +39,11 @@ export class ScheduledHabitDao {
                 ...unit,
                 title: scheduledHabit.title,
                 description: scheduledHabit.description,
+                icon: {
+                    connect: {
+                        id: scheduledHabit.iconId ?? 7,
+                    },
+                },
                 detailsEnabled: scheduledHabit.detailsEnabled === true,
                 quantity: scheduledHabit.quantity ?? 1,
                 daysOfWeekEnabled: scheduledHabit.daysOfWeekEnabled === true,
@@ -95,17 +100,14 @@ export class ScheduledHabitDao {
             };
         }
 
-        let remoteImageUrlData = {};
-        if (scheduledHabit.remoteImageUrl) {
-            remoteImageUrlData = {
-                remoteImageUrl: scheduledHabit.remoteImageUrl,
-            };
-        }
-
-        let localImageData = {};
-        if (scheduledHabit.localImage) {
-            localImageData = {
-                localImage: scheduledHabit.localImage,
+        let iconData = {};
+        if (scheduledHabit.iconId) {
+            iconData = {
+                icon: {
+                    connect: {
+                        id: scheduledHabit.iconId,
+                    },
+                },
             };
         }
 
@@ -183,8 +185,7 @@ export class ScheduledHabitDao {
                 ...unitData,
                 ...titleData,
                 ...descriptionData,
-                ...remoteImageUrlData,
-                ...localImageData,
+                ...iconData,
                 ...quantityData,
                 ...daysOfWeekData,
                 ...timesOfDayData,
@@ -287,8 +288,10 @@ export class ScheduledHabitDao {
                 id: id,
             },
             include: {
+                icon: true,
                 task: {
                     include: {
+                        icon: true,
                         challengeRequirements: {
                             select: {
                                 challengeId: true,
@@ -413,7 +416,12 @@ export class ScheduledHabitDao {
                 ],
             },
             include: {
-                task: true,
+                icon: true,
+                task: {
+                    include: {
+                        icon: true,
+                    },
+                },
                 unit: true,
                 daysOfWeek: true,
                 timesOfDay: true,
@@ -530,7 +538,12 @@ export class ScheduledHabitDao {
                 ],
             },
             include: {
-                task: true,
+                icon: true,
+                task: {
+                    include: {
+                        icon: true,
+                    },
+                },
                 unit: true,
                 daysOfWeek: true,
                 timesOfDay: true,

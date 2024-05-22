@@ -9,12 +9,13 @@ import { PlannedDayResultDao, PlannedDayResultType } from '@src/database/Planned
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
-import { PlannedDayResult } from '@resources/schema';
+import { PlannedDayResult, PlannedTask } from '@resources/schema';
 import { ImageDetectionService } from './ImageService';
 import { ImageDao } from '@src/database/ImageDao';
 import { BlockUserService } from './BlockUserService';
 import { ApiAlertsService } from './ApiAlertsService';
 import { PlannedDayAttribute, PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
+import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 
 export class PlannedDayResultService {
     public static async create(
@@ -133,6 +134,11 @@ export class PlannedDayResultService {
 
         const plannedDayResultsModels: PlannedDayResult[] =
             ModelConverter.convertAll(plannedDayResults);
+        plannedDayResultsModels.forEach((plannedDayResult) => {
+            plannedDayResult.plannedDay?.plannedTasks?.forEach((plannedTask) => {
+                DeprecatedImageUtility.setPlannedTaskImages(plannedTask);
+            });
+        });
         const plannedDayResultDtos: PlannedDayResultDto[] = plannedDayResultsModels;
         this.addAttributes(plannedDayResultDtos);
         return plannedDayResultDtos;
@@ -217,6 +223,9 @@ export class PlannedDayResultService {
         );
 
         const plannedDayResultModel: PlannedDayResult = ModelConverter.convert(plannedDayResult);
+        plannedDayResultModel.plannedDay?.plannedTasks?.forEach((plannedTask) => {
+            DeprecatedImageUtility.setPlannedTaskImages(plannedTask);
+        });
         const plannedDayResultDto: PlannedDayResultDto = plannedDayResultModel;
         this.addAttribute(plannedDayResultDto);
 
@@ -289,8 +298,7 @@ export class PlannedDayResultService {
 
         const attribute: PlannedDayAttribute = {
             body: description,
-            remoteImageUrl: firstRequirement?.task?.remoteImageUrl,
-            localImage: firstRequirement?.task?.localImage,
+            icon: firstRequirement?.task?.icon,
             ionicon: {
                 name: 'flash',
                 color: '#FF6712',
@@ -306,7 +314,10 @@ export class PlannedDayResultService {
         }
 
         const completedHabits: CompletedHabit[] = [];
-        plannedDayResult.plannedDay.plannedTasks.forEach((plannedTask) => {
+        plannedDayResult.plannedDay.plannedTasks.forEach((plannedTaskDb) => {
+            const plannedTask: PlannedTask = ModelConverter.convert(plannedTaskDb);
+            DeprecatedImageUtility.setPlannedTaskImages(plannedTask);
+
             const element: CompletedHabitElement = {
                 unit: plannedTask.unit ?? undefined,
                 quantity: plannedTask.quantity ?? 0,
@@ -338,8 +349,8 @@ export class PlannedDayResultService {
             } else {
                 completedHabits.push({
                     scheduledHabitId: plannedTask.scheduledHabitId ?? 0,
-                    localImage: plannedTask.localImage ?? undefined,
-                    remoteImageUrl: plannedTask.remoteImageUrl ?? undefined,
+                    remoteImageUrl: plannedTask.remoteImageUrl ?? '',
+                    localImage: plannedTask.localImage ?? '',
                     attempted: 1,
                     completed: completed ? 1 : 0,
                     elements: [element],

@@ -11,10 +11,12 @@ export const PlannedDayGetInclude = {
     user: true,
     plannedTasks: {
         include: {
+            icon: true,
             scheduledHabit: {
                 include: {
                     task: {
                         select: {
+                            icon: true,
                             type: true,
                         },
                     },

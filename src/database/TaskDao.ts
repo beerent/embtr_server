@@ -67,9 +67,11 @@ export class TaskDao {
                     },
                 },
                 title: task.title ?? '',
-                description: task.description,
-                localImage: task.localImage,
-                remoteImageUrl: task.remoteImageUrl,
+                icon: {
+                    connect: {
+                        id: task.iconId ?? 7,
+                    },
+                },
                 type: task.type,
             },
         });

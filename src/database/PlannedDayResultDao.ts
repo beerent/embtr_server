@@ -68,11 +68,14 @@ export const PlannedDayResultInclude = {
                     active: true,
                 },
                 include: {
+                    icon: true,
                     unit: true,
                     scheduledHabit: {
                         select: {
+                            icon: true,
                             task: {
                                 select: {
+                                    icon: true,
                                     type: true,
                                 },
                             },

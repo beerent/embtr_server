@@ -7,6 +7,7 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
+import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 
 export class PlannedHabitService {
     public static async getById(context: Context, id: number): Promise<PlannedTask> {
@@ -16,6 +17,10 @@ export class PlannedHabitService {
         }
 
         const plannedHabitModel: PlannedTask = ModelConverter.convert(plannedHabit);
+
+        // deprecated on 4.0.13
+        DeprecatedImageUtility.setPlannedTaskImages(plannedHabitModel);
+
         return plannedHabitModel;
     }
 
@@ -129,9 +134,8 @@ export class PlannedHabitService {
     }
 
     public static async countAllCompleted(): Promise<number> {
-        return await PlannedHabitDao.countAllCompleted()
+        return await PlannedHabitDao.countAllCompleted();
     }
-
 
     public static async hasCompleted(context: Context): Promise<boolean> {
         return await PlannedHabitDao.completedExists(context.userId);

@@ -16,6 +16,7 @@ import { Code } from '@resources/codes';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedHabitService } from './PlannedHabitService';
 import { HttpCode } from '@src/common/RequestResponses';
+import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -257,6 +258,7 @@ export class ScheduledHabitService {
         }
 
         const scheduledHabitModel: ScheduledHabit = ModelConverter.convert(scheduledHabit);
+        DeprecatedImageUtility.setScheduledHabitImages(scheduledHabitModel);
         return scheduledHabitModel;
     }
 
@@ -287,6 +289,12 @@ export class ScheduledHabitService {
         }
 
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+
+        // deprecated in 4.0.13
+        scheduledHabitModels.forEach((scheduledHabit) => {
+            DeprecatedImageUtility.setScheduledHabitImages(scheduledHabit);
+        });
+
         return scheduledHabitModels;
     }
 

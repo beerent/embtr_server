@@ -76,7 +76,13 @@ const handleCommandGetRoles = async (email: string) => {
 
 const handleCommandIsAdmin = async (email: string) => {
     try {
-        const isAdmin = await UserRoleService.isAdmin(email);
+        const user = await UserDao.getByUsername(email);
+        if (!user?.id) {
+            console.log('user not found');
+            return;
+        }
+
+        const isAdmin = await UserRoleService.isAdmin(user.email);
         console.log(!!isAdmin);
     } catch (error) {
         console.log('false');
@@ -92,9 +98,13 @@ const handleCommandIsUser = async (email: string) => {
 };
 
 const handleCommandAddAdminRole = async (email: string) => {
-    if (email) {
-        await UserRoleService.addUserRole(adminContext, email, Role.ADMIN);
+    const user = await UserDao.getByUsername(email);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
     }
+
+    await UserRoleService.addUserRole(adminContext, user.email, Role.ADMIN);
 };
 
 const handleCommandAddUserRole = async (email: string) => {
@@ -516,6 +526,7 @@ const processCommand = async (command: string) => {
         case 'addUserRole':
             await handleCommandAddUserRole(email);
             break;
+
         case 'removeAdminRole':
             await handleCommandRemoveAdminRole(email);
             break;
