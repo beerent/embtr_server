@@ -69,7 +69,7 @@ export class TaskDao {
                 title: task.title ?? '',
                 icon: {
                     connect: {
-                        id: task.iconId ?? 7,
+                        id: task.iconId ?? 9,
                     },
                 },
                 type: task.type,
