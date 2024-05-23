@@ -1,4 +1,4 @@
 export interface CreateReportDto {
-    type: string,
-    id: number
+    type: string;
+    id: number;
 }

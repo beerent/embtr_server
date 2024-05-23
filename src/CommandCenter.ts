@@ -19,6 +19,8 @@ import { ChallengeCalculationType, User } from '@resources/schema';
 import { DayKeyUtility } from './utility/date/DayKeyUtility';
 import { ChallengeCreationService } from './service/feature/ChallengeCreationService';
 import { CreateChallengeRequest } from '@resources/types/requests/ChallengeTypes';
+import { CreateIconRequest } from '@resources/types/requests/IconTypes';
+import { IconCreationService } from './service/feature/IconCreationService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -461,9 +463,7 @@ const handleCommandCreateChallenge = async () => {
         task: {
             title: 'Walk The Dog',
             description: 'woof, woof, woof!',
-            remoteImageUrl:
-                'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/award%2F002-sheriff.svg?alt=media',
-            localImage: '',
+            // TODO need to add icon
         },
         challengeRequirement: {
             unitId: 1,
@@ -488,6 +488,26 @@ const handleCommandCreateChallenge = async () => {
         task,
         challengeRequirement,
         milestoneKeys
+    );
+};
+
+const handleCommandCreateIcon = async () => {
+    const request: CreateIconRequest = {
+        icon: {
+            name: 'Budget',
+            key: 'BUDGET',
+            remoteImageUrl:
+                'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/habit_categories%2Fbudget.svg?alt=media',
+        },
+        tags: ['money', 'finance', 'budget', 'dollar', 'cash', 'coin', 'currency'],
+        categories: ['habit'],
+    };
+
+    await IconCreationService.create(
+        adminContext,
+        request.icon,
+        request.categories ?? [],
+        request.tags ?? []
     );
 };
 
@@ -661,6 +681,10 @@ const processCommand = async (command: string) => {
 
         case 'createChallenge':
             await handleCommandCreateChallenge();
+            break;
+
+        case 'createIcon':
+            await handleCommandCreateIcon();
             break;
 
         default:

@@ -14,6 +14,7 @@ export const PlannedDayGetInclude = {
             icon: true,
             scheduledHabit: {
                 include: {
+                    icon: true,
                     task: {
                         select: {
                             icon: true,

@@ -56,6 +56,8 @@ export interface Task extends TaskCustom {
   id?: number;
   title?: string;
   description?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   iconId?: number;
   icon?: Icon;
   userId?: number;
@@ -97,6 +99,8 @@ export interface PlannedTask extends PlannedTaskCustom {
   originalTimeOfDay?: TimeOfDay;
   title?: string;
   description?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   iconId?: number;
   icon?: Icon;
   unitId?: number;
@@ -399,6 +403,8 @@ export interface ScheduledHabit extends ScheduledHabitCustom {
   task?: Task;
   title?: string;
   description?: string;
+  remoteImageUrl?: string;
+  localImage?: string;
   iconId?: number;
   icon?: Icon;
   daysOfWeekEnabled?: boolean;

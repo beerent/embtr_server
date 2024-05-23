@@ -26,6 +26,7 @@ import '@src/event/event_listener_imports';
 import newUserRouter from './endpoints/new_user/NewUserRouter';
 import jobRouter from './endpoints/job/JobRouter';
 import challengeRouter from './endpoints/challenge/ChallengeRouter';
+import iconRouter from './endpoints/icon/IconRouter';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
@@ -39,7 +40,7 @@ const allowedOrigins = [
     'https://embtr.com',
     'https://app.embtr.com',
     'http://localhost:19006',
-    'https://admin.embtr.com'
+    'https://admin.embtr.com',
 ];
 app.use(
     cors({
@@ -84,6 +85,7 @@ app.use('/', newUserRouter);
 app.use('/', healthRouter);
 app.use('/', jobRouter);
 app.use('/', challengeRouter);
+app.use('/', iconRouter);
 
 app.use(handleError);
 

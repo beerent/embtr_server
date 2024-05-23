@@ -35,7 +35,7 @@ import {
 import { validateSearch as validateSearchTasks } from '@src/middleware/task/TaskValidation';
 import { Task } from '@resources/schema';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
-import { IconCategory, IconService } from '@src/service/IconService';
+import { IconService } from '@src/service/IconService';
 import { GetIconsResponse } from '@resources/types/requests/IconTypes';
 
 const habitRouterLatest = express.Router();
@@ -148,7 +148,7 @@ habitRouterLatest.get(
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         console.log('context', context);
-        const icons = await IconService.getAllByCategory(context, IconCategory.HABIT);
+        const icons = await IconService.getAllByCategory(context, 'habit');
 
         const response: GetIconsResponse = { ...SUCCESS, icons };
         res.json(response);
