@@ -124,7 +124,6 @@ export class ScheduledHabitService {
         scheduledHabit: ScheduledHabit
     ): Promise<ScheduledHabit> {
         scheduledHabit.startDate = context.dateTime;
-        console.log('creating with start date', scheduledHabit.startDate);
 
         const createdScheduledHabit = await ScheduledHabitDao.create(
             context.userId,
@@ -176,20 +175,8 @@ export class ScheduledHabitService {
             throw new ServiceException(400, Code.INVALID_REQUEST, 'invalid request');
         }
 
-        const existingScheduledHabit = await ScheduledHabitDao.get(scheduledHabit.id);
-        if (!existingScheduledHabit) {
-            throw new ServiceException(
-                404,
-                Code.SCHEDULED_HABIT_NOT_FOUND,
-                'scheduled habit not found'
-            );
-        }
-
-        const existingScheduledHabitModel: ScheduledHabit =
-            ModelConverter.convert(existingScheduledHabit);
-
-        const clientDayKey = context.dayKey;
-        const clientDayKeyDate = DateUtility.getDate(clientDayKey);
+        const existingScheduledHabitModel = await this.get(context, scheduledHabit.id);
+        const clientDateTime = context.dateTime;
 
         const isModified = await PlannedHabitService.existsByDayKeyAndScheduledHabitId(
             context,
@@ -197,10 +184,10 @@ export class ScheduledHabitService {
             scheduledHabit.id
         );
 
-        let endDate = DateUtility.getDayBefore(clientDayKeyDate);
-        let newStartDate = clientDayKeyDate;
+        let endDate = DateUtility.getDayBefore(clientDateTime);
+        let newStartDate = clientDateTime;
         if (isModified) {
-            newStartDate = DateUtility.getDayAfter(clientDayKeyDate);
+            newStartDate = DateUtility.getDayAfter(clientDateTime);
         }
 
         // 1. set end date on current scheduled habit

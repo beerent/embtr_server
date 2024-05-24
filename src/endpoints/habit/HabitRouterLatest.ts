@@ -147,7 +147,6 @@ habitRouterLatest.get(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        console.log('context', context);
         const icons = await IconService.getAllByCategory(context, 'habit');
 
         const response: GetIconsResponse = { ...SUCCESS, icons };

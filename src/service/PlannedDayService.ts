@@ -474,7 +474,6 @@ export class PlannedDayService {
                 active: true,
             };
 
-            console.log('remote image: ', placeHolderPlannedTask.remoteImageUrl);
             placeHolderPlannedTasks.push(placeHolderPlannedTask);
         }
 
