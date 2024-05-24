@@ -3,7 +3,7 @@ import { HabitStreak, HabitStreakResult } from '@resources/types/dto/HabitStreak
 import { Context } from '@src/general/auth/Context';
 import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
-import { PlannedDay, Property, ScheduledHabit } from '@resources/schema';
+import { PlannedDay, ScheduledHabit } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './UserPropertyService';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
@@ -11,13 +11,25 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
+import { UserService } from './UserService';
 
 // "comment" - stronkbad - 2024-03-13
 
 export class HabitStreakService {
     public static async get(context: Context, userId: number): Promise<HabitStreak> {
-        const days = 30;
+        const userIsPremium = await UserService.isPremium(context, userId);
+        const days = userIsPremium ? 209 : 30;
 
+        const habitStreak = await this.getForDays(context, userId, days);
+
+        return habitStreak;
+    }
+
+    private static async getForDays(
+        context: Context,
+        userId: number,
+        days: number
+    ): Promise<HabitStreak> {
         const endDate = await this.getEndDateForUser(context, userId);
 
         const startDate = new Date(endDate);
@@ -55,6 +67,7 @@ export class HabitStreakService {
             startDate: PureDate.fromDateOnServer(startDate),
             medianDate: PureDate.fromDateOnServer(medianDate),
             endDate: PureDate.fromDateOnServer(endDate),
+            isAdvanced: days > 30,
 
             currentStreak: currentHabitStreak,
             longestStreak: lonestHabitStreak,
@@ -62,6 +75,7 @@ export class HabitStreakService {
             results: habitStreakResults,
         };
 
+        //log entire object
         return habitStreak;
     }
 
