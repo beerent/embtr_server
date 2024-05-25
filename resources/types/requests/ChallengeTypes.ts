@@ -4,11 +4,17 @@ import {
   Challenge,
   ChallengeParticipant,
   ChallengeRequirement,
-  Milestone,
   Task,
 } from '../../schema';
 import { Response } from './RequestTypes';
 import { PureDate } from '../date/PureDate';
+
+/**
+ * Challenges
+ */
+export interface GetChallengesResponse extends Response {
+  challenges: Challenge[]
+}
 
 /**
  * Challenge Summaries

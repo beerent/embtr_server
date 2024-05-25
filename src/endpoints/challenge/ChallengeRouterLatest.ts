@@ -24,6 +24,7 @@ import {
     GetChallengesDetailsResponse,
     GetChallengesSummariesResponse,
     GetChallengeSummaryResponse,
+    GetChallengesResponse
 } from '@resources/types/requests/ChallengeTypes';
 import { ChallengeCreationService } from '@src/service/feature/ChallengeCreationService';
 
@@ -71,6 +72,18 @@ challengeRouterLatest.get('/details', routeLogger(v), authenticate, authorize, a
     };
     res.status(response.httpCode).json(response);
 });
+
+challengeRouterLatest.get('/all', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
+    const context = await ContextService.get(req);
+
+    const challenges = await ChallengeService.getAll(context);
+    const response: GetChallengesResponse = {
+        ...SUCCESS,
+        challenges
+    };
+    res.status(response.httpCode).json(response);
+});
+
 
 challengeRouterLatest.get(
     '/:id/details',
