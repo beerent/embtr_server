@@ -12,20 +12,17 @@ import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
 import { UserService } from './UserService';
-import { ServiceException } from '@src/general/exception/ServiceException';
-import { HttpCode } from '@src/common/RequestResponses';
-import { Code } from '@resources/codes';
 
 // "comment" - stronkbad - 2024-03-13
 
 export class HabitStreakService {
     public static async getAdvanced(context: Context, userId: number): Promise<HabitStreak> {
         const userIsPremium = await UserService.isPremium(context, userId);
+        let days = 209;
         if (!userIsPremium) {
-            throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'User is not premium');
+            days = 30;
         }
 
-        const days = 209;
         const habitStreak = await this.getForDays(context, userId, days);
         return habitStreak;
     }
