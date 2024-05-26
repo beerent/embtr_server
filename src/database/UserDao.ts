@@ -63,6 +63,9 @@ export class UserDao {
 
     public static async getAll(query?: Record<string, string>): Promise<User[]> {
         const users = await prisma.user.findMany({
+            ...(query?.page && {
+               skip: ((Number(query.page) - 1) * Number(query.limit || 25))
+            }),
             ...(query?.limit && {
                take: Number(query.limit)
             }),
