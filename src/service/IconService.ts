@@ -23,6 +23,13 @@ export class IconService {
         return iconModel;
     }
 
+    public static async getAll(): Promise<Icon[]> {
+        const icons = await IconDao.getAll();
+        const iconModel: Icon[] = ModelConverter.convertAll(icons);
+
+        return iconModel;
+    }
+
     public static async getAllByCategory(context: Context, category: string): Promise<Icon[]> {
         const icons = await IconDao.getAllByCategory(category);
         if (!icons) {

@@ -4,6 +4,7 @@ import {
   Challenge,
   ChallengeParticipant,
   ChallengeRequirement,
+  Milestone,
   Task,
 } from '../../schema';
 import { Response } from './RequestTypes';
