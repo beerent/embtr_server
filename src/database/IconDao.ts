@@ -10,6 +10,15 @@ export class IconDao {
         });
     }
 
+    public static async getAll() {
+        return prisma.icon.findMany({
+            include: {
+                categories: true,
+                tags: true
+            }
+        });
+    }
+
     public static async getAllByCategory(category: string) {
         return prisma.icon.findMany({
             where: {

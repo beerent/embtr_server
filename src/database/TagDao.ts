@@ -1,7 +1,11 @@
 import { prisma } from '@database/prisma';
-import { Icon } from '@resources/schema';
 
 export class TagDao {
+    public static async getAll() {
+        return prisma.tag.findMany();
+    }
+
+
     public static async getByName(name: string) {
         return prisma.tag.findFirst({
             where: {

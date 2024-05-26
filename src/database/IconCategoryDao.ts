@@ -16,4 +16,8 @@ export class IconCategoryDao {
             },
         });
     }
+
+    public static async getAll() {
+        return prisma.iconCategory.findMany();
+    }
 }
