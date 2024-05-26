@@ -68,7 +68,7 @@ export interface LeaveChallengeRequest {
 export interface CreateChallengeRequest {
   challenge: Pick<Challenge, 'name' | 'description' | 'start' | 'end'>;
   award: Pick<Award, 'name' | 'description' | 'remoteImageUrl' | 'localImage'>;
-  task: Pick<Task, 'title' | 'description'>;
+  task: Pick<Task, 'title' | 'description' | 'iconId'>;
   challengeRequirement: Pick<
     ChallengeRequirement,
     | 'unitId'
