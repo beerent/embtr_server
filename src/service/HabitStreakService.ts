@@ -18,10 +18,7 @@ import { UserService } from './UserService';
 export class HabitStreakService {
     public static async getAdvanced(context: Context, userId: number): Promise<HabitStreak> {
         const userIsPremium = await UserService.isPremium(context, userId);
-        let days = 209;
-        if (!userIsPremium) {
-            days = 30;
-        }
+        const days = 209;
 
         const habitStreak = await this.getForDays(context, userId, days);
         return habitStreak;
