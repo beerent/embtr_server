@@ -19,7 +19,26 @@ habitStreakRouterLatest.get(
     const context = await ContextService.get(req);
     const userId = Number(req.params.userId);
 
-    const habitStreak = await HabitStreakService.get(context, userId);
+    const habitStreak = await HabitStreakService.getBasic(context, userId);
+    const response: GetHabitStreakResponse = {
+      ...SUCCESS,
+      habitStreak,
+    };
+
+    res.json(response);
+  }
+);
+
+habitStreakRouterLatest.get(
+  '/advanced/:userId',
+  routeLogger(v),
+  authenticate,
+  authorize,
+  async (req, res) => {
+    const context = await ContextService.get(req);
+    const userId = Number(req.params.userId);
+
+    const habitStreak = await HabitStreakService.getAdvanced(context, userId);
     const response: GetHabitStreakResponse = {
       ...SUCCESS,
       habitStreak,
