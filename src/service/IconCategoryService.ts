@@ -4,6 +4,13 @@ import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class IconCategoryService {
+    public static async getAll(): Promise<IconCategory[]> {
+        const iconCategories = await IconCategoryDao.getAll()
+
+        const iconCategoriesModel: IconCategory[] = ModelConverter.convertAll(iconCategories);
+        return iconCategoriesModel;
+    }
+
     public static async getByName(
         context: Context,
         name: string
