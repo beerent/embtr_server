@@ -4,6 +4,14 @@ import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class TagService {
+    public static async getAll(): Promise<Tag[]> {
+        const tags = await TagDao.getAll();
+
+        const tagModels: Tag[] = ModelConverter.convertAll(tags);
+        return tagModels;
+    }
+
+
     public static async getByName(context: Context, name: string): Promise<Tag | undefined> {
         const tag = await TagDao.getByName(name);
         if (!tag) {
