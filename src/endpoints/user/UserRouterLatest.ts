@@ -37,6 +37,7 @@ import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BlockUserService } from '@src/service/BlockUserService';
 import userPropertyRouterLatest from './UserPropertyRouterLatest';
 import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
+import { PremiumService } from '@src/service/PremiumService';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -62,8 +63,8 @@ userRouterLatest.get(
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
 
-        const totalUsers = await UserService.getAllUserCount(context)
-        const premiumUsers = await UserService.getAllPremiumUserCount(context)
+        const totalUsers = await UserService.getAllUserCount(context);
+        const premiumUsers = await UserService.getAllPremiumUserCount(context);
 
         const response: GetUserStatsResponse = { ...SUCCESS, totalUsers, premiumUsers };
         res.json(response);
@@ -77,14 +78,13 @@ userRouterLatest.get(
     authorizeAdmin,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const query = req.query as Record<string, string>
+        const query = req.query as Record<string, string>;
 
-        const users: User[] = await UserService.getAll(context, query)
+        const users: User[] = await UserService.getAll(context, query);
         const response: GetUsersResponse = { ...SUCCESS, users };
         res.json(response);
     })
 );
-
 
 userRouterLatest.get(
     '/search/',
@@ -203,6 +203,20 @@ userRouterLatest.post(
         const user = await UserService.updatePremiumStatus(context, context.userUid);
         const response: UpdatePremiumStatusResponse = { ...SUCCESS, user };
         res.json(response);
+    })
+);
+
+userRouterLatest.post(
+    '/premiumPressed',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const source = req.query.source as string;
+
+        await PremiumService.premiumPressed(context, source);
+        res.json(SUCCESS);
     })
 );
 

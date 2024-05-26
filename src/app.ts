@@ -28,6 +28,7 @@ import jobRouter from './endpoints/job/JobRouter';
 import challengeRouter from './endpoints/challenge/ChallengeRouter';
 import iconRouter from './endpoints/icon/IconRouter';
 import milestoneRouter from './endpoints/milestone/MilestoneRouter';
+import premiumRouter from './endpoints/premium_router/PremiumRouter';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
@@ -88,6 +89,7 @@ app.use('/', jobRouter);
 app.use('/', challengeRouter);
 app.use('/', iconRouter);
 app.use('/', milestoneRouter);
+app.use('/', premiumRouter);
 
 app.use(handleError);
 

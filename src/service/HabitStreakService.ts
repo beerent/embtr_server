@@ -3,7 +3,7 @@ import { HabitStreak, HabitStreakResult } from '@resources/types/dto/HabitStreak
 import { Context } from '@src/general/auth/Context';
 import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
-import { PlannedDay, Property, ScheduledHabit } from '@resources/schema';
+import { PlannedDay, ScheduledHabit } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './UserPropertyService';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
@@ -11,13 +11,43 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
+import { UserService } from './UserService';
+import { ServiceException } from '@src/general/exception/ServiceException';
+import { HttpCode } from '@src/common/RequestResponses';
+import { Code } from '@resources/codes';
 
 // "comment" - stronkbad - 2024-03-13
 
 export class HabitStreakService {
-    public static async get(context: Context, userId: number): Promise<HabitStreak> {
+    public static async getAdvanced(context: Context, userId: number): Promise<HabitStreak> {
+        const userIsPremium = await UserService.isPremium(context, userId);
+        if (!userIsPremium) {
+            throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'User is not premium');
+        }
+
+        const days = 209;
+        const habitStreak = await this.getForDays(context, userId, days);
+        return habitStreak;
+    }
+
+    public static async getBasic(context: Context, userId: number): Promise<HabitStreak> {
         const days = 30;
 
+        const habitStreak = await this.getForDays(context, userId, days);
+        return habitStreak;
+    }
+
+    public static async get(context: Context, userId: number, days: number): Promise<HabitStreak> {
+        const habitStreak = await this.getForDays(context, userId, days);
+
+        return habitStreak;
+    }
+
+    private static async getForDays(
+        context: Context,
+        userId: number,
+        days: number
+    ): Promise<HabitStreak> {
         const endDate = await this.getEndDateForUser(context, userId);
 
         const startDate = new Date(endDate);
