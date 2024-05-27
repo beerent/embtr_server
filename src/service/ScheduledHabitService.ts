@@ -123,7 +123,7 @@ export class ScheduledHabitService {
         context: Context,
         scheduledHabit: ScheduledHabit
     ): Promise<ScheduledHabit> {
-        scheduledHabit.startDate = context.dateTime;
+        scheduledHabit.startDate = scheduledHabit.startDate ?? context.dateTime;
 
         const createdScheduledHabit = await ScheduledHabitDao.create(
             context.userId,
