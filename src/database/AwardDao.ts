@@ -15,8 +15,11 @@ export class AwardDao {
             data: {
                 name: award.name ?? '',
                 description: award.description,
-                remoteImageUrl: award.remoteImageUrl,
-                localImage: award.localImage,
+                icon: {
+                    connect: {
+                        id: award.iconId,
+                    },
+                },
             },
         });
     }

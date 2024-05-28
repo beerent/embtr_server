@@ -326,8 +326,8 @@ export interface Award {
   id?: number;
   name?: string;
   description?: string;
-  remoteImageUrl?: string;
-  localImage?: string;
+  iconId?: number;
+  icon?: Icon;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
@@ -457,6 +457,7 @@ export interface Icon {
   plannedTasks?: PlannedTask[];
   ScheduledHabit?: ScheduledHabit[];
   Task?: Task[];
+  Award?: Award[];
 }
 
 export interface Tag {

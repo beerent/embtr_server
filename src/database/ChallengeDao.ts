@@ -43,7 +43,7 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
-                award: true,
+                award: { include: { icon: true } },
                 creator: true,
                 likes: {
                     include: {
@@ -81,7 +81,11 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
-                award: true,
+                award: {
+                    include: {
+                        icon: true,
+                    },
+                },
                 creator: true,
                 likes: {
                     where: {
@@ -112,7 +116,7 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
-                award: true,
+                award: { include: { icon: true } },
                 creator: true,
                 likes: {
                     where: {
@@ -153,7 +157,7 @@ export class ChallengeDao {
                         createdAt: 'desc',
                     },
                 },
-                award: true,
+                award: { include: { icon: true } },
                 creator: true,
                 likes: {
                     where: {
@@ -211,7 +215,7 @@ export class ChallengeDao {
                         user: true,
                     },
                 },
-                award: true,
+                award: { include: { icon: true } },
             },
         });
     }
@@ -232,7 +236,7 @@ export class ChallengeDao {
                         unit: true,
                     },
                 },
-                award: true,
+                award: { include: { icon: true } },
                 challengeParticipants: true,
                 creator: true,
                 likes: true,

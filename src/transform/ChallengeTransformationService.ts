@@ -76,8 +76,8 @@ export class ChallengeTransformationServiceV3 {
             {
                 name: challenge.award.name ?? '',
                 description: challenge.award.description ?? '',
-                remoteImageUrl: challenge.award.remoteImageUrl ?? '',
-                localImage: challenge.award.localImage ?? '',
+                remoteImageUrl: challenge.award.icon?.remoteImageUrl ?? '',
+                localImage: challenge.award.icon?.localImage ?? '',
                 active: challenge.award.active ?? true,
                 createdAt: challenge.award.createdAt ?? new Date(),
                 updatedAt: challenge.award.updatedAt ?? new Date(),
