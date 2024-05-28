@@ -6,27 +6,23 @@ import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDay, ScheduledHabit } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './UserPropertyService';
-import { PlannedDayDao } from '@src/database/PlannedDayDao';
-import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
-import { parseISO, getDay } from 'date-fns';
+import { DateUtility } from '@src/utility/date/DateUtility';
 
 // "comment" - stronkbad - 2024-03-13
 
-export class HabitStreakService {
+export class HabitStreakServiceV4 {
     public static async getAdvanced(context: Context, userId: number): Promise<HabitStreak> {
-        const days = 201;
+        const days = 209;
 
-        const startDay = 1; // monday
-        const maxWeeks = 28;
-        const habitStreak = await this.getForDays(context, userId, days, startDay, maxWeeks);
+        const habitStreak = await this.getForDays(context, userId, days);
         return habitStreak;
     }
 
     public static async getBasic(context: Context, userId: number): Promise<HabitStreak> {
-        const days = 29;
+        const days = 30;
 
         const habitStreak = await this.getForDays(context, userId, days);
         return habitStreak;
@@ -41,14 +37,15 @@ export class HabitStreakService {
     private static async getForDays(
         context: Context,
         userId: number,
-        days: number,
-        startDayOfWeek?: number,
-        maxWeeks?: number
+        days: number
     ): Promise<HabitStreak> {
         const endDate = await this.getEndDateForUser(context, userId);
 
         const startDate = new Date(endDate);
         startDate.setDate(endDate.getDate() - days);
+
+        const medianDate = new Date(endDate);
+        medianDate.setDate(endDate.getDate() - Math.floor(days / 2));
 
         HabitStreakEventDispatcher.onRefresh(context, userId);
 
@@ -74,45 +71,11 @@ export class HabitStreakService {
             plannedDays
         );
 
-        // remove days that are not the start of the week
-        if (startDayOfWeek !== undefined) {
-            while (true) {
-                const date = parseISO(habitStreakResults[0].dayKey);
-                const dayOfWeek = getDay(date);
-                const isStartDay = dayOfWeek === startDayOfWeek;
-
-                if (isStartDay) {
-                    break;
-                }
-
-                habitStreakResults.shift();
-            }
-        }
-
-        // remove extra weeks
-        if (maxWeeks !== undefined) {
-            while (habitStreakResults.length / 7 > maxWeeks) {
-                for (let i = 0; i < 7; i++) {
-                    habitStreakResults.shift();
-                }
-            }
-        }
-
-        const calculatedStartDate = PureDate.fromDateOnServer(
-            new Date(habitStreakResults[0].dayKey)
-        );
-        const calculatedMedianDate = PureDate.fromDateOnServer(
-            new Date(habitStreakResults[Math.floor(habitStreakResults.length / 2)].dayKey)
-        );
-        const calculatedEndDate = PureDate.fromDateOnServer(
-            new Date(habitStreakResults[habitStreakResults.length - 1].dayKey)
-        );
-
         // 3. send it on back
         const habitStreak: HabitStreak = {
-            startDate: calculatedStartDate,
-            medianDate: calculatedMedianDate,
-            endDate: calculatedEndDate,
+            startDate: PureDate.fromDateOnServer(startDate),
+            medianDate: PureDate.fromDateOnServer(medianDate),
+            endDate: PureDate.fromDateOnServer(endDate),
 
             currentStreak: currentHabitStreak,
             longestStreak: lonestHabitStreak,
@@ -121,79 +84,6 @@ export class HabitStreakService {
         };
 
         return habitStreak;
-    }
-
-    // todo - consider passing in the statuses so we don't repeat the query
-    public static async fullPopulateCurrentStreak(context: Context, userId: number) {
-        let startDate = await this.getStartDateForUser(context, userId);
-        const endDate = await this.getEndDateForUser(context, userId);
-        if (startDate === undefined) {
-            startDate = endDate;
-        }
-
-        const statuses = await PlannedDayDao.getCompletionStatusesForDateRange(
-            userId,
-            startDate,
-            endDate
-        );
-        statuses.reverse();
-
-        let completionCount = 0;
-        for (const status of statuses) {
-            if (status.status === Constants.CompletionState.COMPLETE) {
-                completionCount++;
-            } else if (
-                status.status === Constants.CompletionState.NO_SCHEDULE ||
-                status.status === null
-            ) {
-                continue;
-            } else {
-                break;
-            }
-        }
-
-        console.log('Setting current habit streak to', completionCount);
-        UserPropertyService.setCurrentHabitStreak(context, userId, completionCount);
-    }
-
-    public static async fullPopulateLongestStreak(context: Context, userId: number) {
-        let startDate = await this.getStartDateForUser(context, userId);
-        const endDate = await this.getEndDateForUser(context, userId);
-        if (startDate === undefined) {
-            startDate = endDate;
-        }
-
-        const statuses = await PlannedDayDao.getCompletionStatusesForDateRange(
-            userId,
-            startDate,
-            endDate
-        );
-
-        let currentStreak = 0;
-        let longestStreak = 0;
-        for (const status of statuses) {
-            if (status.status === Constants.CompletionState.COMPLETE) {
-                currentStreak++;
-                if (currentStreak > longestStreak) {
-                    longestStreak = currentStreak;
-                }
-            } else if (
-                status.status === Constants.CompletionState.NO_SCHEDULE ||
-                status.status === null
-            ) {
-                continue;
-            } else {
-                currentStreak = 0;
-            }
-        }
-
-        console.log('Setting longest habit streak to', longestStreak);
-        UserPropertyService.setLongestHabitStreak(context, userId, longestStreak);
-    }
-
-    private static async getStartDateForUser(context: Context, userId: number) {
-        const plannedDay = await PlannedDayDao.getFirst(userId);
-        return plannedDay?.date;
     }
 
     private static async getEndDateForUser(context: Context, userId: number) {

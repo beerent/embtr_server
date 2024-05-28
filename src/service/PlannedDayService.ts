@@ -294,8 +294,6 @@ export class PlannedDayService {
             plannedDay.dayKey
         );
 
-        console.log('COMPLETE', completionStatus);
-
         if (plannedDay.status === completionStatus) {
             return plannedDay;
         }
