@@ -362,7 +362,7 @@ export class ChallengeDao {
        AND taskId = ${taskId}
        AND planned_task.active = true
        AND planned_day.date >= ${startDateString}
-       AND planned_day.date < ${endDateString}
+       AND planned_day.date <= ${endDateString}
      group by intervalIndex; 
             `
         );

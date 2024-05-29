@@ -311,9 +311,8 @@ export class ChallengeService {
     ): Promise<number> {
         const start = challenge.start ?? new Date();
         const end = challenge.end ?? new Date();
-        const daysInDateRange = Math.floor(
-            (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
-        );
+        const daysInDateRange =
+            Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
         const interval = requirement.calculationIntervalDays ?? daysInDateRange;
 
         let taskId: number | undefined = undefined;
