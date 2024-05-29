@@ -248,12 +248,13 @@ export class PlannedDayService {
             dayKey
         );
 
+        // no status to update if the planned day does not exist
         if (!plannedDay?.id) {
-            throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
+            return;
         }
 
         try {
-            return this.updateCompletionStatusByPlannedDayId(context, plannedDay.id);
+            this.updateCompletionStatusByPlannedDayId(context, plannedDay.id);
         } catch (error) {
             console.error('error updating planned day', plannedDay.id);
         }
