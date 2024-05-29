@@ -483,13 +483,7 @@ export class PlannedDayService {
         ];
 
         clonedPlannedDay.plannedTasks = clonedPlannedDay.plannedTasks?.sort((a, b) => {
-            if (a.timeOfDay === b.timeOfDay) {
-                return 0;
-            }
-
-            const aRank = a.timeOfDay?.id === undefined ? 0 : a.timeOfDay.id;
-            const bRank = b.timeOfDay?.id === undefined ? 0 : b.timeOfDay.id;
-            return aRank < bRank ? -1 : 1;
+            return (a.scheduledHabitId ?? 0) - (b.scheduledHabitId ?? 0);
         });
 
         return clonedPlannedDay;
