@@ -17,6 +17,7 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedHabitService } from './PlannedHabitService';
 import { HttpCode } from '@src/common/RequestResponses';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+import { Constants } from '@resources/types/constants/constants';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -185,9 +186,27 @@ export class ScheduledHabitService {
         );
 
         let endDate = DateUtility.getDayBefore(clientDateTime);
+
         let newStartDate = clientDateTime;
         if (isModified) {
             newStartDate = DateUtility.getDayAfter(clientDateTime);
+        }
+
+        // we do not want to set scheduled habits that start in the future to start
+        // before they should
+        if (existingScheduledHabitModel.startDate) {
+            const clientDate = PureDate.fromString(context.dayKey);
+            const challengeStartDate = PureDate.fromDateOnServer(
+                existingScheduledHabitModel.startDate
+            );
+
+            if (clientDate.compare(challengeStartDate) < 0) {
+                console.log(
+                    'client date is before challenge start date, using',
+                    existingScheduledHabitModel.startDate
+                );
+                newStartDate = existingScheduledHabitModel.startDate;
+            }
         }
 
         // 1. set end date on current scheduled habit

@@ -17,6 +17,17 @@ export class ScheduledHabitDao {
             };
         }
 
+        let icon = {};
+        if (scheduledHabit.iconId) {
+            icon = {
+                icon: {
+                    connect: {
+                        id: scheduledHabit.iconId,
+                    },
+                },
+            };
+        }
+
         let daysOfWeekIds = scheduledHabit.daysOfWeek?.map((day) => day.id ?? 0);
 
         let timesOfDayIds = [DEFAULT_TIME_OF_DAY_ID];
@@ -37,13 +48,10 @@ export class ScheduledHabitDao {
                     },
                 },
                 ...unit,
+                ...icon,
                 title: scheduledHabit.title,
                 description: scheduledHabit.description,
-                icon: {
-                    connect: {
-                        id: scheduledHabit.iconId ?? undefined,
-                    },
-                },
+
                 detailsEnabled: scheduledHabit.detailsEnabled === true,
                 quantity: scheduledHabit.quantity ?? 1,
                 daysOfWeekEnabled: scheduledHabit.daysOfWeekEnabled === true,
