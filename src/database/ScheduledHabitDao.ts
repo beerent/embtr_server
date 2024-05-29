@@ -41,7 +41,7 @@ export class ScheduledHabitDao {
                 description: scheduledHabit.description,
                 icon: {
                     connect: {
-                        id: scheduledHabit.iconId ?? 9,
+                        id: scheduledHabit.iconId ?? undefined,
                     },
                 },
                 detailsEnabled: scheduledHabit.detailsEnabled === true,
