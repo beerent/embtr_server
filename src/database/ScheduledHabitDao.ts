@@ -538,7 +538,7 @@ export class ScheduledHabitDao {
                             },
                             {
                                 endDate: {
-                                    gte: date,
+                                    gt: date,
                                 },
                             },
                         ],

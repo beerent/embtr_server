@@ -149,7 +149,11 @@ export class ChallengeParticipantDao {
             include: {
                 challenge: {
                     include: {
-                        award: true,
+                        award: {
+                            include: {
+                                icon: true,
+                            },
+                        },
                         challengeRequirements: {
                             include: {
                                 task: true,
