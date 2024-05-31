@@ -17,7 +17,6 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedHabitService } from './PlannedHabitService';
 import { HttpCode } from '@src/common/RequestResponses';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
-import { Constants } from '@resources/types/constants/constants';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -48,9 +47,7 @@ export class ScheduledHabitService {
                 continue;
             }
 
-            scheduledHabit.endDate = challenge.end ?? new Date();
-
-            const updatedScheduledHabit = await this.update(context, scheduledHabit);
+            const updatedScheduledHabit = await this.replace(context, scheduledHabit);
             scheduledHabits.push(updatedScheduledHabit);
         }
 
@@ -192,6 +189,9 @@ export class ScheduledHabitService {
             newStartDate = DateUtility.getDayAfter(clientDateTime);
         }
 
+        const challengeEnd =
+            existingScheduledHabitModel.task?.challengeRequirements?.[0].challenge?.end;
+
         // we do not want to set scheduled habits that start in the future to start
         // before they should
         if (existingScheduledHabitModel.startDate) {
@@ -218,7 +218,7 @@ export class ScheduledHabitService {
             ...scheduledHabit,
         };
         updatedScheduledHabitModal.startDate = newStartDate;
-        updatedScheduledHabitModal.endDate = undefined;
+        updatedScheduledHabitModal.endDate = challengeEnd ?? undefined;
 
         const promises = [
             ScheduledHabitDao.update(context.userId, existingScheduledHabitModel),

@@ -301,8 +301,13 @@ export class ScheduledHabitDao {
                     include: {
                         icon: true,
                         challengeRequirements: {
-                            select: {
-                                challengeId: true,
+                            include: {
+                                challenge: {
+                                    select: {
+                                        start: true,
+                                        end: true,
+                                    },
+                                },
                             },
                         },
                     },
