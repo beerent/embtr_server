@@ -1,4 +1,4 @@
-import { Unit } from '@resources/schema';
+import type { Unit } from '@resources/schema';
 import { UnitDao } from '@src/database/UnitDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Context } from '@src/general/auth/Context';
@@ -9,6 +9,13 @@ export class UnitService {
         const unitModels: Unit[] = ModelConverter.convertAll(units);
 
         return unitModels;
+    }
+
+    public static async create(unit: Unit): Promise<Unit> {
+        const response = await UnitDao.create(unit);
+        const unitModel: Unit = ModelConverter.convert(response);
+
+        return unitModel;
     }
 
     public static getUnitString(unit: Unit, quantity: number): string {

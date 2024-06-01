@@ -1,9 +1,9 @@
 import express from 'express';
 import { authenticate } from '@src/middleware/authentication';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { UnitService } from '@src/service/UnitService';
 import { ContextService } from '@src/service/ContextService';
-import { GetUnitsResponse } from '@resources/types/requests/UnitTypes';
+import { CreateUnitRequest, CreateUnitResponse, GetUnitsResponse } from '@resources/types/requests/UnitTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
@@ -20,5 +20,18 @@ unitRouterLatest.get('/', routeLogger(v), authenticate, authorize, async (req, r
     };
     res.json(response);
 });
+
+unitRouterLatest.post('/', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
+    const request: CreateUnitRequest = req.body;
+    const unit = await UnitService.create(request);
+
+    const response: CreateUnitResponse = {
+        ...SUCCESS,
+        unit
+    };
+
+    res.json(response);
+});
+
 
 export default unitRouterLatest;
