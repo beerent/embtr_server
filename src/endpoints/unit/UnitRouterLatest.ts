@@ -3,7 +3,7 @@ import { authenticate } from '@src/middleware/authentication';
 import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { UnitService } from '@src/service/UnitService';
 import { ContextService } from '@src/service/ContextService';
-import { CreateUnitRequest, CreateUnitResponse, GetUnitsResponse } from '@resources/types/requests/UnitTypes';
+import { CreateUnitRequest, CreateUnitResponse, DeleteUnitRequest, GetUnitsResponse, UpdateUnitRequest, UpdateUnitResponse } from '@resources/types/requests/UnitTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 
@@ -33,5 +33,22 @@ unitRouterLatest.post('/', routeLogger(v), authenticate, authorizeAdmin, async (
     res.json(response);
 });
 
+unitRouterLatest.post('/update', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
+    const request: UpdateUnitRequest = req.body;
+    const unit = await UnitService.update(parseInt(request.id), request.data);
+
+    const response: UpdateUnitResponse = {
+        ...SUCCESS,
+        unit
+    };
+
+    res.json(response);
+});
+
+unitRouterLatest.post('/delete', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
+    const request: DeleteUnitRequest = req.body;
+    const response = await UnitService.delete(parseInt(request.id));
+    res.status(response.httpCode).json(response);
+});
 
 export default unitRouterLatest;

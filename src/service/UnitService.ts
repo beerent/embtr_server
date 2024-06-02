@@ -2,6 +2,8 @@ import type { Unit } from '@resources/schema';
 import { UnitDao } from '@src/database/UnitDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Context } from '@src/general/auth/Context';
+import { SUCCESS } from '@src/common/RequestResponses';
+import { Response } from '@resources/types/requests/RequestTypes';
 
 export class UnitService {
     public static async getAll(context: Context): Promise<Unit[]> {
@@ -16,6 +18,18 @@ export class UnitService {
         const unitModel: Unit = ModelConverter.convert(response);
 
         return unitModel;
+    }
+
+    public static async update(id: number, unit: Unit): Promise<Unit> {
+        const response = await UnitDao.update(id, unit);
+        const unitModel: Unit = ModelConverter.convert(response);
+
+        return unitModel;
+    }
+
+    public static async delete(id: number): Promise<Response> {
+        await UnitDao.delete(id);
+        return { ...SUCCESS }
     }
 
     public static getUnitString(unit: Unit, quantity: number): string {
