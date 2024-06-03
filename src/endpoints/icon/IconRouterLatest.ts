@@ -43,8 +43,9 @@ iconRouterLatest.post(
   authenticate,
   authorizeAdmin,
   async (req, res) => {
+    const context = await ContextService.get(req);
     const request: UpdateIconRequest = req.body;
-    const icon = await IconService.update(request.id, request.data)
+    const icon = await IconService.update(context, request.id, request.data)
     const response: UpdateIconResponse = { ...SUCCESS, icon };
 
     res.json(response);

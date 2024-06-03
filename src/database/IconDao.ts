@@ -46,14 +46,13 @@ export class IconDao {
         });
     }
 
-    public static async update(iconId: number, icon: Icon) {
+    public static async update(iconId: number, icon: Partial<Icon>) {
         return prisma.icon.update({
             where: {
               id: iconId
             },
             data: {
                 name: icon.name ?? '',
-                key: icon.key ?? '',
                 remoteImageUrl: icon.remoteImageUrl
             },
         });

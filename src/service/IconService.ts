@@ -1,5 +1,6 @@
 import { Code } from '@resources/codes';
 import { Icon, Tag, IconCategory } from '@resources/schema';
+import { UpdateIconData } from '@resources/types/requests/IconTypes';
 import { HttpCode } from '@src/common/RequestResponses';
 import { IconDao } from '@src/database/IconDao';
 import { Context } from '@src/general/auth/Context';
@@ -54,14 +55,26 @@ export class IconService {
         return createdIconModel;
     }
 
-    public static async update(iconId: number, icon: Icon): Promise<Icon> {
-        const updatedIcon = await IconDao.update(iconId, icon);
+    public static async update(context: Context, iconId: number, data: UpdateIconData): Promise<Icon> {
+        const updatedIcon = await IconDao.update(iconId, {
+            name: data.name,
+            remoteImageUrl: data.remoteImageUrl
+        });
+
         if (!updatedIcon) {
             throw new ServiceException(
                 HttpCode.GENERAL_FAILURE,
                 Code.GENERIC_ERROR,
                 'Failed to update icon'
             );
+        }
+
+        if (data.tags) {
+            await IconService.addTags(context, updatedIcon.id, data.tags);
+        }
+
+        if (data.categories) {
+            await IconService.addCategories(context, updatedIcon.id, data.categories);
         }
 
         const updatedIconModel: Icon = ModelConverter.convert(updatedIcon);
