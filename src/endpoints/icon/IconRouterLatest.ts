@@ -1,4 +1,4 @@
-import { CreateIconRequest, CreateIconResponse, GetIconsResponse } from '@resources/types/requests/IconTypes';
+import { CreateIconRequest, CreateIconResponse, GetIconsResponse, UpdateIconRequest, UpdateIconResponse } from '@resources/types/requests/IconTypes';
 import { authenticate } from '@src/middleware/authentication';
 import { authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
@@ -36,5 +36,19 @@ iconRouterLatest.post('/', routeLogger(v), authenticate, authorizeAdmin, async (
 
   res.json(response);
 });
+
+iconRouterLatest.post(
+  '/update',
+  routeLogger(v),
+  authenticate,
+  authorizeAdmin,
+  async (req, res) => {
+    const request: UpdateIconRequest = req.body;
+    const icon = await IconService.update(request.id, request.data)
+    const response: UpdateIconResponse = { ...SUCCESS, icon };
+
+    res.json(response);
+  }
+);
 
 export default iconRouterLatest;

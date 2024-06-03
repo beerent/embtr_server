@@ -46,6 +46,19 @@ export class IconDao {
         });
     }
 
+    public static async update(iconId: number, icon: Icon) {
+        return prisma.icon.update({
+            where: {
+              id: iconId
+            },
+            data: {
+                name: icon.name ?? '',
+                key: icon.key ?? '',
+                remoteImageUrl: icon.remoteImageUrl
+            },
+        });
+    }
+
     public static async addTags(iconId: number, tagIds: number[]) {
         return prisma.icon.update({
             where: {

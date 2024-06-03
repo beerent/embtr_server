@@ -54,6 +54,20 @@ export class IconService {
         return createdIconModel;
     }
 
+    public static async update(iconId: number, icon: Icon): Promise<Icon> {
+        const updatedIcon = await IconDao.update(iconId, icon);
+        if (!updatedIcon) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'Failed to update icon'
+            );
+        }
+
+        const updatedIconModel: Icon = ModelConverter.convert(updatedIcon);
+        return updatedIconModel;
+    }
+
     public static async addTags(context: Context, iconId: number, tags: string[]): Promise<Icon> {
         const tagObjects: Tag[] = await TagService.createAll(context, tags);
         const tagIds = tagObjects.flatMap((tag) => (tag.id ? [tag.id] : []));
