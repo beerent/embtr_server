@@ -19,8 +19,8 @@ export interface UpdateIconRequest {
     id: number
     data: {
       name?: string
-      tags?: Tag[]
-      categories?: IconCategory[]
+      tags?: string[]
+      categories?: string[]
       remoteImageUrl?: string
     }
 }
