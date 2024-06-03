@@ -64,6 +64,31 @@ plannedDayRouterLatest.get(
 );
 
 plannedDayRouterLatest.get(
+    '/admin/:userId/:dayKey',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    validateGetByUser,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const userId = Number(req.params.userId);
+        const dayKey = req.params.dayKey;
+
+        let plannedDay 
+
+        try {
+          plannedDay = await PlannedDayController.getByUser(context, userId, dayKey)
+        } catch (error) {
+          plannedDay = await PlannedDayService.getFullyPopulatedPlaceholderByUser(context, userId, dayKey)
+        }
+
+        const response: GetPlannedDayResponse = { ...SUCCESS, plannedDay };
+        res.json(response);
+    })
+);
+
+
+plannedDayRouterLatest.get(
     '/:userId/:dayKey/isComplete',
     routeLogger(v),
     authenticate,

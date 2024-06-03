@@ -220,6 +220,19 @@ userRouterLatest.post(
     })
 );
 
+userRouterLatest.get(
+    '/:userId',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const user = await UserService.getByIdForAdmin(parseInt(req.params.userId))
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+
 /*
  * Daily History
  */
