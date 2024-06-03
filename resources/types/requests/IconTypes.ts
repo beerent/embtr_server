@@ -29,6 +29,6 @@ export interface UpdateIconResponse extends Response {
     icon?: Icon;
 }
 
-export interface DeleteIconResponse extends Response {
+export interface DeleteIconRequest {
     id: number
 }

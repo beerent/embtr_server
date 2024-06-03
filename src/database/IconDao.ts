@@ -59,6 +59,14 @@ export class IconDao {
         });
     }
 
+    public static async delete(iconId: number) {
+        return prisma.icon.delete({
+            where: {
+              id: iconId
+            },
+        });
+    }
+
     public static async addTags(iconId: number, tagIds: number[]) {
         return prisma.icon.update({
             where: {

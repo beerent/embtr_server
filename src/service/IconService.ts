@@ -68,6 +68,10 @@ export class IconService {
         return updatedIconModel;
     }
 
+    public static async delete(iconId: number): Promise<void> {
+        await IconDao.delete(iconId);
+    }
+
     public static async addTags(context: Context, iconId: number, tags: string[]): Promise<Icon> {
         const tagObjects: Tag[] = await TagService.createAll(context, tags);
         const tagIds = tagObjects.flatMap((tag) => (tag.id ? [tag.id] : []));
