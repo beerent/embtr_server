@@ -20,6 +20,27 @@ export class UnitDao {
         });
     }
 
+    public static async update(id: number, unit: Unit) {
+        return prisma.unit.update({
+            where: {
+                id
+            },
+            data: {
+                unit: unit.unit ?? '',
+                abreveation: unit.abreveation ?? '',
+                stepSize: unit.stepSize ?? 1
+            }
+        });
+    }
+
+    public static async delete(id: number) {
+        return prisma.unit.delete({
+            where: {
+                id
+            },
+        });
+    }
+
     public static async getAll() {
         return prisma.unit.findMany({
             where: {
