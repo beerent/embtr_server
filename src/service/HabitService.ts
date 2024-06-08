@@ -58,4 +58,18 @@ export class HabitService {
 
         return taskModel;
     }
+
+    public static async update(context: Context, habit: Task): Promise<Task> {
+        const task = await TaskDao.update(habit);
+        if (!task) {
+            throw new ServiceException(500, Code.HABIT_NOT_FOUND, 'habit update failed');
+        }
+
+        const taskModel: Task = ModelConverter.convert(task);
+
+        // deprecated on 4.0.13
+        DeprecatedImageUtility.setTaskImages(taskModel);
+
+        return taskModel;
+    }
 }

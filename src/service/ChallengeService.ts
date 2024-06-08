@@ -7,7 +7,7 @@ import {
     ChallengeRequirementCompletionState,
     PlannedTask,
 } from '@resources/schema';
-import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
+import { ChallengeDetails, ChallengeFull, ChallengeSummary } from '@resources/types/dto/Challenge';
 import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
@@ -17,6 +17,8 @@ import { ChallengeParticipantEventDispatcher } from '@src/event/challenge_partic
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { AwardService } from './AwardService';
+import { HabitService } from './HabitService';
 import { PlannedHabitService } from './PlannedHabitService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 
@@ -364,6 +366,20 @@ export class ChallengeService {
         }
 
         const challengeModel: Challenge = ModelConverter.convert(createdChallenge);
+        return challengeModel;
+    }
+
+    public static async update(context: Context, challenge: Challenge): Promise<Challenge> {
+        const updatedChallenge = await ChallengeDao.update(challenge);
+        if (!updatedChallenge) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'challenge update failed'
+            );
+        }
+
+        const challengeModel: Challenge = ModelConverter.convert(updatedChallenge);
         return challengeModel;
     }
 

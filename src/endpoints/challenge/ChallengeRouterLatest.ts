@@ -18,15 +18,18 @@ import { Context } from '@src/general/auth/Context';
 import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
 import {
-    CreateChallengeRequest,
     CreateChallengeResponse,
     GetChallengeDetailsResponse,
     GetChallengesDetailsResponse,
     GetChallengesSummariesResponse,
     GetChallengeSummaryResponse,
-    GetChallengesResponse
+    GetChallengesResponse,
+    GetChallengeFullResponse,
+    CreateChallengeFullRequest,
+    UpdateChallengeFullRequest,
 } from '@resources/types/requests/ChallengeTypes';
-import { ChallengeCreationService } from '@src/service/feature/ChallengeCreationService';
+import { ChallengeFullService } from '@src/service/feature/ChallengeFullService';
+import { ChallengeController } from '@src/controller/ChallengeController';
 
 // WARNING: Must be a level 12+ Engineer to refactor this file. - TheCaptainCoder - 2024-04-19
 
@@ -73,17 +76,22 @@ challengeRouterLatest.get('/details', routeLogger(v), authenticate, authorize, a
     res.status(response.httpCode).json(response);
 });
 
-challengeRouterLatest.get('/all', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
-    const context = await ContextService.get(req);
+challengeRouterLatest.get(
+    '/all',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    async (req, res) => {
+        const context = await ContextService.get(req);
 
-    const challenges = await ChallengeService.getAll(context);
-    const response: GetChallengesResponse = {
-        ...SUCCESS,
-        challenges
-    };
-    res.status(response.httpCode).json(response);
-});
-
+        const challenges = await ChallengeService.getAll(context);
+        const response: GetChallengesResponse = {
+            ...SUCCESS,
+            challenges,
+        };
+        res.status(response.httpCode).json(response);
+    }
+);
 
 challengeRouterLatest.get(
     '/:id/details',
@@ -188,6 +196,28 @@ challengeRouterLatest.delete(
     })
 );
 
+/******************/
+/* CHALLENGE FULL */
+/******************/
+
+challengeRouterLatest.get(
+    '/:id/full',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        const challengeFull = await ChallengeController.getFull(context, id);
+        const response: GetChallengeFullResponse = {
+            ...SUCCESS,
+            challengeFull: challengeFull,
+        };
+        res.status(response.httpCode).json(response);
+    }
+);
+
 challengeRouterLatest.post(
     '/',
     routeLogger(v),
@@ -195,15 +225,15 @@ challengeRouterLatest.post(
     authorizeAdmin,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const request: CreateChallengeRequest = req.body;
+        const request: CreateChallengeFullRequest = req.body;
 
-        const challenge = request.challenge;
-        const award = request.award;
-        const task = request.task;
-        const challengeRequirement = request.challengeRequirement;
-        const milestoneKeys = request.milestoneKeys;
+        const challenge = request.challengeFull.challenge;
+        const award = request.challengeFull.award;
+        const task = request.challengeFull.task;
+        const challengeRequirement = request.challengeFull.challengeRequirement;
+        const milestoneKeys = request.challengeFull.milestoneKeys;
 
-        const createdChallenge = await ChallengeCreationService.create(
+        const createdChallenge = await ChallengeFullService.create(
             context,
             challenge,
             award,
@@ -211,6 +241,24 @@ challengeRouterLatest.post(
             challengeRequirement,
             milestoneKeys
         );
+        const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
+        res.status(response.httpCode).json(response);
+    })
+);
+
+challengeRouterLatest.post(
+    '/:id',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: UpdateChallengeFullRequest = req.body;
+
+        const id = Number(req.params.id);
+        const challengeFull = request.challengeFull;
+
+        const createdChallenge = await ChallengeFullService.update(context, id, challengeFull);
         const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
         res.status(response.httpCode).json(response);
     })

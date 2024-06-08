@@ -26,4 +26,24 @@ export class ChallengeRequirementService {
         );
         return createdChallengeRequirementModel;
     }
+
+    public static async update(
+        context: Context,
+        challengeRequirement: ChallengeRequirement
+    ): Promise<ChallengeRequirement> {
+        const updatedChallengeRequirement =
+            await ChallengeRequirementDao.update(challengeRequirement);
+        if (!updatedChallengeRequirement) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'challenge requirement update failed'
+            );
+        }
+
+        const updatedChallengeRequirementModel: ChallengeRequirement = ModelConverter.convert(
+            updatedChallengeRequirement
+        );
+        return updatedChallengeRequirementModel;
+    }
 }

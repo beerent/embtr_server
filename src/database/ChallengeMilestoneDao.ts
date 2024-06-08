@@ -17,4 +17,12 @@ export class ChallengeMilestoneDao {
             },
         });
     }
+
+    public static async removeAllForChallenge(challengeId: number) {
+        return prisma.challengeMilestone.deleteMany({
+            where: {
+                challengeId,
+            },
+        });
+    }
 }

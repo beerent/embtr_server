@@ -23,4 +23,21 @@ export class AwardDao {
             },
         });
     }
+
+    public static async update(award: Award) {
+        return prisma.award.update({
+            where: {
+                id: award.id,
+            },
+            data: {
+                name: award.name ?? '',
+                description: award.description,
+                icon: {
+                    connect: {
+                        id: award.iconId,
+                    },
+                },
+            },
+        });
+    }
 }

@@ -1,5 +1,7 @@
+import { PlannedDayChallengeMilestone } from '@resources/schema';
 import { PlannedDayChallengeMilestoneDao } from '@src/database/PlannedDayChallengeMilestoneDao';
 import { Context } from '@src/general/auth/Context';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class PlannedDayChallengeMilestoneService {
     public static async deleteAll(context: Context, ids: number[]) {
@@ -10,14 +12,16 @@ export class PlannedDayChallengeMilestoneService {
         context: Context,
         challengeParticipantId: number,
         challengeMilestoneIds: number[]
-    ) {
-        const results =
+    ): Promise<PlannedDayChallengeMilestone[]> {
+        const plannedDayChallengeMilestones =
             await PlannedDayChallengeMilestoneDao.getAllForChallengeParticipantWithChallengeMilestoneInList(
                 challengeParticipantId,
                 challengeMilestoneIds
             );
 
-        return results;
+        const plannedDayChallengeMilestoneModels: PlannedDayChallengeMilestone[] =
+            ModelConverter.convertAll(plannedDayChallengeMilestones);
+        return plannedDayChallengeMilestoneModels;
     }
 
     public static async deleteAllForChallengeParticipantAndChallengeMilestoneInList(
@@ -31,22 +35,24 @@ export class PlannedDayChallengeMilestoneService {
         );
     }
 
+    public static async deleteAllByChallenge(context: Context, challengeId: number) {
+        return PlannedDayChallengeMilestoneDao.deleteAllByChallenge(challengeId);
+    }
+
     public static async create(
         context: Context,
         plannedDayId: number,
         challengeMilestoneId: number,
         challengeParticipantId: number
-    ) {
-        console.log(
-            'creating planned day challenge milestone',
+    ): Promise<PlannedDayChallengeMilestone> {
+        const plannedDayChallengeMilestone = await PlannedDayChallengeMilestoneDao.create(
             plannedDayId,
             challengeMilestoneId,
             challengeParticipantId
         );
-        return PlannedDayChallengeMilestoneDao.create(
-            plannedDayId,
-            challengeMilestoneId,
-            challengeParticipantId
-        );
+
+        const plannedDayChallengeMilestoneModel: PlannedDayChallengeMilestone =
+            ModelConverter.convert(plannedDayChallengeMilestone);
+        return plannedDayChallengeMilestoneModel;
     }
 }

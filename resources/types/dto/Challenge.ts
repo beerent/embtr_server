@@ -1,4 +1,11 @@
-import { ChallengeParticipant, Role } from '../../schema';
+import {
+    Role,
+    Award as AwardSchema,
+    Challenge,
+    ChallengeParticipant,
+    ChallengeRequirement,
+    Task,
+} from '../../schema';
 
 interface ChallengeUser {
     id: number;
@@ -50,4 +57,19 @@ export interface ChallengeSummary extends ChallengeBase {
 
 export interface ChallengeDetails extends ChallengeBase {
     comments: ChallengeComment[];
+}
+
+export interface ChallengeFull {
+    challenge: Pick<Challenge, 'name' | 'description' | 'start' | 'end'>;
+    award: Pick<AwardSchema, 'name' | 'description' | 'iconId'>;
+    task: Pick<Task, 'title' | 'description' | 'iconId'>;
+    challengeRequirement: Pick<
+        ChallengeRequirement,
+        | 'unitId'
+        | 'calculationType'
+        | 'calculationIntervalDays'
+        | 'requiredIntervalQuantity'
+        | 'requiredTaskQuantity'
+    >;
+    milestoneKeys: string[];
 }

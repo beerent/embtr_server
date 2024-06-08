@@ -56,4 +56,8 @@ export class ChallengeMilestoneService {
             ModelConverter.convert(challengeMilestone);
         return challengeMilestoneModel;
     }
+
+    public static async removeAllForChallenge(context: Context, challengeId: number) {
+        await ChallengeMilestoneDao.removeAllForChallenge(challengeId);
+    }
 }

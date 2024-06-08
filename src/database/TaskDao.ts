@@ -79,6 +79,25 @@ export class TaskDao {
         return result;
     }
 
+    public static async update(task: TaskModel) {
+        const result = prisma.task.update({
+            where: {
+                id: task.id,
+            },
+            data: {
+                title: task.title ?? '',
+                icon: {
+                    connect: {
+                        id: task.iconId ?? 9,
+                    },
+                },
+                type: task.type,
+            },
+        });
+
+        return result;
+    }
+
     public static async deleteByTitle(title: string): Promise<void> {
         try {
             await prisma.task.deleteMany({
