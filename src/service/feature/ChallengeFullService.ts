@@ -12,6 +12,35 @@ import { ChallengeFull } from '@resources/types/dto/Challenge';
 import { HttpCode } from '@src/common/RequestResponses';
 
 export class ChallengeFullService {
+    public static async get(context: Context, id: number): Promise<ChallengeFull> {
+        const challenge = await ChallengeService.get(context, id);
+        if (!challenge.awardId || (challenge.challengeRequirements?.length ?? 0) < 1) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'challenge is not full'
+            );
+        }
+
+        const award = await AwardService.get(context, challenge.awardId ?? 0);
+        const challengeRequirement = challenge.challengeRequirements![0];
+        const task = await HabitService.get(context, challengeRequirement.taskId ?? 0);
+        const challengeMilestones = challenge.challengeMilestones ?? [];
+        const challengeMilestoneKeys = challengeMilestones.flatMap((challengeMilestone) => {
+            return challengeMilestone.milestone?.key ? [challengeMilestone.milestone.key] : [];
+        });
+
+        const challengeFull: ChallengeFull = {
+            challenge: { ...challenge },
+            award: { ...award },
+            challengeRequirement: { ...challengeRequirement },
+            task: { ...task },
+            milestoneKeys: challengeMilestoneKeys,
+        };
+
+        return challengeFull;
+    }
+
     public static async create(
         context: Context,
         challenge: Challenge,
@@ -121,34 +150,5 @@ export class ChallengeFullService {
         // get challenge model
         const challengeModel = await ChallengeService.get(context, updatedChallenge.id ?? 0);
         return challengeModel;
-    }
-
-    public static async get(context: Context, id: number): Promise<ChallengeFull> {
-        const challenge = await ChallengeService.get(context, id);
-        if (!challenge.awardId || (challenge.challengeRequirements?.length ?? 0) < 1) {
-            throw new ServiceException(
-                HttpCode.GENERAL_FAILURE,
-                Code.GENERIC_ERROR,
-                'challenge is not full'
-            );
-        }
-
-        const award = await AwardService.get(context, challenge.awardId ?? 0);
-        const challengeRequirement = challenge.challengeRequirements![0];
-        const task = await HabitService.get(context, challengeRequirement.taskId ?? 0);
-        const challengeMilestones = challenge.challengeMilestones ?? [];
-        const challengeMilestoneKeys = challengeMilestones.flatMap((challengeMilestone) => {
-            return challengeMilestone.milestone?.key ? [challengeMilestone.milestone.key] : [];
-        });
-
-        const challengeFull: ChallengeFull = {
-            challenge: { ...challenge },
-            award: { ...award },
-            challengeRequirement: { ...challengeRequirement },
-            task: { ...task },
-            milestoneKeys: challengeMilestoneKeys,
-        };
-
-        return challengeFull;
     }
 }
