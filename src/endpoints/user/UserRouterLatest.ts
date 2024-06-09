@@ -230,9 +230,9 @@ userRouterLatest.post(
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
         const request: CreateAwayModeRequest = req.body;
-        const away = request.away;
+        const awayMode = request.awayMode;
 
-        await AwayModeService.update(context, away);
+        await AwayModeService.update(context, awayMode);
         res.json(SUCCESS);
     })
 );

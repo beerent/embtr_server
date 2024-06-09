@@ -1,5 +1,5 @@
 import { Context } from '@src/general/auth/Context';
-import { AwayService } from './feature/AwayService';
+import { AwayModeService } from './feature/AwayModeService';
 import { ReminderService } from './feature/ReminderService';
 import { UserService } from './UserService';
 
@@ -25,6 +25,6 @@ export class JobService {
     }
 
     public static async refreshAwayMode(context: Context): Promise<void> {
-        await AwayService.refreshAwayMode(context);
+        await AwayModeService.refreshAll(context);
     }
 }

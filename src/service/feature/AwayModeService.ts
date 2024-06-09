@@ -1,4 +1,3 @@
-import { User } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { Context } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
@@ -23,7 +22,7 @@ export class AwayModeService {
         }
     }
 
-    public static async set(context: Context, awayMode: Constants.AwayMode) {
+    public static async update(context: Context, awayMode: Constants.AwayMode) {
         await UserPropertyService.setAwayMode(context, awayMode);
 
         if (awayMode === Constants.AwayMode.ENABLED) {
