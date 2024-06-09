@@ -1,6 +1,7 @@
 import { Property, User as UserModel } from '../../schema';
 import { Response } from './RequestTypes';
 import { NewUserChecklist } from '../dto/NewUserChecklist';
+import { Constants } from '../constants/constants';
 
 export interface GetUserResponse extends Response {
     user?: UserModel;
@@ -11,8 +12,8 @@ export interface GetUsersResponse extends Response {
 }
 
 export interface GetUserStatsResponse extends Response {
-  totalUsers: number
-  premiumUsers: number
+    totalUsers: number;
+    premiumUsers: number;
 }
 
 export interface CreateUserRequest { }
@@ -55,4 +56,16 @@ export interface CreatePropertyResponse extends Response {
 
 export interface GetNewUserChecklistResponse extends Response {
     checklist?: NewUserChecklist;
+}
+
+export interface CreateAwayModeRequest {
+    awayMode: Constants.AwayMode;
+}
+
+export interface CreateAwayModeResponse extends Response {
+    awayMode: Constants.AwayMode;
+}
+
+export interface GetAwayModeResponse extends Response {
+    awayMode: Constants.AwayMode;
 }

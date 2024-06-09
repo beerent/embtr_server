@@ -31,7 +31,7 @@ userPropertyRouterLatest.get(
     authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const timezone = await UserPropertyService.getTimezone(context);
+        const timezone = await UserPropertyService.getTimezone(context, context.userId);
         const response: GetUserTimezoneResponse = { ...SUCCESS, timezone };
 
         res.json(response);

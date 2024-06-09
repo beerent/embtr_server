@@ -4,7 +4,6 @@ import { Request } from 'express';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { logger } from '@src/common/logger/Logger';
-import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { toZonedTime } from 'date-fns-tz';
 
 export class ContextService {
@@ -57,25 +56,11 @@ export class ContextService {
 
     private static getDayKey(request: Request): string {
         let dayKey = request.headers['client-dayKey'] as string;
-
-        // this can go away after client version 2.0.17 if we
-        // make it a forced update
-        if (!dayKey) {
-            dayKey = DayKeyUtility.getTodayKey();
-        }
-
         return dayKey;
     }
 
     private static getTimezone(request: Request): string {
         let timezone = request.headers['client-timezone'] as string;
-
-        // this can go away after client version 3.0.1 if we
-        // make it a forced update
-        if (!timezone) {
-            timezone = 'America/New_York';
-        }
-
         return timezone;
     }
 

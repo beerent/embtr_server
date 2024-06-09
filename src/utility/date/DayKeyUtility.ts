@@ -1,4 +1,5 @@
 import { PureDate } from '@resources/types/date/PureDate';
+import { toZonedTime } from 'date-fns-tz';
 
 export class DayKeyUtility {
     public static getDayKey(date: Date): string {
@@ -21,9 +22,8 @@ export class DayKeyUtility {
     }
 
     public static getDayKeyFromTimezone(timezone: string): string {
-        const dateWithTimezone = new Date().toLocaleString('en-US', { timeZone: timezone });
-        const date = new Date(dateWithTimezone);
-
-        return this.getDayKey(date);
+        const date = new Date();
+        const zonedDate = toZonedTime(date, timezone);
+        return this.getDayKey(zonedDate);
     }
 }
