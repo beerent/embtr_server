@@ -220,18 +220,6 @@ userRouterLatest.post(
     })
 );
 
-userRouterLatest.get(
-    '/:userId',
-    routeLogger(v),
-    authenticate,
-    authorizeAdmin,
-    runEndpoint(async (req, res) => {
-        const user = await UserService.getByIdForAdmin(parseInt(req.params.userId))
-        const response: GetUserResponse = { ...SUCCESS, user };
-        res.json(response);
-    })
-);
-
 /*
  * Daily History
  */
@@ -454,7 +442,7 @@ userRouterLatest.post(
  * THIS NEEDS TO BE AT THE BOTTOM
  */
 userRouterLatest.get(
-    '/:uid',
+    '/:uid([a-zA-Z0-9]+)',
     routeLogger(v),
     authenticate,
     authorize,
@@ -463,6 +451,18 @@ userRouterLatest.get(
         const uid = req.params.uid;
 
         const user = await UserService.get(context, uid);
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+userRouterLatest.get(
+    '/:id(\\d+)',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const user = await UserService.getByIdForAdmin(parseInt(req.params.userId));
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
