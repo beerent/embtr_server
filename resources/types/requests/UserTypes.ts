@@ -66,6 +66,14 @@ export interface CreateAwayModeResponse extends Response {
     awayMode: Constants.AwayMode;
 }
 
+export interface UpdateAwayModeRequest {
+    awayMode: Constants.AwayMode;
+}
+
+export interface UpdateAwayModeResponse extends Response {
+    awayMode: Constants.AwayMode;
+}
+
 export interface GetAwayModeResponse extends Response {
     awayMode: Constants.AwayMode;
 }

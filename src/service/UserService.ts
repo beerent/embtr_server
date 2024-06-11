@@ -309,6 +309,7 @@ export class UserService {
 
     private static async getByUid(uid: string): Promise<User | undefined> {
         const user = await UserDao.getByUid(uid);
+
         if (user) {
             const userModel: User = ModelConverter.convert(user);
             return userModel;

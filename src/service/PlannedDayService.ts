@@ -306,6 +306,10 @@ export class PlannedDayService {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
+        if (plannedDay.status === Constants.CompletionState.AWAY) {
+            return plannedDay;
+        }
+
         const completionStatus = await this.getCompletionStatus(
             context,
             plannedDay.userId,

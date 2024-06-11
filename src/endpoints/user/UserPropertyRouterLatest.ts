@@ -20,6 +20,8 @@ import {
     SetUserWarningNotificationRequest,
     SetUserWarningNotificationResponse,
 } from '@resources/types/requests/UserPropertyTypes';
+import { CreateAwayModeRequest, GetAwayModeResponse } from '@resources/types/requests/UserTypes';
+import { AwayModeService } from '@src/service/feature/AwayModeService';
 
 const userPropertyRouterLatest = express.Router();
 const v = '✓';
@@ -145,6 +147,35 @@ userPropertyRouterLatest.post(
         const response: SetUserWarningNotificationResponse = { ...SUCCESS, setting };
 
         res.json(response);
+    })
+);
+
+userPropertyRouterLatest.get(
+    '/away/',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const setting = await UserPropertyService.getAwayMode(context);
+        const response: GetAwayModeResponse = { ...SUCCESS, awayMode: setting };
+
+        res.json(response);
+    })
+);
+
+userPropertyRouterLatest.post(
+    '/away/',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: CreateAwayModeRequest = req.body;
+        const awayMode = request.awayMode;
+
+        await AwayModeService.update(context, awayMode);
+        res.json(SUCCESS);
     })
 );
 

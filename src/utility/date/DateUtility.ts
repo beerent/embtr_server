@@ -1,4 +1,21 @@
+import { toZonedTime } from 'date-fns-tz';
+
 export namespace DateUtility {
+    export const getTodayWithTimezone = (timezone: string): Date => {
+        const date = new Date();
+        const zonedDate = toZonedTime(date, timezone);
+
+        return zonedDate;
+    };
+
+    export const getYesterdayWithTimezone = (timezone: string): Date => {
+        const date = new Date();
+        date.setDate(date.getDate() - 1);
+        const zonedDate = toZonedTime(date, timezone);
+
+        return zonedDate;
+    };
+
     export const getToday = (): Date => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

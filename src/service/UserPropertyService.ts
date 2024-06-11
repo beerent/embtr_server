@@ -41,7 +41,7 @@ export class UserPropertyService {
 
     /* AWAY */
     public static async getAwayMode(context: Context): Promise<Constants.AwayMode> {
-        const away = await this.get(context, context.userId, Constants.UserPropertyKey.TIMEZONE);
+        const away = await this.get(context, context.userId, Constants.UserPropertyKey.AWAY_MODE);
         if (!away?.value) {
             return Constants.AwayMode.INVALID;
         }

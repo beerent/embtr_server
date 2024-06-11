@@ -4,7 +4,6 @@ import { GetDailyHistoryResponse } from '@resources/types/requests/DailyHistoryT
 import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
 import {
-    CreateAwayModeRequest,
     CreateBlockUserRequest,
     GetUserResponse,
     GetUsersResponse,
@@ -39,7 +38,6 @@ import { BlockUserService } from '@src/service/BlockUserService';
 import userPropertyRouterLatest from './UserPropertyRouterLatest';
 import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
 import { PremiumService } from '@src/service/PremiumService';
-import { AwayModeService } from '@src/service/feature/AwayModeService';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -231,22 +229,6 @@ userRouterLatest.get(
         const user = await UserService.getByIdForAdmin(parseInt(req.params.userId))
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
-    })
-);
-
-
-userRouterLatest.post(
-    '/away',
-    routeLogger(v),
-    authenticate,
-    authorize,
-    runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
-        const request: CreateAwayModeRequest = req.body;
-        const awayMode = request.awayMode;
-
-        await AwayModeService.update(context, awayMode);
-        res.json(SUCCESS);
     })
 );
 
