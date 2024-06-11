@@ -14,8 +14,6 @@ export class AwayModeService {
             Constants.AwayMode.ENABLED
         );
 
-        logger.info('Refreshing away mode for users:', users.length);
-
         for (const user of users) {
             if (!user.id) {
                 continue;
@@ -49,7 +47,7 @@ export class AwayModeService {
         }
 
         if (context.type === ContextType.JOB_CONTEXT) {
-            logger.info('Setting away mode for user:', userId + ' on day:', dayKey);
+            logger.info('Setting away mode for user: ' + userId + ' on day: ' + dayKey);
         }
 
         plannedDay.status = Constants.CompletionState.AWAY;
