@@ -317,4 +317,13 @@ export class UserService {
             throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
         }
     }
+
+    public static async getByIdForAdmin(id: number): Promise<User | undefined> {
+        const user = await UserDao.getByIdForAdmin(id)
+        if (user) {
+          return user as User;
+        } else {
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
+        }
+    }
 }

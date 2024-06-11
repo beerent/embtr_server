@@ -77,6 +77,7 @@ export class UserDao {
     }
 
     public static async getAll(query?: Record<string, string>): Promise<User[]> {
+
         const users = await prisma.user.findMany({
             ...(query?.page && {
                 skip: (Number(query.page) - 1) * Number(query.limit || 25),
@@ -137,6 +138,45 @@ export class UserDao {
                         },
                     },
                 },
+            },
+        });
+
+        return user;
+    }
+
+    public static async getByIdForAdmin(id: number) {
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: id,
+            },
+            include: {
+              roles: true,
+              scheduledHabits: {
+                include: {
+                  task: true,
+                  plannedTasks: true
+                }
+              },
+              plannedDays: {
+                include: {
+                  plannedTasks: {
+                    include: {
+                      scheduledHabit: {
+                        include: {
+                          task: {
+                            include: {
+                              icon: true
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              challenges: true,
+              properties: true,
             },
         });
 
