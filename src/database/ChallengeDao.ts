@@ -157,7 +157,18 @@ export class ChallengeDao {
                 },
                 challengeParticipants: {
                     include: {
-                        user: true,
+                        user: {
+                            include: {
+                                properties: {
+                                    where: {
+                                        key: {
+                                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                                        },
+                                    },
+                                },
+                                roles: true,
+                            },
+                        },
                     },
                     where: {
                         active: true,
