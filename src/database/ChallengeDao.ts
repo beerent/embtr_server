@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Challenge } from '@resources/schema';
+import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 
 export interface ChallengeRequirementResults {
     intervalIndex: number;
@@ -59,6 +60,13 @@ export class ChallengeDao {
                         user: {
                             include: {
                                 roles: true,
+                                properties: {
+                                    where: {
+                                        key: {
+                                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                                        },
+                                    },
+                                },
                             },
                         },
                     },

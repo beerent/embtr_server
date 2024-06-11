@@ -144,6 +144,7 @@ export class HabitStreakService {
                 completionCount++;
             } else if (
                 status.status === Constants.CompletionState.NO_SCHEDULE ||
+                status.status === Constants.CompletionState.AWAY ||
                 status.status === null
             ) {
                 continue;
@@ -179,6 +180,7 @@ export class HabitStreakService {
                 }
             } else if (
                 status.status === Constants.CompletionState.NO_SCHEDULE ||
+                status.status === Constants.CompletionState.AWAY ||
                 status.status === null
             ) {
                 continue;
@@ -196,7 +198,53 @@ export class HabitStreakService {
         return plannedDay?.date;
     }
 
-    private static async getEndDateForUser(context: Context, userId: number) {
+    private static async getEndDateForUser(context: Context, userId: number): Promise<Date> {
+        const newEndDate = await this.getEndDateForUserNewVersion(context, userId);
+        if (newEndDate) {
+            console.log('Using new version of getEndDateForUser', newEndDate);
+            return newEndDate;
+        }
+
+        const oldEndDate = await this.getEndDateForUserOldVersion(context, userId);
+        console.log('Using old version of getEndDateForUser', oldEndDate);
+        return oldEndDate;
+    }
+
+    private static async getEndDateForUserNewVersion(context: Context, userId: number) {
+        const timezone = await UserPropertyService.getTimezone(context, userId);
+        if (!timezone || timezone === 'N/A') {
+            return undefined;
+        }
+
+        const todayForUser = DateUtility.getTodayWithTimezone(timezone);
+        const yesterdayForUser = DateUtility.getYesterdayWithTimezone(timezone);
+        const currentDayKey = DayKeyUtility.getDayKeyFromTimezone(timezone);
+
+        const plannedDayExists = await PlannedDayService.exists(context, userId, currentDayKey);
+        if (!plannedDayExists) {
+            return yesterdayForUser;
+        }
+
+        const plannedDay = await PlannedDayService.getByUserIdAndDayKey(
+            context,
+            userId,
+            currentDayKey
+        );
+
+        const completionStatus = Constants.getCompletionState(plannedDay?.status ?? '');
+        if (
+            completionStatus === Constants.CompletionState.COMPLETE ||
+            completionStatus === Constants.CompletionState.NO_SCHEDULE ||
+            completionStatus === Constants.CompletionState.FAILED ||
+            completionStatus === Constants.CompletionState.AWAY
+        ) {
+            return todayForUser;
+        }
+
+        return yesterdayForUser;
+    }
+
+    private static async getEndDateForUserOldVersion(context: Context, userId: number) {
         const earliestPossibleEndDate = this.getLastCompletedDayInAllTimezones();
         const latestPossibleEndDate = this.getFirstCompletedDayInAllTimezones();
 

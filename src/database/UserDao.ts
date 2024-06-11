@@ -3,6 +3,7 @@ import { User as UserModel } from '@resources/schema';
 import { prisma } from '@database/prisma';
 import { Constants } from '@resources/types/constants/constants';
 import { Role } from '@src/roles/Roles';
+import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 
 export class UserDao {
     public static async getByUid(uid: string): Promise<User | null> {
@@ -12,6 +13,13 @@ export class UserDao {
             },
             include: {
                 roles: true,
+                properties: {
+                    where: {
+                        key: {
+                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                        },
+                    },
+                },
             },
         });
 
@@ -55,6 +63,13 @@ export class UserDao {
             },
             include: {
                 roles: true,
+                properties: {
+                    where: {
+                        key: {
+                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                        },
+                    },
+                },
             },
         });
 
@@ -64,18 +79,18 @@ export class UserDao {
     public static async getAll(query?: Record<string, string>): Promise<User[]> {
         const users = await prisma.user.findMany({
             ...(query?.page && {
-               skip: ((Number(query.page) - 1) * Number(query.limit || 25))
+                skip: (Number(query.page) - 1) * Number(query.limit || 25),
             }),
             ...(query?.limit && {
-               take: Number(query.limit)
+                take: Number(query.limit),
             }),
             ...(query?.sort && {
-               orderBy: [
-                  {
-                    createdAt: query.sort as Prisma.SortOrder
-                  }
-               ]
-            })
+                orderBy: [
+                    {
+                        createdAt: query.sort as Prisma.SortOrder,
+                    },
+                ],
+            }),
         });
         return users;
     }
@@ -90,7 +105,7 @@ export class UserDao {
             where: {
                 roles: {
                     some: {
-                        name: "premium"
+                        name: 'premium',
                     },
                 },
             },
@@ -115,6 +130,13 @@ export class UserDao {
             },
             include: {
                 roles: true,
+                properties: {
+                    where: {
+                        key: {
+                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                        },
+                    },
+                },
             },
         });
 
@@ -302,6 +324,13 @@ export class UserDao {
             },
             include: {
                 roles: true,
+                properties: {
+                    where: {
+                        key: {
+                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                        },
+                    },
+                },
             },
         });
 

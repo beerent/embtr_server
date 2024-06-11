@@ -55,7 +55,7 @@ export class ContextService {
     }
 
     private static getDayKey(request: Request): string {
-        let dayKey = request.headers['client-dayKey'] as string;
+        let dayKey = request.headers['client-daykey'] as string;
         return dayKey;
     }
 

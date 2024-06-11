@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Image, PlannedDayResult as PlannedDayResultModel } from '@resources/schema';
+import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 import { CommonUpserts } from './CommonUpserts';
 
 export const PlannedDayResultInclude = {
@@ -12,6 +13,13 @@ export const PlannedDayResultInclude = {
             user: {
                 include: {
                     roles: true,
+                    properties: {
+                        where: {
+                            key: {
+                                in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                            },
+                        },
+                    },
                 },
             },
         },
@@ -61,6 +69,13 @@ export const PlannedDayResultInclude = {
             user: {
                 include: {
                     roles: true,
+                    properties: {
+                        where: {
+                            key: {
+                                in: UserPropertyUtility.ALLOWED_PROPERTIES,
+                            },
+                        },
+                    },
                 },
             },
             plannedTasks: {

@@ -190,7 +190,7 @@ export class ScheduledHabitService {
         }
 
         const challengeEnd =
-            existingScheduledHabitModel.task?.challengeRequirements?.[0].challenge?.end;
+            existingScheduledHabitModel.task?.challengeRequirements?.[0]?.challenge?.end;
 
         // we do not want to set scheduled habits that start in the future to start
         // before they should
@@ -217,6 +217,7 @@ export class ScheduledHabitService {
             ...existingScheduledHabitModel,
             ...scheduledHabit,
         };
+
         updatedScheduledHabitModal.startDate = newStartDate;
         updatedScheduledHabitModal.endDate = challengeEnd ?? undefined;
 
