@@ -1,5 +1,6 @@
 import { Code } from '@resources/codes';
 import { Icon, Tag, IconCategory } from '@resources/schema';
+import { UpdateIconData } from '@resources/types/requests/IconTypes';
 import { HttpCode } from '@src/common/RequestResponses';
 import { IconDao } from '@src/database/IconDao';
 import { Context } from '@src/general/auth/Context';
@@ -52,6 +53,36 @@ export class IconService {
 
         const createdIconModel: Icon = ModelConverter.convert(createdIcon);
         return createdIconModel;
+    }
+
+    public static async update(context: Context, iconId: number, data: UpdateIconData): Promise<Icon> {
+        const updatedIcon = await IconDao.update(iconId, {
+            name: data.name,
+            remoteImageUrl: data.remoteImageUrl
+        });
+
+        if (!updatedIcon) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'Failed to update icon'
+            );
+        }
+
+        if (data.tags) {
+            await IconService.addTags(context, updatedIcon.id, data.tags);
+        }
+
+        if (data.categories) {
+            await IconService.addCategories(context, updatedIcon.id, data.categories);
+        }
+
+        const updatedIconModel: Icon = ModelConverter.convert(updatedIcon);
+        return updatedIconModel;
+    }
+
+    public static async delete(iconId: number): Promise<void> {
+        await IconDao.delete(iconId);
     }
 
     public static async addTags(context: Context, iconId: number, tags: string[]): Promise<Icon> {

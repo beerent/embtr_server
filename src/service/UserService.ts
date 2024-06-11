@@ -17,6 +17,7 @@ import { RevenueCatService } from './internal/RevenueCatService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './UserPropertyService';
 import { HttpCode } from '@src/common/RequestResponses';
+import { PremiumMembershipService } from './feature/PremiumMembershipService';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -182,6 +183,7 @@ export class UserService {
                 continue;
             }
 
+            console.log('checking premium status for', user.username);
             await this.updatePremiumStatus(context, user.uid);
         }
     }
@@ -200,15 +202,11 @@ export class UserService {
         const hasPremiumRole = await this.isPremium(context, account.customClaims.userId);
         if (isPremium) {
             if (!hasPremiumRole) {
-                await UserRoleService.addUserRole(context, account.email, Role.PREMIUM);
-                await UserRoleService.removeUserRole(context, account.email, Role.FREE);
-                ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
+                await PremiumMembershipService.addPremium(context, account.email);
             }
         } else {
             if (hasPremiumRole) {
-                await UserRoleService.addUserRole(context, account.email, Role.FREE);
-                await UserRoleService.removeUserRole(context, account.email, Role.PREMIUM);
-                ApiAlertsService.sendAlert('we lost a premium user 😢');
+                await PremiumMembershipService.removePremium(context, account.email);
             }
         }
 

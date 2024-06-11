@@ -15,4 +15,24 @@ export class AwardService {
         const awardModel: Award = ModelConverter.convert(createdAward);
         return awardModel;
     }
+
+    public static async update(context: Context, award: Award): Promise<Award> {
+        const updatedAward = await AwardDao.update(award);
+        if (!updatedAward) {
+            throw new ServiceException(400, Code.USER_UPDATE_FAILED, 'award update failed');
+        }
+
+        const awardModel: Award = ModelConverter.convert(updatedAward);
+        return awardModel;
+    }
+
+    public static async get(context: Context, id: number): Promise<Award> {
+        const award = await AwardDao.get(id);
+        if (!award) {
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'award not found');
+        }
+
+        const awardModel: Award = ModelConverter.convert(award);
+        return awardModel;
+    }
 }

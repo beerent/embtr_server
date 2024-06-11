@@ -1,12 +1,10 @@
-import { ChallengeSummary, ChallengeDetails, ChallengeRecentlyJoined } from '../dto/Challenge';
 import {
-  Award,
-  Challenge,
-  ChallengeParticipant,
-  ChallengeRequirement,
-  Milestone,
-  Task,
-} from '../../schema';
+  ChallengeSummary,
+  ChallengeDetails,
+  ChallengeRecentlyJoined,
+  ChallengeFull,
+} from '../dto/Challenge';
+import { Challenge, ChallengeParticipant } from '../../schema';
 import { Response } from './RequestTypes';
 import { PureDate } from '../date/PureDate';
 
@@ -14,7 +12,7 @@ import { PureDate } from '../date/PureDate';
  * Challenges
  */
 export interface GetChallengesResponse extends Response {
-  challenges: Challenge[]
+  challenges: Challenge[];
 }
 
 /**
@@ -65,21 +63,22 @@ export interface LeaveChallengeRequest {
   date: PureDate;
 }
 
-export interface CreateChallengeRequest {
-  challenge: Pick<Challenge, 'name' | 'description' | 'start' | 'end'>;
-  award: Pick<Award, 'name' | 'description' | 'remoteImageUrl' | 'localImage'>;
-  task: Pick<Task, 'title' | 'description' | 'iconId'>;
-  challengeRequirement: Pick<
-    ChallengeRequirement,
-    | 'unitId'
-    | 'calculationType'
-    | 'calculationIntervalDays'
-    | 'requiredIntervalQuantity'
-    | 'requiredTaskQuantity'
-  >;
-  milestoneKeys: string[];
+export interface CreateChallengeFullRequest {
+  challengeFull: ChallengeFull;
+}
+
+export interface UpdateChallengeFullRequest {
+  challengeFull: ChallengeFull;
+}
+
+export interface GetChallengeFullResponse extends Response {
+  challengeFull?: ChallengeFull;
 }
 
 export interface CreateChallengeResponse extends Response {
   challenge?: Challenge;
+}
+
+export interface UpdateChallengeResponse extends Response {
+  challengeFull?: ChallengeFull;
 }

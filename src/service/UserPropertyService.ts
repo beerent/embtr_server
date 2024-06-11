@@ -11,18 +11,16 @@ import { HttpCode } from '@src/common/RequestResponses';
 export class UserPropertyService {
     public static async getAll(context: Context, userId: number): Promise<Property[]> {
         const properties = await UserPropertyDao.getAll(userId);
-        const propertyModels: Property[] = properties.map((property) => ModelConverter.convert(property));
+        const propertyModels: Property[] = properties.map((property) =>
+            ModelConverter.convert(property)
+        );
 
         return propertyModels;
     }
 
     /* TIMEZONE */
-    public static async getTimezone(context: Context): Promise<string> {
-        const timezone = await this.get(
-            context,
-            context.userId,
-            Constants.UserPropertyKey.TIMEZONE
-        );
+    public static async getTimezone(context: Context, userId: number): Promise<string> {
+        const timezone = await this.get(context, userId, Constants.UserPropertyKey.TIMEZONE);
         if (!timezone?.value) {
             return 'N/A';
         }
@@ -41,12 +39,36 @@ export class UserPropertyService {
         return timezone;
     }
 
+    /* AWAY */
+    public static async getAwayMode(context: Context): Promise<Constants.AwayMode> {
+        const away = await this.get(context, context.userId, Constants.UserPropertyKey.TIMEZONE);
+        if (!away?.value) {
+            return Constants.AwayMode.INVALID;
+        }
+
+        const awayMode = Constants.getAwayMode(away.value);
+        return awayMode;
+    }
+
+    public static async setAwayMode(context: Context, awayMode: Constants.AwayMode) {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.AWAY_MODE,
+            awayMode
+        );
+    }
+
     /* NOTIFICATION SOCIAL */
     public static async getSocialNotification(
         context: Context,
-        userId: number,
+        userId: number
     ): Promise<Constants.SocialNotificationSetting | undefined> {
-        const property = await this.get(context, userId, Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING);
+        const property = await this.get(
+            context,
+            userId,
+            Constants.UserPropertyKey.SOCIAL_NOTIFICATIONS_SETTING
+        );
 
         if (!property?.value) {
             return undefined;
@@ -55,7 +77,11 @@ export class UserPropertyService {
         return Constants.getSocialNotificationsSetting(property.value);
     }
 
-    public static async setSocialNotification(context: Context, userId: number, value: string): Promise<Property> {
+    public static async setSocialNotification(
+        context: Context,
+        userId: number,
+        value: string
+    ): Promise<Property> {
         return this.set(
             context,
             userId,
@@ -123,8 +149,15 @@ export class UserPropertyService {
         return Constants.getWarningNotificationSetting(property.value);
     }
 
-    public static async setWarningNotification(context: Context, userId: number, setting: Constants.WarningNotificationSetting): Promise<Property> {
-        const premiumSettings = [Constants.WarningNotificationSetting.DAILY, Constants.WarningNotificationSetting.PERIODICALLY];
+    public static async setWarningNotification(
+        context: Context,
+        userId: number,
+        setting: Constants.WarningNotificationSetting
+    ): Promise<Property> {
+        const premiumSettings = [
+            Constants.WarningNotificationSetting.DAILY,
+            Constants.WarningNotificationSetting.PERIODICALLY,
+        ];
         const isPremiumSetting = premiumSettings.includes(setting);
         const isPremiumUser = Roles.isPremium(context.userRoles);
         if (isPremiumSetting && !isPremiumUser) {
@@ -239,20 +272,32 @@ export class UserPropertyService {
         const promises = [
             this.getSocialNotification(context, userId),
             this.getWarningNotification(context),
-            this.getReminderNotification(context, userId)
+            this.getReminderNotification(context, userId),
         ];
 
         const [social, warning, reminder] = await Promise.all(promises);
         if (!social) {
-            this.setSocialNotification(context, userId, Constants.SocialNotificationSetting.ENABLED);
+            this.setSocialNotification(
+                context,
+                userId,
+                Constants.SocialNotificationSetting.ENABLED
+            );
         }
 
         if (!reminder) {
-            this.setReminderNotification(context, userId, Constants.ReminderNotificationSetting.DAILY);
+            this.setReminderNotification(
+                context,
+                userId,
+                Constants.ReminderNotificationSetting.DAILY
+            );
         }
 
         if (!warning) {
-            this.setWarningNotification(context, userId, Constants.WarningNotificationSetting.DISABLED);
+            this.setWarningNotification(
+                context,
+                userId,
+                Constants.WarningNotificationSetting.DISABLED
+            );
         }
     }
 

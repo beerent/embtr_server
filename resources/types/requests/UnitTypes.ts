@@ -14,3 +14,20 @@ export interface CreateUnitRequest {
 export interface CreateUnitResponse extends Response {
     unit?: Unit;
 }
+
+export interface UpdateUnitRequest {
+    id: string;
+    data: {
+        unit?: string;
+        abreveation?: string;
+        stepSize?: number;
+    }
+}
+
+export interface UpdateUnitResponse extends Response {
+    unit?: Unit;
+}
+
+export interface DeleteUnitRequest {
+    id: string;
+}

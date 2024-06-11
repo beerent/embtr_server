@@ -115,7 +115,7 @@ plannedDayRouterLatest.post(
         const context: Context = await ContextService.get(req);
         const dayKey = req.body.dayKey;
 
-        const plannedDay = await PlannedDayService.create(context, dayKey);
+        const plannedDay = await PlannedDayService.create(context, context.userId, dayKey);
         const response: CreatePlannedDayResponse = { ...SUCCESS, plannedDay };
         res.json(response);
     })

@@ -54,4 +54,16 @@ export class PlannedDayChallengeMilestoneDao {
             },
         });
     }
+
+    public static async deleteAllByChallenge(challengeId: number) {
+        return prisma.plannedDayChallengeMilestone.deleteMany({
+            where: {
+                challengeParticipant: {
+                    challenge: {
+                        id: challengeId,
+                    },
+                },
+            },
+        });
+    }
 }

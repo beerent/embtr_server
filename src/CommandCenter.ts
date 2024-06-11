@@ -17,10 +17,15 @@ import { UserDao } from './database/UserDao';
 import { UserAwardService } from './service/UserAwardService';
 import { ChallengeCalculationType, User } from '@resources/schema';
 import { DayKeyUtility } from './utility/date/DayKeyUtility';
-import { ChallengeCreationService } from './service/feature/ChallengeCreationService';
-import { CreateChallengeRequest } from '@resources/types/requests/ChallengeTypes';
+import { ChallengeFullService } from './service/feature/ChallengeFullService';
 import { CreateIconRequest } from '@resources/types/requests/IconTypes';
 import { IconCreationService } from './service/feature/IconCreationService';
+import { ChallengeService } from './service/ChallengeService';
+import {
+    CreateChallengeFullRequest,
+    UpdateChallengeFullRequest,
+} from '@resources/types/requests/ChallengeTypes';
+import { ChallengeController } from './controller/ChallengeController';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -446,42 +451,47 @@ const handleRemoveFreeRole = async (username: string) => {
 };
 
 const handleCommandCreateChallenge = async () => {
-    const request: CreateChallengeRequest = {
-        challenge: {
-            name: 'Walk The Dog',
-            description: 'walk the dog every day for a month',
-            start: new Date('2024-05-01'),
-            end: new Date('2024-06-01'),
+    const request: CreateChallengeFullRequest = {
+        challengeFull: {
+            challenge: {
+                name: 'Walk The Dog',
+                description: 'walk the dog every day for a month',
+                start: new Date('2024-05-01'),
+                end: new Date('2024-06-01'),
+            },
+            award: {
+                name: 'Dog Walked Success',
+                description: 'you walked the dog every day for a month!',
+                iconId: 127,
+            },
+            task: {
+                title: 'Walk The Dog',
+                description: 'woof, woof, woof!',
+                iconId: 127,
+                // TODO need to add icon
+            },
+            challengeRequirement: {
+                unitId: 1,
+                calculationType: ChallengeCalculationType.UNIQUE,
+                calculationIntervalDays: 1,
+                requiredIntervalQuantity: 30,
+                requiredTaskQuantity: 1,
+            },
+            milestoneKeys: [
+                'CHALLENGE_PROGRESS_10',
+                'CHALLENGE_PROGRESS_20',
+                'CHALLENGE_PROGRESS_30',
+            ],
         },
-        award: {
-            name: 'Dog Walked Success',
-            description: 'you walked the dog every day for a month!',
-            remoteImageUrl:
-                'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/award%2F002-sheriff.svg?alt=media',
-            localImage: '',
-        },
-        task: {
-            title: 'Walk The Dog',
-            description: 'woof, woof, woof!',
-            // TODO need to add icon
-        },
-        challengeRequirement: {
-            unitId: 1,
-            calculationType: ChallengeCalculationType.UNIQUE,
-            calculationIntervalDays: 1,
-            requiredIntervalQuantity: 30,
-            requiredTaskQuantity: 1,
-        },
-        milestoneKeys: ['CHALLENGE_PROGRESS_10', 'CHALLENGE_PROGRESS_20', 'CHALLENGE_PROGRESS_30'],
     };
 
-    const challenge = request.challenge;
-    const award = request.award;
-    const task = request.task;
-    const challengeRequirement = request.challengeRequirement;
-    const milestoneKeys = request.milestoneKeys;
+    const challenge = request.challengeFull.challenge;
+    const award = request.challengeFull.award;
+    const task = request.challengeFull.task;
+    const challengeRequirement = request.challengeFull.challengeRequirement;
+    const milestoneKeys = request.challengeFull.milestoneKeys;
 
-    const createdChallenge = await ChallengeCreationService.create(
+    const createdChallenge = await ChallengeFullService.create(
         adminContext,
         challenge,
         award,
@@ -509,6 +519,15 @@ const handleCommandCreateIcon = async () => {
         request.categories ?? [],
         request.tags ?? []
     );
+};
+
+const handleCommandUpdateChallenge = async () => {
+    const challengeFull = await ChallengeFullService.get(adminContext, 37);
+    console.log('old task name: ', challengeFull.task.title);
+    challengeFull.task.title = 'new title name';
+    await ChallengeFullService.update(adminContext, 37, challengeFull);
+    const updatedChallengeFull = await ChallengeFullService.get(adminContext, 37);
+    console.log('new task name: ', updatedChallengeFull.task.title);
 };
 
 const rl = readline.createInterface({
@@ -685,6 +704,10 @@ const processCommand = async (command: string) => {
 
         case 'createIcon':
             await handleCommandCreateIcon();
+            break;
+
+        case 'updateChallenge':
+            await handleCommandUpdateChallenge();
             break;
 
         default:

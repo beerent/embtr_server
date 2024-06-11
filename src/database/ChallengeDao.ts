@@ -43,6 +43,7 @@ export class ChallengeDao {
                     },
                 },
                 challengeParticipants: true,
+                challengeMilestones: { include: { milestone: true } },
                 award: { include: { icon: true } },
                 creator: true,
                 likes: {

@@ -25,6 +25,23 @@ interface ScheduledHabitTimeOfDay {
 }
 
 export class PlannedDayService {
+    public static async getOrCreate(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDay | undefined> {
+        const exists = await PlannedDayService.exists(context, userId, dayKey);
+
+        let plannedDay;
+        if (exists) {
+            plannedDay = await PlannedDayService.getByUserIdAndDayKey(context, userId, dayKey);
+        } else {
+            plannedDay = PlannedDayService.create(context, userId, dayKey);
+        }
+
+        return plannedDay;
+    }
+
     public static async getByUserIdAndDayKey(
         context: Context,
         userId: number,
@@ -144,8 +161,12 @@ export class PlannedDayService {
         return populatedPlannedDay;
     }
 
-    public static async create(context: Context, dayKey: string): Promise<PlannedDay> {
-        const preExistingDayKey = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
+    public static async create(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<PlannedDay> {
+        const preExistingDayKey = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (preExistingDayKey) {
             throw new ServiceException(
                 409,
@@ -154,7 +175,7 @@ export class PlannedDayService {
             );
         }
 
-        const createdPlannedDay = await PlannedDayDao.create(context.userId, dayKey);
+        const createdPlannedDay = await PlannedDayDao.create(userId, dayKey);
         if (!createdPlannedDay) {
             throw new ServiceException(
                 500,
@@ -163,11 +184,7 @@ export class PlannedDayService {
             );
         }
 
-        const plannedDayWithData = await this.getFullyPopulatedByUser(
-            context,
-            context.userId,
-            dayKey
-        );
+        const plannedDayWithData = await this.getFullyPopulatedByUser(context, userId, dayKey);
         if (!plannedDayWithData) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }

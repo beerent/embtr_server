@@ -46,6 +46,26 @@ export class IconDao {
         });
     }
 
+    public static async update(iconId: number, icon: Partial<Icon>) {
+        return prisma.icon.update({
+            where: {
+              id: iconId
+            },
+            data: {
+                name: icon.name ?? '',
+                remoteImageUrl: icon.remoteImageUrl
+            },
+        });
+    }
+
+    public static async delete(iconId: number) {
+        return prisma.icon.delete({
+            where: {
+              id: iconId
+            },
+        });
+    }
+
     public static async addTags(iconId: number, tagIds: number[]) {
         return prisma.icon.update({
             where: {

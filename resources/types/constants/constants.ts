@@ -9,6 +9,7 @@ export namespace Constants {
         SOCIAL_NOTIFICATIONS_SETTING = 'SOCIAL_NOTIFICATIONS_SETTING',
         REMINDER_NOTIFICATIONS_SETTING = 'REMINDER_NOTIFICATIONS_SETTING',
         WARNING_NOTIFICATIONS_SETTING = 'WARNING_NOTIFICATIONS_SETTING',
+        AWAY_MODE = 'AWAY_MODE',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -25,6 +26,8 @@ export namespace Constants {
                 return UserPropertyKey.NEW_USER_CHECKLIST_COMPLETED;
             case 'INTRO_ACKNOWLEDGED':
                 return UserPropertyKey.INTRO_ACKNOWLEDGED;
+            case 'AWAY_MODE':
+                return UserPropertyKey.AWAY_MODE;
 
             default:
                 return UserPropertyKey.HABIT_STREAK_CURRENT;
@@ -41,6 +44,7 @@ export namespace Constants {
         FAILED = 'FAILED',
         SKIPPED = 'SKIPPED',
         NO_SCHEDULE = 'NO_SCHEDULE',
+        AWAY = 'AWAY',
     }
     export const getCompletionState = (state: string): CompletionState => {
         switch (state) {
@@ -54,6 +58,8 @@ export namespace Constants {
                 return CompletionState.SKIPPED;
             case 'NO_SCHEDULE':
                 return CompletionState.NO_SCHEDULE;
+            case 'AWAY':
+                return CompletionState.AWAY;
 
             default:
                 return CompletionState.INVALID;
@@ -168,5 +174,23 @@ export namespace Constants {
         }
 
         return TaskType.INVALID;
+    };
+
+    export enum AwayMode {
+        INVALID = 'INVALID',
+        ENABLED = 'ENABLED',
+        DISABLED = 'DISABLED',
+    }
+
+    export const getAwayMode = (state: string): AwayMode => {
+        switch (state) {
+            case 'ENABLED':
+                return AwayMode.ENABLED;
+            case 'DISABLED':
+                return AwayMode.DISABLED;
+
+            default:
+                return AwayMode.INVALID;
+        }
     };
 }
