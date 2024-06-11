@@ -1,3 +1,4 @@
+import { logger } from '@src/common/logger/Logger';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { ContextService } from '@src/service/ContextService';
@@ -66,6 +67,7 @@ jobRouterLatest.get(
     '/refresh-away-mode',
     routeLogger(v),
     runEndpoint(async (req, res) => {
+        logger.info('JOB - Refreshing away mode');
         const context = await ContextService.getJobContext(req);
         await JobService.refreshAwayMode(context);
 

@@ -14,6 +14,8 @@ export class AwayModeService {
             Constants.AwayMode.ENABLED
         );
 
+        logger.info('Refreshing away mode for users:', users.length);
+
         for (const user of users) {
             if (!user.id) {
                 continue;
