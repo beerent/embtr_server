@@ -1,5 +1,6 @@
 import { Constants } from '@resources/types/constants/constants';
-import { Context } from '@src/general/auth/Context';
+import { logger } from '@src/common/logger/Logger';
+import { Context, ContextType } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDayService } from '../PlannedDayService';
 import { UserPropertyService } from '../UserPropertyService';
@@ -39,12 +40,14 @@ export class AwayModeService {
     private static async refresh(context: Context, userId: number) {
         const timezone = await UserPropertyService.getTimezone(context, userId);
 
-        // todo - later optimize that we only do this at midnight
-
         const dayKey = DayKeyUtility.getDayKeyFromTimezone(timezone);
         const plannedDay = await PlannedDayService.getOrCreate(context, userId, dayKey);
         if (!plannedDay) {
             return;
+        }
+
+        if (context.type === ContextType.JOB_CONTEXT) {
+            logger.info('Setting away mode for user:', userId + ' on day:', dayKey);
         }
 
         plannedDay.status = Constants.CompletionState.AWAY;

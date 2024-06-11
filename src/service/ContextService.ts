@@ -1,5 +1,5 @@
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
-import { Context, NewUserContext } from '@src/general/auth/Context';
+import { Context, ContextType, JobContext, NewUserContext } from '@src/general/auth/Context';
 import { Request } from 'express';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
@@ -30,6 +30,7 @@ export class ContextService {
         }
 
         return {
+            type: ContextType.CONTEXT,
             userId,
             userUid: userUid,
             userEmail: userEmail,
@@ -51,7 +52,18 @@ export class ContextService {
             throw new ServiceException(401, Code.REAUTHENTICATE, 'invalid token');
         }
 
-        return { userUid: userUid, userEmail: userEmail };
+        return {
+            type: ContextType.NEW_USER_CONTEXT,
+            userUid: userUid,
+            userEmail: userEmail,
+        };
+    }
+
+    public static async getJobContext(request: Request): Promise<Context> {
+        const context = await this.get(request);
+        context.type = ContextType.JOB_CONTEXT;
+
+        return context;
     }
 
     private static getDayKey(request: Request): string {
