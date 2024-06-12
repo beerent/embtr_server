@@ -449,6 +449,7 @@ userRouterLatest.get(
     authenticate,
     authorizeAdmin,
     runEndpoint(async (req, res) => {
+        console.log('GETTING USER BY ID');
         const user = await UserService.getByIdForAdmin(parseInt(req.params.userId));
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
@@ -462,6 +463,7 @@ userRouterLatest.get(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
+        console.log('GETTING USER BY UID');
         const context = await ContextService.get(req);
         const uid = req.params.uid;
 
