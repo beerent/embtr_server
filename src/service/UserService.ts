@@ -318,12 +318,13 @@ export class UserService {
         }
     }
 
-    public static async getByIdForAdmin(id: number): Promise<User | undefined> {
+    public static async getByIdForAdmin(id: number): Promise<User> {
         const user = await UserDao.getByIdForAdmin(id);
-        if (user) {
-            return user as User;
-        } else {
+        if (!user) {
             throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
         }
+
+        const userModel: User = ModelConverter.convert(user);
+        return userModel;
     }
 }
