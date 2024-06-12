@@ -441,6 +441,21 @@ userRouterLatest.post(
 /*
  * THIS NEEDS TO BE AT THE BOTTOM
  */
+
+/* by all numberic id */
+userRouterLatest.get(
+    '/:id(\\d+)',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const user = await UserService.getByIdForAdmin(parseInt(req.params.userId));
+        const response: GetUserResponse = { ...SUCCESS, user };
+        res.json(response);
+    })
+);
+
+/* by all alphanumeric id */
 userRouterLatest.get(
     '/:uid([a-zA-Z0-9]+)',
     routeLogger(v),
@@ -451,18 +466,6 @@ userRouterLatest.get(
         const uid = req.params.uid;
 
         const user = await UserService.get(context, uid);
-        const response: GetUserResponse = { ...SUCCESS, user };
-        res.json(response);
-    })
-);
-
-userRouterLatest.get(
-    '/:id(\\d+)',
-    routeLogger(v),
-    authenticate,
-    authorizeAdmin,
-    runEndpoint(async (req, res) => {
-        const user = await UserService.getByIdForAdmin(parseInt(req.params.userId));
         const response: GetUserResponse = { ...SUCCESS, user };
         res.json(response);
     })
