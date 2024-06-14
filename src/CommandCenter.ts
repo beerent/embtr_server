@@ -3,19 +3,19 @@ require('module-alias/register');
 
 import * as readline from 'readline';
 import { UserRoleService } from './service/UserRoleService';
-import { Context } from './general/auth/Context';
+import { Context, ContextType } from './general/auth/Context';
 import { Role } from './roles/Roles';
 import { AccountService } from './service/AccountService';
 import { UserService } from './service/UserService';
 import { RevenueCatService } from './service/internal/RevenueCatService';
 import { PlannedDayService } from './service/PlannedDayService';
-import { HabitStreakService } from './service/HabitStreakService';
+import { DetailedHabitStreakService } from './service/DetailedHabitStreakService';
 import { ReminderService } from './service/feature/ReminderService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './service/UserPropertyService';
 import { UserDao } from './database/UserDao';
 import { UserAwardService } from './service/UserAwardService';
-import { ChallengeCalculationType, User } from '@resources/schema';
+import { ChallengeCalculationType, HabitStreak, User } from '@resources/schema';
 import { DayKeyUtility } from './utility/date/DayKeyUtility';
 import { ChallengeFullService } from './service/feature/ChallengeFullService';
 import { CreateIconRequest } from '@resources/types/requests/IconTypes';
@@ -26,10 +26,15 @@ import {
     UpdateChallengeFullRequest,
 } from '@resources/types/requests/ChallengeTypes';
 import { ChallengeController } from './controller/ChallengeController';
+import { HabitStreakService } from './service/HabitStreakService';
+import { ScheduledHabitService } from './service/ScheduledHabitService';
+import { PureDate } from '@resources/types/date/PureDate';
+import { DateUtility } from './utility/date/DateUtility';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
 const adminContext: Context = {
+    type: ContextType.CONTEXT,
     userId: 1853,
     userUid: 'hello',
     userEmail: 'bnren',
@@ -41,6 +46,7 @@ const adminContext: Context = {
 
 const impersonateContext = (user: User): Context => {
     const context: Context = {
+        type: ContextType.CONTEXT,
         userId: user.id || 0,
         userUid: user.uid || '',
         userEmail: user.email || '',
@@ -221,8 +227,9 @@ const handleCommandUpdateUserStreaks = async (username: string) => {
         return;
     }
 
-    await HabitStreakService.fullPopulateCurrentStreak(adminContext, user.id);
-    await HabitStreakService.fullPopulateLongestStreak(adminContext, user.id);
+    const context: Context = impersonateContext(user);
+    await DetailedHabitStreakService.fullPopulateCurrentStreak(context);
+    await DetailedHabitStreakService.fullPopulateLongestStreak(context);
 };
 
 const handleCommandUpdateAllUserStreaks = async () => {
@@ -233,11 +240,13 @@ const handleCommandUpdateAllUserStreaks = async () => {
             continue;
         }
 
+        const context: Context = impersonateContext(user);
+
         count++;
         console.log('updating (', count, '/', users.length, ')');
 
-        await HabitStreakService.fullPopulateCurrentStreak(adminContext, user.id);
-        await HabitStreakService.fullPopulateLongestStreak(adminContext, user.id);
+        await DetailedHabitStreakService.fullPopulateCurrentStreak(context);
+        await DetailedHabitStreakService.fullPopulateLongestStreak(context);
     }
 };
 
@@ -530,6 +539,58 @@ const handleCommandUpdateChallenge = async () => {
     console.log('new task name: ', updatedChallengeFull.task.title);
 };
 
+const handleCommandMigrateStreaks = async () => {
+    const allCurrent = await UserPropertyService.getAllHabitStreakCurrent(adminContext);
+    for (const property of allCurrent) {
+        await HabitStreakService.update(
+            adminContext,
+            property.userId!,
+            Constants.HabitStreakType.CURRENT,
+            Number(property.value ?? '0')
+        );
+        console.log('migrated current streak for user', property.userId, 'to', property.value);
+    }
+
+    const allLatest = await UserPropertyService.getAllHabitStreakLatest(adminContext);
+    for (const property of allLatest) {
+        await HabitStreakService.update(
+            adminContext,
+            property.userId!,
+            Constants.HabitStreakType.LONGEST,
+            Number(property.value ?? '0')
+        );
+        console.log('migrated current streak for user', property.userId, 'to', property.value);
+    }
+};
+
+const handleCommandMigrateHabitStreaks = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+
+    const yesterday = DateUtility.getYesterday();
+    const yesterdayPureDate = PureDate.fromDateOnServer(yesterday);
+
+    for (const user of users) {
+        count++;
+        if (!user.id) {
+            continue;
+        }
+
+        const context = impersonateContext(user);
+        const schedules = await ScheduledHabitService.getActive(context, yesterdayPureDate);
+        const scheduleCount = schedules.length;
+        if (scheduleCount === 0) {
+            continue;
+        }
+
+        console.log('updating (', count, '/', users.length, ',', schedules.length, 'schedules)');
+        for (const schedule of schedules) {
+            await DetailedHabitStreakService.fullPopulateCurrentStreak(context, schedule.taskId);
+            await DetailedHabitStreakService.fullPopulateLongestStreak(context, schedule.taskId);
+        }
+    }
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -708,6 +769,14 @@ const processCommand = async (command: string) => {
 
         case 'updateChallenge':
             await handleCommandUpdateChallenge();
+            break;
+
+        case 'migrateStreaks':
+            await handleCommandMigrateStreaks();
+            break;
+
+        case 'migrateHabitStreaks':
+            await handleCommandMigrateHabitStreaks();
             break;
 
         default:

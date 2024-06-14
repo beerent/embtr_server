@@ -1,7 +1,5 @@
 import { NotificationType } from './NotificationService';
-import {
-    HttpCode,
-} from '@src/common/RequestResponses';
+import { HttpCode } from '@src/common/RequestResponses';
 import { Interactable } from '@resources/types/interactable/Interactable';
 import { ChallengeDao } from '@src/database/ChallengeDao';
 import { LikeDao } from '@src/database/LikeDao';
@@ -16,26 +14,48 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { LikeEventDispatcher } from '@src/event/like/LikeEventDispatcher';
 
 export class LikeService {
-    public static async create(context: Context, interactable: Interactable, targetId: number): Promise<Like> {
+    public static async create(
+        context: Context,
+        interactable: Interactable,
+        targetId: number
+    ): Promise<Like> {
         const exists = await this.exists(interactable, targetId);
         if (!exists) {
-            throw new ServiceException(HttpCode.RESOURCE_NOT_FOUND, Code.RESOURCE_NOT_FOUND, 'resource not found');
+            throw new ServiceException(
+                HttpCode.RESOURCE_NOT_FOUND,
+                Code.RESOURCE_NOT_FOUND,
+                'resource not found'
+            );
         }
 
         const alreadyLiked = await LikeDao.exists(interactable, context.userId, targetId);
         if (alreadyLiked) {
-            throw new ServiceException(HttpCode.RESOURCE_ALREADY_EXISTS, Code.RESOURCE_ALREADY_EXISTS, 'already liked');
+            throw new ServiceException(
+                HttpCode.RESOURCE_ALREADY_EXISTS,
+                Code.RESOURCE_ALREADY_EXISTS,
+                'already liked'
+            );
         }
 
         const like = await LikeDao.create(interactable, context.userId, targetId);
         if (!like) {
-            throw new ServiceException(HttpCode.GENERAL_FAILURE, Code.GENERIC_ERROR, 'failed to save like');
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'failed to save like'
+            );
         }
         const likeModel: Like = ModelConverter.convert(like);
 
         const toUserId = this.getToUserId(interactable, likeModel);
         const notificationType = this.getNotificationType(interactable);
-        LikeEventDispatcher.onCreated(context, notificationType, context.userId, toUserId, targetId);
+        LikeEventDispatcher.onCreated(
+            context,
+            notificationType,
+            context.userId,
+            toUserId,
+            targetId
+        );
 
         return likeModel;
     }
@@ -95,5 +115,4 @@ export class LikeService {
 
         return NotificationType.PLANNED_DAY_RESULT_LIKE;
     }
-
 }

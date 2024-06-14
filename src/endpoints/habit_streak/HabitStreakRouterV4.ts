@@ -5,7 +5,7 @@ import { ContextService } from '@src/service/ContextService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { SUCCESS } from '@src/common/RequestResponses';
 import { GetHabitStreakResponse } from '@resources/types/requests/HabitTypes';
-import { HabitStreakServiceV4 } from '@src/service/HabitStreakServiceV4';
+import { DetailedHabitStreakServiceV4 } from '@src/service/DetailedHabitStreakServiceV4';
 
 const habitStreakRouterV4 = express.Router();
 const v = 'v4';
@@ -14,7 +14,7 @@ habitStreakRouterV4.get('/:userId', routeLogger(v), authenticate, authorize, asy
   const context = await ContextService.get(req);
   const userId = Number(req.params.userId);
 
-  const habitStreak = await HabitStreakServiceV4.getBasic(context, userId);
+  const habitStreak = await DetailedHabitStreakServiceV4.getBasic(context, userId);
   const response: GetHabitStreakResponse = {
     ...SUCCESS,
     habitStreak,
@@ -32,7 +32,7 @@ habitStreakRouterV4.get(
     const context = await ContextService.get(req);
     const userId = Number(req.params.userId);
 
-    const habitStreak = await HabitStreakServiceV4.getAdvanced(context, userId);
+    const habitStreak = await DetailedHabitStreakServiceV4.getAdvanced(context, userId);
     const response: GetHabitStreakResponse = {
       ...SUCCESS,
       habitStreak,

@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { PlannedDay } from '@resources/schema';
+import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 
 export interface QueryResults {
     date: Date;
@@ -163,7 +164,11 @@ export class PlannedDayDao {
                 },
             },
             include: {
-                plannedTasks: true,
+                plannedTasks: {
+                    include: {
+                        scheduledHabit: true,
+                    },
+                },
             },
         });
 
@@ -267,6 +272,11 @@ export class PlannedDayDao {
             `
         );
 
-        return results;
+        const dateToStatus: { [key: string]: string } = {};
+        results.forEach((result) => {
+            dateToStatus[DayKeyUtility.getDayKey(result.date)] = result.status;
+        });
+
+        return dateToStatus;
     }
 }

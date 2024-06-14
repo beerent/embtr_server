@@ -30,6 +30,7 @@ export interface User {
   blockedUsers?: BlockedUser[];
   roles?: Role[];
   properties?: Property[];
+  habitStreaks?: HabitStreak[];
 }
 
 export interface Property {
@@ -68,6 +69,7 @@ export interface Task extends TaskCustom {
   updatedAt?: Date;
   challengeRequirements?: ChallengeRequirement[];
   scheduledHabits?: ScheduledHabit[];
+  habitStreaks?: HabitStreak[];
 }
 
 export interface PlannedDay {
@@ -476,6 +478,16 @@ export interface IconCategory {
   createdAt?: Date;
   updatedAt?: Date;
   icons?: Icon[];
+}
+
+export interface HabitStreak {
+  id?: number;
+  userId?: number;
+  user?: User;
+  taskId?: number;
+  task?: Task;
+  type?: string;
+  streak?: number;
 }
 
 export enum NotificationTargetPage {

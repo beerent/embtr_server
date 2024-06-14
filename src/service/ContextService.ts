@@ -1,5 +1,5 @@
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
-import { Context, ContextType, JobContext, NewUserContext } from '@src/general/auth/Context';
+import { Context, ContextType, NewUserContext } from '@src/general/auth/Context';
 import { Request } from 'express';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';

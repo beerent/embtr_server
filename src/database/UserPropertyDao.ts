@@ -20,6 +20,14 @@ export class UserPropertyDao {
         });
     }
 
+    public static async getAllByKey(key: string) {
+        return prisma.property.findMany({
+            where: {
+                key,
+            },
+        });
+    }
+
     public static async set(userId: number, key: string, value: string) {
         return prisma.property.upsert({
             where: {

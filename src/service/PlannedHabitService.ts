@@ -78,19 +78,25 @@ export class PlannedHabitService {
             );
         }
 
-        PlannedHabitEventDispatcher.onCreated(context, createdPlannedTask.id);
+        const createPlannedTasKModel = await this.getById(context, createdPlannedTask.id ?? 0);
+
+        PlannedHabitEventDispatcher.onCreated(
+            context,
+            createPlannedTasKModel.id ?? 0,
+            createPlannedTasKModel.scheduledHabit?.taskId ?? 0
+        );
 
         const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
         return plannedTaskModel;
     }
 
     public static async update(context: Context, plannedTask: PlannedTask): Promise<PlannedTask> {
-        const existingPlannedTask = await PlannedHabitDao.get(plannedTask.id!);
+        const existingPlannedTask = await this.getById(context, plannedTask.id!);
         if (!existingPlannedTask) {
             throw new ServiceException(404, Code.PLANNED_TASK_NOT_FOUND, 'planned task not found');
         }
 
-        if (existingPlannedTask.plannedDay.userId !== context.userId) {
+        if (existingPlannedTask?.plannedDay?.userId !== context.userId) {
             throw new ServiceException(403, Code.FORBIDDEN, 'user does not have permission');
         }
 
@@ -106,9 +112,10 @@ export class PlannedHabitService {
             );
         }
 
-        PlannedHabitEventDispatcher.onUpdated(context, existingPlannedTask.id);
-
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
+
+        this.handleDispatches(context, existingPlannedTask, updatedPlannedTaskModel);
+
         return updatedPlannedTaskModel;
     }
 
@@ -174,5 +181,39 @@ export class PlannedHabitService {
         );
 
         return plannedHabit?.id;
+    }
+
+    private static handleDispatches(
+        context: Context,
+        existingPlannedTask: PlannedTask,
+        updatedPlannedTask: PlannedTask
+    ) {
+        PlannedHabitEventDispatcher.onUpdated(
+            context,
+            existingPlannedTask.id ?? 0,
+            existingPlannedTask.scheduledHabit?.taskId ?? 0
+        );
+
+        const changedToComplete =
+            existingPlannedTask.status !== updatedPlannedTask.status &&
+            updatedPlannedTask.status === Constants.CompletionState.COMPLETE;
+        if (changedToComplete) {
+            PlannedHabitEventDispatcher.onCompleted(
+                context,
+                updatedPlannedTask.id ?? 0,
+                existingPlannedTask.scheduledHabit?.taskId ?? 0
+            );
+        }
+
+        const changedToIncomplete =
+            existingPlannedTask.status !== updatedPlannedTask.status &&
+            updatedPlannedTask.status !== Constants.CompletionState.COMPLETE;
+        if (changedToIncomplete) {
+            PlannedHabitEventDispatcher.onIncompleted(
+                context,
+                updatedPlannedTask.id ?? 0,
+                existingPlannedTask.scheduledHabit?.taskId ?? 0
+            );
+        }
     }
 }

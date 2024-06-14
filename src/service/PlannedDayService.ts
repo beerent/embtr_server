@@ -290,11 +290,10 @@ export class PlannedDayService {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
-        try {
-            return this.updateCompletionStatusByPlannedDayId(context, plannedHabit.plannedDayId);
-        } catch (error) {
-            console.error('error updating planned day', plannedHabit.plannedDayId);
-        }
+        const updatedPlannedHabit = await this.updateCompletionStatusByPlannedDayId(
+            context,
+            plannedHabit.plannedDayId
+        );
     }
 
     public static async updateCompletionStatusByPlannedDayId(
@@ -322,9 +321,7 @@ export class PlannedDayService {
 
         plannedDay.status = completionStatus;
         const updatedPlannedDay = await this.update(context, plannedDay);
-        const updatedPlannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
-
-        return updatedPlannedDayModel;
+        return updatedPlannedDay;
     }
 
     public static async update(context: Context, plannedDay: PlannedDay) {

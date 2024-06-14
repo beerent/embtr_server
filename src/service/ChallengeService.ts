@@ -7,7 +7,7 @@ import {
     ChallengeRequirementCompletionState,
     PlannedTask,
 } from '@resources/schema';
-import { ChallengeDetails, ChallengeFull, ChallengeSummary } from '@resources/types/dto/Challenge';
+import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
 import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { HttpCode, SUCCESS } from '@src/common/RequestResponses';
 import { ChallengeDao, ChallengeRequirementResults } from '@src/database/ChallengeDao';
@@ -17,8 +17,6 @@ import { ChallengeParticipantEventDispatcher } from '@src/event/challenge_partic
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
-import { AwardService } from './AwardService';
-import { HabitService } from './HabitService';
 import { PlannedHabitService } from './PlannedHabitService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 

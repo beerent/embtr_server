@@ -1,8 +1,7 @@
 export namespace Constants {
     export enum UserPropertyKey {
+        INVALID = 'INVALID',
         TIMEZONE = 'TIMEZONE',
-        HABIT_STREAK_CURRENT = 'HABIT_STREAK_CURRENT',
-        HABIT_STREAK_LONGEST = 'HABIT_STREAK_LONGEST',
         NEW_USER_CHECKLIST_DISMISSED = 'NEW_USER_CHECKLIST_DISMISSED',
         NEW_USER_CHECKLIST_COMPLETED = 'NEW_USER_CHECKLIST_COMPLETED',
         INTRO_ACKNOWLEDGED = 'INTRO_ACKNOWLEDGED',
@@ -16,10 +15,6 @@ export namespace Constants {
         switch (key) {
             case 'TIME_ZONE':
                 return UserPropertyKey.TIMEZONE;
-            case 'HABIT_STREAK_CURRENT':
-                return UserPropertyKey.HABIT_STREAK_CURRENT;
-            case 'HABIT_STREAK_LONGEST':
-                return UserPropertyKey.HABIT_STREAK_LONGEST;
             case 'NEW_USER_CHECKLIST_DISMISSED':
                 return UserPropertyKey.NEW_USER_CHECKLIST_DISMISSED;
             case 'NEW_USER_CHECKLIST_COMPLETED':
@@ -28,9 +23,11 @@ export namespace Constants {
                 return UserPropertyKey.INTRO_ACKNOWLEDGED;
             case 'AWAY_MODE':
                 return UserPropertyKey.AWAY_MODE;
+            case 'INVALID':
+                return UserPropertyKey.INVALID;
 
             default:
-                return UserPropertyKey.HABIT_STREAK_CURRENT;
+                return UserPropertyKey.INVALID;
         }
     };
 
@@ -191,6 +188,24 @@ export namespace Constants {
 
             default:
                 return AwayMode.INVALID;
+        }
+    };
+
+    export enum HabitStreakType {
+        INVALID = 'INVALID',
+        LONGEST = 'LONGEST',
+        CURRENT = 'CURRENT',
+    }
+
+    export const getStreakType = (type: string): HabitStreakType => {
+        switch (type) {
+            case 'LONGEST':
+                return HabitStreakType.LONGEST;
+            case 'CURRENT':
+                return HabitStreakType.CURRENT;
+
+            default:
+                return HabitStreakType.INVALID;
         }
     };
 }

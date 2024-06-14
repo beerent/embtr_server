@@ -176,60 +176,6 @@ export class UserPropertyService {
         );
     }
 
-    public static async getCurrentHabitStreak(context: Context, userId: number): Promise<number> {
-        const property = await this.get(
-            context,
-            userId,
-            Constants.UserPropertyKey.HABIT_STREAK_CURRENT
-        );
-
-        if (!property?.value) {
-            return 0;
-        }
-
-        return parseInt(property.value);
-    }
-
-    public static async setCurrentHabitStreak(
-        context: Context,
-        userId: number,
-        value: number
-    ): Promise<Property> {
-        return this.set(
-            context,
-            userId,
-            Constants.UserPropertyKey.HABIT_STREAK_CURRENT,
-            value.toString()
-        );
-    }
-
-    public static async getLongestHabitStreak(context: Context, userId: number): Promise<number> {
-        const property = await this.get(
-            context,
-            userId,
-            Constants.UserPropertyKey.HABIT_STREAK_LONGEST
-        );
-
-        if (!property?.value) {
-            return 0;
-        }
-
-        return parseInt(property.value);
-    }
-
-    public static async setLongestHabitStreak(
-        context: Context,
-        userId: number,
-        value: number
-    ): Promise<Property> {
-        return this.set(
-            context,
-            userId,
-            Constants.UserPropertyKey.HABIT_STREAK_LONGEST,
-            value.toString()
-        );
-    }
-
     public static async setNewUserChecklistDismissed(context: Context): Promise<void> {
         await this.set(
             context,
@@ -299,6 +245,20 @@ export class UserPropertyService {
                 Constants.WarningNotificationSetting.DISABLED
             );
         }
+    }
+
+    public static async getAllHabitStreakCurrent(context: Context): Promise<Property[]> {
+        const allCurrent = await UserPropertyDao.getAllByKey('HABIT_STREAK_CURRENT');
+        const models: Property[] = ModelConverter.convertAll(allCurrent);
+
+        return models;
+    }
+
+    public static async getAllHabitStreakLatest(context: Context): Promise<Property[]> {
+        const allLatest = await UserPropertyDao.getAllByKey('HABIT_STREAK_LONGEST');
+        const models: Property[] = ModelConverter.convertAll(allLatest);
+
+        return models;
     }
 
     private static async get(

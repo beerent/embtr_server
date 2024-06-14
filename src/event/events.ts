@@ -15,10 +15,13 @@ export namespace Event {
     export namespace PlannedHabit {
         export const Updated = 'PLANNED_HABIT_UPDATED';
         export const Created = 'PLANNED_HABIT_CREATED';
+        export const Completed = 'PLANNED_HABIT_COMPLETED';
+        export const Incompleted = 'PLANNED_HABIT_INCOMPLETED';
 
         export interface Event {
             context: Context;
             id: number;
+            habitId: number;
         }
     }
 

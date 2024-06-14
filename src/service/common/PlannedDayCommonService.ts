@@ -7,18 +7,17 @@ export class PlannedDayCommonService {
         plannedDayDate: Date,
         plannedHabits: PlannedTask[]
     ): Constants.CompletionState {
+        const plannedTaskCount = plannedHabits.length ?? 0;
         const scheduledHabitCount = this.getScheduledActiveHabitCount(
             scheduledHabits,
             plannedDayDate
         );
-        if (scheduledHabitCount === 0) {
+        if (plannedTaskCount === 0 && scheduledHabitCount === 0) {
             return Constants.CompletionState.NO_SCHEDULE;
         }
 
         // at this point we do have expected scheduled habits
         // ==================================================================
-
-        const plannedTaskCount = plannedHabits.length ?? 0;
 
         const containsFailedPlannedTask = plannedHabits.some((task) => {
             return task.status === Constants.CompletionState.FAILED;
@@ -61,12 +60,20 @@ export class PlannedDayCommonService {
     // this should live in SchedukedHabitService
     public static getScheduledActiveHabitCount(
         scheduledHabits: ScheduledHabit[],
-        plannedDayDate: Date
+        plannedDayDate: Date,
+        habitId?: number
     ): number {
         const plannedDayDayOfWeek = plannedDayDate.getDay() + 1;
 
+        // 0. reduce the results to the habit we are interested in
+        const scheduledHabitsForHabit = habitId
+            ? scheduledHabits.filter((scheduledHabit) => {
+                return scheduledHabit.taskId === habitId;
+            })
+            : scheduledHabits;
+
         // 1. reduce results to the day of the week we are on
-        const scheduledHabitsForDayOfWeek = scheduledHabits.filter((scheduledHabit) => {
+        const scheduledHabitsForDayOfWeek = scheduledHabitsForHabit.filter((scheduledHabit) => {
             if (scheduledHabit.daysOfWeekEnabled === false) {
                 return true;
             }

@@ -10,10 +10,11 @@ import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
 import { DateUtility } from '@src/utility/date/DateUtility';
+import { HabitStreakService } from './HabitStreakService';
 
 // "comment" - stronkbad - 2024-03-13
 
-export class HabitStreakServiceV4 {
+export class DetailedHabitStreakServiceV4 {
     public static async getAdvanced(context: Context, userId: number): Promise<HabitStreak> {
         const days = 209;
 
@@ -176,23 +177,21 @@ export class HabitStreakServiceV4 {
     }
 
     private static async getCurrentHabitStreak(context: Context, userId: number): Promise<number> {
-        const currentStreak = await UserPropertyService.getCurrentHabitStreak(context, userId);
-
-        if (!currentStreak) {
-            return 0;
-        }
-
-        return currentStreak;
+        const currentStreak = await HabitStreakService.get(
+            context,
+            userId,
+            Constants.HabitStreakType.CURRENT
+        );
+        return currentStreak?.streak ?? 0;
     }
 
     private static async getLongestHabitStreak(context: Context, userId: number): Promise<number> {
-        const longestStreak = await UserPropertyService.getLongestHabitStreak(context, userId);
-
-        if (!longestStreak) {
-            return 0;
-        }
-
-        return longestStreak;
+        const longestStreak = await HabitStreakService.get(
+            context,
+            userId,
+            Constants.HabitStreakType.LONGEST
+        );
+        return longestStreak?.streak ?? 0;
     }
 
     private static getCompletionStateForPlannedDay(

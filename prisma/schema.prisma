@@ -40,6 +40,7 @@ model User {
     blockedUsers           BlockedUser[]           @relation("blockedUser")
     roles                  Role[]
     properties             Property[]
+    habitStreaks           HabitStreak[]
 
     @@index([username])
     @@map("user")
@@ -88,6 +89,7 @@ model Task {
     updatedAt             DateTime               @default(now()) @updatedAt
     challengeRequirements ChallengeRequirement[]
     scheduledHabits       ScheduledHabit[]
+    habitStreaks          HabitStreak[]
 
     @@index([userId], name: "user_id")
     @@index([habitCategoryId], name: "habit_category_id")
@@ -649,4 +651,19 @@ model IconCategory {
     icons     Icon[]
 
     @@map("icon_category")
+}
+
+model HabitStreak {
+    id     Int    @id @default(autoincrement())
+    userId Int    @db.Int
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    taskId Int?   @db.Int
+    task   Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+    type   String @default("INVALID")
+    streak Int    @default(0)
+
+    @@unique([userId, taskId, type], name: "unique_user_task_type")
+    @@index([userId])
+    @@index([taskId])
+    @@map("habit_streak")
 }

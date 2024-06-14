@@ -26,10 +26,15 @@ import {
     Icon,
     Tag,
     IconCategory,
+    Unit,
+    HabitStreak,
+    ChallengeParticipant,
+    PushNotificationToken,
+    Comment,
+    Like,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
-import { Unit } from '@resources/schema';
 
 type PrismaModel =
     | User
@@ -44,7 +49,6 @@ type PrismaModel =
     | Metadata
     | QuoteOfTheDay
     | Season
-    | Unit
     | Challenge
     | HabitCategory
     | ScheduledHabit
@@ -59,7 +63,13 @@ type PrismaModel =
     | ChallengeRequirement
     | Icon
     | Tag
-    | IconCategory;
+    | IconCategory
+    | Unit
+    | HabitStreak
+    | ChallengeParticipant
+    | PushNotificationToken
+    | Comment
+    | Like;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

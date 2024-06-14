@@ -64,7 +64,7 @@ export class UserAwardService {
         return updatedUserAwardModel;
     }
 
-    private static async addAward(context: Context, awardId: number) {
+    private static async addAward(context: Context, awardId: number): Promise<UserAward> {
         const userAward = await this.getByAwardId(context, awardId);
 
         let updatedUserAward: UserAward;
@@ -75,8 +75,7 @@ export class UserAwardService {
             updatedUserAward = await UserAwardDao.create(context.userId, awardId);
         }
 
-        const updatedUserAwardModel: UserAward = ModelConverter.convert(updatedUserAward);
-        return updatedUserAwardModel;
+        return updatedUserAward;
     }
 
     public static async getByAwardId(
