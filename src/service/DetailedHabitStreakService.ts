@@ -188,6 +188,7 @@ export class DetailedHabitStreakService {
             } else if (
                 status === Constants.CompletionState.NO_SCHEDULE ||
                 status === Constants.CompletionState.AWAY ||
+                status === Constants.CompletionState.SKIPPED ||
                 status === null
             ) {
                 continue;
@@ -245,6 +246,7 @@ export class DetailedHabitStreakService {
             } else if (
                 status === Constants.CompletionState.NO_SCHEDULE ||
                 status === Constants.CompletionState.AWAY ||
+                status === Constants.CompletionState.SKIPPED ||
                 status === null
             ) {
                 continue;
