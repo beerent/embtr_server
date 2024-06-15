@@ -77,3 +77,7 @@ export interface UpdateAwayModeResponse extends Response {
 export interface GetAwayModeResponse extends Response {
     awayMode: Constants.AwayMode;
 }
+
+export interface GetActiveUsersResponse extends Response {
+    activeUsers: number;
+}

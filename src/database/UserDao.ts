@@ -416,4 +416,22 @@ export class UserDao {
 
         return users;
     }
+
+    public static getActiveUsersForRange = async (startDate: Date, endDate: Date) => {
+        const results = await prisma.plannedDay.findMany({
+            distinct: ['userId'],
+            where: {
+                plannedTasks: {
+                    some: {
+                        updatedAt: {
+                            gt: startDate,
+                            lte: endDate
+                        }
+                    }
+                }
+            }
+        });
+
+        return results.length;
+    }
 }

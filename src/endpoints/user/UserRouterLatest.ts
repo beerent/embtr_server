@@ -5,6 +5,7 @@ import { GetHabitJourneyResponse } from '@resources/types/requests/HabitTypes';
 import { GetPlannedDayResultSummariesResponse } from '@resources/types/requests/PlannedDayResultTypes';
 import {
     CreateBlockUserRequest,
+    GetActiveUsersResponse,
     GetUserResponse,
     GetUsersResponse,
     GetUserStatsResponse,
@@ -471,6 +472,27 @@ userRouterLatest.get(
         res.json(response);
     })
 );
+
+userRouterLatest.get(
+    '/admin/active-users/:startDate/:endDate',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const startDate = new Date(parseInt(req.params.startDate));
+        const endDate = new Date(parseInt(req.params.endDate));
+
+        const activeUsers = await UserService.getActiveUsersForRange(startDate, endDate);
+
+        const response: GetActiveUsersResponse = {
+            ...SUCCESS,
+            activeUsers
+        };
+
+        res.json(response);
+    })
+);
+
 
 userRouterLatest.use('/property', userPropertyRouterLatest);
 
