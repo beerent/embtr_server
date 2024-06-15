@@ -66,8 +66,10 @@ export class DetailedHabitStreakService {
         maxWeeks?: number
     ): Promise<HabitStreak> {
         const endDate = await this.getEndDateForUser(context, userId, habitId);
+        endDate.setHours(0, 0, 0, 0);
         const startDate = new Date(endDate);
         startDate.setDate(endDate.getDate() - days);
+        startDate.setHours(0, 0, 0, 0);
 
         HabitStreakEventDispatcher.onRefresh(context, userId);
 
