@@ -20,12 +20,7 @@ import { DayKeyUtility } from './utility/date/DayKeyUtility';
 import { ChallengeFullService } from './service/feature/ChallengeFullService';
 import { CreateIconRequest } from '@resources/types/requests/IconTypes';
 import { IconCreationService } from './service/feature/IconCreationService';
-import { ChallengeService } from './service/ChallengeService';
-import {
-    CreateChallengeFullRequest,
-    UpdateChallengeFullRequest,
-} from '@resources/types/requests/ChallengeTypes';
-import { ChallengeController } from './controller/ChallengeController';
+import { CreateChallengeFullRequest } from '@resources/types/requests/ChallengeTypes';
 import { HabitStreakService } from './service/HabitStreakService';
 import { ScheduledHabitService } from './service/ScheduledHabitService';
 import { PureDate } from '@resources/types/date/PureDate';

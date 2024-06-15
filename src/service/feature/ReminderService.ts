@@ -20,6 +20,12 @@ export class ReminderService {
         );
 
         for (const user of users) {
+            const isAwayModeEnabled = UserPropertyUtility.isAwayModeEnabled(user);
+            if (isAwayModeEnabled) {
+                console.log('skipping notifications, ' + user.username + ' is in away mode');
+                continue;
+            }
+
             try {
                 await this.sendUserDailyReminder(context, user);
             } catch (e) {
@@ -36,6 +42,12 @@ export class ReminderService {
         );
 
         for (const user of users) {
+            const isAwayModeEnabled = UserPropertyUtility.isAwayModeEnabled(user);
+            if (isAwayModeEnabled) {
+                console.log('skipping notifications, ' + user.username + ' is in away mode');
+                continue;
+            }
+
             try {
                 await this.sendUserPeriodicReminder(context, user);
             } catch (e) {
@@ -52,6 +64,12 @@ export class ReminderService {
         );
 
         for (const user of users) {
+            const isAwayModeEnabled = UserPropertyUtility.isAwayModeEnabled(user);
+            if (isAwayModeEnabled) {
+                console.log('skipping notifications, ' + user.username + ' is in away mode');
+                continue;
+            }
+
             try {
                 await this.sendUserDailyWarning(context, user);
             } catch (e) {
@@ -68,6 +86,12 @@ export class ReminderService {
         );
 
         for (const user of users) {
+            const isAwayModeEnabled = UserPropertyUtility.isAwayModeEnabled(user);
+            if (isAwayModeEnabled) {
+                console.log('skipping notifications, ' + user.username + ' is in away mode');
+                continue;
+            }
+
             try {
                 await this.sendUserPeriodicWarning(context, user);
             } catch (e) {

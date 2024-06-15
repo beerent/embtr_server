@@ -17,4 +17,9 @@ export class UserPropertyUtility {
             }
         }
     }
+
+    public static isAwayModeEnabled(user: User) {
+        const awayModeProperty = this.getProperty(user, Constants.UserPropertyKey.AWAY_MODE);
+        return awayModeProperty?.value === Constants.AwayMode.ENABLED;
+    }
 }
