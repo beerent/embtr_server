@@ -327,4 +327,9 @@ export class UserService {
         const userModel: User = ModelConverter.convert(user);
         return userModel;
     }
+
+
+    public static async getActiveUsersForRange(startDate: Date, endDate: Date): Promise<number> {
+        return UserDao.getActiveUsersForRange(startDate, endDate);
+    }
 }
