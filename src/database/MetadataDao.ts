@@ -1,4 +1,5 @@
 import { prisma } from '@database/prisma';
+import { MetadataBody } from '@resources/types/requests/MetadataTypes';
 
 export class MetadataDao {
     public static async getAll() {
@@ -10,6 +11,33 @@ export class MetadataDao {
             where: {
                 key,
             },
+        });
+
+        return metadata;
+    }
+
+    public static async create(key: string, value: string) {
+        const metadata = await prisma.metadata.create({
+            data: {
+                key,
+                value
+            }
+        });
+
+        return metadata;
+    }
+
+    public static async update(id: number, data: MetadataBody) {
+        const metadata = await prisma.metadata.update({
+            where: {
+                id
+            },
+            data: {
+                ...(data.key && {
+                    key: data.key
+                }),
+                value: data.value
+            }
         });
 
         return metadata;
@@ -32,10 +60,10 @@ export class MetadataDao {
         return metadata;
     }
 
-    public static async delete(key: string) {
+    public static async delete(id: number) {
         const metadata = await prisma.metadata.delete({
             where: {
-                key,
+                id
             },
         });
 
