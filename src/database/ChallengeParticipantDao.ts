@@ -147,6 +147,7 @@ export class ChallengeParticipantDao {
                 ...completionCondition,
             },
             include: {
+                completedOnPlannedDay: true,
                 challenge: {
                     include: {
                         award: {
