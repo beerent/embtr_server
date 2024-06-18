@@ -225,6 +225,49 @@ export class UserDao {
         return users;
     }
 
+    public static async adminSearch(query: string): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            include: {
+                scheduledHabits: {
+                    include: {
+                        plannedTasks: true
+                    }
+                }
+            },
+            where: {
+                OR: [
+                    {
+                        username: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        displayName: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        email: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        id: {
+                            equals: Number(query),
+                        },
+                    },
+                    {
+                        uid: {
+                            equals: query,
+                        },
+                    },
+                ],
+            },
+        });
+
+        return users;
+    }
+
     public static async create(uid: string, email: string): Promise<User | null> {
         const newUser = await prisma.user.create({
             data: {

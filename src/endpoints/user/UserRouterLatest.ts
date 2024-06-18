@@ -103,6 +103,20 @@ userRouterLatest.get(
 );
 
 userRouterLatest.get(
+    '/admin/search/',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const query = req.query.query as string;
+
+        const users: User[] = await UserService.adminSearch(query);
+        const response: GetUsersResponse = { ...SUCCESS, users };
+        res.json(response);
+    })
+);
+
+userRouterLatest.get(
     '/exists',
     routeLogger(v),
     authenticate,

@@ -174,6 +174,13 @@ export class UserService {
         return userModels;
     }
 
+    public static async adminSearch(query: string): Promise<User[]> {
+        const users = await UserDao.adminSearch(query);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
     public static async refreshPremiumUsers(context: Context) {
         const users = await this.getAllPremium(context);
         logger.info(`found ${users.length} premium users`);
