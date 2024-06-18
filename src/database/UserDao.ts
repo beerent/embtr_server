@@ -92,6 +92,13 @@ export class UserDao {
                     },
                 ],
             }),
+            include: {
+                scheduledHabits: {
+                    include: {
+                        plannedTasks: true
+                    }
+                }
+           }
         });
         return users;
     }
