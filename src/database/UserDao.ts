@@ -226,6 +226,12 @@ export class UserDao {
     }
 
     public static async adminSearch(query: string): Promise<User[]> {
+        const idQuery = isNaN(Number(query)) ? {} : {
+            id: {
+                equals: Number(query)
+            }
+        }
+
         const users = await prisma.user.findMany({
             include: {
                 scheduledHabits: {
@@ -252,15 +258,11 @@ export class UserDao {
                         },
                     },
                     {
-                        id: {
-                            equals: Number(query),
-                        },
-                    },
-                    {
                         uid: {
                             equals: query,
                         },
                     },
+                    ...[idQuery]
                 ],
             },
         });
