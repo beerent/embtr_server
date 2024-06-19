@@ -77,7 +77,6 @@ export class UserDao {
     }
 
     public static async getAll(query?: Record<string, string>): Promise<User[]> {
-
         const users = await prisma.user.findMany({
             ...(query?.page && {
                 skip: (Number(query.page) - 1) * Number(query.limit || 25),
@@ -97,9 +96,11 @@ export class UserDao {
                     include: {
                         plannedTasks: true
                     }
-                }
+                },
+                properties: true
            }
         });
+
         return users;
     }
 
