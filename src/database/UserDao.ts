@@ -91,7 +91,16 @@ export class UserDao {
                     },
                 ],
             }),
+            include: {
+                scheduledHabits: {
+                    include: {
+                        plannedTasks: true
+                    }
+                },
+                properties: true
+           }
         });
+
         return users;
     }
 
@@ -209,6 +218,51 @@ export class UserDao {
                             contains: query,
                         },
                     },
+                ],
+            },
+        });
+
+        return users;
+    }
+
+    public static async adminSearch(query: string): Promise<User[]> {
+        const idQuery = isNaN(Number(query)) ? {} : {
+            id: {
+                equals: Number(query)
+            }
+        }
+
+        const users = await prisma.user.findMany({
+            include: {
+                scheduledHabits: {
+                    include: {
+                        plannedTasks: true
+                    }
+                }
+            },
+            where: {
+                OR: [
+                    {
+                        username: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        displayName: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        email: {
+                            contains: query,
+                        },
+                    },
+                    {
+                        uid: {
+                            equals: query,
+                        },
+                    },
+                    ...[idQuery]
                 ],
             },
         });
