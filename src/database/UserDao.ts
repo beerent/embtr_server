@@ -77,7 +77,6 @@ export class UserDao {
     }
 
     public static async getAll(query?: Record<string, string>): Promise<User[]> {
-
         const users = await prisma.user.findMany({
             ...(query?.page && {
                 skip: (Number(query.page) - 1) * Number(query.limit || 25),
@@ -145,38 +144,37 @@ export class UserDao {
     }
 
     public static async getByIdForAdmin(id: number) {
-
         const user = await prisma.user.findUnique({
             where: {
                 id: id,
             },
             include: {
-              roles: true,
-              scheduledHabits: {
-                include: {
-                  task: true,
-                  plannedTasks: true
-                }
-              },
-              plannedDays: {
-                include: {
-                  plannedTasks: {
+                roles: true,
+                scheduledHabits: {
                     include: {
-                      scheduledHabit: {
-                        include: {
-                          task: {
+                        task: true,
+                        plannedTasks: true,
+                    },
+                },
+                plannedDays: {
+                    include: {
+                        plannedTasks: {
                             include: {
-                              icon: true
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              challenges: true,
-              properties: true,
+                                scheduledHabit: {
+                                    include: {
+                                        task: {
+                                            include: {
+                                                icon: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                challenges: true,
+                properties: true,
             },
         });
 
@@ -425,13 +423,13 @@ export class UserDao {
                     some: {
                         updatedAt: {
                             gt: startDate,
-                            lte: endDate
-                        }
-                    }
-                }
-            }
+                            lte: endDate,
+                        },
+                    },
+                },
+            },
         });
 
         return results.length;
-    }
+    };
 }

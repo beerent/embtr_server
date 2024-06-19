@@ -16,3 +16,8 @@ export interface HabitStreak {
     streakRank: number;
     results: HabitStreakResult[];
 }
+
+export interface SimpleHabitStreak {
+    currentStreak: number;
+    longestStreak: number;
+}

@@ -1,5 +1,9 @@
 import { PureDate } from '@resources/types/date/PureDate';
-import { HabitStreak, HabitStreakResult } from '@resources/types/dto/HabitStreak';
+import {
+    HabitStreak,
+    HabitStreakResult,
+    SimpleHabitStreak,
+} from '@resources/types/dto/HabitStreak';
 import { Context } from '@src/general/auth/Context';
 import { PlannedDayService } from './PlannedDayService';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
@@ -20,6 +24,18 @@ import { HabitStreakService } from './HabitStreakService';
  * separate logic between chart data and streak data
  */
 export class DetailedHabitStreakService {
+    public static async getSimple(context: Context, userId: number) {
+        const currentHabitStreak = await this.getCurrentHabitStreak(context, userId);
+        const longestHabitStreak = await this.getLongestHabitStreak(context, userId);
+
+        const simpleHableStreak: SimpleHabitStreak = {
+            currentStreak: currentHabitStreak,
+            longestStreak: longestHabitStreak,
+        };
+
+        return simpleHableStreak;
+    }
+
     public static async getAdvanced(
         context: Context,
         userId: number,
@@ -178,7 +194,6 @@ export class DetailedHabitStreakService {
 
         let completionCount = 0;
         for (const habitStreakResult of habitStreakResults) {
-            console.log('Checking', habitStreakResult.dayKey, habitStreakResult.result);
             const status = habitStreakResult.result;
 
             // if we don't have the plannedDay in the database, we need to go to the schedule

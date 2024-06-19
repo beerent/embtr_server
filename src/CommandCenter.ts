@@ -586,6 +586,30 @@ const handleCommandMigrateHabitStreaks = async () => {
     }
 };
 
+const handleCommandMigrateHabitStreaksForUser = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    const yesterday = DateUtility.getYesterday();
+    const yesterdayPureDate = PureDate.fromDateOnServer(yesterday);
+
+    const context = impersonateContext(user);
+    const schedules = await ScheduledHabitService.getActive(context, yesterdayPureDate);
+    const scheduleCount = schedules.length;
+    if (scheduleCount === 0) {
+        return;
+    }
+
+    for (const schedule of schedules) {
+        console.log(schedule.task?.title);
+        await DetailedHabitStreakService.fullPopulateCurrentStreak(context, schedule.taskId);
+        await DetailedHabitStreakService.fullPopulateLongestStreak(context, schedule.taskId);
+    }
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -772,6 +796,10 @@ const processCommand = async (command: string) => {
 
         case 'migrateHabitStreaks':
             await handleCommandMigrateHabitStreaks();
+            break;
+
+        case 'migrateHabitStreaksForUser':
+            await handleCommandMigrateHabitStreaksForUser(email);
             break;
 
         default:
