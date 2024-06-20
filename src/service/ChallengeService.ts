@@ -451,23 +451,27 @@ export class ChallengeService {
 
     private static isChallengeJoinable(challenge: Challenge): boolean {
         if (!challenge.end) {
-           return true;
+            return true;
         }
 
         const requirement = challenge.challengeRequirements?.[0];
 
         if (!requirement) {
-          return false;
+            return false;
         }
 
-        const isChallengeTypeUnique = requirement.calculationType === ChallengeCalculationType.UNIQUE;
+        const isChallengeTypeUnique =
+            requirement.calculationType === ChallengeCalculationType.UNIQUE;
 
         if (!isChallengeTypeUnique) {
-          return true;
+            return true;
         }
 
-        const daysRemaningInChallenge = Math.floor((challenge.end.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) + 1;
-        const chunksOfDays = Math.ceil(daysRemaningInChallenge / (requirement.calculationIntervalDays ?? 1));
+        const daysRemaningInChallenge =
+            Math.floor((challenge.end.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) + 1;
+        const chunksOfDays = Math.ceil(
+            daysRemaningInChallenge / (requirement.calculationIntervalDays ?? 1)
+        );
         const canJoin = chunksOfDays >= (requirement.requiredIntervalQuantity ?? 1);
 
         return canJoin;
@@ -502,7 +506,7 @@ export class ChallengeService {
 
             commentCount: challenge.comments?.length ?? 0,
             latestParticipant: challenge.challengeParticipants![0],
-            canJoin: this.isChallengeJoinable(challenge)
+            canJoin: this.isChallengeJoinable(challenge),
         };
 
         return challengeSummary;
@@ -553,7 +557,7 @@ export class ChallengeService {
                         },
                     };
                 }) ?? [],
-            canJoin: this.isChallengeJoinable(challenge)
+            canJoin: this.isChallengeJoinable(challenge),
         };
 
         return challengeDetails;
