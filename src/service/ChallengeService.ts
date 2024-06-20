@@ -449,6 +449,30 @@ export class ChallengeService {
         await ChallengeDao.update(challenge);
     }
 
+    private static isChallengeJoinable(challenge: Challenge): boolean {
+        if (!challenge.end) {
+           return true;
+        }
+
+        const requirement = challenge.challengeRequirements?.[0];
+
+        if (!requirement) {
+          return false;
+        }
+
+        const isChallengeTypeUnique = requirement.calculationType === ChallengeCalculationType.UNIQUE;
+
+        if (!isChallengeTypeUnique) {
+          return true;
+        }
+
+        const daysRemaningInChallenge = Math.floor((challenge.end.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) + 1;
+        const chunksOfDays = Math.ceil(daysRemaningInChallenge / (requirement.calculationIntervalDays ?? 1));
+        const canJoin = chunksOfDays >= (requirement.requiredIntervalQuantity ?? 1);
+
+        return canJoin;
+    }
+
     private static getSummaryFromChallenge(
         context: Context,
         challenge: Challenge
@@ -471,7 +495,6 @@ export class ChallengeService {
             end: challenge.end ?? new Date(),
             timelineTimestamp: challenge.timelineTimestamp ?? new Date(),
             isLiked: challenge.likes?.some((like) => like.userId === context.userId) ?? false,
-
             isParticipant:
                 challenge.challengeParticipants?.some((participant) => {
                     return participant.userId === context.userId && participant.active === true;
@@ -479,6 +502,7 @@ export class ChallengeService {
 
             commentCount: challenge.comments?.length ?? 0,
             latestParticipant: challenge.challengeParticipants![0],
+            canJoin: this.isChallengeJoinable(challenge)
         };
 
         return challengeSummary;
@@ -529,6 +553,7 @@ export class ChallengeService {
                         },
                     };
                 }) ?? [],
+            canJoin: this.isChallengeJoinable(challenge)
         };
 
         return challengeDetails;

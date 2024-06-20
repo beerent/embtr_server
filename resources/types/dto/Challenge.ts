@@ -38,6 +38,7 @@ interface ChallengeBase {
 
     isLiked: boolean;
     isParticipant: boolean;
+    canJoin: boolean;
 }
 
 export interface Award {
