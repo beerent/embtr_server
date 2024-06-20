@@ -88,7 +88,8 @@ export class IconService {
     public static async addTags(context: Context, iconId: number, tags: string[]): Promise<Icon> {
         const tagObjects: Tag[] = await TagService.createAll(context, tags);
         const tagIds = tagObjects.flatMap((tag) => (tag.id ? [tag.id] : []));
-        IconDao.addTags(iconId, tagIds);
+        await IconDao.removeAllTags(iconId);
+        await IconDao.addTags(iconId, tagIds);
 
         const icon = await this.get(context, iconId);
         return icon;
@@ -106,7 +107,8 @@ export class IconService {
         const iconCategoryIds = categoryObjects.flatMap((category) =>
             category.id ? [category.id] : []
         );
-        IconDao.addCategories(iconId, iconCategoryIds);
+        await IconDao.removeAllCategories(iconId)
+        await IconDao.addCategories(iconId, iconCategoryIds);
 
         const icon = await this.get(context, iconId);
         return icon;

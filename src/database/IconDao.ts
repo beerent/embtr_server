@@ -81,6 +81,19 @@ export class IconDao {
         });
     }
 
+    public static async removeAllTags(iconId: number) {
+        return prisma.icon.update({
+            where: {
+                id: iconId,
+            },
+            data: {
+                tags: {
+                  set: []
+                },
+            },
+        });
+    }
+
     public static async addCategories(iconId: number, categoryIds: number[]) {
         return prisma.icon.update({
             where: {
@@ -91,6 +104,19 @@ export class IconDao {
                     connect: categoryIds.map((id) => ({
                         id,
                     })),
+                },
+            },
+        });
+    }
+
+    public static async removeAllCategories(iconId: number) {
+        return prisma.icon.update({
+            where: {
+                id: iconId,
+            },
+            data: {
+                categories: {
+                    set: []
                 },
             },
         });
