@@ -7,6 +7,10 @@ export class IconDao {
             where: {
                 id,
             },
+            include: {
+              categories: true,
+              tags: true
+            }
         });
     }
 
@@ -56,6 +60,10 @@ export class IconDao {
                 remoteImageUrl: icon.remoteImageUrl,
                 localImage: icon.localImage
             },
+            include: {
+                tags: true,
+                categories: true
+            }
         });
     }
 
