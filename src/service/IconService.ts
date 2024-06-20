@@ -78,7 +78,9 @@ export class IconService {
             await IconService.addCategories(context, updatedIcon.id, data.categories);
         }
 
-        const updatedIconModel: Icon = ModelConverter.convert(updatedIcon);
+        const icon = await IconDao.get(iconId);
+
+        const updatedIconModel: Icon = ModelConverter.convert(icon!);
         return updatedIconModel;
     }
 
