@@ -40,8 +40,8 @@ export class IconDao {
             data: {
                 name: icon.name ?? '',
                 key: icon.key ?? '',
-                remoteImageUrl: icon.remoteImageUrl,
-                localImage: icon.localImage,
+                remoteImageUrl: icon.remoteImageUrl ?? '',
+                localImage: icon.localImage ?? '',
             },
         });
     }
@@ -53,7 +53,8 @@ export class IconDao {
             },
             data: {
                 name: icon.name ?? '',
-                remoteImageUrl: icon.remoteImageUrl
+                remoteImageUrl: icon.remoteImageUrl,
+                localImage: icon.localImage
             },
         });
     }

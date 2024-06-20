@@ -58,7 +58,8 @@ export class IconService {
     public static async update(context: Context, iconId: number, data: UpdateIconData): Promise<Icon> {
         const updatedIcon = await IconDao.update(iconId, {
             name: data.name,
-            remoteImageUrl: data.remoteImageUrl
+            remoteImageUrl: data.remoteImageUrl,
+            localImage: data.localImage
         });
 
         if (!updatedIcon) {

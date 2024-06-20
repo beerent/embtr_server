@@ -1,4 +1,4 @@
-import { Icon, IconCategory, Tag } from '../../schema';
+import { Icon } from '../../schema';
 import { Response } from './RequestTypes';
 
 export interface GetIconsResponse extends Response {
@@ -20,6 +20,7 @@ export interface UpdateIconData {
     tags?: string[]
     categories?: string[]
     remoteImageUrl?: string
+    localImage?: string
 }
 
 export interface UpdateIconRequest {
