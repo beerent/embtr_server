@@ -56,7 +56,7 @@ export class IconService {
     }
 
     public static async update(context: Context, iconId: number, data: UpdateIconData): Promise<Icon> {
-        const updatedIcon = await IconDao.update(iconId, {
+        let updatedIcon = await IconDao.update(iconId, {
             name: data.name,
             remoteImageUrl: data.remoteImageUrl,
             localImage: data.localImage
@@ -72,37 +72,40 @@ export class IconService {
 
         if (data.tags) {
             await IconService.addTags(context, updatedIcon.id, data.tags);
+        } else {
+            await IconService.removeAllTags(iconId)
         }
 
         if (data.categories) {
             await IconService.addCategories(context, updatedIcon.id, data.categories);
+        } else {
+            await IconService.removeAllCategories(iconId)
         }
 
-        const icon = await IconDao.get(iconId);
-
-        const updatedIconModel: Icon = ModelConverter.convert(icon!);
-        return updatedIconModel;
+        const icon = await this.get(context, iconId)
+        return icon
     }
 
     public static async delete(iconId: number): Promise<void> {
         await IconDao.delete(iconId);
     }
 
-    public static async addTags(context: Context, iconId: number, tags: string[]): Promise<Icon> {
+    public static async addTags(context: Context, iconId: number, tags: string[]): Promise<void> {
         const tagObjects: Tag[] = await TagService.createAll(context, tags);
         const tagIds = tagObjects.flatMap((tag) => (tag.id ? [tag.id] : []));
         await IconDao.removeAllTags(iconId);
         await IconDao.addTags(iconId, tagIds);
+    }
 
-        const icon = await this.get(context, iconId);
-        return icon;
+    public static async removeAllTags(iconId: number): Promise<void> {
+        await IconDao.removeAllTags(iconId);
     }
 
     public static async addCategories(
         context: Context,
         iconId: number,
         categories: string[]
-    ): Promise<Icon> {
+    ): Promise<void> {
         const categoryObjects: IconCategory[] = await IconCategoryService.createAll(
             context,
             categories
@@ -112,8 +115,9 @@ export class IconService {
         );
         await IconDao.removeAllCategories(iconId)
         await IconDao.addCategories(iconId, iconCategoryIds);
+    }
 
-        const icon = await this.get(context, iconId);
-        return icon;
+    public static async removeAllCategories(iconId: number): Promise<void> {
+        await IconDao.removeAllCategories(iconId);
     }
 }

@@ -76,4 +76,11 @@ export class QuoteOfTheDayService {
 
         return quoteOfTheDay;
     }
+
+    public static async getAll() {
+        const quotesOfTheDay = await QuoteOfTheDayDao.getAll();
+        const quoteOfTheDayModels: QuoteOfTheDay[] = ModelConverter.convertAll(quotesOfTheDay);
+
+        return quoteOfTheDayModels;
+    }
 }

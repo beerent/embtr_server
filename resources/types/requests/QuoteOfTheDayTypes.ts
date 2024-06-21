@@ -13,3 +13,7 @@ export interface CreateQuoteOfTheDayResponse extends Response {
 export interface GetQuoteOfTheDayResponse extends Response {
   quoteOfTheDay?: QuoteOfTheDay
 }
+
+export interface GetAllQuoteOfTheDayResponse extends Response {
+  quotesOfTheDay: QuoteOfTheDay[]
+}

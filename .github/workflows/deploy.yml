@@ -1,0 +1,17 @@
+name: deploy
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deployment:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy server
+      uses: fjogeleit/http-request-action@v1
+      with:
+        url: 'https://api.render.com/deploy/srv-cff81hhgp3jjseftaef0?key=8QfuddscF0s'

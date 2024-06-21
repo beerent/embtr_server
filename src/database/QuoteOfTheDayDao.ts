@@ -75,4 +75,8 @@ export class QuoteOfTheDayDao {
             },
         });
     }
+
+    public static async getAll() {
+        return await prisma.quoteOfTheDay.findMany();
+    }
 }
