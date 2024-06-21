@@ -38,6 +38,16 @@ export class UserService {
         return this.getByUid(uid);
     }
 
+    public static async getById(context: Context, id: number): Promise<User> {
+        const user = await UserDao.getById(id);
+        if (!user) {
+            throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
+        }
+
+        const userModel: User = ModelConverter.convert(user);
+        return userModel;
+    }
+
     public static async getAll(context: Context, query?: Record<string, string>): Promise<User[]> {
         const users = await UserDao.getAll(query);
         const userModels: User[] = ModelConverter.convertAll(users);
@@ -334,7 +344,6 @@ export class UserService {
         const userModel: User = ModelConverter.convert(user);
         return userModel;
     }
-
 
     public static async getActiveUsersForRange(startDate: Date, endDate: Date): Promise<number> {
         return UserDao.getActiveUsersForRange(startDate, endDate);

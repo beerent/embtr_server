@@ -32,6 +32,9 @@ import {
     PushNotificationToken,
     Comment,
     Like,
+    Badge,
+    UserBadge,
+    HabitStreakTier,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -69,7 +72,10 @@ type PrismaModel =
     | ChallengeParticipant
     | PushNotificationToken
     | Comment
-    | Like;
+    | Like
+    | Badge
+    | UserBadge
+    | HabitStreakTier;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

@@ -5,22 +5,33 @@ import { Constants } from '@resources/types/constants/constants';
 import { Role } from '@src/roles/Roles';
 import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 
+export const UserIncludes = {
+    roles: true,
+    properties: {
+        where: {
+            key: {
+                in: UserPropertyUtility.ALLOWED_PROPERTIES,
+            },
+        },
+    },
+    userBadges: {
+        include: {
+            badge: {
+                include: {
+                    icon: true,
+                },
+            },
+        },
+    },
+};
+
 export class UserDao {
     public static async getByUid(uid: string): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
                 uid: uid,
             },
-            include: {
-                roles: true,
-                properties: {
-                    where: {
-                        key: {
-                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                        },
-                    },
-                },
-            },
+            include: UserIncludes,
         });
 
         return user;
@@ -61,16 +72,7 @@ export class UserDao {
             where: {
                 email: email,
             },
-            include: {
-                roles: true,
-                properties: {
-                    where: {
-                        key: {
-                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                        },
-                    },
-                },
-            },
+            include: UserIncludes,
         });
 
         return user;
@@ -94,11 +96,11 @@ export class UserDao {
             include: {
                 scheduledHabits: {
                     include: {
-                        plannedTasks: true
-                    }
+                        plannedTasks: true,
+                    },
                 },
-                properties: true
-           }
+                properties: true,
+            },
         });
 
         return users;
@@ -137,16 +139,7 @@ export class UserDao {
             where: {
                 id: id,
             },
-            include: {
-                roles: true,
-                properties: {
-                    where: {
-                        key: {
-                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                        },
-                    },
-                },
-            },
+            include: UserIncludes,
         });
 
         return user;
@@ -226,19 +219,21 @@ export class UserDao {
     }
 
     public static async adminSearch(query: string): Promise<User[]> {
-        const idQuery = isNaN(Number(query)) ? {} : {
-            id: {
-                equals: Number(query)
-            }
-        }
+        const idQuery = isNaN(Number(query))
+            ? {}
+            : {
+                id: {
+                    equals: Number(query),
+                },
+            };
 
         const users = await prisma.user.findMany({
             include: {
                 scheduledHabits: {
                     include: {
-                        plannedTasks: true
-                    }
-                }
+                        plannedTasks: true,
+                    },
+                },
             },
             where: {
                 OR: [
@@ -262,7 +257,7 @@ export class UserDao {
                             equals: query,
                         },
                     },
-                    ...[idQuery]
+                    ...[idQuery],
                 ],
             },
         });
@@ -414,16 +409,7 @@ export class UserDao {
                     },
                 },
             },
-            include: {
-                roles: true,
-                properties: {
-                    where: {
-                        key: {
-                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                        },
-                    },
-                },
-            },
+            include: UserIncludes,
         });
 
         return users;

@@ -208,4 +208,70 @@ export namespace Constants {
                 return HabitStreakType.INVALID;
         }
     };
+
+    export enum BadgeCategory {
+        INVALID = 'INVALID',
+        MEMBERSHIP = 'MEMBERSHIP',
+        AWAY = 'AWAY',
+        NEW_USER = 'NEW_USER',
+        HABIT_STREAK_TIER = 'HABIT_STREAK_TIER',
+    }
+
+    export const getBadgeCategory = (category: string): BadgeCategory => {
+        switch (category) {
+            case 'MEMBERSHIP':
+                return BadgeCategory.MEMBERSHIP;
+            case 'AWAY':
+                return BadgeCategory.AWAY;
+            case 'NEW_USER':
+                return BadgeCategory.NEW_USER;
+            case 'HABIT_STREAK_TIER':
+                return BadgeCategory.HABIT_STREAK_TIER;
+
+            default:
+                return BadgeCategory.INVALID;
+        }
+    };
+
+    export enum Badge {
+        INVALID = 'INVALID',
+        PREMIUM = 'PREMIUM',
+        AWAY = 'AWAY',
+        NEW_USER = 'NEW_USER',
+        LOGS = 'LOGS',
+        COMMON = 'COMMON',
+        UNCOMMON = 'UNCOMMON',
+        RARE = 'RARE',
+        EPIC = 'EPIC',
+        LEGENDARY = 'LEGENDARY',
+        MYTHICAL = 'MYTHICAL',
+    }
+
+    export const getBadge = (badge: string): Badge => {
+        switch (badge) {
+            case 'PREMIUM':
+                return Badge.PREMIUM;
+            case 'AWAY':
+                return Badge.AWAY;
+            case 'NEW_USER':
+                return Badge.NEW_USER;
+            case 'LOGS':
+                return Badge.LOGS;
+            case 'COMMON':
+                return Badge.COMMON;
+            case 'UNCOMMON':
+                return Badge.UNCOMMON;
+            case 'RARE':
+                return Badge.RARE;
+            case 'EPIC':
+                return Badge.EPIC;
+            case 'LEGENDARY':
+                return Badge.LEGENDARY;
+            case 'MYTHICAL':
+                return Badge.MYTHICAL;
+
+            default:
+                return Badge.INVALID;
+        }
+    };
 }

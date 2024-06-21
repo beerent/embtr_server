@@ -39,6 +39,8 @@ import { BlockUserService } from '@src/service/BlockUserService';
 import userPropertyRouterLatest from './UserPropertyRouterLatest';
 import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes';
 import { PremiumService } from '@src/service/PremiumService';
+import { HabitStreakTierService } from '@src/service/HabitStreakTierService';
+import { GetUserHabitStreakTierResponse } from '@resources/types/requests/HabitStreakTypes';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -453,6 +455,22 @@ userRouterLatest.post(
     })
 );
 
+userRouterLatest.get(
+    '/:userId/habit-streak-tier',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const userId = Number(req.params.userId);
+        const userHabitStreakTier = await HabitStreakTierService.getForUser(context, userId);
+        const response: GetUserHabitStreakTierResponse = { ...SUCCESS, userHabitStreakTier };
+
+        res.json(response);
+    })
+);
+
 /*
  * THIS NEEDS TO BE AT THE BOTTOM
  */
@@ -500,13 +518,12 @@ userRouterLatest.get(
 
         const response: GetActiveUsersResponse = {
             ...SUCCESS,
-            activeUsers
+            activeUsers,
         };
 
         res.json(response);
     })
 );
-
 
 userRouterLatest.use('/property', userPropertyRouterLatest);
 

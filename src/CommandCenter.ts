@@ -25,6 +25,7 @@ import { HabitStreakService } from './service/HabitStreakService';
 import { ScheduledHabitService } from './service/ScheduledHabitService';
 import { PureDate } from '@resources/types/date/PureDate';
 import { DateUtility } from './utility/date/DateUtility';
+import { UserBadgeService } from './service/UserBadgeService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -546,7 +547,7 @@ const handleCommandMigrateStreaks = async () => {
         console.log('migrated current streak for user', property.userId, 'to', property.value);
     }
 
-    const allLatest = await UserPropertyService.getAllHabitStreakLatest(adminContext);
+    const allLatest = await UserPropertyService.getAllHabitStreakLongest(adminContext);
     for (const property of allLatest) {
         await HabitStreakService.update(
             adminContext,
@@ -608,6 +609,32 @@ const handleCommandMigrateHabitStreaksForUser = async (username: string) => {
         await DetailedHabitStreakService.fullPopulateCurrentStreak(context, schedule.taskId);
         await DetailedHabitStreakService.fullPopulateLongestStreak(context, schedule.taskId);
     }
+};
+
+const handleCommandUpdateAllBadgesForAllUsers = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+    for (const user of users) {
+        count += 1;
+        if (!user.id || !user.username) {
+            continue;
+        }
+
+        await handleCommandUpdateAllBadgesForUser(user.username);
+        console.log(count + ' / ' + users.length);
+    }
+};
+
+const handleCommandUpdateAllBadgesForUser = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    console.log('updating badges for user', user.username);
+    const context = impersonateContext(user);
+    await UserBadgeService.refreshAllBadges(context);
 };
 
 const rl = readline.createInterface({
@@ -800,6 +827,14 @@ const processCommand = async (command: string) => {
 
         case 'migrateHabitStreaksForUser':
             await handleCommandMigrateHabitStreaksForUser(email);
+            break;
+
+        case 'updateAllBadgesForAllUsers':
+            await handleCommandUpdateAllBadgesForAllUsers();
+            break;
+
+        case 'updateAllBadgesForUser':
+            await handleCommandUpdateAllBadgesForUser(email);
             break;
 
         default:

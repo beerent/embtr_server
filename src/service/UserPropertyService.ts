@@ -254,7 +254,7 @@ export class UserPropertyService {
         return models;
     }
 
-    public static async getAllHabitStreakLatest(context: Context): Promise<Property[]> {
+    public static async getAllHabitStreakLongest(context: Context): Promise<Property[]> {
         const allLatest = await UserPropertyDao.getAllByKey('HABIT_STREAK_LONGEST');
         const models: Property[] = ModelConverter.convertAll(allLatest);
 

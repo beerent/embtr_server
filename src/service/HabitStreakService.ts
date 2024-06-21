@@ -25,6 +25,42 @@ export class HabitStreakService {
         return upsertedHabitStreakModel;
     }
 
+    public static async getLongestHabitStreak(
+        context: Context,
+        userId: number,
+        habitId?: number
+    ): Promise<HabitStreak | undefined> {
+        const habitStreak = await this.get(
+            context,
+            userId,
+            Constants.HabitStreakType.LONGEST,
+            habitId
+        );
+        if (!habitStreak) {
+            return undefined;
+        }
+
+        return habitStreak;
+    }
+
+    public static async getCurrentHabitStreak(
+        context: Context,
+        userId: number,
+        habitId?: number
+    ): Promise<HabitStreak | undefined> {
+        const habitStreak = await this.get(
+            context,
+            userId,
+            Constants.HabitStreakType.CURRENT,
+            habitId
+        );
+        if (!habitStreak) {
+            return undefined;
+        }
+
+        return habitStreak;
+    }
+
     public static async get(
         context: Context,
         userId: number,

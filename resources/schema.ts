@@ -31,6 +31,7 @@ export interface User {
   roles?: Role[];
   properties?: Property[];
   habitStreaks?: HabitStreak[];
+  userBadges?: UserBadge[];
 }
 
 export interface Property {
@@ -460,6 +461,8 @@ export interface Icon {
   ScheduledHabit?: ScheduledHabit[];
   Task?: Task[];
   Award?: Award[];
+  badges?: Badge[];
+  habitStreakTiers?: HabitStreakTier[];
 }
 
 export interface Tag {
@@ -488,6 +491,44 @@ export interface HabitStreak {
   task?: Task;
   type?: string;
   streak?: number;
+}
+
+export interface Badge {
+  id?: number;
+  key?: string;
+  iconId?: number;
+  icon?: Icon;
+  category?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  habitStreakTiers?: HabitStreakTier[];
+  userBadges?: UserBadge[];
+}
+
+export interface UserBadge {
+  id?: number;
+  userId?: number;
+  user?: User;
+  badgeId?: number;
+  badge?: Badge;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface HabitStreakTier {
+  id?: number;
+  badgeId?: number;
+  badge?: Badge;
+  iconId?: number;
+  icon?: Icon;
+  minStreak?: number;
+  maxStreak?: number;
+  backgroundColor?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum NotificationTargetPage {

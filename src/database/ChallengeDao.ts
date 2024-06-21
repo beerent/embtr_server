@@ -2,6 +2,7 @@ import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Challenge } from '@resources/schema';
 import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
+import { UserIncludes } from './UserDao';
 
 export interface ChallengeRequirementResults {
     intervalIndex: number;
@@ -58,16 +59,7 @@ export class ChallengeDao {
                     },
                     include: {
                         user: {
-                            include: {
-                                roles: true,
-                                properties: {
-                                    where: {
-                                        key: {
-                                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                                        },
-                                    },
-                                },
-                            },
+                            include: UserIncludes,
                         },
                     },
                 },
@@ -158,16 +150,7 @@ export class ChallengeDao {
                 challengeParticipants: {
                     include: {
                         user: {
-                            include: {
-                                properties: {
-                                    where: {
-                                        key: {
-                                            in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                                        },
-                                    },
-                                },
-                                roles: true,
-                            },
+                            include: UserIncludes,
                         },
                     },
                     where: {

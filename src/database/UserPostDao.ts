@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { UserPost } from '@resources/schema';
 import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 import { CommonUpserts } from './CommonUpserts';
+import { UserIncludes } from './UserDao';
 
 export const UserPostInclude = {
     comments: {
@@ -11,16 +12,7 @@ export const UserPostInclude = {
         },
         include: {
             user: {
-                include: {
-                    roles: true,
-                    properties: {
-                        where: {
-                            key: {
-                                in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                            },
-                        },
-                    },
-                },
+                include: UserIncludes,
             },
         },
     },
@@ -41,16 +33,7 @@ export const UserPostInclude = {
         },
     },
     user: {
-        include: {
-            roles: true,
-            properties: {
-                where: {
-                    key: {
-                        in: UserPropertyUtility.ALLOWED_PROPERTIES,
-                    },
-                },
-            },
-        },
+        include: UserIncludes,
     },
 } satisfies Prisma.UserPostInclude;
 
