@@ -82,8 +82,8 @@ export class IconService {
             await IconService.removeAllCategories(iconId)
         }
 
-        const updatedIconModel: Icon = ModelConverter.convert(updatedIcon);
-        return updatedIconModel;
+        const icon = await this.get(context, iconId)
+        return icon
     }
 
     public static async delete(iconId: number): Promise<void> {
