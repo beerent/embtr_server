@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '@src/middleware/authentication';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { validateAddQuoteOfTheDay } from '@src/middleware/quote_of_the_day/QuoteOfTheDayValidation';
 import { QuoteOfTheDayService } from '@src/service/QuoteOfTheDayService';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
@@ -11,6 +11,7 @@ import { ContextService } from '@src/service/ContextService';
 import {
     CreateQuoteOfTheDayRequest,
     CreateQuoteOfTheDayResponse,
+    GetAllQuoteOfTheDayResponse,
     GetQuoteOfTheDayResponse,
 } from '@resources/types/requests/QuoteOfTheDayTypes';
 import { SUCCESS } from '@src/common/RequestResponses';
@@ -49,6 +50,18 @@ quoteOfTheDayRouterLatest.get(
 
         const quoteOfTheDay = await QuoteOfTheDayService.get(context);
         const response: GetQuoteOfTheDayResponse = { ...SUCCESS, quoteOfTheDay };
+        res.json(response);
+    })
+);
+
+quoteOfTheDayRouterLatest.get(
+    '/all',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const quotesOfTheDay = await QuoteOfTheDayService.getAll();
+        const response: GetAllQuoteOfTheDayResponse = { ...SUCCESS, quotesOfTheDay };
         res.json(response);
     })
 );
