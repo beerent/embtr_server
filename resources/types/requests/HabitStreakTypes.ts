@@ -9,3 +9,15 @@ export interface GetUserHabitStreakTierResponse extends Response {
 export interface GetHabitStreakTiersResponse extends Response {
     habitStreakTiers: HabitStreakTier[]
 }
+
+export interface UpdateHabitStreakTier {
+    iconId?: number
+    badgeId?: number
+    minStreak: number
+    maxStreak: number
+    backgroundColor: string
+}
+
+export interface UpdateHabitStreakTierResponse extends Response {
+    habitStreakTier: HabitStreakTier
+}

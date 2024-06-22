@@ -10,7 +10,7 @@ import {
     GetSimpleHabitStreakResponse,
 } from '@resources/types/requests/HabitTypes';
 import { HabitStreakTierService } from '@src/service/HabitStreakTierService';
-import { GetHabitStreakTiersResponse } from '@resources/types/requests/HabitStreakTypes';
+import { GetHabitStreakTiersResponse, UpdateHabitStreakTier, UpdateHabitStreakTierResponse } from '@resources/types/requests/HabitStreakTypes';
 
 const habitStreakRouterLatest = express.Router();
 const v = '✓';
@@ -25,6 +25,21 @@ habitStreakRouterLatest.get(
 
         const habitStreakTiers = await HabitStreakTierService.getAll(context)
         const response: GetHabitStreakTiersResponse = { ...SUCCESS, habitStreakTiers };
+        res.json(response);
+    }
+);
+
+habitStreakRouterLatest.post(
+    '/tier/:tierId',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    async (req, res) => {
+        const tierId = Number(req.params.tierId)
+        const body: UpdateHabitStreakTier = req.body
+
+        const habitStreakTier = await HabitStreakTierService.update(tierId, body)
+        const response: UpdateHabitStreakTierResponse = { ...SUCCESS, habitStreakTier };
         res.json(response);
     }
 );
