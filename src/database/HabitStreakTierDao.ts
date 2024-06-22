@@ -63,7 +63,7 @@ export class HabitStreakTierDao {
                 badge: {
                     ...(data.badgeId && {
                         connect: {
-                            id: 4
+                            id: data.badgeId
                         }
                     }),
                     ...(!data.badgeId && {

@@ -9,6 +9,14 @@ export class BadgeDao {
         });
     }
 
+    public static async getAll() {
+        return prisma.badge.findMany({
+            include: {
+                icon: true
+            }
+        });
+    }
+
     public static async getAllByCategory(category: string) {
         return prisma.badge.findMany({
             where: {

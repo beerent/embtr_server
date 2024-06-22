@@ -31,6 +31,7 @@ import milestoneRouter from './endpoints/milestone/MilestoneRouter';
 import iconCategoryRouter from './endpoints/iconCategory/IconCategoryRouter';
 import tagRouter from './endpoints/tag/TagRouter';
 import premiumRouter from './endpoints/premium_router/PremiumRouter';
+import badgeRouter from './endpoints/badge/BadgeRouter';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
@@ -94,6 +95,7 @@ app.use('/', iconCategoryRouter);
 app.use('/', tagRouter);
 app.use('/', milestoneRouter);
 app.use('/', premiumRouter);
+app.use('/', badgeRouter);
 
 app.use(handleError);
 

@@ -15,6 +15,14 @@ export class BadgeService {
         return badgeModel;
     }
 
+    public static async getAll(): Promise<Badge[]> {
+        const badges = await BadgeDao.getAll();
+
+        const badgeModels: Badge[] = ModelConverter.convertAll(badges);
+        return badgeModels;
+    }
+
+
     public static async getAllByCategory(
         context: Context,
         category: Constants.BadgeCategory
