@@ -481,6 +481,7 @@ export class ChallengeService {
         context: Context,
         challenge: Challenge
     ): ChallengeSummary {
+    console.log(challenge)
         const challengeSummary: ChallengeSummary = {
             id: challenge.id ?? 0,
             name: challenge.name ?? '',
@@ -505,7 +506,7 @@ export class ChallengeService {
                 }) ?? false,
 
             commentCount: challenge.comments?.length ?? 0,
-            latestParticipant: challenge.challengeParticipants![0],
+            latestParticipant: challenge.challengeParticipants![0] || {},
             canJoin: this.isChallengeJoinable(challenge),
         };
 

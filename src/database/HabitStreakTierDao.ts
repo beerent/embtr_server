@@ -51,7 +51,7 @@ export class HabitStreakTierDao {
                 name: habitStreakTier.name ?? '',
                 minStreak: habitStreakTier.minStreak ?? 0,
                 maxStreak: habitStreakTier.maxStreak ?? 0,
-                backgroundColor: habitStreakTier.backgroundColor,
+                backgroundColor: habitStreakTier.backgroundColor ?? '',
                 icon: {
                     ...(habitStreakTier.iconId && {
                         connect: {

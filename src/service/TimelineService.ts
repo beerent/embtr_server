@@ -49,9 +49,9 @@ export class TimelineService {
         const elements: TimelineElement[] = [
             ...TimelineService.createUserPostTimelineElements(userPosts ?? []),
             ...TimelineService.createPlannedDayResultTimelineElements(plannedDayResults ?? []),
-            //...TimelineService.createRecentlyJoinedChallengeTimelineElements(
-            //    challengeSummaries ?? []
-            //),
+            ...TimelineService.createRecentlyJoinedChallengeTimelineElements(
+                challengeSummaries ?? []
+            ),
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
