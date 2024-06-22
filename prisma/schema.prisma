@@ -712,6 +712,7 @@ model HabitStreakTier {
     icon            Icon?    @relation(fields: [iconId], references: [id])
     minStreak       Int
     maxStreak       Int
+    name            String   @db.VarChar(255)
     backgroundColor String   @db.VarChar(7)
     active          Boolean  @default(true)
     createdAt       DateTime @default(now())

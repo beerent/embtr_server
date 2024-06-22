@@ -525,6 +525,7 @@ export interface HabitStreakTier {
   icon?: Icon;
   minStreak?: number;
   maxStreak?: number;
+  name?: string;
   backgroundColor?: string;
   active?: boolean;
   createdAt?: Date;

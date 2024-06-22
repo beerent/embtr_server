@@ -1,5 +1,9 @@
 import { prisma } from '@database/prisma';
-import { CreateHabitStreakTier, UpdateHabitStreakTier } from '@resources/types/requests/HabitStreakTypes';
+import { HabitStreakTier } from '@resources/schema';
+import {
+    CreateHabitStreakTier,
+    UpdateHabitStreakTier,
+} from '@resources/types/requests/HabitStreakTypes';
 
 export class HabitStreakTierDao {
     public static async get(id: number) {
@@ -41,24 +45,25 @@ export class HabitStreakTierDao {
         });
     }
 
-    public static async create(data: CreateHabitStreakTier) {
+    public static async create(habitStreakTier: HabitStreakTier) {
         return prisma.habitStreakTier.create({
             data: {
-                minStreak: data.minStreak,
-                maxStreak: data.maxStreak,
-                backgroundColor: data.backgroundColor,
+                name: habitStreakTier.name ?? '',
+                minStreak: habitStreakTier.minStreak ?? 0,
+                maxStreak: habitStreakTier.maxStreak ?? 0,
+                backgroundColor: habitStreakTier.backgroundColor,
                 icon: {
-                    ...(data.iconId && {
+                    ...(habitStreakTier.iconId && {
                         connect: {
-                            id: data.iconId
-                        }
+                            id: habitStreakTier.iconId,
+                        },
                     }),
                 },
                 badge: {
-                    ...(data.badgeId && {
+                    ...(habitStreakTier.badgeId && {
                         connect: {
-                            id: data.badgeId
-                        }
+                            id: habitStreakTier.badgeId,
+                        },
                     }),
                 },
             },
@@ -73,34 +78,35 @@ export class HabitStreakTierDao {
         });
     }
 
-    public static async update(tierId: number, data: UpdateHabitStreakTier) {
+    public static async update(tierId: number, habitStreakTier: HabitStreakTier) {
         return prisma.habitStreakTier.update({
             where: {
-                id: tierId
+                id: tierId,
             },
             data: {
-                minStreak: data.minStreak,
-                maxStreak: data.maxStreak,
-                backgroundColor: data.backgroundColor,
+                name: habitStreakTier.name,
+                minStreak: habitStreakTier.minStreak,
+                maxStreak: habitStreakTier.maxStreak,
+                backgroundColor: habitStreakTier.backgroundColor,
                 icon: {
-                    ...(data.iconId && {
+                    ...(habitStreakTier.iconId && {
                         connect: {
-                            id: data.iconId
-                        }
+                            id: habitStreakTier.iconId,
+                        },
                     }),
-                    ...(!data.iconId && {
-                        disconnect: true
-                    })
+                    ...(!habitStreakTier.iconId && {
+                        disconnect: true,
+                    }),
                 },
                 badge: {
-                    ...(data.badgeId && {
+                    ...(habitStreakTier.badgeId && {
                         connect: {
-                            id: data.badgeId
-                        }
+                            id: habitStreakTier.badgeId,
+                        },
                     }),
-                    ...(!data.badgeId && {
-                        disconnect: true
-                    })
+                    ...(!habitStreakTier.badgeId && {
+                        disconnect: true,
+                    }),
                 },
             },
             include: {

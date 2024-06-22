@@ -7,29 +7,21 @@ export interface GetUserHabitStreakTierResponse extends Response {
 }
 
 export interface GetHabitStreakTiersResponse extends Response {
-    habitStreakTiers: HabitStreakTier[]
+    habitStreakTiers?: HabitStreakTier[];
 }
 
 export interface CreateHabitStreakTier {
-    iconId?: number
-    badgeId?: number
-    minStreak: number
-    maxStreak: number
-    backgroundColor: string
+    habitStreakTier: HabitStreakTier;
 }
 
 export interface CreateHabitStreakTierResponse extends Response {
-    habitStreakTier: HabitStreakTier
+    habitStreakTier?: HabitStreakTier;
 }
 
 export interface UpdateHabitStreakTier {
-    iconId?: number
-    badgeId?: number
-    minStreak: number
-    maxStreak: number
-    backgroundColor: string
+    habitStreakTier: HabitStreakTier;
 }
 
 export interface UpdateHabitStreakTierResponse extends Response {
-    habitStreakTier: HabitStreakTier
+    habitStreakTier?: HabitStreakTier;
 }

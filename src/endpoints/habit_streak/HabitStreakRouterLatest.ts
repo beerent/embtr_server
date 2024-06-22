@@ -10,7 +10,15 @@ import {
     GetSimpleHabitStreakResponse,
 } from '@resources/types/requests/HabitTypes';
 import { HabitStreakTierService } from '@src/service/HabitStreakTierService';
-import { GetHabitStreakTiersResponse, CreateHabitStreakTier, UpdateHabitStreakTier, UpdateHabitStreakTierResponse, CreateHabitStreakTierResponse } from '@resources/types/requests/HabitStreakTypes';
+import {
+    GetHabitStreakTiersResponse,
+    CreateHabitStreakTier,
+    UpdateHabitStreakTier,
+    UpdateHabitStreakTierResponse,
+    CreateHabitStreakTierResponse,
+} from '@resources/types/requests/HabitStreakTypes';
+import { HabitStreakTier } from '@resources/schema';
+import { Context } from '@src/general/auth/Context';
 
 const habitStreakRouterLatest = express.Router();
 const v = '✓';
@@ -23,7 +31,7 @@ habitStreakRouterLatest.get(
     async (req, res) => {
         const context = await ContextService.get(req);
 
-        const habitStreakTiers = await HabitStreakTierService.getAll(context)
+        const habitStreakTiers = await HabitStreakTierService.getAll(context);
         const response: GetHabitStreakTiersResponse = { ...SUCCESS, habitStreakTiers };
         res.json(response);
     }
@@ -35,10 +43,18 @@ habitStreakRouterLatest.post(
     authenticate,
     authorizeAdmin,
     async (req, res) => {
-        const body: CreateHabitStreakTier = req.body
+        const context: Context = await ContextService.get(req);
+        const request: CreateHabitStreakTier = req.body;
+        const habitStreakTier: HabitStreakTier = request.habitStreakTier;
 
-        const habitStreakTier = await HabitStreakTierService.create(body)
-        const response: CreateHabitStreakTierResponse = { ...SUCCESS, habitStreakTier };
+        const createdHabitStreakTier = await HabitStreakTierService.create(
+            context,
+            habitStreakTier
+        );
+        const response: CreateHabitStreakTierResponse = {
+            habitStreakTier: createdHabitStreakTier,
+            ...SUCCESS,
+        };
         res.json(response);
     }
 );
@@ -49,11 +65,22 @@ habitStreakRouterLatest.post(
     authenticate,
     authorizeAdmin,
     async (req, res) => {
-        const tierId = Number(req.params.tierId)
-        const body: UpdateHabitStreakTier = req.body
+        const context: Context = await ContextService.get(req);
+        const tierId = Number(req.params.tierId);
+        const request: UpdateHabitStreakTier = req.body;
+        const habitStreakTier: HabitStreakTier = request.habitStreakTier;
 
-        const habitStreakTier = await HabitStreakTierService.update(tierId, body)
-        const response: UpdateHabitStreakTierResponse = { ...SUCCESS, habitStreakTier };
+        const updatedHabitStreakTier = await HabitStreakTierService.update(
+            context,
+            tierId,
+            habitStreakTier
+        );
+
+        const response: UpdateHabitStreakTierResponse = {
+            ...SUCCESS,
+            habitStreakTier: updatedHabitStreakTier,
+        };
+
         res.json(response);
     }
 );

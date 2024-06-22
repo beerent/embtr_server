@@ -8,7 +8,6 @@ import { UserHabitStreakTier } from '@resources/types/dto/HabitStreak';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { HttpCode } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
-import { CreateHabitStreakTier, UpdateHabitStreakTier } from '@resources/types/requests/HabitStreakTypes';
 
 export class HabitStreakTierService {
     public static async getForUser(context: Context, userId: number) {
@@ -66,16 +65,17 @@ export class HabitStreakTierService {
         return undefined;
     }
 
-    public static async create(data: CreateHabitStreakTier) {
-        const habitStreakTier = await HabitStreakTierDao.create(data);
-        const habitStreakTierModel: HabitStreakTier = ModelConverter.convert(habitStreakTier);
+    public static async create(context: Context, habitStreakTier: HabitStreakTier) {
+        const createdHabitStreakTier = await HabitStreakTierDao.create(habitStreakTier);
+        const habitStreakTierModel: HabitStreakTier =
+            ModelConverter.convert(createdHabitStreakTier);
 
         return habitStreakTierModel;
     }
 
-    public static async update(tierId: number, data: UpdateHabitStreakTier) {
-        const habitStreakTier = await HabitStreakTierDao.update(tierId, data);
-        const habitStreakTierModel: HabitStreakTier = ModelConverter.convert(habitStreakTier);
+    public static async update(context: Context, tierId: number, habitStreakTier: HabitStreakTier) {
+        const createHabitStreakTier = await HabitStreakTierDao.update(tierId, habitStreakTier);
+        const habitStreakTierModel: HabitStreakTier = ModelConverter.convert(createHabitStreakTier);
 
         return habitStreakTierModel;
     }
