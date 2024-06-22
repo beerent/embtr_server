@@ -1,6 +1,6 @@
 import express from 'express';
 import { authenticate } from '@src/middleware/authentication';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { ContextService } from '@src/service/ContextService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { SUCCESS } from '@src/common/RequestResponses';
@@ -9,9 +9,25 @@ import {
     GetHabitStreakResponse,
     GetSimpleHabitStreakResponse,
 } from '@resources/types/requests/HabitTypes';
+import { HabitStreakTierService } from '@src/service/HabitStreakTierService';
+import { GetHabitStreakTiersResponse } from '@resources/types/requests/HabitStreakTypes';
 
 const habitStreakRouterLatest = express.Router();
 const v = '✓';
+
+habitStreakRouterLatest.get(
+    '/tiers',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    async (req, res) => {
+        const context = await ContextService.get(req);
+
+        const habitStreakTiers = await HabitStreakTierService.getAll(context)
+        const response: GetHabitStreakTiersResponse = { ...SUCCESS, habitStreakTiers };
+        res.json(response);
+    }
+);
 
 habitStreakRouterLatest.get(
     '/simple/:userId/',
