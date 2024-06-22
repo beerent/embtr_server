@@ -8,7 +8,7 @@ import { UserHabitStreakTier } from '@resources/types/dto/HabitStreak';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { HttpCode } from '@src/common/RequestResponses';
 import { Code } from '@resources/codes';
-import { UpdateHabitStreakTier } from '@resources/types/requests/HabitStreakTypes';
+import { CreateHabitStreakTier, UpdateHabitStreakTier } from '@resources/types/requests/HabitStreakTypes';
 
 export class HabitStreakTierService {
     public static async getForUser(context: Context, userId: number) {
@@ -64,6 +64,13 @@ export class HabitStreakTierService {
         }
 
         return undefined;
+    }
+
+    public static async create(data: CreateHabitStreakTier) {
+        const habitStreakTier = await HabitStreakTierDao.create(data);
+        const habitStreakTierModel: HabitStreakTier = ModelConverter.convert(habitStreakTier);
+
+        return habitStreakTierModel;
     }
 
     public static async update(tierId: number, data: UpdateHabitStreakTier) {

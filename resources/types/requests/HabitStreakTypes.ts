@@ -10,6 +10,18 @@ export interface GetHabitStreakTiersResponse extends Response {
     habitStreakTiers: HabitStreakTier[]
 }
 
+export interface CreateHabitStreakTier {
+    iconId?: number
+    badgeId?: number
+    minStreak: number
+    maxStreak: number
+    backgroundColor: string
+}
+
+export interface CreateHabitStreakTierResponse extends Response {
+    habitStreakTier: HabitStreakTier
+}
+
 export interface UpdateHabitStreakTier {
     iconId?: number
     badgeId?: number

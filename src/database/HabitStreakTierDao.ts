@@ -1,5 +1,5 @@
 import { prisma } from '@database/prisma';
-import { UpdateHabitStreakTier } from '@resources/types/requests/HabitStreakTypes';
+import { CreateHabitStreakTier, UpdateHabitStreakTier } from '@resources/types/requests/HabitStreakTypes';
 
 export class HabitStreakTierDao {
     public static async get(id: number) {
@@ -30,6 +30,38 @@ export class HabitStreakTierDao {
 
     public static async getAll() {
         return prisma.habitStreakTier.findMany({
+            include: {
+                badge: {
+                    include: {
+                        icon: true,
+                    },
+                },
+                icon: true,
+            },
+        });
+    }
+
+    public static async create(data: CreateHabitStreakTier) {
+        return prisma.habitStreakTier.create({
+            data: {
+                minStreak: data.minStreak,
+                maxStreak: data.maxStreak,
+                backgroundColor: data.backgroundColor,
+                icon: {
+                    ...(data.iconId && {
+                        connect: {
+                            id: data.iconId
+                        }
+                    }),
+                },
+                badge: {
+                    ...(data.badgeId && {
+                        connect: {
+                            id: data.badgeId
+                        }
+                    }),
+                },
+            },
             include: {
                 badge: {
                     include: {
