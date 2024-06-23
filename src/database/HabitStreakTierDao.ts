@@ -1,9 +1,5 @@
 import { prisma } from '@database/prisma';
 import { HabitStreakTier } from '@resources/schema';
-import {
-    CreateHabitStreakTier,
-    UpdateHabitStreakTier,
-} from '@resources/types/requests/HabitStreakTypes';
 
 export class HabitStreakTierDao {
     public static async get(id: number) {
@@ -118,5 +114,13 @@ export class HabitStreakTierDao {
                 icon: true,
             },
         });
+    }
+
+    public static async delete(tierId: number) {
+        return prisma.habitStreakTier.delete({
+            where: {
+                id: tierId
+            }
+        })
     }
 }

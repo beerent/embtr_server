@@ -85,6 +85,28 @@ habitStreakRouterLatest.post(
     }
 );
 
+habitStreakRouterLatest.post(
+    '/tier/:tierId/delete',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    async (req, res) => {
+        const context: Context = await ContextService.get(req);
+        const tierId = Number(req.params.tierId);
+
+         await HabitStreakTierService.delete(
+            context,
+            tierId,
+        );
+
+        const response = {
+            ...SUCCESS,
+        };
+
+        res.json(response);
+    }
+);
+
 habitStreakRouterLatest.get(
     '/simple/:userId/',
     routeLogger(v),

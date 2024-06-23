@@ -79,4 +79,8 @@ export class HabitStreakTierService {
 
         return habitStreakTierModel;
     }
+
+    public static async delete(context: Context, tierId: number) {
+        await HabitStreakTierDao.delete(tierId);
+    }
 }
