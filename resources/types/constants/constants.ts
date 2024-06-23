@@ -245,6 +245,9 @@ export namespace Constants {
         EPIC = 'EPIC',
         LEGENDARY = 'LEGENDARY',
         MYTHICAL = 'MYTHICAL',
+        RED = 'RED',
+        FINAL_FIRE = 'FINAL_FIRE',
+        ETERNAL_FLAME = 'ETERNAL_FLAME',
     }
 
     export const getBadge = (badge: string): Badge => {
@@ -269,6 +272,12 @@ export namespace Constants {
                 return Badge.LEGENDARY;
             case 'MYTHICAL':
                 return Badge.MYTHICAL;
+            case 'RED':
+                return Badge.RED;
+            case 'FINAL_FIRE':
+                return Badge.FINAL_FIRE;
+            case 'ETERNAL_FLAME':
+                return Badge.ETERNAL_FLAME;
 
             default:
                 return Badge.INVALID;
