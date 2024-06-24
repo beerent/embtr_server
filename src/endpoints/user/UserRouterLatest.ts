@@ -459,7 +459,7 @@ userRouterLatest.get(
     '/:userId/habit-streak-tier',
     routeLogger(v),
     authenticate,
-    authorizeAdmin,
+    authorize,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
 
