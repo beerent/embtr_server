@@ -27,7 +27,7 @@ habitStreakRouterLatest.get(
     '/tiers',
     routeLogger(v),
     authenticate,
-    authorizeAdmin,
+    authorize,
     async (req, res) => {
         const context = await ContextService.get(req);
 
