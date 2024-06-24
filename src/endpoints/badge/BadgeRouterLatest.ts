@@ -60,4 +60,27 @@ badgeRouterLatest.post(
         res.json(response);
     }
 );
+
+badgeRouterLatest.post(
+    '/badge/:badgeId/delete',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    async (req, res) => {
+        const context: Context = await ContextService.get(req);
+        const badgeId = Number(req.params.badgeId);
+
+         await BadgeService.delete(
+            context,
+            badgeId,
+        );
+
+        const response = {
+            ...SUCCESS,
+        };
+
+        res.json(response);
+    }
+);
+
 export default badgeRouterLatest

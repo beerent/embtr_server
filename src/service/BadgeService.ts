@@ -28,6 +28,11 @@ export class BadgeService {
 
         return badgeModel;
     }
+
+    public static async delete(context: Context, badgeId: number) {
+        await BadgeDao.delete(badgeId);
+    }
+
     public static async getAll(): Promise<Badge[]> {
         const badges = await BadgeDao.getAll();
 

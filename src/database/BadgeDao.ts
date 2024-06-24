@@ -56,4 +56,12 @@ export class BadgeDao {
             }
         });
     }
+
+    public static async delete(badgeId: number) {
+        return prisma.badge.delete({
+            where: {
+                id: badgeId
+            }
+        })
+    }
 }
