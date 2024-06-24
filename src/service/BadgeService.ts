@@ -22,6 +22,12 @@ export class BadgeService {
         return badgeModel;
     }
 
+    public static async update(context: Context, badgeId: number, badge: Badge) {
+        const updatedBadge = await BadgeDao.update(badgeId, badge);
+        const badgeModel: Badge = ModelConverter.convert(updatedBadge);
+
+        return badgeModel;
+    }
     public static async getAll(): Promise<Badge[]> {
         const badges = await BadgeDao.getAll();
 

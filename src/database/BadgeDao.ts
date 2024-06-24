@@ -26,14 +26,31 @@ export class BadgeDao {
         });
     }
 
-    public static async create(data: Badge) {
+    public static async create(badge: Badge) {
         return prisma.badge.create({
             data: {
-                category: data.category ?? '',
-                key: data.key ?? '',
+                category: badge.category ?? '',
+                key: badge.key ?? '',
                 icon: {
-                    connect: {
-                        id: data.iconId
+                    connect: { 
+                        id: badge.iconId
+                    }
+                }
+            }
+        });
+    }
+
+    public static async update(badgeId: number, badge: Badge) {
+        return prisma.badge.update({
+            where: {
+                id: badgeId
+            },
+            data: {
+                category: badge.category ?? '',
+                key: badge.key ?? '',
+                icon: {
+                    connect: { 
+                        id: badge.iconId
                     }
                 }
             }

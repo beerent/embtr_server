@@ -13,3 +13,10 @@ export interface CreateBadgeResponse extends Response {
     badge?: Badge;
 }
 
+export interface UpdateBadge {
+    badge: Badge;
+}
+
+export interface UpdateBadgeResponse extends Response {
+    badge?: Badge;
+}
