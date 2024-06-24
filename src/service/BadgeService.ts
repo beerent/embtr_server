@@ -15,6 +15,13 @@ export class BadgeService {
         return badgeModel;
     }
 
+    public static async create(context: Context, badge: Badge) {
+        const createdBadge = await BadgeDao.create(badge);
+
+        const badgeModel: Badge = ModelConverter.convert(createdBadge);
+        return badgeModel;
+    }
+
     public static async getAll(): Promise<Badge[]> {
         const badges = await BadgeDao.getAll();
 

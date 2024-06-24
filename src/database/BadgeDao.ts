@@ -1,4 +1,5 @@
 import { prisma } from '@database/prisma';
+import { Badge } from '@resources/schema';
 
 export class BadgeDao {
     public static async get(key: string) {
@@ -22,6 +23,20 @@ export class BadgeDao {
             where: {
                 category,
             },
+        });
+    }
+
+    public static async create(data: Badge) {
+        return prisma.badge.create({
+            data: {
+                category: data.category ?? '',
+                key: data.key ?? '',
+                icon: {
+                    connect: {
+                        id: data.iconId
+                    }
+                }
+            }
         });
     }
 }

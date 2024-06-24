@@ -4,7 +4,10 @@ import express from 'express';
 import { authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { BadgeService } from '@src/service/BadgeService';
-import { GetAllBadgesResponse } from '@resources/types/requests/BadgeTypes';
+import { CreateBadge, CreateBadgeResponse, GetAllBadgesResponse } from '@resources/types/requests/BadgeTypes';
+import { Context } from '@src/general/auth/Context';
+import { ContextService } from '@src/service/ContextService';
+import { Badge } from '@resources/schema';
 
 const badgeRouterLatest = express.Router();
 const v = '✓';
@@ -15,5 +18,22 @@ badgeRouterLatest.get('/all', routeLogger(v), authenticate, authorizeAdmin, asyn
     const response: GetAllBadgesResponse = { ...SUCCESS, badges };
     res.json(response);
 });
+
+badgeRouterLatest.post('/', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
+    const context: Context = await ContextService.get(req);
+    const request: CreateBadge = req.body;
+    const badge: Badge = request.badge;
+
+    const createdBadge = await BadgeService.create(
+        context,
+        badge
+    );
+    const response: CreateBadgeResponse = {
+        badge: createdBadge,
+        ...SUCCESS,
+    };
+    res.json(response);
+});
+
 
 export default badgeRouterLatest
