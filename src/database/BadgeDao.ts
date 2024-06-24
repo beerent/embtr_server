@@ -36,6 +36,9 @@ export class BadgeDao {
                         id: badge.iconId
                     }
                 }
+            },
+            include: {
+                icon: true
             }
         });
     }
@@ -53,6 +56,9 @@ export class BadgeDao {
                         id: badge.iconId
                     }
                 }
+            },
+            include: {
+                icon: true
             }
         });
     }

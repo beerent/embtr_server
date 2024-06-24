@@ -36,7 +36,7 @@ badgeRouterLatest.post('/', routeLogger(v), authenticate, authorizeAdmin, async 
 });
 
 badgeRouterLatest.post(
-    '/badge/:badgeId',
+    '/:badgeId',
     routeLogger(v),
     authenticate,
     authorizeAdmin,
@@ -62,7 +62,7 @@ badgeRouterLatest.post(
 );
 
 badgeRouterLatest.post(
-    '/badge/:badgeId/delete',
+    '/:badgeId/delete',
     routeLogger(v),
     authenticate,
     authorizeAdmin,
