@@ -91,8 +91,8 @@ export class CommentService {
         const ownerNotificationType = this.getNotificationType(interactable, {
             forOwner: true
         });
-        const forOwnerUserId = this.getToUserId(interactable, commentModel);
-        const toOtherUserIds = this.getOtherUserIds(interactable, commentModel).filter((id, index, arr) => {
+        const forOwnerUserId = this.getOwnerIdFromTargetPost(interactable, commentModel);
+        const toOtherUserIds = this.getUserIdsFromTargetComments(interactable, commentModel).filter((id, index, arr) => {
             return id !== forOwnerUserId && id !== commentModel.userId && arr.indexOf(id) === index;
         });
 
@@ -106,7 +106,7 @@ export class CommentService {
         })
     }
 
-    private static getToUserId(interactable: Interactable, comment: Comment): number {
+    private static getOwnerIdFromTargetPost(interactable: Interactable, comment: Comment): number {
         if (interactable === Interactable.USER_POST) {
             return comment.userPosts?.[0].userId ?? 0;
         }
@@ -122,7 +122,7 @@ export class CommentService {
         return 0;
     }
 
-    private static getOtherUserIds(interactable: Interactable, comment: Comment): number[] {
+    private static getUserIdsFromTargetComments(interactable: Interactable, comment: Comment): number[] {
         if (interactable === Interactable.USER_POST) {
             return comment.userPosts?.[0]?.comments?.map(comment => comment.userId!) || []
         }
