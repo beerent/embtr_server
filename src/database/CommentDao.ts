@@ -42,11 +42,20 @@ export class CommentDao {
             data,
             include: {
                 user: true,
-                userPosts: true,
-                challenges: true,
+                userPosts: {
+                    include: {
+                        comments: true
+                    }
+                },
+                challenges: {
+                    include: {
+                        comments: true
+                    },
+                },
                 plannedDayResults: {
                     include: {
                         plannedDay: true,
+                        comments: true
                     },
                 },
             },
