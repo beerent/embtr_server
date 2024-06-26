@@ -87,14 +87,26 @@ export class CommentService {
         targetId: number,
         commentModel: Comment
     ) {
-        const notificationType = this.getNotificationType(interactable);
         const fromUserId = context.userId;
-        const toUserId = this.getToUserId(interactable, commentModel);
+        const ownerNotificationType = this.getNotificationType(interactable, {
+            forOwner: true
+        });
+        const forOwnerUserId = this.getOwnerIdFromTargetPost(interactable, commentModel);
+        const toOtherUserIds = this.getUserIdsFromTargetComments(interactable, commentModel).filter((id, index, arr) => {
+            return id !== forOwnerUserId && id !== commentModel.userId && arr.indexOf(id) === index;
+        });
 
-        CommentEventDispatcher.onCreated(context, notificationType, fromUserId, toUserId, targetId);
+        CommentEventDispatcher.onCreated(context, ownerNotificationType, fromUserId, forOwnerUserId, targetId);
+
+        toOtherUserIds.forEach((toUserId) => {
+            const notificationType = this.getNotificationType(interactable, {
+                forOwner: false
+            });
+            CommentEventDispatcher.onCreated(context, notificationType, fromUserId, toUserId, targetId);
+        })
     }
 
-    private static getToUserId(interactable: Interactable, comment: Comment): number {
+    private static getOwnerIdFromTargetPost(interactable: Interactable, comment: Comment): number {
         if (interactable === Interactable.USER_POST) {
             return comment.userPosts?.[0].userId ?? 0;
         }
@@ -110,15 +122,32 @@ export class CommentService {
         return 0;
     }
 
-    private static getNotificationType(interactable: Interactable): NotificationType {
+    private static getUserIdsFromTargetComments(interactable: Interactable, comment: Comment): number[] {
         if (interactable === Interactable.USER_POST) {
-            return NotificationType.TIMELINE_COMMENT;
+            return comment.userPosts?.[0]?.comments?.map(comment => comment.userId!) || []
         }
 
         if (interactable === Interactable.CHALLENGE) {
-            return NotificationType.CHALLENGE_COMMENT;
+            return comment.challenges?.[0].comments?.map(comment => comment.userId!) || []
         }
 
-        return NotificationType.PLANNED_DAY_RESULT_COMMENT;
+        if (interactable === Interactable.PLANNED_DAY_RESULT) {
+            return comment.plannedDayResults?.[0].comments?.map(comment => comment.userId!) || []
+        }
+
+
+        return [0];
+    }
+
+    private static getNotificationType(interactable: Interactable, { forOwner }: { forOwner: boolean }): NotificationType {
+        if (interactable === Interactable.USER_POST) {
+            return forOwner ? NotificationType.TIMELINE_COMMENT : NotificationType.TIMELINE_COMMENT_BACK;
+        }
+
+        if (interactable === Interactable.CHALLENGE) {
+            return forOwner ? NotificationType.CHALLENGE_COMMENT : NotificationType.CHALLENGE_COMMENT_BACK;
+        }
+
+        return forOwner ? NotificationType.PLANNED_DAY_RESULT_COMMENT : NotificationType.PLANNED_DAY_RESULT_COMMENT_BACK;
     }
 }

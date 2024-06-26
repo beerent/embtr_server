@@ -7,11 +7,14 @@ import { PushNotificationService } from './PushNotificationService';
 
 export enum NotificationType {
     TIMELINE_COMMENT,
+    TIMELINE_COMMENT_BACK,
     TIMELINE_TAG,
     TIMELINE_LIKE,
     CHALLENGE_COMMENT,
+    CHALLENGE_COMMENT_BACK,
     DAILY_RESULT_TAG,
     PLANNED_DAY_RESULT_COMMENT,
+    PLANNED_DAY_RESULT_COMMENT_BACK,
     PLANNED_DAY_RESULT_LIKE,
     FAILED_DAILY_RESULT_LIKE,
     NEW_FOLLOWER,
@@ -76,12 +79,16 @@ export class NotificationService {
         switch (notificationType) {
             case NotificationType.TIMELINE_COMMENT:
                 return 'commented on your post';
+            case NotificationType.TIMELINE_COMMENT_BACK:
+                return 'commented on a post you commented on';
             case NotificationType.TIMELINE_LIKE:
                 return 'liked your post';
             case NotificationType.PLANNED_DAY_RESULT_LIKE:
                 return 'liked your completed day';
             case NotificationType.PLANNED_DAY_RESULT_COMMENT:
                 return 'commented on your completed day';
+            case NotificationType.PLANNED_DAY_RESULT_COMMENT_BACK:
+                return 'commented on a planned day you commented on';
             case NotificationType.NEW_FOLLOWER:
                 return 'now follows you!';
             case NotificationType.QUOTE_LIKE:
@@ -96,6 +103,8 @@ export class NotificationService {
                 return 'liked your challenge';
             case NotificationType.CHALLENGE_COMMENT:
                 return 'commented on your challenge';
+            case NotificationType.CHALLENGE_COMMENT_BACK:
+                return 'commented on a challenge you commented on';
 
             default:
                 return 'tagged you in a comment';
@@ -105,11 +114,13 @@ export class NotificationService {
     private static getTargetPage(notificationType: NotificationType): NotificationTargetPage {
         switch (notificationType) {
             case NotificationType.TIMELINE_COMMENT:
+            case NotificationType.TIMELINE_COMMENT_BACK:
             case NotificationType.TIMELINE_TAG:
             case NotificationType.TIMELINE_LIKE:
                 return NotificationTargetPage.USER_POST_DETAILS;
             case NotificationType.DAILY_RESULT_TAG:
             case NotificationType.PLANNED_DAY_RESULT_COMMENT:
+            case NotificationType.PLANNED_DAY_RESULT_COMMENT_BACK:
             case NotificationType.PLANNED_DAY_RESULT_LIKE:
                 return NotificationTargetPage.PLANNED_DAY_RESULT;
             case NotificationType.NEW_FOLLOWER:
@@ -122,6 +133,7 @@ export class NotificationService {
                 return NotificationTargetPage.GOAL_DETAILS;
             case NotificationType.CHALLENGE_LIKE:
             case NotificationType.CHALLENGE_COMMENT:
+            case NotificationType.CHALLENGE_COMMENT_BACK:
                 return NotificationTargetPage.CHALLENGE_DETAILS;
 
             default:
