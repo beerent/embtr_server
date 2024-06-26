@@ -114,11 +114,13 @@ export class NotificationService {
     private static getTargetPage(notificationType: NotificationType): NotificationTargetPage {
         switch (notificationType) {
             case NotificationType.TIMELINE_COMMENT:
+            case NotificationType.TIMELINE_COMMENT_BACK:
             case NotificationType.TIMELINE_TAG:
             case NotificationType.TIMELINE_LIKE:
                 return NotificationTargetPage.USER_POST_DETAILS;
             case NotificationType.DAILY_RESULT_TAG:
             case NotificationType.PLANNED_DAY_RESULT_COMMENT:
+            case NotificationType.PLANNED_DAY_RESULT_COMMENT_BACK:
             case NotificationType.PLANNED_DAY_RESULT_LIKE:
                 return NotificationTargetPage.PLANNED_DAY_RESULT;
             case NotificationType.NEW_FOLLOWER:
@@ -131,6 +133,7 @@ export class NotificationService {
                 return NotificationTargetPage.GOAL_DETAILS;
             case NotificationType.CHALLENGE_LIKE:
             case NotificationType.CHALLENGE_COMMENT:
+            case NotificationType.CHALLENGE_COMMENT_BACK:
                 return NotificationTargetPage.CHALLENGE_DETAILS;
 
             default:
