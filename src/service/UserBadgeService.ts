@@ -14,13 +14,11 @@ import { HabitStreakService } from './HabitStreakService';
 
 export class UserBadgeService {
     public static async refreshAllBadges(context: Context) {
-        await this.removeAllBadges(context);
-
         const promises = [
-            this.optionallyAddPremiumBadge(context),
-            this.optionallyAddAwayBadge(context),
-            this.optionallyAddNewUserBadge(context),
-            this.optionallyAddHabitStreakTierBadge(context),
+            this.refreshPremiumBadge(context),
+            this.refreshAwayBadge(context),
+            this.refreshNewUserBadge(context),
+            this.refreshHabitStreakTierBadge(context),
         ];
 
         await Promise.all(promises);
@@ -30,6 +28,11 @@ export class UserBadgeService {
      * Premium Badge
      */
 
+    public static async refreshPremiumBadge(context: Context) {
+        await this.removePremiumBadge(context);
+        await this.optionallyAddPremiumBadge(context);
+    }
+
     public static async optionallyAddPremiumBadge(context: Context) {
         const shouldAddPremiumBadge = await this.shouldAddPremiumBadge(context);
         if (shouldAddPremiumBadge) {
@@ -37,30 +40,56 @@ export class UserBadgeService {
         }
     }
 
+    public static async addPremiumBadge(context: Context) {
+        const containsPremiumBadge = await this.containsPremiumBadge(context);
+        if (!containsPremiumBadge) {
+            return this.addBadge(context, 'PREMIUM');
+        }
+    }
+
+    public static async removePremiumBadge(context: Context) {
+        const containsPremiumBadge = await this.containsPremiumBadge(context);
+        if (containsPremiumBadge) {
+            return this.removeBadge(context, 'PREMIUM');
+        }
+    }
+
+    private static async containsPremiumBadge(context: Context) {
+        return this.containsBadge(context, 'PREMIUM');
+    }
+
     private static async shouldAddPremiumBadge(context: Context) {
         const userIsPremium = await UserService.isPremium(context, context.userId);
         return userIsPremium;
     }
 
-    private static async addPremiumBadge(context: Context) {
-        return this.addBadge(context, Constants.Badge.PREMIUM);
-    }
-
-    private static async containsPremiumBadge(context: Context) {
-        return this.containsBadge(context, Constants.Badge.PREMIUM);
-    }
-
-    private static async removePremiumBadge(context: Context) {
-        return this.removeBadge(context, Constants.Badge.PREMIUM);
-    }
-
     /*
      * Away Badge
      */
+
+    public static async refreshAwayBadge(context: Context) {
+        await this.removeAwayBadge(context);
+        await this.optionallyAddAwayBadge(context);
+    }
+
     public static async optionallyAddAwayBadge(context: Context) {
         const shouldAddAwayBadge = await this.shouldAddAwayBadge(context);
         if (shouldAddAwayBadge) {
             await this.addAwayBadge(context);
+        }
+    }
+
+    public static async removeAwayBadge(context: Context) {
+        const containsAwayBadge = await this.containsAwayBadge(context);
+        if (containsAwayBadge) {
+            return this.removeBadge(context, 'AWAY');
+        }
+    }
+
+    public static async addAwayBadge(context: Context) {
+        const containsAwayBadge = await this.containsAwayBadge(context);
+        if (!containsAwayBadge) {
+            return this.addBadge(context, 'AWAY');
         }
     }
 
@@ -69,25 +98,36 @@ export class UserBadgeService {
         return awayMode === Constants.AwayMode.ENABLED;
     }
 
-    private static async addAwayBadge(context: Context) {
-        return this.addBadge(context, Constants.Badge.AWAY);
-    }
-
     private static async containsAwayBadge(context: Context) {
-        return this.containsBadge(context, Constants.Badge.AWAY);
-    }
-
-    private static async removeAwayBadge(context: Context) {
-        return this.removeBadge(context, Constants.Badge.AWAY);
+        return this.containsBadge(context, 'AWAY');
     }
 
     /*
      * New User Badge
      */
+    public static async refreshNewUserBadge(context: Context) {
+        await this.removeNewUserBadge(context);
+        await this.optionallyAddNewUserBadge(context);
+    }
+
     public static async optionallyAddNewUserBadge(context: Context) {
         const shouldAddNewUserBadge = await this.shouldAddNewUserBadge(context);
         if (shouldAddNewUserBadge) {
             await this.addNewUserBadge(context);
+        }
+    }
+
+    public static async addNewUserBadge(context: Context) {
+        const containsNewUserBadge = await this.containsNewUserBadge(context);
+        if (!containsNewUserBadge) {
+            await this.addBadge(context, 'NEW_USER');
+        }
+    }
+
+    public static async removeNewUserBadge(context: Context) {
+        const containsNewUserBadge = await this.containsNewUserBadge(context);
+        if (containsNewUserBadge) {
+            return this.removeBadge(context, 'NEW_USER');
         }
     }
 
@@ -104,30 +144,34 @@ export class UserBadgeService {
         return createdDate > sevenDaysAgo;
     }
 
-    private static async addNewUserBadge(context: Context) {
-        return this.addBadge(context, Constants.Badge.NEW_USER);
-    }
-
     private static async containsNewUserBadge(context: Context) {
-        return this.containsBadge(context, Constants.Badge.NEW_USER);
-    }
-
-    private static async removeNewUserBadge(context: Context) {
-        return this.removeBadge(context, Constants.Badge.NEW_USER);
+        return this.containsBadge(context, 'NEW_USER');
     }
 
     /*
      * Habit Streak Tier Badge
      */
+
+    public static async refreshHabitStreakTierBadge(context: Context) {
+        console.log('Refreshing habit streak tier badge');
+        await this.removeHabitStreakTierBadge(context);
+        await this.optionallyAddHabitStreakTierBadge(context);
+    }
+
+    public static async removeHabitStreakTierBadge(context: Context) {
+        console.log('Removing habit streak tier badge');
+        const category = Constants.BadgeCategory.HABIT_STREAK_TIER;
+        await this.removeBadgesByCategory(context, category);
+    }
+
     public static async optionallyAddHabitStreakTierBadge(context: Context) {
+        console.log('Optionally adding habit streak tier badge');
         const badgeToAdd = await this.getHabitStreakBadgeToAdd(context);
         if (!badgeToAdd?.key) {
             return;
         }
 
-        const badgeKey = Constants.getBadge(badgeToAdd.key);
-
-        await this.addBadge(context, badgeKey);
+        await this.addBadge(context, badgeToAdd.key);
     }
 
     public static async getHabitStreakBadgeToAdd(context: Context) {
@@ -152,16 +196,7 @@ export class UserBadgeService {
         return foundHabitStreakTier?.badge;
     }
 
-    private static async containsHabitStreakTierBadge(context: Context) {
-        const containsBadge = await this.containsBadgeByCategory(
-            context,
-            Constants.BadgeCategory.HABIT_STREAK_TIER
-        );
-
-        return containsBadge;
-    }
-
-    private static async addBadge(context: Context, key: Constants.Badge) {
+    private static async addBadge(context: Context, key: string) {
         const badge = await BadgeService.get(context, key);
         if (!badge?.id) {
             throw new ServiceException(
@@ -175,7 +210,7 @@ export class UserBadgeService {
         await UserBadgeDao.create(context.userId, badge.id);
     }
 
-    private static async containsBadge(context: Context, key: Constants.Badge) {
+    private static async containsBadge(context: Context, key: string) {
         const badge = await BadgeService.get(context, key);
         if (!badge?.id) {
             return false;
@@ -185,17 +220,26 @@ export class UserBadgeService {
         return !!exists;
     }
 
-    private static async containsBadgeByCategory(
+    private static async removeBadgesByCategory(
         context: Context,
         category: Constants.BadgeCategory
     ) {
         const badges = await BadgeService.getAllByCategory(context, category);
-        const ids = badges.map((badge) => badge.id).flatMap((id) => (id ? [id] : []));
-        const contains = await UserBadgeDao.contains(context.userId, ids);
-        return !!contains;
+        for (const badge of badges) {
+            if (!badge?.id || !badge.key) {
+                continue;
+            }
+
+            const containsBadge = await this.containsBadge(context, badge.key);
+            if (!containsBadge) {
+                continue;
+            }
+
+            this.removeBadge(context, badge.key);
+        }
     }
 
-    private static async removeBadge(context: Context, key: Constants.Badge) {
+    private static async removeBadge(context: Context, key: string) {
         const badge = await BadgeService.get(context, key);
         if (!badge?.id) {
             throw new ServiceException(
@@ -207,16 +251,5 @@ export class UserBadgeService {
 
         console.log('  Removing badge', badge.key);
         await UserBadgeDao.delete(context.userId, badge.id);
-    }
-
-    private static async removeAllBadges(context: Context) {
-        for (const badge of Object.values(Constants.Badge)) {
-            const containsBadge = await this.containsBadge(context, badge);
-            if (!containsBadge) {
-                continue;
-            }
-
-            await this.removeBadge(context, badge);
-        }
     }
 }

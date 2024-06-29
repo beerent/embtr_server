@@ -1,5 +1,6 @@
 import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
+import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
 import { Context, ContextType } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
 import { PlannedDayService } from '../PlannedDayService';
@@ -28,8 +29,10 @@ export class AwayModeService {
 
         if (awayMode === Constants.AwayMode.ENABLED) {
             await this.refresh(context, context.userId);
+            UserEventDispatcher.onAway(context);
         } else {
             await this.remove(context, context.userId);
+            UserEventDispatcher.onReturned(context);
         }
     }
 

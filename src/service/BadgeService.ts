@@ -5,7 +5,7 @@ import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class BadgeService {
-    public static async get(context: Context, key: Constants.Badge): Promise<Badge | undefined> {
+    public static async get(context: Context, key: string): Promise<Badge | undefined> {
         const badge = await BadgeDao.get(key);
         if (!badge) {
             return undefined;
@@ -39,7 +39,6 @@ export class BadgeService {
         const badgeModels: Badge[] = ModelConverter.convertAll(badges);
         return badgeModels;
     }
-
 
     public static async getAllByCategory(
         context: Context,

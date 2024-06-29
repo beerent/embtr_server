@@ -5,11 +5,13 @@ import { UserRoleService } from '../UserRoleService';
 import { UserPropertyService } from '@src/service/UserPropertyService';
 import { UserService } from '../UserService';
 import { Constants } from '@resources/types/constants/constants';
+import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
 
 export class PremiumMembershipService {
     public static async addPremium(context: Context, email: string) {
         await UserRoleService.addUserRole(context, email, Role.PREMIUM);
         await UserRoleService.removeUserRole(context, email, Role.FREE);
+        UserEventDispatcher.onPremiumAdded(context);
         ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
     }
 
@@ -17,6 +19,7 @@ export class PremiumMembershipService {
         await UserRoleService.addUserRole(context, email, Role.FREE);
         await UserRoleService.removeUserRole(context, email, Role.PREMIUM);
         await this.removePremiumFeatures(context, email);
+        UserEventDispatcher.onPremiumRemoved(context);
         ApiAlertsService.sendAlert('we lost a premium user 😢');
     }
 

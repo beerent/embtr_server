@@ -1,4 +1,4 @@
-import { Context } from '@src/general/auth/Context';
+import { Context, NewUserContext } from '@src/general/auth/Context';
 import { NotificationType } from '@src/service/NotificationService';
 
 export namespace Event {
@@ -87,6 +87,18 @@ export namespace Event {
             context: Context;
             plannedDayId: number;
             id: number;
+        }
+    }
+
+    export namespace User {
+        export const Created = 'USER_CREATED';
+        export const PremiumAdded = 'USER_PREMIUM_ADDED';
+        export const PremiumRemoved = 'USER_PREMIUM_REMOVED';
+        export const Away = 'USER_AWAY';
+        export const Returned = 'USER_RETURNED';
+
+        export interface Event {
+            context: Context;
         }
     }
 }

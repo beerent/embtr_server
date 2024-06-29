@@ -18,6 +18,7 @@ import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './UserPropertyService';
 import { HttpCode } from '@src/common/RequestResponses';
 import { PremiumMembershipService } from './feature/PremiumMembershipService';
+import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -106,6 +107,8 @@ export class UserService {
 
         await UserRoleService.addUserRoles(newUserContext, newUser.email, [Role.USER, Role.FREE]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
+
+        UserEventDispatcher.onCreated(newUserContext as Context);
 
         const userModel: User = ModelConverter.convert(newUser);
         return userModel;

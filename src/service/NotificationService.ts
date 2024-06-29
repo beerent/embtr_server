@@ -80,7 +80,7 @@ export class NotificationService {
             case NotificationType.TIMELINE_COMMENT:
                 return 'commented on your post';
             case NotificationType.TIMELINE_COMMENT_BACK:
-                return 'commented on a post you commented on';
+                return 'also commented on a post';
             case NotificationType.TIMELINE_LIKE:
                 return 'liked your post';
             case NotificationType.PLANNED_DAY_RESULT_LIKE:
@@ -88,7 +88,7 @@ export class NotificationService {
             case NotificationType.PLANNED_DAY_RESULT_COMMENT:
                 return 'commented on your completed day';
             case NotificationType.PLANNED_DAY_RESULT_COMMENT_BACK:
-                return 'commented on a planned day you commented on';
+                return 'also commented on a completed day';
             case NotificationType.NEW_FOLLOWER:
                 return 'now follows you!';
             case NotificationType.QUOTE_LIKE:
@@ -104,7 +104,7 @@ export class NotificationService {
             case NotificationType.CHALLENGE_COMMENT:
                 return 'commented on your challenge';
             case NotificationType.CHALLENGE_COMMENT_BACK:
-                return 'commented on a challenge you commented on';
+                return 'also commented on a challenge';
 
             default:
                 return 'tagged you in a comment';
