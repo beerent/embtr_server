@@ -4,11 +4,7 @@ import { Event } from '../events';
 
 export namespace HabitStreakEventDispatcher {
     export const onRefresh = (context: Context, userId: number) => {
-        const type: Event.HabitStreak.Event = {
-            context,
-            userId: userId,
-        };
-
-        eventBus.emit(Event.HabitStreak.Refresh, type);
+        const event: Event.HabitStreak.Event = new Event.HabitStreak.Event(context, userId);
+        eventBus.emit(Event.HabitStreak.Refresh, event);
     };
 }

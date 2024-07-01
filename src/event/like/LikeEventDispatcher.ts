@@ -11,14 +11,13 @@ export namespace LikeEventDispatcher {
         toUserId: number,
         targetId: number
     ) => {
-        const type: Event.Like.Event = {
+        const event: Event.Like.Event = new Event.Like.Event(
             context,
             notificationType,
             fromUserId,
             toUserId,
-            targetId,
-        };
-
-        eventBus.emit(Event.Like.Created, type);
+            targetId
+        );
+        eventBus.emit(Event.Like.Created, event);
     };
 }

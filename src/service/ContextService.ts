@@ -66,6 +66,7 @@ export class ContextService {
 
     public static impersonateUserContext(context: Context, user: User): Context {
         if (!Roles.isAdmin(context.userRoles)) {
+            console.log('user is not admin', context.userRoles);
             throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'user is not admin');
         }
 

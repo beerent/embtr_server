@@ -4,42 +4,27 @@ import { Event } from '../events';
 
 export namespace UserEventDispatcher {
     export const onCreated = (context: Context) => {
-        const type: Event.User.Event = {
-            context,
-        };
-
-        eventBus.emit(Event.User.Created, type);
+        const event: Event.User.Event = new Event.User.Event(context);
+        eventBus.emit(Event.User.Created, event);
     };
 
     export const onPremiumAdded = (context: Context) => {
-        const type: Event.User.Event = {
-            context,
-        };
-
-        eventBus.emit(Event.User.PremiumAdded, type);
+        const event: Event.User.Event = new Event.User.Event(context);
+        eventBus.emit(Event.User.PremiumAdded, event);
     };
 
     export const onPremiumRemoved = (context: Context) => {
-        const type: Event.User.Event = {
-            context,
-        };
-
-        eventBus.emit(Event.User.PremiumRemoved, type);
+        const event: Event.User.Event = new Event.User.Event(context);
+        eventBus.emit(Event.User.PremiumRemoved, event);
     };
 
     export const onAway = (context: Context) => {
-        const type: Event.User.Event = {
-            context,
-        };
-
-        eventBus.emit(Event.User.Away, type);
+        const event: Event.User.Event = new Event.User.Event(context);
+        eventBus.emit(Event.User.Away, event);
     };
 
     export const onReturned = (context: Context) => {
-        const type: Event.User.Event = {
-            context,
-        };
-
-        eventBus.emit(Event.User.Returned, type);
+        const event: Event.User.Event = new Event.User.Event(context);
+        eventBus.emit(Event.User.Returned, event);
     };
 }

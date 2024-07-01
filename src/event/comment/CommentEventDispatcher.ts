@@ -11,14 +11,13 @@ export namespace CommentEventDispatcher {
         toUserId: number,
         targetId: number
     ) => {
-        const type: Event.Comment.Event = {
+        const event: Event.Comment.Event = new Event.Comment.Event(
             context,
             notificationType,
             fromUserId,
             toUserId,
-            targetId,
-        };
-
-        eventBus.emit(Event.Comment.Created, type);
+            targetId
+        );
+        eventBus.emit(Event.Comment.Created, event);
     };
 }

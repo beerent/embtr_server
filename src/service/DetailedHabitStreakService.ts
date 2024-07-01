@@ -195,6 +195,7 @@ export class DetailedHabitStreakService {
         let completionCount = 0;
         for (const habitStreakResult of habitStreakResults) {
             const status = habitStreakResult.result;
+            console.log(habitStreakResult.dayKey, status);
 
             // if we don't have the plannedDay in the database, we need to go to the schedule
             // to see if any work was supposed to be done.

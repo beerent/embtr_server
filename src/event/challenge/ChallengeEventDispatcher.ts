@@ -4,38 +4,22 @@ import { Event } from '../events';
 
 export namespace ChallengeEventDispatcher {
     export const onJoined = (context: Context, id: number) => {
-        const type: Event.Challenge.Event = {
-            context,
-            id: id,
-        };
-
-        eventBus.emit(Event.Challenge.Joined, type);
+        const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
+        eventBus.emit(Event.Challenge.Joined, event);
     };
 
     export const onLeft = (context: Context, id: number) => {
-        const type: Event.Challenge.Event = {
-            context,
-            id: id,
-        };
-
-        eventBus.emit(Event.Challenge.Left, type);
+        const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
+        eventBus.emit(Event.Challenge.Left, event);
     };
 
     export const onComplete = (context: Context, id: number) => {
-        const type: Event.Challenge.Event = {
-            context,
-            id: id,
-        };
-
-        eventBus.emit(Event.Challenge.Completed, type);
+        const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
+        eventBus.emit(Event.Challenge.Completed, event);
     };
 
     export const onIncomplete = (context: Context, id: number) => {
-        const type: Event.Challenge.Event = {
-            context,
-            id: id,
-        };
-
-        eventBus.emit(Event.Challenge.Incompleted, type);
+        const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
+        eventBus.emit(Event.Challenge.Incompleted, event);
     };
 }

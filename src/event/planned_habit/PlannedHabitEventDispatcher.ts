@@ -4,42 +4,22 @@ import { Event } from '../events';
 
 export namespace PlannedHabitEventDispatcher {
     export const onUpdated = (context: Context, id: number, habitId: number) => {
-        const type: Event.PlannedHabit.Event = {
-            context,
-            habitId,
-            id,
-        };
-
-        eventBus.emit(Event.PlannedHabit.Updated, type);
+        const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(context, id, habitId);
+        eventBus.emit(Event.PlannedHabit.Updated, event);
     };
 
     export const onCreated = (context: Context, id: number, habitId: number) => {
-        const type: Event.PlannedHabit.Event = {
-            context,
-            habitId,
-            id,
-        };
-
-        eventBus.emit(Event.PlannedHabit.Created, type);
+        const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(context, id, habitId);
+        eventBus.emit(Event.PlannedHabit.Created, event);
     };
 
     export const onCompleted = (context: Context, id: number, habitId: number) => {
-        const type: Event.PlannedHabit.Event = {
-            context,
-            habitId,
-            id,
-        };
-
-        eventBus.emit(Event.PlannedHabit.Completed, type);
+        const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(context, id, habitId);
+        eventBus.emit(Event.PlannedHabit.Completed, event);
     };
 
     export const onIncompleted = (context: Context, id: number, habitId: number) => {
-        const type: Event.PlannedHabit.Event = {
-            context,
-            habitId,
-            id,
-        };
-
-        eventBus.emit(Event.PlannedHabit.Incompleted, type);
+        const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(context, id, habitId);
+        eventBus.emit(Event.PlannedHabit.Incompleted, event);
     };
 }
