@@ -170,8 +170,6 @@ export class DetailedHabitStreakService {
             startDate = endDate;
         }
 
-        console.log('Start date', startDate, 'end date', endDate);
-
         // 1. get streak constants, schedules and plannedDays
         const [plannedDays, scheduledHabits] = await Promise.all([
             PlannedDayService.getAllInDateRange(context, context.userId, startDate, endDate),
@@ -195,7 +193,6 @@ export class DetailedHabitStreakService {
         let completionCount = 0;
         for (const habitStreakResult of habitStreakResults) {
             const status = habitStreakResult.result;
-            console.log(habitStreakResult.dayKey, status);
 
             // if we don't have the plannedDay in the database, we need to go to the schedule
             // to see if any work was supposed to be done.
