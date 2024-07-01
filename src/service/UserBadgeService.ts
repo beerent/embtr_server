@@ -1,7 +1,7 @@
 import { Constants } from '@resources/types/constants/constants';
 import { UserBadgeDao } from '@src/database/UserBadgeDao';
 import { Context } from '@src/general/auth/Context';
-import { UserService } from '@src/service/UserService';
+import { BADGE_KEYS, UserService } from '@src/service/UserService';
 import { BadgeService } from './BadgeService';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { HttpCode } from '@src/common/RequestResponses';
@@ -120,14 +120,14 @@ export class UserBadgeService {
     public static async addNewUserBadge(context: Context) {
         const containsNewUserBadge = await this.containsNewUserBadge(context);
         if (!containsNewUserBadge) {
-            await this.addBadge(context, 'NEW_USER');
+            await this.addBadge(context, BADGE_KEYS.NEW_USER);
         }
     }
 
     public static async removeNewUserBadge(context: Context) {
         const containsNewUserBadge = await this.containsNewUserBadge(context);
         if (containsNewUserBadge) {
-            return this.removeBadge(context, 'NEW_USER');
+            return this.removeBadge(context, BADGE_KEYS.NEW_USER);
         }
     }
 

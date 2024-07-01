@@ -5,6 +5,11 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { logger } from '@src/common/logger/Logger';
 import { toZonedTime } from 'date-fns-tz';
+import { User } from '@resources/schema';
+import { HttpCode } from '@src/common/RequestResponses';
+import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
+import { UserRoleService } from './UserRoleService';
+import { Roles } from '@src/roles/Roles';
 
 export class ContextService {
     public static async get(request: Request): Promise<Context> {
@@ -57,6 +62,34 @@ export class ContextService {
             userUid: userUid,
             userEmail: userEmail,
         };
+    }
+
+    public static impersonateUserContext(context: Context, user: User): Context {
+        if (!Roles.isAdmin(context.userRoles)) {
+            throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'user is not admin');
+        }
+
+        if (!user.id || !user.uid) {
+            logger.error('invalid user:', user);
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'invalid user'
+            );
+        }
+
+        const impersonatedContext: Context = {
+            type: ContextType.CONTEXT,
+            userId: user.id,
+            userUid: user.uid,
+            userEmail: '',
+            userRoles: [],
+            dayKey: '',
+            timeZone: '',
+            dateTime: new Date(),
+        };
+
+        return impersonatedContext;
     }
 
     public static async getJobContext(request: Request): Promise<Context> {

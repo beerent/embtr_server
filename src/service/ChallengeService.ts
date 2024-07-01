@@ -481,7 +481,6 @@ export class ChallengeService {
         context: Context,
         challenge: Challenge
     ): ChallengeSummary {
-    console.log(challenge)
         const challengeSummary: ChallengeSummary = {
             id: challenge.id ?? 0,
             name: challenge.name ?? '',

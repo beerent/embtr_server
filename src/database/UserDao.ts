@@ -415,6 +415,23 @@ export class UserDao {
         return users;
     }
 
+    public static async getUsersWithBadge(key: string): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                userBadges: {
+                    some: {
+                        badge: {
+                            key: key,
+                        },
+                    },
+                },
+            },
+            include: UserIncludes,
+        });
+
+        return users;
+    }
+
     public static async getUsersWithProperty(
         key: Constants.UserPropertyKey,
         value: string

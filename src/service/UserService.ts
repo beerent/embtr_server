@@ -19,6 +19,14 @@ import { UserPropertyService } from './UserPropertyService';
 import { HttpCode } from '@src/common/RequestResponses';
 import { PremiumMembershipService } from './feature/PremiumMembershipService';
 import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
+import { UserBadgeService } from './UserBadgeService';
+import { ContextService } from './ContextService';
+
+export namespace BADGE_KEYS {
+    export const PREMIUM = 'PREMIUM';
+    export const AWAY = 'AWAY';
+    export const NEW_USER = 'NEW_USER';
+}
 
 export class UserService {
     public static async currentUserExists(newUserContext: NewUserContext): Promise<boolean> {
@@ -70,6 +78,13 @@ export class UserService {
 
     public static async getAllPremium(context: Context): Promise<User[]> {
         const users = await UserDao.getUsersWithRole(Role.PREMIUM);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
+    public static async getAllWithNewBadge(context: Context): Promise<User[]> {
+        const users = await UserDao.getUsersWithBadge(BADGE_KEYS.NEW_USER);
         const userModels: User[] = ModelConverter.convertAll(users);
 
         return userModels;
@@ -192,6 +207,20 @@ export class UserService {
         const userModels: User[] = ModelConverter.convertAll(users);
 
         return userModels;
+    }
+
+    public static async refreshNewUsers(context: Context) {
+        const users = await this.getAllWithNewBadge(context);
+        logger.info(`found ${users.length} premium users`);
+
+        for (const user of users) {
+            if (!user.uid) {
+                continue;
+            }
+
+            const impersonatedContext = ContextService.impersonateUserContext(context, user);
+            await UserBadgeService.refreshNewUserBadge(impersonatedContext);
+        }
     }
 
     public static async refreshPremiumUsers(context: Context) {

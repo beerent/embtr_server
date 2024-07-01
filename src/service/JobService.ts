@@ -24,6 +24,10 @@ export class JobService {
         await UserService.refreshPremiumUsers(context);
     }
 
+    public static async refreshNewUsers(context: Context): Promise<void> {
+        await UserService.refreshNewUsers(context);
+    }
+
     public static async refreshAwayMode(context: Context): Promise<void> {
         await AwayModeService.refreshAll(context);
     }
