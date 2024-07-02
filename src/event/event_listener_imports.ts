@@ -6,3 +6,4 @@ import '@src/event/comment/CommentEventListener';
 import '@src/event/like/LikeEventListener';
 import '@src/event/challenge/ChallengeEventListener';
 import '@src/event/challenge_participant/ChallengeParticipantEventListener';
+import '@src/event/user/UserEventListener';
