@@ -15,7 +15,7 @@ import rateLimit from 'express-rate-limit';
 import { authenticate } from '@src/middleware/authentication';
 import { ContextService } from '@src/service/ContextService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
-import { authorize } from '@src/middleware/general/GeneralAuthorization';
+import { authorize, authorizeAdmin } from '@src/middleware/general/GeneralAuthorization';
 
 const limiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -91,5 +91,19 @@ accountRouterLatest.post(
         res.status(response.httpCode).json(response);
     })
 );
+
+accountRouterLatest.post(
+    '/delete/:userId',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const userId = Number(req.params.userId);
+        const response: Response = await AccountService.adminDelete(userId);
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
 
 export default accountRouterLatest;
