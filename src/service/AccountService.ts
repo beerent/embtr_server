@@ -183,6 +183,19 @@ export class AccountService {
         return { ...SUCCESS };
     }
 
+    public static async adminDelete(userId: number): Promise<Response> {
+        const user = await UserDao.getById(userId)
+
+        if (!user?.email)  {
+            throw new ServiceException(HttpCode.GENERAL_FAILURE, Code.GENERIC_ERROR, 'User not found');
+        }
+
+        await AccountDao.delete(user.email);
+        await UserDao.deleteByEmail(user.email);
+
+        return { ...SUCCESS };
+    }
+
     public static async deleteByEmail(email: string): Promise<Response> {
         const user = await AccountDao.getByEmail(email);
         if (!user) {

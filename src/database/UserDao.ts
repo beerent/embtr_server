@@ -260,6 +260,9 @@ export class UserDao {
                     ...[idQuery],
                 ],
             },
+            orderBy: {
+                createdAt: 'desc'
+            }
         });
 
         return users;
