@@ -1,4 +1,5 @@
 import { Role } from '@src/roles/Roles';
+import { Context, ContextType, NewUserContext } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
@@ -7,7 +8,6 @@ import { AccountDao } from '@src/database/AccountDao';
 import { UserDao } from '@src/database/UserDao';
 import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
-import { Context, NewUserContext } from '@src/general/auth/Context';
 import { AccountService } from '@src/service/AccountService';
 import { ApiAlertsService } from '@src/service/ApiAlertsService';
 import { BlockUserService } from './BlockUserService';
@@ -123,9 +123,8 @@ export class UserService {
         await UserRoleService.addUserRoles(newUserContext, newUser.email, [Role.USER, Role.FREE]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
 
-        UserEventDispatcher.onCreated(newUserContext as Context);
-
         const userModel: User = ModelConverter.convert(newUser);
+        this.dispatchUserOnCreated(newUserContext, userModel);
         return userModel;
     }
 
@@ -379,5 +378,20 @@ export class UserService {
 
     public static async getActiveUsersForRange(startDate: Date, endDate: Date): Promise<number> {
         return UserDao.getActiveUsersForRange(startDate, endDate);
+    }
+
+    private static dispatchUserOnCreated(newUserContext: NewUserContext, user: User) {
+        const context: Context = {
+            type: ContextType.CONTEXT,
+            userId: user.id ?? 0,
+            userUid: user.uid ?? newUserContext.userUid,
+            userEmail: user.email ?? '',
+            userRoles: [Role.USER, Role.FREE],
+            dayKey: '',
+            timeZone: '',
+            dateTime: new Date(),
+        };
+
+        UserEventDispatcher.onCreated(context);
     }
 }

@@ -17,6 +17,8 @@ import {
     SetUserSocialNotificationResponse,
     SetUserTimezoneRequest,
     SetUserTimezoneResponse,
+    SetUserTutorialCompletionStateRequest,
+    SetUserTutorialCompletionStateResponse,
     SetUserWarningNotificationRequest,
     SetUserWarningNotificationResponse,
 } from '@resources/types/requests/UserPropertyTypes';
@@ -176,6 +178,23 @@ userPropertyRouterLatest.post(
 
         await AwayModeService.update(context, awayMode);
         res.json(SUCCESS);
+    })
+);
+
+userPropertyRouterLatest.post(
+    '/tutorial/',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: SetUserTutorialCompletionStateRequest = req.body;
+        const state = request.state;
+
+        const user = await UserPropertyService.setTutorialCompletionState(context, state);
+        const response: SetUserTutorialCompletionStateResponse = { ...SUCCESS, user };
+
+        res.json(response);
     })
 );
 

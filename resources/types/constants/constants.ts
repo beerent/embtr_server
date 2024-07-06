@@ -9,6 +9,7 @@ export namespace Constants {
         REMINDER_NOTIFICATIONS_SETTING = 'REMINDER_NOTIFICATIONS_SETTING',
         WARNING_NOTIFICATIONS_SETTING = 'WARNING_NOTIFICATIONS_SETTING',
         AWAY_MODE = 'AWAY_MODE',
+        TUTORIAL_COMPLETED = 'TUTORIAL_COMPLETED',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -23,6 +24,8 @@ export namespace Constants {
                 return UserPropertyKey.INTRO_ACKNOWLEDGED;
             case 'AWAY_MODE':
                 return UserPropertyKey.AWAY_MODE;
+            case 'TUTORIAL_COMPLETED':
+                return UserPropertyKey.TUTORIAL_COMPLETED;
             case 'INVALID':
                 return UserPropertyKey.INVALID;
 

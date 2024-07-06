@@ -1,5 +1,6 @@
 import { Response } from './RequestTypes';
 import { Constants } from '../constants/constants';
+import { User } from '../../schema';
 
 export interface SetUserTimezoneRequest {
   timezone: string;
@@ -47,4 +48,16 @@ export interface SetUserWarningNotificationResponse extends Response {
 
 export interface GetUserWarningNotificationResponse extends Response {
   setting?: Constants.WarningNotificationSetting;
+}
+
+export interface SetUserTutorialCompletionStateRequest {
+  state: Constants.CompletionState;
+}
+
+export interface SetUserTutorialCompletionStateResponse extends Response {
+  user?: User;
+}
+
+export interface GetUserTutorialCompletionStateResponse extends Response {
+  state?: Constants.CompletionState;
 }

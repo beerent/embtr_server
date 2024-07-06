@@ -1,5 +1,5 @@
 import { Context } from '@src/general/auth/Context';
-import { Property } from '@resources/schema';
+import { Property, User } from '@resources/schema';
 import { UserPropertyDao } from '@src/database/UserPropertyDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ServiceException } from '@src/general/exception/ServiceException';
@@ -7,6 +7,7 @@ import { Code } from '@resources/codes';
 import { Constants } from '@resources/types/constants/constants';
 import { Roles } from '@src/roles/Roles';
 import { HttpCode } from '@src/common/RequestResponses';
+import { UserService } from './UserService';
 
 export class UserPropertyService {
     public static async getAll(context: Context, userId: number): Promise<Property[]> {
@@ -37,6 +38,29 @@ export class UserPropertyService {
         );
 
         return timezone;
+    }
+
+    public static async setTutorialCompletionState(
+        context: Context,
+        state: Constants.CompletionState
+    ): Promise<User> {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.TUTORIAL_COMPLETED,
+            state
+        );
+
+        const user = await UserService.get(context, context.userUid);
+        if (!user) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.USER_NOT_FOUND,
+                'user not found'
+            );
+        }
+
+        return user;
     }
 
     /* AWAY */
