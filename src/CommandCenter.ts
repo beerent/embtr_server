@@ -374,6 +374,25 @@ const handleCommandSetDefaultReminderNotificationsSettingsForAllUsers = async ()
     }
 };
 
+const handleCommandSetDefaultTutorialIslandProperty = async () => {
+    const users = await UserService.getUsersWithoutProperty(
+        adminContext,
+        Constants.UserPropertyKey.TUTORIAL_COMPLETED
+    );
+
+    for (const user of users) {
+        console.log('setting tutorial property for user', user.username);
+        const context = impersonateContext(user);
+        const scheduledHabits = await ScheduledHabitService.getAllForUser(context);
+        if (scheduledHabits.length > 0) {
+            await UserPropertyService.setTutorialCompletionState(
+                context,
+                Constants.CompletionState.COMPLETE
+            );
+        }
+    }
+};
+
 const handleCommandSetDefaultWarmingNotificationsSettingsForAllUsers = async () => {
     const users = await UserService.getUsersWithoutProperty(
         adminContext,
@@ -835,6 +854,10 @@ const processCommand = async (command: string) => {
 
         case 'updateAllBadgesForUser':
             await handleCommandUpdateAllBadgesForUser(email);
+            break;
+
+        case 'populateTutorialsIslandProperty':
+            await handleCommandSetDefaultTutorialIslandProperty();
             break;
 
         default:

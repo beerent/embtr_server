@@ -315,6 +315,16 @@ export class ScheduledHabitService {
         return scheduledHabitModels;
     }
 
+    public static async getAllForUser(context: Context): Promise<ScheduledHabit[]> {
+        const scheduledHabits = await ScheduledHabitDao.getAll(context.userId);
+        if (!scheduledHabits) {
+            return [];
+        }
+
+        const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
+        return scheduledHabitModels;
+    }
+
     public static async getAllForUserInDateRange(
         context: Context,
         userId: number,

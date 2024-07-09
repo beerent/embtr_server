@@ -78,13 +78,9 @@ export class PlannedHabitService {
             );
         }
 
-        const createPlannedTasKModel = await this.getById(context, createdPlannedTask.id ?? 0);
+        const createPlannedTaskModel = await this.getById(context, createdPlannedTask.id ?? 0);
 
-        PlannedHabitEventDispatcher.onCreated(
-            context,
-            createPlannedTasKModel.id ?? 0,
-            createPlannedTasKModel.scheduledHabit?.taskId ?? 0
-        );
+        this.handleCreateDispatches(context, createPlannedTaskModel);
 
         const plannedTaskModel: PlannedTask = ModelConverter.convert(createdPlannedTask);
         return plannedTaskModel;
@@ -114,7 +110,7 @@ export class PlannedHabitService {
 
         const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
 
-        this.handleDispatches(context, existingPlannedTask, updatedPlannedTaskModel);
+        this.handleUpdateDispatches(context, existingPlannedTask, updatedPlannedTaskModel);
 
         return updatedPlannedTaskModel;
     }
@@ -183,7 +179,24 @@ export class PlannedHabitService {
         return plannedHabit?.id;
     }
 
-    private static handleDispatches(
+    private static handleCreateDispatches(context: Context, plannedTask: PlannedTask) {
+        PlannedHabitEventDispatcher.onCreated(
+            context,
+            plannedTask.id ?? 0,
+            plannedTask.scheduledHabit?.taskId ?? 0
+        );
+
+        const isComplete = plannedTask.status === Constants.CompletionState.COMPLETE;
+        if (isComplete) {
+            PlannedHabitEventDispatcher.onCompleted(
+                context,
+                plannedTask.id ?? 0,
+                plannedTask.scheduledHabit?.taskId ?? 0
+            );
+        }
+    }
+
+    private static handleUpdateDispatches(
         context: Context,
         existingPlannedTask: PlannedTask,
         updatedPlannedTask: PlannedTask

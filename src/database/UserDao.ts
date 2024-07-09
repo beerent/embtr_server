@@ -213,6 +213,7 @@ export class UserDao {
                     },
                 ],
             },
+            include: UserIncludes,
         });
 
         return users;
@@ -261,8 +262,8 @@ export class UserDao {
                 ],
             },
             orderBy: {
-                createdAt: 'desc'
-            }
+                createdAt: 'desc',
+            },
         });
 
         return users;

@@ -175,12 +175,14 @@ export class PlannedHabitDao {
                 plannedDay: true,
                 scheduledHabit: {
                     include: {
+                        icon: true,
                         task: true,
                     },
                 },
                 timeOfDay: true,
                 originalTimeOfDay: true,
                 unit: true,
+                icon: true,
             },
         });
     }
