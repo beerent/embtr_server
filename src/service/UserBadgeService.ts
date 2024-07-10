@@ -9,6 +9,8 @@ import { Code } from '@resources/codes';
 import { UserPropertyService } from './UserPropertyService';
 import { HabitStreakTierService } from './HabitStreakTierService';
 import { HabitStreakService } from './HabitStreakService';
+import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { Badge } from '@resources/schema';
 
 // "15 months is almost a year" - TheCaptainCoder - 2024-06-21
 
@@ -22,6 +24,13 @@ export class UserBadgeService {
         ];
 
         await Promise.all(promises);
+    }
+
+    public static async getAll(context: Context) {
+        const badges = await UserBadgeDao.getAll(context.userId);
+        const badgeModels: Badge[] = ModelConverter.convertAll(badges);
+
+        return badgeModels;
     }
 
     /*

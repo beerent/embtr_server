@@ -26,6 +26,8 @@ import { ScheduledHabitService } from './service/ScheduledHabitService';
 import { PureDate } from '@resources/types/date/PureDate';
 import { DateUtility } from './utility/date/DateUtility';
 import { UserBadgeService } from './service/UserBadgeService';
+import { AccountDao } from './database/AccountDao';
+import { NewUserContext } from '@src/general/auth/Context';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -83,6 +85,11 @@ const handleCommandGetRoles = async (email: string) => {
     }
 };
 
+const handleCommandGetCustomClaims = async (email: string) => {
+    const account = await AccountService.get(adminContext, email);
+    console.log(account.customClaims);
+};
+
 const handleCommandIsAdmin = async (email: string) => {
     try {
         const user = await UserDao.getByUsername(email);
@@ -104,6 +111,21 @@ const handleCommandIsUser = async (email: string) => {
     } catch (error) {
         console.log('false');
     }
+};
+
+const handleCommandSetCustomClaim = async () => {
+    const email = 'brent+claims@embtr.com';
+    const uid = 'ke8rMCnyuGTH0COrkP55kXvPzWo2';
+    const id = 427;
+
+    const context: NewUserContext = {
+        type: ContextType.NEW_USER_CONTEXT,
+        userUid: uid,
+        userEmail: email,
+    };
+
+    await UserRoleService.addUserRoles(context, email, [Role.USER, Role.PREMIUM, Role.ADMIN]);
+    await AccountDao.updateCustomClaim(context.userUid, 'userId', id);
 };
 
 const handleCommandAddAdminRole = async (email: string) => {
@@ -383,11 +405,12 @@ const handleCommandSetDefaultTutorialIslandProperty = async () => {
     for (const user of users) {
         console.log('setting tutorial property for user', user.username);
         const context = impersonateContext(user);
-        const scheduledHabits = await ScheduledHabitService.getAllForUser(context);
-        if (scheduledHabits.length > 0) {
+        const property = await UserPropertyService.getTutorialCompletionState(context);
+        if (property === Constants.CompletionState.INVALID) {
+            console.log('setting as invalid');
             await UserPropertyService.setTutorialCompletionState(
                 context,
-                Constants.CompletionState.COMPLETE
+                Constants.CompletionState.INVALID
             );
         }
     }
@@ -656,6 +679,18 @@ const handleCommandUpdateAllBadgesForUser = async (username: string) => {
     await UserBadgeService.refreshAllBadges(context);
 };
 
+const handleCommandGetAllBadgesForUser = async (username: string) => {
+    const user = await UserService.getByUsername(username);
+    if (!user?.id) {
+        console.log('user not found');
+        return;
+    }
+
+    const context = impersonateContext(user);
+    const badges = await UserBadgeService.getAll(context);
+    console.log(badges);
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -856,8 +891,20 @@ const processCommand = async (command: string) => {
             await handleCommandUpdateAllBadgesForUser(email);
             break;
 
+        case 'getAllBadgesForUser':
+            await handleCommandGetAllBadgesForUser(email);
+            break;
+
         case 'populateTutorialsIslandProperty':
             await handleCommandSetDefaultTutorialIslandProperty();
+            break;
+
+        case 'getCustomClaimsForEmail':
+            await handleCommandGetCustomClaims(email);
+            break;
+
+        case 'setCustomClaims':
+            await handleCommandSetCustomClaim();
             break;
 
         default:

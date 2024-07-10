@@ -18,6 +18,14 @@ export class UserBadgeDao {
         });
     }
 
+    public static async getAll(userId: number) {
+        return await prisma.userBadge.findMany({
+            where: {
+                userId,
+            },
+        });
+    }
+
     public static async exists(userId: number, badgeId: number) {
         return await prisma.userBadge.findUnique({
             where: {

@@ -63,6 +63,22 @@ export class UserPropertyService {
         return user;
     }
 
+    public static async getTutorialCompletionState(
+        context: Context
+    ): Promise<Constants.CompletionState> {
+        const property = await this.get(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.TUTORIAL_COMPLETED
+        );
+
+        if (!property?.value) {
+            return Constants.CompletionState.INVALID;
+        }
+
+        return Constants.getCompletionState(property.value);
+    }
+
     /* AWAY */
     public static async getAwayMode(context: Context): Promise<Constants.AwayMode> {
         const away = await this.get(context, context.userId, Constants.UserPropertyKey.AWAY_MODE);
