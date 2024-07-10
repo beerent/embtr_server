@@ -42,6 +42,7 @@ model User {
     properties             Property[]
     habitStreaks           HabitStreak[]
     userBadges             UserBadge[]
+    pointLedger            PointLedger[]
 
     @@index([username])
     @@map("user")
@@ -721,4 +722,33 @@ model HabitStreakTier {
     @@index([badgeId])
     @@index([iconId])
     @@map("habit_streak_tier")
+}
+
+model PointDefinition {
+    id          Int           @id @default(autoincrement())
+    action      String        @unique @db.VarChar(255)
+    value       Int           @db.Int
+    PointLedger PointLedger[]
+    active      Boolean       @default(true)
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @default(now()) @updatedAt
+
+    @@map("point_definition")
+}
+
+model PointLedger {
+    id                Int             @id @default(autoincrement())
+    userId            Int             @db.Int
+    user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+    pointDefinitionId Int             @db.Int
+    pointDefinition   PointDefinition @relation(fields: [pointDefinitionId], references: [id])
+    relevantId        Int?            @db.Int
+
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
+
+    @@index([userId])
+    @@index([pointDefinitionId])
+    @@map("point_ledger")
 }

@@ -235,4 +235,61 @@ export namespace Constants {
                 return BadgeCategory.INVALID;
         }
     };
+
+    export enum PointDefinition {
+        INVALID = 'INVALID',
+        HABIT_COMPLETE = 'HABIT_COMPLETE',
+        DAY_COMPLETE = 'DAY_COMPLETE',
+        WEEK_COMPLETE = 'WEEK_COMPLETE',
+        POST_CREATED = 'POST_CREATED',
+        PLANNED_DAY_CREATED = 'PLANNED_DAY_CREATED',
+        CHALLENGE_JOINED = 'CHALLENGE_JOINED',
+        CHALLENGE_COMPLETE = 'CHALLENGE_COMPLETE',
+        POST_COMMENTED_ON = 'POST_COMMENTED_ON',
+        POST_LIKED = 'POST_LIKED',
+        PLANNED_DAY_COMMENTED_ON = 'PLANNED_DAY_COMMENTED_ON',
+        PLANNED_DAY_LIKED = 'PLANNED_DAY_LIKED',
+        COMMENTED_ON_POST = 'COMMENTED_ON_POST',
+        LIKED_POST = 'LIKED_POST',
+        COMMENTED_ON_PLANNED_DAY = 'COMMENTED_ON_PLANNED_DAY',
+        LIKED_PLANNED_DAY = 'LIKED_PLANNED_DAY',
+    }
+
+    export const getPointDefinition = (category: string): PointDefinition => {
+        switch (category) {
+            case 'HABIT_COMPLETE':
+                return PointDefinition.HABIT_COMPLETE;
+            case 'DAY_COMPLETE':
+                return PointDefinition.DAY_COMPLETE;
+            case 'WEEK_COMPLETE':
+                return PointDefinition.WEEK_COMPLETE;
+            case 'POST_CREATED':
+                return PointDefinition.POST_CREATED;
+            case 'PLANNED_DAY_CREATED':
+                return PointDefinition.PLANNED_DAY_CREATED;
+            case 'CHALLENGE_JOINED':
+                return PointDefinition.CHALLENGE_JOINED;
+            case 'CHALLENGE_COMPLETE':
+                return PointDefinition.CHALLENGE_COMPLETE;
+            case 'POST_COMMENTED_ON':
+                return PointDefinition.POST_COMMENTED_ON;
+            case 'POST_LIKED':
+                return PointDefinition.POST_LIKED;
+            case 'PLANNED_DAY_COMMENTED_ON':
+                return PointDefinition.PLANNED_DAY_COMMENTED_ON;
+            case 'PLANNED_DAY_LIKED':
+                return PointDefinition.PLANNED_DAY_LIKED;
+            case 'COMMENTED_ON_POST':
+                return PointDefinition.COMMENTED_ON_POST;
+            case 'LIKED_POST':
+                return PointDefinition.LIKED_POST;
+            case 'COMMENTED_ON_PLANNED_DAY':
+                return PointDefinition.COMMENTED_ON_PLANNED_DAY;
+            case 'LIKED_PLANNED_DAY':
+                return PointDefinition.LIKED_PLANNED_DAY;
+
+            default:
+                return PointDefinition.INVALID;
+        }
+    };
 }

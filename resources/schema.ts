@@ -32,6 +32,7 @@ export interface User {
   properties?: Property[];
   habitStreaks?: HabitStreak[];
   userBadges?: UserBadge[];
+  pointLedger?: PointLedger[];
 }
 
 export interface Property {
@@ -527,6 +528,28 @@ export interface HabitStreakTier {
   maxStreak?: number;
   name?: string;
   backgroundColor?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PointDefinition {
+  id?: number;
+  action?: string;
+  value?: number;
+  PointLedger?: PointLedger[];
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PointLedger {
+  id?: number;
+  userId?: number;
+  user?: User;
+  pointDefinitionId?: number;
+  pointDefinition?: PointDefinition;
+  relevantId?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
