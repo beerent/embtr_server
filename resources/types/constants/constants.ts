@@ -292,4 +292,12 @@ export namespace Constants {
                 return PointDefinition.INVALID;
         }
     };
+
+    export enum WebSocketEventType {
+        INVALID = 'INVALID',
+        FIRE_CONFETTI = 'FIRE_CONFETTI',
+        POINTS_EARNED = 'POINTS_EARNED',
+        DAY_COMPLETE = 'DAY_COMPLETE',
+        HABIT_STREAK_UPDATED = 'HABIT_STREAK_UPDATED',
+    }
 }

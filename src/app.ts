@@ -32,13 +32,20 @@ import iconCategoryRouter from './endpoints/iconCategory/IconCategoryRouter';
 import tagRouter from './endpoints/tag/TagRouter';
 import premiumRouter from './endpoints/premium_router/PremiumRouter';
 import badgeRouter from './endpoints/badge/BadgeRouter';
+import http from 'http';
+import { WebSocketService } from './service/WebSocketService';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
 //  - definitelynot_chad - 2024-04-12
 
+//  I just shit my pants - loganmbutler - 2024-07-11
+
 const cors = require('cors');
+
 const app = express();
+const server = http.createServer(app);
+WebSocketService.init(server);
 
 const allowedOrigins = [
     'https://www.embtr.com',
@@ -109,4 +116,4 @@ app.use((req, res, next) => {
 // ###############################
 //app.use('/widget', widgetRouterV1);
 
-export default app;
+export default server;

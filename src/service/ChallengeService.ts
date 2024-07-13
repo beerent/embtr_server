@@ -298,9 +298,9 @@ export class ChallengeService {
         completionState: ChallengeRequirementCompletionState
     ) {
         if (completionState === ChallengeRequirementCompletionState.COMPLETED) {
-            ChallengeEventDispatcher.onComplete(context, challengeId);
+            ChallengeEventDispatcher.onCompleted(context, challengeId);
         } else {
-            ChallengeEventDispatcher.onIncomplete(context, challengeId);
+            ChallengeEventDispatcher.onIncompleted(context, challengeId);
         }
     }
 

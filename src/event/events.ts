@@ -4,20 +4,24 @@ import { NotificationType } from '@src/service/NotificationService';
 export namespace Event {
     export namespace PlannedDay {
         export const Updated = 'PLANNED_DAY_UPDATED';
+        export const Completed = 'PLANNED_DAY_COMPLETED';
+        export const Incompleted = 'PLANNED_DAY_INCOMPLETED';
 
         export class Event {
             context: Context;
             userId: number;
+            dayKey: string;
             id: number;
 
-            constructor(context: Context, userId: number, id: number) {
+            constructor(context: Context, userId: number, dayKey: string, id: number) {
                 this.context = context;
                 this.userId = userId;
+                this.dayKey = dayKey;
                 this.id = id;
             }
 
             public getKey = () => {
-                return `${this.context.userId}_${this.userId}_${this.id}`;
+                return `${this.context.userId}_${this.userId}_${this.dayKey}_${this.id}`;
             };
         }
     }
