@@ -10,11 +10,12 @@ export namespace Constants {
         WARNING_NOTIFICATIONS_SETTING = 'WARNING_NOTIFICATIONS_SETTING',
         AWAY_MODE = 'AWAY_MODE',
         TUTORIAL_COMPLETED = 'TUTORIAL_COMPLETED',
+        POINTS = 'POINTS',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
         switch (key) {
-            case 'TIME_ZONE':
+            case 'TIMEZONE':
                 return UserPropertyKey.TIMEZONE;
             case 'NEW_USER_CHECKLIST_DISMISSED':
                 return UserPropertyKey.NEW_USER_CHECKLIST_DISMISSED;
@@ -28,6 +29,8 @@ export namespace Constants {
                 return UserPropertyKey.TUTORIAL_COMPLETED;
             case 'INVALID':
                 return UserPropertyKey.INVALID;
+            case 'POINTS':
+                return UserPropertyKey.POINTS;
 
             default:
                 return UserPropertyKey.INVALID;
@@ -240,19 +243,7 @@ export namespace Constants {
         INVALID = 'INVALID',
         HABIT_COMPLETE = 'HABIT_COMPLETE',
         DAY_COMPLETE = 'DAY_COMPLETE',
-        WEEK_COMPLETE = 'WEEK_COMPLETE',
-        POST_CREATED = 'POST_CREATED',
-        PLANNED_DAY_CREATED = 'PLANNED_DAY_CREATED',
-        CHALLENGE_JOINED = 'CHALLENGE_JOINED',
-        CHALLENGE_COMPLETE = 'CHALLENGE_COMPLETE',
-        POST_COMMENTED_ON = 'POST_COMMENTED_ON',
-        POST_LIKED = 'POST_LIKED',
-        PLANNED_DAY_COMMENTED_ON = 'PLANNED_DAY_COMMENTED_ON',
-        PLANNED_DAY_LIKED = 'PLANNED_DAY_LIKED',
-        COMMENTED_ON_POST = 'COMMENTED_ON_POST',
-        LIKED_POST = 'LIKED_POST',
-        COMMENTED_ON_PLANNED_DAY = 'COMMENTED_ON_PLANNED_DAY',
-        LIKED_PLANNED_DAY = 'LIKED_PLANNED_DAY',
+        PLANNED_DAY_RESULT_CREATED = 'PLANNED_DAY_RESULT_CREATED',
     }
 
     export const getPointDefinition = (category: string): PointDefinition => {
@@ -261,42 +252,38 @@ export namespace Constants {
                 return PointDefinition.HABIT_COMPLETE;
             case 'DAY_COMPLETE':
                 return PointDefinition.DAY_COMPLETE;
-            case 'WEEK_COMPLETE':
-                return PointDefinition.WEEK_COMPLETE;
-            case 'POST_CREATED':
-                return PointDefinition.POST_CREATED;
-            case 'PLANNED_DAY_CREATED':
-                return PointDefinition.PLANNED_DAY_CREATED;
-            case 'CHALLENGE_JOINED':
-                return PointDefinition.CHALLENGE_JOINED;
-            case 'CHALLENGE_COMPLETE':
-                return PointDefinition.CHALLENGE_COMPLETE;
-            case 'POST_COMMENTED_ON':
-                return PointDefinition.POST_COMMENTED_ON;
-            case 'POST_LIKED':
-                return PointDefinition.POST_LIKED;
-            case 'PLANNED_DAY_COMMENTED_ON':
-                return PointDefinition.PLANNED_DAY_COMMENTED_ON;
-            case 'PLANNED_DAY_LIKED':
-                return PointDefinition.PLANNED_DAY_LIKED;
-            case 'COMMENTED_ON_POST':
-                return PointDefinition.COMMENTED_ON_POST;
-            case 'LIKED_POST':
-                return PointDefinition.LIKED_POST;
-            case 'COMMENTED_ON_PLANNED_DAY':
-                return PointDefinition.COMMENTED_ON_PLANNED_DAY;
-            case 'LIKED_PLANNED_DAY':
-                return PointDefinition.LIKED_PLANNED_DAY;
+            case 'PLANNED_DAY_RESULT_CREATED':
+                return PointDefinition.PLANNED_DAY_RESULT_CREATED;
 
             default:
                 return PointDefinition.INVALID;
         }
     };
 
+    export enum PointTransactionType {
+        INVALID = 'INVALID',
+        ADD = 'ADD',
+        SUBTRACT = 'SUBTRACT',
+    }
+
+    export const getPointTransactionType = (type: string): PointTransactionType => {
+        switch (type) {
+            case 'ADD':
+                return PointTransactionType.ADD;
+            case 'SUBTRACT':
+                return PointTransactionType.SUBTRACT;
+
+            default:
+                return PointTransactionType.INVALID;
+        }
+    };
+
     export enum WebSocketEventType {
         INVALID = 'INVALID',
         FIRE_CONFETTI = 'FIRE_CONFETTI',
-        POINTS_EARNED = 'POINTS_EARNED',
+        POINTS_UPDATED = 'POINTS_UPDATED',
+        POINTS_ADDED = 'POINTS_ADDED',
+        POINTS_SUBTRACTED = 'POINTS_SUBTRACTED',
         DAY_COMPLETE = 'DAY_COMPLETE',
         HABIT_STREAK_UPDATED = 'HABIT_STREAK_UPDATED',
     }

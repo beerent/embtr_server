@@ -35,6 +35,8 @@ import {
     Badge,
     UserBadge,
     HabitStreakTier,
+    PointDefinition,
+    PointLedgerRecord,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -75,7 +77,9 @@ type PrismaModel =
     | Like
     | Badge
     | UserBadge
-    | HabitStreakTier;
+    | HabitStreakTier
+    | PointDefinition
+    | PointLedgerRecord;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

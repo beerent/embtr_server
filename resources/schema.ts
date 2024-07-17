@@ -32,7 +32,7 @@ export interface User {
   properties?: Property[];
   habitStreaks?: HabitStreak[];
   userBadges?: UserBadge[];
-  pointLedger?: PointLedger[];
+  pointLedgerRecords?: PointLedgerRecord[];
 }
 
 export interface Property {
@@ -505,6 +505,7 @@ export interface Badge {
   updatedAt?: Date;
   habitStreakTiers?: HabitStreakTier[];
   userBadges?: UserBadge[];
+  pointTiers?: PointTier[];
 }
 
 export interface UserBadge {
@@ -533,22 +534,36 @@ export interface HabitStreakTier {
   updatedAt?: Date;
 }
 
-export interface PointDefinition {
+export interface PointTier {
   id?: number;
-  action?: string;
-  value?: number;
-  PointLedger?: PointLedger[];
+  name?: string;
+  minPoints?: number;
+  maxPoints?: number;
+  badgeId?: number;
+  badge?: Badge;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
-export interface PointLedger {
+export interface PointDefinition {
+  id?: number;
+  action?: string;
+  value?: number;
+  version?: number;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  pointLedgerRecords?: PointLedgerRecord[];
+}
+
+export interface PointLedgerRecord {
   id?: number;
   userId?: number;
   user?: User;
   pointDefinitionId?: number;
   pointDefinition?: PointDefinition;
+  transactionType?: string;
   relevantId?: number;
   active?: boolean;
   createdAt?: Date;

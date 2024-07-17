@@ -4,6 +4,8 @@ datasource db {
     relationMode = "prisma"
 }
 
+// If this comment is removed the program will blow up! - tyka____ - 2024-07-13
+
 generator client {
     provider = "prisma-client-js"
 }
@@ -42,7 +44,7 @@ model User {
     properties             Property[]
     habitStreaks           HabitStreak[]
     userBadges             UserBadge[]
-    pointLedger            PointLedger[]
+    pointLedgerRecords     PointLedgerRecord[]
 
     @@index([username])
     @@map("user")
@@ -683,6 +685,7 @@ model Badge {
     updatedAt        DateTime          @default(now())
     habitStreakTiers HabitStreakTier[]
     userBadges       UserBadge[]
+    pointTiers       PointTier[]
 
     @@unique([key])
     @@index([iconId])
@@ -724,31 +727,48 @@ model HabitStreakTier {
     @@map("habit_streak_tier")
 }
 
-model PointDefinition {
-    id          Int           @id @default(autoincrement())
-    action      String        @unique @db.VarChar(255)
-    value       Int           @db.Int
-    PointLedger PointLedger[]
-    active      Boolean       @default(true)
-    createdAt   DateTime      @default(now())
-    updatedAt   DateTime      @default(now()) @updatedAt
+model PointTier {
+    id        Int      @id @default(autoincrement())
+    name      String   @db.VarChar(255)
+    minPoints Int      @db.Int
+    maxPoints Int      @db.Int
+    badgeId   Int?
+    badge     Badge?   @relation(fields: [badgeId], references: [id])
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
+    @@index([badgeId])
+    @@map("point_tier")
+}
+
+model PointDefinition {
+    id                 Int                 @id @default(autoincrement())
+    action             String              @db.VarChar(255)
+    value              Int                 @db.Int
+    version            Int                 @default(1) @db.Int
+    active             Boolean             @default(true)
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @default(now()) @updatedAt
+    pointLedgerRecords PointLedgerRecord[]
+
+    @@unique([action, version], name: "unique_action_version")
     @@map("point_definition")
 }
 
-model PointLedger {
+model PointLedgerRecord {
     id                Int             @id @default(autoincrement())
     userId            Int             @db.Int
     user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
     pointDefinitionId Int             @db.Int
     pointDefinition   PointDefinition @relation(fields: [pointDefinitionId], references: [id])
+    transactionType   String          @db.VarChar(20)
     relevantId        Int?            @db.Int
-
-    active    Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @default(now()) @updatedAt
+    active            Boolean         @default(true)
+    createdAt         DateTime        @default(now())
+    updatedAt         DateTime        @default(now()) @updatedAt
 
     @@index([userId])
     @@index([pointDefinitionId])
-    @@map("point_ledger")
+    @@map("point_ledger_record")
 }

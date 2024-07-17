@@ -301,6 +301,27 @@ export class UserPropertyService {
         return models;
     }
 
+    /* POINTS */
+    public static async getPoints(context: Context): Promise<number> {
+        const timezone = await this.get(context, context.userId, Constants.UserPropertyKey.POINTS);
+        if (!timezone?.value) {
+            return 0;
+        }
+
+        return parseInt(timezone.value);
+    }
+
+    public static async setPoints(context: Context, points: number): Promise<number> {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.POINTS,
+            points.toString()
+        );
+
+        return points;
+    }
+
     private static async get(
         context: Context,
         userId: number,

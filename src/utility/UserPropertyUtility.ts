@@ -5,6 +5,7 @@ export class UserPropertyUtility {
     public static ALLOWED_PROPERTIES = [
         Constants.UserPropertyKey.AWAY_MODE.toString(),
         Constants.UserPropertyKey.TUTORIAL_COMPLETED.toString(),
+        Constants.UserPropertyKey.POINTS.toString(),
     ];
 
     public static getProperty(user: User, key: Constants.UserPropertyKey) {

@@ -1,17 +1,24 @@
-import { Constants } from '@resources/types/constants/constants';
-import { PointLedgerDao } from '@src/database/PointLedgerDao';
 import { Context } from '@src/general/auth/Context';
+import { PointLedgerRecordService } from './PointLedgerRecordService';
+import { UserPropertyService } from './UserPropertyService';
+import { WebSocketService } from './WebSocketService';
 
 export class PointLedgerService {
-    public static async addHabitComplete(context: Context, habitId: number) {
-        //await this.addLedgerEntry(context, Constants.PointDefinition.HABIT_COMPLETE, habitId);
+    public static async recalculatePoints(context: Context) {
+        const totalPoints = await this.totalPoints(context);
+        console.log('Total points:', totalPoints);
+        await UserPropertyService.setPoints(context, totalPoints);
     }
 
-    private static async addLedgerEntry(
-        context: Context,
-        pointDefinitionCategory: Constants.PointDefinition,
-        relevantId?: number
-    ) {
-        PointLedgerDao.create(context.userId, pointDefinitionCategory, relevantId);
+    public static async totalPoints(context: Context): Promise<number> {
+        const [addPoints, subtractPoints] = await Promise.all([
+            PointLedgerRecordService.sumAddRecords(context),
+            PointLedgerRecordService.sumSubtractRecord(context),
+        ]);
+
+        const points = addPoints - subtractPoints;
+
+        WebSocketService.emitPointsUpdated(context, points);
+        return points;
     }
 }

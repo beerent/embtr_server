@@ -8,8 +8,11 @@ import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+const AsyncLock = require('async-lock');
 
 export class PlannedHabitService {
+    private static lock = new AsyncLock();
+
     public static async getById(context: Context, id: number): Promise<PlannedTask> {
         const plannedHabit = await PlannedHabitDao.get(id);
         if (!plannedHabit) {
@@ -87,32 +90,42 @@ export class PlannedHabitService {
     }
 
     public static async update(context: Context, plannedTask: PlannedTask): Promise<PlannedTask> {
-        const existingPlannedTask = await this.getById(context, plannedTask.id!);
-        if (!existingPlannedTask) {
-            throw new ServiceException(404, Code.PLANNED_TASK_NOT_FOUND, 'planned task not found');
-        }
+        const userId = context.userId;
+        const plannedTaskId = plannedTask.id;
+        const key = `update-${userId}-${plannedTaskId}`;
 
-        if (existingPlannedTask?.plannedDay?.userId !== context.userId) {
-            throw new ServiceException(403, Code.FORBIDDEN, 'user does not have permission');
-        }
+        return this.lock.acquire(key, async () => {
+            const existingPlannedTask = await this.getById(context, plannedTask.id!);
+            if (!existingPlannedTask) {
+                throw new ServiceException(
+                    404,
+                    Code.PLANNED_TASK_NOT_FOUND,
+                    'planned task not found'
+                );
+            }
 
-        plannedTask.status = this.getUpdatedStatus(plannedTask);
-        plannedTask.timeOfDayId = plannedTask.timeOfDayId ?? 5;
+            if (existingPlannedTask?.plannedDay?.userId !== context.userId) {
+                throw new ServiceException(403, Code.FORBIDDEN, 'user does not have permission');
+            }
 
-        const updatedPlannedTask = await PlannedHabitDao.update(plannedTask);
-        if (!updatedPlannedTask) {
-            throw new ServiceException(
-                500,
-                Code.PLANNED_TASK_NOT_FOUND,
-                'failed to update planned task'
-            );
-        }
+            plannedTask.status = this.getUpdatedStatus(plannedTask);
+            plannedTask.timeOfDayId = plannedTask.timeOfDayId ?? 5;
 
-        const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
+            const updatedPlannedTask = await PlannedHabitDao.update(plannedTask);
+            if (!updatedPlannedTask) {
+                throw new ServiceException(
+                    500,
+                    Code.PLANNED_TASK_NOT_FOUND,
+                    'failed to update planned task'
+                );
+            }
 
-        this.handleUpdateDispatches(context, existingPlannedTask, updatedPlannedTaskModel);
+            const updatedPlannedTaskModel: PlannedTask = ModelConverter.convert(updatedPlannedTask);
 
-        return updatedPlannedTaskModel;
+            this.handleUpdateDispatches(context, existingPlannedTask, updatedPlannedTaskModel);
+
+            return updatedPlannedTaskModel;
+        });
     }
 
     public static async existsByDayKeyAndScheduledHabitId(
@@ -210,18 +223,17 @@ export class PlannedHabitService {
         const changedToComplete =
             existingPlannedTask.status !== updatedPlannedTask.status &&
             updatedPlannedTask.status === Constants.CompletionState.COMPLETE;
+        const changedToIncomplete =
+            existingPlannedTask.status !== updatedPlannedTask.status &&
+            updatedPlannedTask.status !== Constants.CompletionState.COMPLETE;
+
         if (changedToComplete) {
             PlannedHabitEventDispatcher.onCompleted(
                 context,
                 updatedPlannedTask.id ?? 0,
                 existingPlannedTask.scheduledHabit?.taskId ?? 0
             );
-        }
-
-        const changedToIncomplete =
-            existingPlannedTask.status !== updatedPlannedTask.status &&
-            updatedPlannedTask.status !== Constants.CompletionState.COMPLETE;
-        if (changedToIncomplete) {
+        } else if (changedToIncomplete) {
             PlannedHabitEventDispatcher.onIncompleted(
                 context,
                 updatedPlannedTask.id ?? 0,
