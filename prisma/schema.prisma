@@ -675,7 +675,7 @@ model Badge {
     id               Int               @id @default(autoincrement())
     key              String            @db.VarChar(255)
     iconId           Int
-    icon             Icon              @relation(fields: [iconId], references: [id])
+    icon             Icon              @relation(fields: [iconId], references: [id], onDelete: Cascade)
     category         String            @db.VarChar(255)
     active           Boolean           @default(true)
     createdAt        DateTime          @default(now())
