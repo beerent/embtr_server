@@ -6,6 +6,8 @@ export class PointLedgerService {
     public static async recalculatePoints(context: Context) {
         const totalPoints = await this.totalPoints(context);
         await UserPropertyService.setPoints(context, totalPoints);
+
+        // emit points updated event
     }
 
     public static async totalPoints(context: Context): Promise<number> {
