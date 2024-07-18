@@ -1,12 +1,10 @@
 import { Context } from '@src/general/auth/Context';
 import { PointLedgerRecordService } from './PointLedgerRecordService';
 import { UserPropertyService } from './UserPropertyService';
-import { WebSocketService } from './WebSocketService';
 
 export class PointLedgerService {
     public static async recalculatePoints(context: Context) {
         const totalPoints = await this.totalPoints(context);
-        console.log('Total points:', totalPoints);
         await UserPropertyService.setPoints(context, totalPoints);
     }
 
@@ -17,8 +15,6 @@ export class PointLedgerService {
         ]);
 
         const points = addPoints - subtractPoints;
-
-        WebSocketService.emitPointsUpdated(context, points);
         return points;
     }
 }

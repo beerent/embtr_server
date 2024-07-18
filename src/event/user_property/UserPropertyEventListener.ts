@@ -11,3 +11,12 @@ eventBus.on(Event.UserProperty.Missing, async (event: Event.UserProperty.Event) 
         console.error('Error updating planned day completion status', e);
     }
 });
+
+eventBus.on(Event.UserProperty.Updated, async (event: Event.UserProperty.Event) => {
+    try {
+        logger.info('UserProperty event received', Event.UserProperty.Updated, event);
+        await UserPropertyEventHandler.onUpdated(event);
+    } catch (e) {
+        console.error('Error updating planned day completion status', e);
+    }
+});

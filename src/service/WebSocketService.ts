@@ -1,5 +1,6 @@
 import { PointLedgerRecord } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
+import { LevelDetails } from '@resources/types/dto/Level';
 import { WebSocketPayload } from '@resources/types/requests/WebSocket';
 import { logger } from '@src/common/logger/Logger';
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
@@ -105,20 +106,20 @@ export class WebSocketService {
         );
     }
 
-    public static emitPointsUpdated(context: Context, points: number) {
+    public static emitLevelDetailsUpdated(context: Context, levelDetails: LevelDetails) {
         if (!this.roomExists(context)) {
             return;
         }
 
         const payload: WebSocketPayload = {
             payload: {
-                points,
+                levelDetails,
             },
         };
 
         this.emit(
             this.getRoomKey(context.userId),
-            Constants.WebSocketEventType.POINTS_UPDATED,
+            Constants.WebSocketEventType.LEVEL_DETAILS_UPDATED,
             payload
         );
     }

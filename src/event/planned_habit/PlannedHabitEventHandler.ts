@@ -51,7 +51,7 @@ export class PlannedHabitEventHandler {
         }
 
         this.activeOnCompletedEvents.add(eventKey);
-        await Promise.all([
+        await Promise.allSettled([
             DetailedHabitStreakService.fullPopulateCurrentStreak(event.context, event.habitId),
             DetailedHabitStreakService.fullPopulateLongestStreak(event.context, event.habitId),
             PointLedgerRecordService.addHabitComplete(event.context, event.habitId),

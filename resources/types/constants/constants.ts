@@ -11,6 +11,7 @@ export namespace Constants {
         AWAY_MODE = 'AWAY_MODE',
         TUTORIAL_COMPLETED = 'TUTORIAL_COMPLETED',
         POINTS = 'POINTS',
+        LEVEL = 'LEVEL',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -31,6 +32,8 @@ export namespace Constants {
                 return UserPropertyKey.INVALID;
             case 'POINTS':
                 return UserPropertyKey.POINTS;
+            case 'LEVEL':
+                return UserPropertyKey.LEVEL;
 
             default:
                 return UserPropertyKey.INVALID;
@@ -281,7 +284,7 @@ export namespace Constants {
     export enum WebSocketEventType {
         INVALID = 'INVALID',
         FIRE_CONFETTI = 'FIRE_CONFETTI',
-        POINTS_UPDATED = 'POINTS_UPDATED',
+        LEVEL_DETAILS_UPDATED = 'LEVEL_DETAILS_UPDATED',
         POINTS_ADDED = 'POINTS_ADDED',
         POINTS_SUBTRACTED = 'POINTS_SUBTRACTED',
         DAY_COMPLETE = 'DAY_COMPLETE',

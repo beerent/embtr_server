@@ -8,12 +8,12 @@ export class PointLedgerRecordEventHandler {
         const eventKey = event.getKey();
 
         if (this.activeOnUpdatedEvents.has(eventKey)) {
-            console.log('Already processing', Event.PointLedgerRecord.UPDATED, event);
+            console.log('Already processing', Event.PointLedgerRecord.Updated, event);
             return;
         }
 
         this.activeOnUpdatedEvents.add(eventKey);
-        await Promise.all([PointLedgerService.recalculatePoints(event.context)]);
+        await PointLedgerService.recalculatePoints(event.context);
         this.activeOnUpdatedEvents.delete(eventKey);
     }
 }

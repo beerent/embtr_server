@@ -1,3 +1,4 @@
+import { LevelDetails } from '@resources/types/dto/Level';
 import { Context } from '@src/general/auth/Context';
 import { NotificationType } from '@src/service/NotificationService';
 
@@ -70,14 +71,17 @@ export namespace Event {
 
     export namespace UserProperty {
         export const Missing = 'USER_PROPERTY_MISSING';
+        export const Updated = 'USER_PROPERTY_UPDATED';
 
         export class Event {
             context: Context;
             key: string;
+            value?: string;
 
-            constructor(context: Context, key: string) {
+            constructor(context: Context, key: string, value?: string) {
                 this.context = context;
                 this.key = key;
+                this.value = value;
             }
 
             public getKey = () => {
@@ -227,13 +231,31 @@ export namespace Event {
     }
 
     export namespace PointLedgerRecord {
-        export const UPDATED = 'UPDATED';
+        export const Updated = 'UPDATED';
 
         export class Event {
             context: Context;
 
             constructor(context: Context) {
                 this.context = context;
+            }
+
+            public getKey = () => {
+                return `${this.context.userId}`;
+            };
+        }
+    }
+
+    export namespace Level {
+        export const Updated = 'UPDATED';
+
+        export class Event {
+            context: Context;
+            levelDetails: LevelDetails;
+
+            constructor(context: Context, levelDetails: LevelDetails) {
+                this.context = context;
+                this.levelDetails = levelDetails;
             }
 
             public getKey = () => {
