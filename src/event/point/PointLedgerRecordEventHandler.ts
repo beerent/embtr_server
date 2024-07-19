@@ -1,3 +1,4 @@
+import { LevelService } from '@src/service/feature/LevelService';
 import { PointLedgerService } from '@src/service/PointLedgerService';
 import { Event } from '../events';
 
@@ -13,7 +14,11 @@ export class PointLedgerRecordEventHandler {
         }
 
         this.activeOnUpdatedEvents.add(eventKey);
+
         await PointLedgerService.recalculatePoints(event.context);
+        await LevelService.recalculateLevel(event.context);
+        await LevelService.emitLevelDetailsUpdated(event.context);
+
         this.activeOnUpdatedEvents.delete(eventKey);
     }
 }

@@ -9,4 +9,3 @@ import '@src/event/challenge_participant/ChallengeParticipantEventListener';
 import '@src/event/user/UserEventListener';
 import '@src/event/point/PointLedgerRecordEventListener';
 import '@src/event/planned_day_result/PlannedDayResultEventListener';
-import '@src/event/level/LevelEventListener';

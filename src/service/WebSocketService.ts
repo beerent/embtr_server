@@ -1,4 +1,3 @@
-import { PointLedgerRecord } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { LevelDetails } from '@resources/types/dto/Level';
 import { WebSocketPayload } from '@resources/types/requests/WebSocket';
@@ -66,42 +65,6 @@ export class WebSocketService {
         this.emit(
             this.getRoomKey(context.userId),
             Constants.WebSocketEventType.HABIT_STREAK_UPDATED,
-            payload
-        );
-    }
-
-    public static emitPointsAdded(context: Context, points: number) {
-        if (!this.roomExists(context)) {
-            return;
-        }
-
-        const payload: WebSocketPayload = {
-            payload: {
-                points,
-            },
-        };
-
-        this.emit(
-            this.getRoomKey(context.userId),
-            Constants.WebSocketEventType.POINTS_ADDED,
-            payload
-        );
-    }
-
-    public static emitPointsSubtracted(context: Context, points: number) {
-        if (!this.roomExists(context)) {
-            return;
-        }
-
-        const payload: WebSocketPayload = {
-            payload: {
-                points,
-            },
-        };
-
-        this.emit(
-            this.getRoomKey(context.userId),
-            Constants.WebSocketEventType.POINTS_SUBTRACTED,
             payload
         );
     }

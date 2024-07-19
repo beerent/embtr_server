@@ -1,4 +1,3 @@
-import { LevelDetails } from '@resources/types/dto/Level';
 import { Context } from '@src/general/auth/Context';
 import { NotificationType } from '@src/service/NotificationService';
 
@@ -238,24 +237,6 @@ export namespace Event {
 
             constructor(context: Context) {
                 this.context = context;
-            }
-
-            public getKey = () => {
-                return `${this.context.userId}`;
-            };
-        }
-    }
-
-    export namespace Level {
-        export const Updated = 'UPDATED';
-
-        export class Event {
-            context: Context;
-            levelDetails: LevelDetails;
-
-            constructor(context: Context, levelDetails: LevelDetails) {
-                this.context = context;
-                this.levelDetails = levelDetails;
             }
 
             public getKey = () => {

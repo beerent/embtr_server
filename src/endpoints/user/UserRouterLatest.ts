@@ -440,6 +440,25 @@ userRouterLatest.get(
     })
 );
 
+userRouterLatest.get(
+    '/:userId/level',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    validateGetUserData,
+    runEndpoint(async (req, res) => {
+        const userId = Number(req.params.userId);
+        const challengeParticipation = await ChallengeService.getCompletedChallengesForUser(userId);
+
+        const response: GetChallengeParticipationResponse = {
+            ...SUCCESS,
+            challengeParticipation,
+        };
+
+        res.status(response.httpCode).json(response);
+    })
+);
+
 userRouterLatest.post(
     '/createPushNotificationToken/',
     routeLogger(v),

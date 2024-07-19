@@ -539,6 +539,7 @@ export interface PointTier {
   name?: string;
   minPoints?: number;
   maxPoints?: number;
+  level?: number;
   badgeId?: number;
   badge?: Badge;
   active?: boolean;

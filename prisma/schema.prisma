@@ -732,6 +732,7 @@ model PointTier {
     name      String   @db.VarChar(255)
     minPoints Int      @db.Int
     maxPoints Int      @db.Int
+    level     Int      @unique @db.Int
     badgeId   Int?
     badge     Badge?   @relation(fields: [badgeId], references: [id])
     active    Boolean  @default(true)
