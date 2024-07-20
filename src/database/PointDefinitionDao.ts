@@ -1,10 +1,10 @@
 import { prisma } from '@database/prisma';
 
 export class PointDefinitionDao {
-    public static async getLatestVersion(action: string) {
+    public static async getLatestVersion(type: string) {
         return prisma.pointDefinition.findFirst({
             where: {
-                action,
+                type,
             },
             orderBy: {
                 version: 'desc',

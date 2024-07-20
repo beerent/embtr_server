@@ -4,17 +4,7 @@ import { UserPropertyService } from './UserPropertyService';
 
 export class PointLedgerService {
     public static async recalculatePoints(context: Context) {
-        const totalPoints = await this.totalPoints(context);
-        await UserPropertyService.setPoints(context, totalPoints);
-    }
-
-    public static async totalPoints(context: Context): Promise<number> {
-        const [addPoints, subtractPoints] = await Promise.all([
-            PointLedgerRecordService.sumAddRecords(context),
-            PointLedgerRecordService.sumSubtractRecord(context),
-        ]);
-
-        const points = addPoints - subtractPoints;
-        return points;
+        const totalPoints = await PointLedgerRecordService.sumLedgerRecords(context);
+        return UserPropertyService.setPoints(context, totalPoints);
     }
 }

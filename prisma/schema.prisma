@@ -744,32 +744,27 @@ model PointTier {
 }
 
 model PointDefinition {
-    id                 Int                 @id @default(autoincrement())
-    action             String              @db.VarChar(255)
-    value              Int                 @db.Int
-    version            Int                 @default(1) @db.Int
-    active             Boolean             @default(true)
-    createdAt          DateTime            @default(now())
-    updatedAt          DateTime            @default(now()) @updatedAt
-    pointLedgerRecords PointLedgerRecord[]
+    id        Int      @id @default(autoincrement())
+    type      String   @db.VarChar(255)
+    points    Int      @db.Int
+    version   Int      @default(1) @db.Int
+    active    Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now()) @updatedAt
 
-    @@unique([action, version], name: "unique_action_version")
+    @@unique([type, version], name: "unique_type_version")
     @@map("point_definition")
 }
 
 model PointLedgerRecord {
-    id                Int             @id @default(autoincrement())
-    userId            Int             @db.Int
-    user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-    pointDefinitionId Int             @db.Int
-    pointDefinition   PointDefinition @relation(fields: [pointDefinitionId], references: [id])
-    transactionType   String          @db.VarChar(20)
-    relevantId        Int?            @db.Int
-    active            Boolean         @default(true)
-    createdAt         DateTime        @default(now())
-    updatedAt         DateTime        @default(now()) @updatedAt
+    id                  Int    @id @default(autoincrement())
+    userId              Int    @db.Int
+    user                User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    relevantId          Int    @db.Int
+    pointDefinitionType String @db.VarChar(255)
+    points              Int    @db.Int
 
+    @@unique([userId, relevantId, pointDefinitionType], name: "unique_user_relevant_type")
     @@index([userId])
-    @@index([pointDefinitionId])
     @@map("point_ledger_record")
 }

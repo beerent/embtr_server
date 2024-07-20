@@ -24,18 +24,14 @@ export class LevelService {
         const level = UserPropertyUtility.getLevel(user);
         const points = UserPropertyUtility.getPoints(user);
 
-        const icon = await this.getLevelIcon(level);
-        if (!icon) {
+        const pointTier = await PointTierService.getByLevel(level);
+        if (pointTier?.minPoints === undefined || pointTier?.maxPoints === undefined) {
             return undefined;
         }
 
-        const pointsToNextLevel = await this.getPointsToNextLevel(level, points);
-
         const levelDetails: LevelDetails = {
-            level,
+            level: pointTier,
             points,
-            pointsToNextLevel,
-            icon,
         };
 
         return levelDetails;
@@ -49,25 +45,5 @@ export class LevelService {
         }
 
         WebSocketService.emitLevelDetailsUpdated(context, levelDetails);
-    }
-
-    private static async getPointsToNextLevel(level: number, points: number) {
-        const nextPointTier = await PointTierService.getByLevel(level + 1);
-        if (!nextPointTier) {
-            console.error('Failed to get next point tier');
-            return 0;
-        }
-
-        const minPoints = nextPointTier.minPoints ?? 0;
-        return minPoints - points;
-    }
-
-    private static async getLevelIcon(level: number) {
-        const pointTier = await PointTierService.getByLevel(level);
-        const icon: Icon = pointTier?.badge?.icon ?? {
-            localImage: 'GENERAL.POINTS',
-        };
-
-        return icon;
     }
 }

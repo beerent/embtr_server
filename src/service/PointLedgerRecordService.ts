@@ -11,47 +11,42 @@ import { PointLedgerRecordDispatcher } from '@src/event/point/PointLedgerRecordE
 
 export class PointLedgerRecordService {
     public static async addHabitComplete(context: Context, habitId: number) {
-        const ledgerRecord = await this.addLedgerRecord(
+        await this.upsertPointsAddedLedgerRecord(
             context,
-            Constants.PointDefinition.HABIT_COMPLETE,
-            Constants.PointTransactionType.ADD,
-            habitId
+            habitId,
+            Constants.PointDefinitionType.HABIT_COMPLETE
         );
     }
 
     public static async subtractHabitComplete(context: Context, habitId: number) {
-        const ledgerRecord = await this.addLedgerRecord(
+        await this.upsertPointsRemovedLedgerRecord(
             context,
-            Constants.PointDefinition.HABIT_COMPLETE,
-            Constants.PointTransactionType.SUBTRACT,
-            habitId
+            habitId,
+            Constants.PointDefinitionType.HABIT_COMPLETE
         );
     }
 
     public static async addDayComplete(context: Context, dayId: number) {
-        const ledgerRecord = await this.addLedgerRecord(
+        await this.upsertPointsAddedLedgerRecord(
             context,
-            Constants.PointDefinition.DAY_COMPLETE,
-            Constants.PointTransactionType.ADD,
-            dayId
+            dayId,
+            Constants.PointDefinitionType.DAY_COMPLETE
         );
     }
 
     public static async subtractDayComplete(context: Context, dayId: number) {
-        const ledgerRecord = await this.addLedgerRecord(
+        await this.upsertPointsRemovedLedgerRecord(
             context,
-            Constants.PointDefinition.DAY_COMPLETE,
-            Constants.PointTransactionType.SUBTRACT,
-            dayId
+            dayId,
+            Constants.PointDefinitionType.DAY_COMPLETE
         );
     }
 
     public static async addPlannedDayResultCreated(context: Context, plannedDayResultId: number) {
-        const ledgerRecord = await this.addLedgerRecord(
+        await this.upsertPointsAddedLedgerRecord(
             context,
-            Constants.PointDefinition.PLANNED_DAY_RESULT_CREATED,
-            Constants.PointTransactionType.ADD,
-            plannedDayResultId
+            plannedDayResultId,
+            Constants.PointDefinitionType.PLANNED_DAY_RESULT_CREATED
         );
     }
 
@@ -59,38 +54,22 @@ export class PointLedgerRecordService {
         context: Context,
         plannedDayResultId: number
     ) {
-        const ledgerRecord = await this.addLedgerRecord(
+        await this.upsertPointsRemovedLedgerRecord(
             context,
-            Constants.PointDefinition.PLANNED_DAY_RESULT_CREATED,
-            Constants.PointTransactionType.SUBTRACT,
-            plannedDayResultId
+            plannedDayResultId,
+            Constants.PointDefinitionType.PLANNED_DAY_RESULT_CREATED
         );
     }
 
-    public static async sumAddRecords(context: Context): Promise<number> {
-        return PointLedgerRecordDao.sumByTransactionType(
-            context.userId,
-            Constants.PointTransactionType.ADD
-        );
-    }
-
-    public static async sumSubtractRecord(context: Context): Promise<number> {
-        return PointLedgerRecordDao.sumByTransactionType(
-            context.userId,
-            Constants.PointTransactionType.SUBTRACT
-        );
-    }
-
-    private static async addLedgerRecord(
+    private static async upsertPointsAddedLedgerRecord(
         context: Context,
-        pointDefinitionCategory: Constants.PointDefinition,
-        transactionType: Constants.PointTransactionType,
-        relevantId?: number
+        relevantId: number,
+        pointDefinitionType: Constants.PointDefinitionType
     ) {
         const latestPointDefinitionVersion =
-            await PointDefinitionService.getLatestVersion(pointDefinitionCategory);
+            await PointDefinitionService.getLatestVersion(pointDefinitionType);
 
-        if (!latestPointDefinitionVersion?.action || !latestPointDefinitionVersion?.version) {
+        if (!latestPointDefinitionVersion?.points || !latestPointDefinitionVersion?.version) {
             throw new ServiceException(
                 HttpCode.GENERAL_FAILURE,
                 Code.GENERIC_ERROR,
@@ -98,18 +77,43 @@ export class PointLedgerRecordService {
             );
         }
 
-        const pointLedgerRecord = await PointLedgerRecordDao.create(
+        return this.upsertPointsLedgerRecord(
+            context,
+            relevantId,
+            pointDefinitionType,
+            latestPointDefinitionVersion.points
+        );
+    }
+
+    private static async upsertPointsRemovedLedgerRecord(
+        context: Context,
+        relevantId: number,
+        pointDefinitionType: Constants.PointDefinitionType
+    ) {
+        return this.upsertPointsLedgerRecord(context, relevantId, pointDefinitionType, 0);
+    }
+
+    private static async upsertPointsLedgerRecord(
+        context: Context,
+        relevantId: number,
+        pointDefinitionType: Constants.PointDefinitionType,
+        points: number
+    ) {
+        const pointLedgerRecord = await PointLedgerRecordDao.upsert(
             context.userId,
-            latestPointDefinitionVersion?.action,
-            latestPointDefinitionVersion?.version,
-            transactionType,
-            relevantId
+            relevantId,
+            pointDefinitionType,
+            points
         );
 
         const pointLedgerRecordModel: PointLedgerRecord = ModelConverter.convert(pointLedgerRecord);
-
         PointLedgerRecordDispatcher.onUpdated(context);
 
         return pointLedgerRecordModel;
+    }
+
+    public static async sumLedgerRecords(context: Context): Promise<number> {
+        const points = await PointLedgerRecordDao.sumPointsByUser(context.userId);
+        return points._sum.points ?? 0;
     }
 }

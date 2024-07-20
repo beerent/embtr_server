@@ -18,6 +18,7 @@ import { PlannedDayEventDispatcher } from '@src/event/planned_day/PlannedDayEven
 import { PlannedHabitService } from './PlannedHabitService';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+const AsyncLock = require('async-lock');
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -25,6 +26,8 @@ interface ScheduledHabitTimeOfDay {
 }
 
 export class PlannedDayService {
+    private static lock = new AsyncLock();
+
     public static async getOrCreate(
         context: Context,
         userId: number,
@@ -333,28 +336,34 @@ export class PlannedDayService {
     }
 
     public static async update(context: Context, plannedDay: PlannedDay) {
-        if (!plannedDay.dayKey || !plannedDay.id || !plannedDay.userId) {
-            throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day is malformed');
-        }
+        const userId = context.userId;
+        const plannedTaskId = plannedDay.id;
+        const key = `update-${userId}-${plannedTaskId}`;
 
-        const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
-        if (!updatedPlannedDay) {
-            throw new ServiceException(
-                500,
-                Code.UPDATE_PLANNED_DAY_FAILED,
-                'failed to update planned day'
+        return this.lock.acquire(key, async () => {
+            if (!plannedDay.dayKey || !plannedDay.id || !plannedDay.userId) {
+                throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day is malformed');
+            }
+
+            const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
+            if (!updatedPlannedDay) {
+                throw new ServiceException(
+                    500,
+                    Code.UPDATE_PLANNED_DAY_FAILED,
+                    'failed to update planned day'
+                );
+            }
+
+            PlannedDayEventDispatcher.onUpdated(
+                context,
+                plannedDay.userId,
+                plannedDay.dayKey,
+                plannedDay.id
             );
-        }
 
-        PlannedDayEventDispatcher.onUpdated(
-            context,
-            plannedDay.userId,
-            plannedDay.dayKey,
-            plannedDay.id
-        );
-
-        const plannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
-        return plannedDayModel;
+            const plannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
+            return plannedDayModel;
+        });
     }
 
     public static async getPlannedDayIdsForUser(

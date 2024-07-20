@@ -18,7 +18,6 @@ export class PlannedDayEventHandler {
         }
 
         this.activeOnUpdatedEvents.add(eventKey);
-
         await Promise.all([
             DetailedHabitStreakService.fullPopulateCurrentStreak(event.context),
             DetailedHabitStreakService.fullPopulateLongestStreak(event.context),
@@ -26,7 +25,6 @@ export class PlannedDayEventHandler {
 
         await UserBadgeService.refreshHabitStreakTierBadge(event.context);
         WebSocketService.emitHabitStreakUpdated(event.context);
-
         this.activeOnUpdatedEvents.delete(eventKey);
     }
 

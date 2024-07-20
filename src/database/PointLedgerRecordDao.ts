@@ -1,56 +1,40 @@
 import { prisma } from '@database/prisma';
 
 export class PointLedgerRecordDao {
-    public static async create(
+    public static async upsert(
         userId: number,
-        action: string,
-        version: number,
-        transactionType: string,
-        relevantId?: number
+        relevantId: number,
+        pointDefinitionType: string,
+        points: number
     ) {
-        return prisma.pointLedgerRecord.create({
-            data: {
-                user: {
-                    connect: {
-                        id: userId,
-                    },
+        return await prisma.pointLedgerRecord.upsert({
+            where: {
+                unique_user_relevant_type: {
+                    userId,
+                    pointDefinitionType,
+                    relevantId,
                 },
-                pointDefinition: {
-                    connect: {
-                        unique_action_version: {
-                            action,
-                            version,
-                        },
-                    },
-                },
-                relevantId,
-                transactionType,
             },
-            include: {
-                pointDefinition: {
-                    select: {
-                        value: true,
-                    },
-                },
+            update: {
+                points,
+            },
+            create: {
+                userId,
+                relevantId,
+                pointDefinitionType,
+                points,
             },
         });
     }
 
-    public static async sumByTransactionType(userId: number, transactionType: string) {
-        const records = await prisma.pointLedgerRecord.findMany({
+    public static async sumPointsByUser(userId: number) {
+        return await prisma.pointLedgerRecord.aggregate({
             where: {
                 userId,
-                transactionType,
             },
-            include: {
-                pointDefinition: {
-                    select: {
-                        value: true,
-                    },
-                },
+            _sum: {
+                points: true,
             },
         });
-
-        return records.reduce((acc, record) => acc + record.pointDefinition.value, 0);
     }
 }

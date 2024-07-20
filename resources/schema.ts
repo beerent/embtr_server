@@ -549,26 +549,21 @@ export interface PointTier {
 
 export interface PointDefinition {
   id?: number;
-  action?: string;
-  value?: number;
+  type?: string;
+  points?: number;
   version?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
-  pointLedgerRecords?: PointLedgerRecord[];
 }
 
 export interface PointLedgerRecord {
   id?: number;
   userId?: number;
   user?: User;
-  pointDefinitionId?: number;
-  pointDefinition?: PointDefinition;
-  transactionType?: string;
   relevantId?: number;
-  active?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  pointDefinitionType?: string;
+  points?: number;
 }
 
 export enum NotificationTargetPage {
