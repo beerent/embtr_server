@@ -13,7 +13,11 @@ export type HabitJourneyQueryResults = Prisma.PromiseReturnType<
 
 const includes = {
     plannedDay: true,
-    scheduledHabit: true,
+    scheduledHabit: {
+        include: {
+            timesOfDay: true,
+        },
+    },
     timeOfDay: true,
     originalTimeOfDay: true,
     unit: true,

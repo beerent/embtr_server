@@ -1,6 +1,6 @@
-import { PointTier } from '../../schema';
+import { Level } from '../../schema';
 
 export interface LevelDetails {
-    level: PointTier;
+    level: Level;
     points: number;
 }

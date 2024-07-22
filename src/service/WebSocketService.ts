@@ -93,6 +93,7 @@ export class WebSocketService {
         payload: WebSocketPayload
     ) {
         this.logEmitEvent(eventType);
+        console.log('emitting', payload);
         this.io.to(roomKey).emit(eventType, payload);
     }
 

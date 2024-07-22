@@ -11,6 +11,7 @@ import { HabitStreakTierService } from './HabitStreakTierService';
 import { HabitStreakService } from './HabitStreakService';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Badge } from '@resources/schema';
+import { LevelService } from './LevelService';
 
 // "15 months is almost a year" - TheCaptainCoder - 2024-06-21
 
@@ -21,6 +22,7 @@ export class UserBadgeService {
             this.refreshAwayBadge(context),
             this.refreshNewUserBadge(context),
             this.refreshHabitStreakTierBadge(context),
+            this.refreshLevelBadge(context),
         ];
 
         await Promise.all(promises);
@@ -183,7 +185,7 @@ export class UserBadgeService {
         await this.addBadge(context, badgeToAdd.key);
     }
 
-    public static async getHabitStreakBadgeToAdd(context: Context) {
+    private static async getHabitStreakBadgeToAdd(context: Context) {
         const habitStreakTiers = await HabitStreakTierService.getAllWithBadge(context);
         const currentHabitStreak = await HabitStreakService.getCurrentHabitStreak(
             context,
@@ -203,6 +205,42 @@ export class UserBadgeService {
         }
 
         return foundHabitStreakTier?.badge;
+    }
+
+    /*
+     * Level Badge
+     */
+
+    public static async refreshLevelBadge(context: Context) {
+        console.log('Refreshing level badge');
+        await this.removeLevelBadge(context);
+        await this.optionallyAddLevelBadge(context);
+    }
+
+    private static async removeLevelBadge(context: Context) {
+        console.log('Removing level badge');
+        const category = Constants.BadgeCategory.LEVEL;
+        await this.removeBadgesByCategory(context, category);
+    }
+
+    private static async optionallyAddLevelBadge(context: Context) {
+        console.log('Optionally adding level badge');
+        const badgeToAdd = await this.getLevelBadgeToAdd(context);
+        if (!badgeToAdd?.key) {
+            return;
+        }
+
+        await this.addBadge(context, badgeToAdd.key);
+    }
+
+    public static async getLevelBadgeToAdd(context: Context) {
+        const currentLevel = await UserPropertyService.getLevel(context);
+        const level = await LevelService.getByLevel(currentLevel);
+        if (!level?.badge?.key) {
+            return undefined;
+        }
+
+        return level.badge;
     }
 
     private static async addBadge(context: Context, key: string) {

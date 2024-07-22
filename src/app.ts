@@ -34,6 +34,7 @@ import premiumRouter from './endpoints/premium_router/PremiumRouter';
 import badgeRouter from './endpoints/badge/BadgeRouter';
 import http from 'http';
 import { WebSocketService } from './service/WebSocketService';
+import levelRouter from './endpoints/level/LevelRouter';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
@@ -93,6 +94,7 @@ app.use('/', marketingRouter);
 app.use('/', timelineRouter);
 app.use('/', reportRouter);
 app.use('/', habitStreakRouter);
+app.use('/', levelRouter);
 app.use('/', newUserRouter);
 app.use('/', healthRouter);
 app.use('/', jobRouter);

@@ -224,6 +224,7 @@ export namespace Constants {
         AWAY = 'AWAY',
         NEW_USER = 'NEW_USER',
         HABIT_STREAK_TIER = 'HABIT_STREAK_TIER',
+        LEVEL = 'LEVEL',
     }
 
     export const getBadgeCategory = (category: string): BadgeCategory => {
@@ -236,6 +237,8 @@ export namespace Constants {
                 return BadgeCategory.NEW_USER;
             case 'HABIT_STREAK_TIER':
                 return BadgeCategory.HABIT_STREAK_TIER;
+            case 'LEVEL':
+                return BadgeCategory.LEVEL;
 
             default:
                 return BadgeCategory.INVALID;

@@ -8,10 +8,10 @@ export interface User {
   bio?: string;
   photoUrl?: string;
   bannerUrl?: string;
-  accountSetup?: boolean;
-  termsVersion?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  accountSetup?: boolean;
+  termsVersion?: number;
   user?: UserPost[];
   plannedDays?: PlannedDay[];
   receivedNotifications?: Notification[];
@@ -38,37 +38,37 @@ export interface User {
 export interface Property {
   id?: number;
   userId?: number;
-  user?: User;
   key?: string;
   value?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
 }
 
 export interface PushNotificationToken {
   id?: number;
   userId?: number;
-  user?: User;
   token?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
 }
 
 export interface Task extends TaskCustom {
   id?: number;
   title?: string;
   description?: string;
-  iconId?: number;
-  icon?: Icon;
-  userId?: number;
-  user?: User;
-  habitCategoryId?: number;
-  habitCategory?: HabitCategory;
-  type?: string;
-  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  habitCategoryId?: number;
+  userId?: number;
+  active?: boolean;
+  type?: string;
+  iconId?: number;
+  icon?: Icon;
+  user?: User;
+  habitCategory?: HabitCategory;
   challengeRequirements?: ChallengeRequirement[];
   scheduledHabits?: ScheduledHabit[];
   habitStreaks?: HabitStreak[];
@@ -76,13 +76,13 @@ export interface Task extends TaskCustom {
 
 export interface PlannedDay {
   id?: number;
-  user?: User;
   userId?: number;
   dayKey?: string;
   date?: Date;
-  status?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  status?: string;
+  user?: User;
   plannedTasks?: PlannedTask[];
   plannedDayResults?: PlannedDayResult[];
   challengeParticipant?: ChallengeParticipant[];
@@ -92,25 +92,25 @@ export interface PlannedDay {
 export interface PlannedTask extends PlannedTaskCustom {
   id?: number;
   plannedDayId?: number;
-  plannedDay?: PlannedDay;
-  scheduledHabitId?: number;
-  scheduledHabit?: ScheduledHabit;
-  timeOfDayId?: number;
-  timeOfDay?: TimeOfDay;
-  originalTimeOfDayId?: number;
-  originalTimeOfDay?: TimeOfDay;
-  title?: string;
-  description?: string;
-  iconId?: number;
-  icon?: Icon;
-  unitId?: number;
-  unit?: Unit;
-  quantity?: number;
-  completedQuantity?: number;
   status?: string;
-  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  quantity?: number;
+  completedQuantity?: number;
+  active?: boolean;
+  unitId?: number;
+  description?: string;
+  scheduledHabitId?: number;
+  title?: string;
+  timeOfDayId?: number;
+  originalTimeOfDayId?: number;
+  iconId?: number;
+  plannedDay?: PlannedDay;
+  scheduledHabit?: ScheduledHabit;
+  timeOfDay?: TimeOfDay;
+  originalTimeOfDay?: TimeOfDay;
+  icon?: Icon;
+  unit?: Unit;
 }
 
 export interface UserPost {
@@ -118,10 +118,10 @@ export interface UserPost {
   title?: string;
   body?: string;
   userId?: number;
-  user?: User;
   createdAt?: Date;
   updatedAt?: Date;
   active?: boolean;
+  user?: User;
   images?: Image[];
   likes?: Like[];
   comments?: Comment[];
@@ -130,12 +130,12 @@ export interface UserPost {
 export interface PlannedDayResult {
   id?: number;
   plannedDayId?: number;
-  plannedDay?: PlannedDay;
   active?: boolean;
-  title?: string;
   description?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  title?: string;
+  plannedDay?: PlannedDay;
   images?: Image[];
   likes?: Like[];
   comments?: Comment[];
@@ -143,15 +143,15 @@ export interface PlannedDayResult {
 
 export interface Milestone {
   id?: number;
-  key?: string;
   description?: string;
   localImage?: string;
-  metric?: number;
-  ordinal?: number;
   remoteImageUrl?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  key?: string;
+  ordinal?: number;
+  metric?: number;
   challengeRequirements?: ChallengeRequirement[];
   challengeMilestones?: ChallengeMilestone[];
 }
@@ -159,36 +159,36 @@ export interface Milestone {
 export interface ChallengeMilestone {
   id?: number;
   challengeId?: number;
-  challenge?: Challenge;
   milestoneId?: number;
-  milestone?: Milestone;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  challenge?: Challenge;
+  milestone?: Milestone;
   plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
 }
 
 export interface PlannedDayChallengeMilestone {
   id?: number;
   challengeMilestoneId?: number;
-  challengeMilestone?: ChallengeMilestone;
-  challengeParticipantId?: number;
-  challengeParticipant?: ChallengeParticipant;
   plannedDayId?: number;
-  plannedDay?: PlannedDay;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  challengeParticipantId?: number;
+  challengeMilestone?: ChallengeMilestone;
+  challengeParticipant?: ChallengeParticipant;
+  plannedDay?: PlannedDay;
 }
 
 export interface Comment {
   id?: number;
   userId?: number;
-  user?: User;
   comment?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
   challenges?: Challenge[];
@@ -197,10 +197,10 @@ export interface Comment {
 export interface Like {
   id?: number;
   userId?: number;
-  user?: User;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
   quoteOfTheDays?: QuoteOfTheDay[];
@@ -221,26 +221,26 @@ export interface Image {
 export interface Notification {
   id?: number;
   fromUserId?: number;
-  fromUser?: User;
   toUserId?: number;
-  toUser?: User;
   read?: boolean;
   summary?: string;
   targetPage?: NotificationTargetPage;
   targetId?: number;
   createdAt?: Date;
   updatedAt?: Date;
+  fromUser?: User;
+  toUser?: User;
 }
 
 export interface Widget {
   id?: number;
   type?: WidgetType;
   order?: number;
-  user?: User;
   userId?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
 }
 
 export interface QuoteOfTheDay {
@@ -248,11 +248,11 @@ export interface QuoteOfTheDay {
   quote?: string;
   author?: string;
   userId?: number;
-  user?: User;
   active?: boolean;
-  likes?: Like[];
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
+  likes?: Like[];
 }
 
 export interface Metadata {
@@ -274,90 +274,90 @@ export interface Challenge extends ChallengeCustom {
   id?: number;
   name?: string;
   description?: string;
-  creator?: User;
   creatorId?: number;
-  challengeRequirements?: ChallengeRequirement[];
-  awardId?: number;
-  award?: Award;
   start?: Date;
   end?: Date;
-  timelineTimestamp?: Date;
   active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  timelineTimestamp?: Date;
+  awardId?: number;
+  creator?: User;
+  challengeRequirements?: ChallengeRequirement[];
+  award?: Award;
   images?: Image[];
   likes?: Like[];
   comments?: Comment[];
-  createdAt?: Date;
-  updatedAt?: Date;
   challengeParticipants?: ChallengeParticipant[];
   challengeMilestones?: ChallengeMilestone[];
 }
 
 export interface ChallengeRequirement {
   id?: number;
-  challenge?: Challenge;
-  challengeId?: number;
-  task?: Task;
-  taskId?: number;
-  unit?: Unit;
-  unitId?: number;
-  calculationType?: ChallengeCalculationType;
-  calculationIntervalDays?: number;
-  requiredIntervalQuantity?: number;
-  requiredTaskQuantity?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  challengeId?: number;
+  taskId?: number;
+  unitId?: number;
+  calculationIntervalDays?: number;
+  calculationType?: ChallengeCalculationType;
+  requiredIntervalQuantity?: number;
+  requiredTaskQuantity?: number;
+  challenge?: Challenge;
+  task?: Task;
+  unit?: Unit;
   milestones?: Milestone[];
 }
 
 export interface ChallengeParticipant {
   id?: number;
-  user?: User;
   userId?: number;
-  challenge?: Challenge;
   challengeId?: number;
-  amountComplete?: number;
-  challengeRequirementCompletionState?: ChallengeRequirementCompletionState;
-  completedOnPlannedDayId?: number;
-  completedOnPlannedDay?: PlannedDay;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  amountComplete?: number;
+  challengeRequirementCompletionState?: ChallengeRequirementCompletionState;
+  completedOnPlannedDayId?: number;
+  user?: User;
+  challenge?: Challenge;
+  completedOnPlannedDay?: PlannedDay;
   plannedDayChallengeMilestones?: PlannedDayChallengeMilestone[];
 }
 
 export interface Award {
   id?: number;
   name?: string;
-  description?: string;
-  iconId?: number;
-  icon?: Icon;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  description?: string;
+  iconId?: number;
+  icon?: Icon;
   userAwards?: UserAward[];
   challenges?: Challenge[];
 }
 
 export interface UserAward {
   id?: number;
-  user?: User;
   userId?: number;
   awardId?: number;
-  award?: Award;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
+  award?: Award;
 }
 
 export interface Unit {
   id?: number;
   unit?: string;
-  abreveation?: string;
   stepSize?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  abreveation?: string;
   PlannedTask?: PlannedTask[];
   challengeRequirement?: ChallengeRequirement[];
   ScheduledHabit?: ScheduledHabit[];
@@ -367,13 +367,13 @@ export interface HabitCategory {
   id?: number;
   name?: string;
   description?: string;
-  remoteImageUrl?: string;
-  localImage?: string;
   active?: boolean;
-  order?: number;
-  generic?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  order?: number;
+  localImage?: string;
+  remoteImageUrl?: string;
+  generic?: boolean;
   tasks?: Task[];
 }
 
@@ -397,39 +397,39 @@ export interface TimeOfDay {
 
 export interface ScheduledHabit extends ScheduledHabitCustom {
   id?: number;
-  userId?: number;
-  user?: User;
   taskId?: number;
-  task?: Task;
-  title?: string;
-  description?: string;
-  iconId?: number;
-  icon?: Icon;
-  daysOfWeekEnabled?: boolean;
-  daysOfWeek?: DayOfWeek[];
-  timesOfDayEnabled?: boolean;
-  timesOfDay?: TimeOfDay[];
-  detailsEnabled?: boolean;
   quantity?: number;
   unitId?: number;
-  unit?: Unit;
-  startDate?: Date;
-  endDate?: Date;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  description?: string;
+  userId?: number;
+  endDate?: Date;
+  startDate?: Date;
+  title?: string;
+  daysOfWeekEnabled?: boolean;
+  timesOfDayEnabled?: boolean;
+  detailsEnabled?: boolean;
+  iconId?: number;
+  user?: User;
+  task?: Task;
+  icon?: Icon;
+  daysOfWeek?: DayOfWeek[];
+  timesOfDay?: TimeOfDay[];
+  unit?: Unit;
   plannedTasks?: PlannedTask[];
 }
 
 export interface BlockedUser {
   id?: number;
   userId?: number;
-  user?: User;
   blockedUserId?: number;
-  blockedUser?: User;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
+  blockedUser?: User;
 }
 
 export interface Feature {
@@ -487,83 +487,174 @@ export interface IconCategory {
 export interface HabitStreak {
   id?: number;
   userId?: number;
-  user?: User;
   taskId?: number;
-  task?: Task;
   type?: string;
   streak?: number;
+  user?: User;
+  task?: Task;
 }
 
 export interface Badge {
   id?: number;
-  key?: string;
   iconId?: number;
-  icon?: Icon;
   category?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  key?: string;
+  priority?: number;
+  icon?: Icon;
   habitStreakTiers?: HabitStreakTier[];
   userBadges?: UserBadge[];
-  pointTiers?: PointTier[];
+  levels?: Level[];
 }
 
 export interface UserBadge {
   id?: number;
   userId?: number;
-  user?: User;
   badgeId?: number;
-  badge?: Badge;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  user?: User;
+  badge?: Badge;
 }
 
 export interface HabitStreakTier {
   id?: number;
   badgeId?: number;
-  badge?: Badge;
-  iconId?: number;
-  icon?: Icon;
   minStreak?: number;
   maxStreak?: number;
-  name?: string;
   backgroundColor?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  iconId?: number;
+  name?: string;
+  badge?: Badge;
+  icon?: Icon;
 }
 
-export interface PointTier {
+export interface Level {
   id?: number;
   name?: string;
   minPoints?: number;
   maxPoints?: number;
   level?: number;
   badgeId?: number;
-  badge?: Badge;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  badge?: Badge;
 }
 
 export interface PointDefinition {
   id?: number;
-  type?: string;
-  points?: number;
   version?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  type?: string;
+  points?: number;
 }
 
 export interface PointLedgerRecord {
   id?: number;
   userId?: number;
-  user?: User;
   relevantId?: number;
   pointDefinitionType?: string;
   points?: number;
+  user?: User;
+}
+
+export interface ChallengeRequirementToMilestone {
+  A?: number;
+  B?: number;
+}
+
+export interface ChallengeToComment {
+  A?: number;
+  B?: number;
+}
+
+export interface ChallengeToImage {
+  A?: number;
+  B?: number;
+}
+
+export interface ChallengeToLike {
+  A?: number;
+  B?: number;
+}
+
+export interface CommentToPlannedDayResult {
+  A?: number;
+  B?: number;
+}
+
+export interface CommentToUserPost {
+  A?: number;
+  B?: number;
+}
+
+export interface DayOfWeekToScheduledHabit {
+  A?: number;
+  B?: number;
+}
+
+export interface FeatureToRequesterRole {
+  A?: number;
+  B?: number;
+}
+
+export interface FeatureToTargetRole {
+  A?: number;
+  B?: number;
+}
+
+export interface IconToIconCategory {
+  A?: number;
+  B?: number;
+}
+
+export interface IconToTag {
+  A?: number;
+  B?: number;
+}
+
+export interface ImageToPlannedDayResult {
+  A?: number;
+  B?: number;
+}
+
+export interface ImageToUserPost {
+  A?: number;
+  B?: number;
+}
+
+export interface LikeToPlannedDayResult {
+  A?: number;
+  B?: number;
+}
+
+export interface LikeToQuoteOfTheDay {
+  A?: number;
+  B?: number;
+}
+
+export interface LikeToUserPost {
+  A?: number;
+  B?: number;
+}
+
+export interface RoleToUser {
+  A?: number;
+  B?: number;
+}
+
+export interface ScheduledHabitToTimeOfDay {
+  A?: number;
+  B?: number;
 }
 
 export enum NotificationTargetPage {
