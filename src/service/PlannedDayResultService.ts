@@ -16,6 +16,7 @@ import { BlockUserService } from './BlockUserService';
 import { ApiAlertsService } from './ApiAlertsService';
 import { PlannedDayAttribute, PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+import { PlannedDayResultEventDispatcher } from '@src/event/planned_day_result/PlannedDayResultEventDispatcher';
 
 export class PlannedDayResultService {
     public static async create(
@@ -23,7 +24,7 @@ export class PlannedDayResultService {
         plannedDayResult: PlannedDayResult
     ): Promise<PlannedDayResult> {
         const plannedDay = await PlannedDayDao.get(plannedDayResult.plannedDayId ?? 0);
-        if (!plannedDay) {
+        if (!plannedDay?.dayKey) {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
@@ -45,7 +46,7 @@ export class PlannedDayResultService {
             );
         }
 
-        ApiAlertsService.sendAlert('new planned day result was created!');
+        PlannedDayResultEventDispatcher.onCreated(context, createdPlannedDayResult.id);
 
         const plannedDayResultModel: PlannedDayResult =
             ModelConverter.convert(createdPlannedDayResult);
@@ -84,6 +85,10 @@ export class PlannedDayResultService {
         await ImageDao.deleteImages(filteredImageResults.adult);
 
         const updatedPlannedDayResult = await PlannedDayResultDao.update(plannedDayResult);
+
+        if (!updatedPlannedDayResult.active) {
+            PlannedDayResultEventDispatcher.onDeleted(context, plannedDayResult.id ?? 0);
+        }
 
         if (!updatedPlannedDayResult) {
             throw new ServiceException(

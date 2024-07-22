@@ -18,6 +18,7 @@ import { PlannedDayEventDispatcher } from '@src/event/planned_day/PlannedDayEven
 import { PlannedHabitService } from './PlannedHabitService';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+const AsyncLock = require('async-lock');
 
 interface ScheduledHabitTimeOfDay {
     scheduledHabit?: ScheduledHabit;
@@ -25,6 +26,8 @@ interface ScheduledHabitTimeOfDay {
 }
 
 export class PlannedDayService {
+    private static lock = new AsyncLock();
+
     public static async getOrCreate(
         context: Context,
         userId: number,
@@ -290,7 +293,7 @@ export class PlannedDayService {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
-        const updatedPlannedHabit = await this.updateCompletionStatusByPlannedDayId(
+        const updatedPlannedDay = await this.updateCompletionStatusByPlannedDayId(
             context,
             plannedHabit.plannedDayId
         );
@@ -309,43 +312,58 @@ export class PlannedDayService {
             return plannedDay;
         }
 
-        const completionStatus = await this.getCompletionStatus(
+        const oldStatus = plannedDay.status;
+        const newStatus = await this.getCompletionStatus(
             context,
             plannedDay.userId,
             plannedDay.dayKey
         );
 
-        if (plannedDay.status === completionStatus) {
+        if (oldStatus === newStatus) {
             return plannedDay;
         }
 
-        plannedDay.status = completionStatus;
+        if (
+            (newStatus && oldStatus === Constants.CompletionState.COMPLETE) ||
+            newStatus === Constants.CompletionState.COMPLETE
+        ) {
+            this.dispatchCompletionStatusChanged(context, plannedDay, newStatus);
+        }
+
+        plannedDay.status = newStatus;
         const updatedPlannedDay = await this.update(context, plannedDay);
         return updatedPlannedDay;
     }
 
     public static async update(context: Context, plannedDay: PlannedDay) {
-        if (!plannedDay.id) {
-            throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day id required');
-        }
+        const userId = context.userId;
+        const plannedTaskId = plannedDay.id;
+        const key = `update-${userId}-${plannedTaskId}`;
 
-        if (!plannedDay.userId) {
-            throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day is malformed');
-        }
+        return this.lock.acquire(key, async () => {
+            if (!plannedDay.dayKey || !plannedDay.id || !plannedDay.userId) {
+                throw new ServiceException(400, Code.INVALID_REQUEST, 'planned day is malformed');
+            }
 
-        const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
-        if (!updatedPlannedDay) {
-            throw new ServiceException(
-                500,
-                Code.UPDATE_PLANNED_DAY_FAILED,
-                'failed to update planned day'
+            const updatedPlannedDay = await PlannedDayDao.update(plannedDay);
+            if (!updatedPlannedDay) {
+                throw new ServiceException(
+                    500,
+                    Code.UPDATE_PLANNED_DAY_FAILED,
+                    'failed to update planned day'
+                );
+            }
+
+            PlannedDayEventDispatcher.onUpdated(
+                context,
+                plannedDay.userId,
+                plannedDay.dayKey,
+                plannedDay.id
             );
-        }
 
-        PlannedDayEventDispatcher.onUpdated(context, plannedDay.userId, plannedDay.id);
-
-        const plannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
-        return plannedDayModel;
+            const plannedDayModel: PlannedDayModel = ModelConverter.convert(updatedPlannedDay);
+            return plannedDayModel;
+        });
     }
 
     public static async getPlannedDayIdsForUser(
@@ -505,5 +523,21 @@ export class PlannedDayService {
         });
 
         return clonedPlannedDay;
+    }
+
+    private static dispatchCompletionStatusChanged(
+        context: Context,
+        plannedDay: PlannedDay,
+        completionState: Constants.CompletionState
+    ) {
+        if (!plannedDay.dayKey || !plannedDay.id) {
+            return;
+        }
+
+        if (completionState === Constants.CompletionState.COMPLETE) {
+            PlannedDayEventDispatcher.onCompleted(context, plannedDay.dayKey, plannedDay.id);
+        } else {
+            PlannedDayEventDispatcher.onIncompleted(context, plannedDay.dayKey, plannedDay.id);
+        }
     }
 }

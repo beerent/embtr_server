@@ -1,6 +1,7 @@
 import { ChallengeService } from '@src/service/ChallengeService';
 import { DetailedHabitStreakService } from '@src/service/DetailedHabitStreakService';
 import { PlannedDayService } from '@src/service/PlannedDayService';
+import { PointLedgerRecordService } from '@src/service/PointLedgerRecordService';
 import { Event } from '../events';
 
 export class PlannedHabitEventHandler {
@@ -50,9 +51,10 @@ export class PlannedHabitEventHandler {
         }
 
         this.activeOnCompletedEvents.add(eventKey);
-        await Promise.all([
+        await Promise.allSettled([
             DetailedHabitStreakService.fullPopulateCurrentStreak(event.context, event.habitId),
             DetailedHabitStreakService.fullPopulateLongestStreak(event.context, event.habitId),
+            PointLedgerRecordService.addHabitComplete(event.context, event.id),
         ]);
         this.activeOnCompletedEvents.delete(eventKey);
     }
@@ -69,6 +71,7 @@ export class PlannedHabitEventHandler {
         await Promise.all([
             DetailedHabitStreakService.fullPopulateCurrentStreak(event.context, event.habitId),
             DetailedHabitStreakService.fullPopulateLongestStreak(event.context, event.habitId),
+            PointLedgerRecordService.subtractHabitComplete(event.context, event.id),
         ]);
         this.activeOnIncompletedEvents.delete(eventKey);
     }

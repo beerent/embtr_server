@@ -4,20 +4,43 @@ import { NotificationType } from '@src/service/NotificationService';
 export namespace Event {
     export namespace PlannedDay {
         export const Updated = 'PLANNED_DAY_UPDATED';
+        export const Completed = 'PLANNED_DAY_COMPLETED';
+        export const Incompleted = 'PLANNED_DAY_INCOMPLETED';
 
         export class Event {
             context: Context;
             userId: number;
+            dayKey: string;
             id: number;
 
-            constructor(context: Context, userId: number, id: number) {
+            constructor(context: Context, userId: number, dayKey: string, id: number) {
                 this.context = context;
                 this.userId = userId;
+                this.dayKey = dayKey;
                 this.id = id;
             }
 
             public getKey = () => {
-                return `${this.context.userId}_${this.userId}_${this.id}`;
+                return `${this.context.userId}_${this.userId}_${this.dayKey}_${this.id}`;
+            };
+        }
+    }
+
+    export namespace PlannedDayResult {
+        export const Created = 'PLANNED_DAY_RESULT_CREATED';
+        export const Deleted = 'PLANNED_DAY_RESULT_DELETED';
+
+        export class Event {
+            context: Context;
+            id: number;
+
+            constructor(context: Context, id: number) {
+                this.context = context;
+                this.id = id;
+            }
+
+            public getKey = () => {
+                return `${this.context.userId}_${this.id}`;
             };
         }
     }
@@ -47,14 +70,17 @@ export namespace Event {
 
     export namespace UserProperty {
         export const Missing = 'USER_PROPERTY_MISSING';
+        export const Updated = 'USER_PROPERTY_UPDATED';
 
         export class Event {
             context: Context;
             key: string;
+            value?: string;
 
-            constructor(context: Context, key: string) {
+            constructor(context: Context, key: string, value?: string) {
                 this.context = context;
                 this.key = key;
+                this.value = value;
             }
 
             public getKey = () => {
@@ -189,6 +215,22 @@ export namespace Event {
         export const PremiumRemoved = 'USER_PREMIUM_REMOVED';
         export const Away = 'USER_AWAY';
         export const Returned = 'USER_RETURNED';
+
+        export class Event {
+            context: Context;
+
+            constructor(context: Context) {
+                this.context = context;
+            }
+
+            public getKey = () => {
+                return `${this.context.userId}`;
+            };
+        }
+    }
+
+    export namespace PointLedgerRecord {
+        export const Updated = 'UPDATED';
 
         export class Event {
             context: Context;

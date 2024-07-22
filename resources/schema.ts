@@ -32,6 +32,7 @@ export interface User {
   properties?: Property[];
   habitStreaks?: HabitStreak[];
   userBadges?: UserBadge[];
+  pointLedgerRecords?: PointLedgerRecord[];
 }
 
 export interface Property {
@@ -504,6 +505,7 @@ export interface Badge {
   updatedAt?: Date;
   habitStreakTiers?: HabitStreakTier[];
   userBadges?: UserBadge[];
+  pointTiers?: PointTier[];
 }
 
 export interface UserBadge {
@@ -530,6 +532,38 @@ export interface HabitStreakTier {
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface PointTier {
+  id?: number;
+  name?: string;
+  minPoints?: number;
+  maxPoints?: number;
+  level?: number;
+  badgeId?: number;
+  badge?: Badge;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PointDefinition {
+  id?: number;
+  type?: string;
+  points?: number;
+  version?: number;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PointLedgerRecord {
+  id?: number;
+  userId?: number;
+  user?: User;
+  relevantId?: number;
+  pointDefinitionType?: string;
+  points?: number;
 }
 
 export enum NotificationTargetPage {

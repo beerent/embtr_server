@@ -8,6 +8,7 @@ import { Constants } from '@resources/types/constants/constants';
 import { Roles } from '@src/roles/Roles';
 import { HttpCode } from '@src/common/RequestResponses';
 import { UserService } from './UserService';
+import { UserPropertyEventDispatcher } from '@src/event/user_property/UserPropertyEventDispatcher';
 
 export class UserPropertyService {
     public static async getAll(context: Context, userId: number): Promise<Property[]> {
@@ -299,6 +300,53 @@ export class UserPropertyService {
         const models: Property[] = ModelConverter.convertAll(allLatest);
 
         return models;
+    }
+
+    /* POINTS */
+    public static async getPoints(context: Context): Promise<number> {
+        const timezone = await this.get(context, context.userId, Constants.UserPropertyKey.POINTS);
+        if (!timezone?.value) {
+            return 0;
+        }
+
+        return parseInt(timezone.value);
+    }
+
+    public static async setPoints(context: Context, points: number): Promise<number> {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.POINTS,
+            points.toString()
+        );
+
+        UserPropertyEventDispatcher.onUpdated(
+            context,
+            Constants.UserPropertyKey.POINTS,
+            points.toString()
+        );
+
+        return points;
+    }
+
+    public static async getLevel(context: Context): Promise<number> {
+        const level = await this.get(context, context.userId, Constants.UserPropertyKey.LEVEL);
+        if (!level?.value) {
+            return 0;
+        }
+
+        return parseInt(level.value);
+    }
+
+    public static async setLevel(context: Context, level: number): Promise<number> {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.LEVEL,
+            level.toString()
+        );
+
+        return level;
     }
 
     private static async get(

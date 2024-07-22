@@ -7,3 +7,5 @@ import '@src/event/like/LikeEventListener';
 import '@src/event/challenge/ChallengeEventListener';
 import '@src/event/challenge_participant/ChallengeParticipantEventListener';
 import '@src/event/user/UserEventListener';
+import '@src/event/point/PointLedgerRecordEventListener';
+import '@src/event/planned_day_result/PlannedDayResultEventListener';

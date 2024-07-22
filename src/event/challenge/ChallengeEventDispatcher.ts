@@ -13,12 +13,12 @@ export namespace ChallengeEventDispatcher {
         eventBus.emit(Event.Challenge.Left, event);
     };
 
-    export const onComplete = (context: Context, id: number) => {
+    export const onCompleted = (context: Context, id: number) => {
         const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
         eventBus.emit(Event.Challenge.Completed, event);
     };
 
-    export const onIncomplete = (context: Context, id: number) => {
+    export const onIncompleted = (context: Context, id: number) => {
         const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
         eventBus.emit(Event.Challenge.Incompleted, event);
     };

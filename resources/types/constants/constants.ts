@@ -10,11 +10,13 @@ export namespace Constants {
         WARNING_NOTIFICATIONS_SETTING = 'WARNING_NOTIFICATIONS_SETTING',
         AWAY_MODE = 'AWAY_MODE',
         TUTORIAL_COMPLETED = 'TUTORIAL_COMPLETED',
+        POINTS = 'POINTS',
+        LEVEL = 'LEVEL',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
         switch (key) {
-            case 'TIME_ZONE':
+            case 'TIMEZONE':
                 return UserPropertyKey.TIMEZONE;
             case 'NEW_USER_CHECKLIST_DISMISSED':
                 return UserPropertyKey.NEW_USER_CHECKLIST_DISMISSED;
@@ -28,6 +30,10 @@ export namespace Constants {
                 return UserPropertyKey.TUTORIAL_COMPLETED;
             case 'INVALID':
                 return UserPropertyKey.INVALID;
+            case 'POINTS':
+                return UserPropertyKey.POINTS;
+            case 'LEVEL':
+                return UserPropertyKey.LEVEL;
 
             default:
                 return UserPropertyKey.INVALID;
@@ -235,4 +241,34 @@ export namespace Constants {
                 return BadgeCategory.INVALID;
         }
     };
+
+    export enum PointDefinitionType {
+        INVALID = 'INVALID',
+        HABIT_COMPLETE = 'HABIT_COMPLETE',
+        DAY_COMPLETE = 'DAY_COMPLETE',
+        PLANNED_DAY_RESULT_CREATED = 'PLANNED_DAY_RESULT_CREATED',
+    }
+
+    export const getPointDefinition = (category: string): PointDefinitionType => {
+        switch (category) {
+            case 'HABIT_COMPLETE':
+                return PointDefinitionType.HABIT_COMPLETE;
+            case 'DAY_COMPLETE':
+                return PointDefinitionType.DAY_COMPLETE;
+            case 'PLANNED_DAY_RESULT_CREATED':
+                return PointDefinitionType.PLANNED_DAY_RESULT_CREATED;
+
+            default:
+                return PointDefinitionType.INVALID;
+        }
+    };
+
+    export enum WebSocketEventType {
+        INVALID = 'INVALID',
+        FIRE_CONFETTI = 'FIRE_CONFETTI',
+        POINTS_UPDATED = 'POINTS_UPDATED',
+        LEVEL_DETAILS_UPDATED = 'LEVEL_DETAILS_UPDATED',
+        DAY_COMPLETE = 'DAY_COMPLETE',
+        HABIT_STREAK_UPDATED = 'HABIT_STREAK_UPDATED',
+    }
 }

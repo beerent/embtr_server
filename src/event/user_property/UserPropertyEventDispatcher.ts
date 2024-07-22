@@ -7,4 +7,9 @@ export namespace UserPropertyEventDispatcher {
         const event: Event.UserProperty.Event = new Event.UserProperty.Event(context, key);
         eventBus.emit(Event.UserProperty.Missing, event);
     };
+
+    export const onUpdated = (context: Context, key: string, value?: string) => {
+        const event: Event.UserProperty.Event = new Event.UserProperty.Event(context, key, value);
+        eventBus.emit(Event.UserProperty.Updated, event);
+    };
 }
