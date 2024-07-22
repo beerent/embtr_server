@@ -482,6 +482,10 @@ export class UserDao {
             where: {
                 plannedTasks: {
                     some: {
+                        active: true,
+                        status: {
+                          not: 'INCOMPLETE'
+                        },
                         updatedAt: {
                             gt: startDate,
                             lte: endDate,
