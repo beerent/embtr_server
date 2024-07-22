@@ -372,7 +372,7 @@ export class UserService {
             throw new ServiceException(404, Code.USER_NOT_FOUND, 'user not found');
         }
 
-        const userModel: User = ModelConverter.convert(user);
+        const userModel: User = ModelConverter.convert(user, false);
         return userModel;
     }
 

@@ -85,10 +85,10 @@ type PrismaModel =
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
-        return prismaObj.map(this.convert<T>);
+        return prismaObj.map(obj => this.convert<T>(obj));
     }
 
-    public static convert<T>(prismaObj: PrismaModel): T {
+    public static convert<T>(prismaObj: PrismaModel, shouldSanitize: boolean = true): T {
         const convertObj = (obj: PrismaModel): T => {
             const convertedObj = obj as any;
             const dateFields = ['createdAt', 'updatedAt'];
@@ -103,7 +103,7 @@ export class ModelConverter {
         };
 
         const converted = convertObj(prismaObj);
-        const sanitized = sanitizeModel(converted);
-        return sanitized;
+        const sanitized = shouldSanitize ? sanitizeModel(converted) : converted;
+        return sanitized
     }
 }
