@@ -10,11 +10,16 @@ import { PointLedgerRecord } from '@resources/schema';
 import { PointLedgerRecordDispatcher } from '@src/event/point/PointLedgerRecordEventDispatcher';
 
 export class PointLedgerRecordService {
-    public static async addHabitComplete(context: Context, habitId: number) {
+    public static async addHabitComplete(
+        context: Context,
+        habitId: number,
+        totalTimesOfDay: number
+    ) {
         await this.upsertPointsAddedLedgerRecord(
             context,
             habitId,
-            Constants.PointDefinitionType.HABIT_COMPLETE
+            Constants.PointDefinitionType.HABIT_COMPLETE,
+            totalTimesOfDay
         );
     }
 
@@ -64,7 +69,8 @@ export class PointLedgerRecordService {
     private static async upsertPointsAddedLedgerRecord(
         context: Context,
         relevantId: number,
-        pointDefinitionType: Constants.PointDefinitionType
+        pointDefinitionType: Constants.PointDefinitionType,
+        pointsSplit?: number
     ) {
         const latestPointDefinitionVersion =
             await PointDefinitionService.getLatestVersion(pointDefinitionType);
@@ -77,11 +83,15 @@ export class PointLedgerRecordService {
             );
         }
 
+        console.log(
+            `Adding ${latestPointDefinitionVersion.points} points for ${pointDefinitionType} on ${relevantId} with pointsSplit ${pointsSplit}`
+        );
+
         return this.upsertPointsLedgerRecord(
             context,
             relevantId,
             pointDefinitionType,
-            latestPointDefinitionVersion.points
+            latestPointDefinitionVersion.points / (pointsSplit ?? 1)
         );
     }
 

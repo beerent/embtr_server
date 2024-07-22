@@ -13,8 +13,18 @@ export namespace PlannedHabitEventDispatcher {
         eventBus.emit(Event.PlannedHabit.Created, event);
     };
 
-    export const onCompleted = (context: Context, id: number, habitId: number) => {
-        const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(context, id, habitId);
+    export const onCompleted = (
+        context: Context,
+        id: number,
+        habitId: number,
+        totalTimesOfDay: number
+    ) => {
+        const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(
+            context,
+            id,
+            habitId,
+            totalTimesOfDay
+        );
         eventBus.emit(Event.PlannedHabit.Completed, event);
     };
 

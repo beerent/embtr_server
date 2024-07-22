@@ -1,12 +1,20 @@
 import { prisma } from '@database/prisma';
 
-export class PointTierDao {
+export class LevelDao {
     public static async getAll() {
-        return prisma.pointTier.findMany();
+        return prisma.level.findMany({
+            include: {
+                badge: {
+                    include: {
+                        icon: true,
+                    },
+                },
+            },
+        });
     }
 
     public static async getByPoints(points: number) {
-        return prisma.pointTier.findFirst({
+        return prisma.level.findFirst({
             where: {
                 minPoints: {
                     lte: points,
@@ -19,7 +27,7 @@ export class PointTierDao {
     }
 
     public static async getByLevel(level: number) {
-        return prisma.pointTier.findUnique({
+        return prisma.level.findUnique({
             where: {
                 level,
             },

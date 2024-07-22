@@ -7,8 +7,6 @@ import { logger } from '@src/common/logger/Logger';
 import { toZonedTime } from 'date-fns-tz';
 import { User } from '@resources/schema';
 import { HttpCode } from '@src/common/RequestResponses';
-import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
-import { UserRoleService } from './UserRoleService';
 import { Roles } from '@src/roles/Roles';
 
 export class ContextService {

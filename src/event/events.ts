@@ -55,11 +55,13 @@ export namespace Event {
             context: Context;
             id: number;
             habitId: number;
+            totalTimesOfDay?: number;
 
-            constructor(context: Context, id: number, habitId: number) {
+            constructor(context: Context, id: number, habitId: number, totalTimesOfDay?: number) {
                 this.context = context;
                 this.id = id;
                 this.habitId = habitId;
+                this.totalTimesOfDay = totalTimesOfDay;
             }
 
             public getKey = () => {
@@ -230,7 +232,23 @@ export namespace Event {
     }
 
     export namespace PointLedgerRecord {
-        export const Updated = 'UPDATED';
+        export const Updated = 'POINT_LEDGER_RECORD_UPDATED';
+
+        export class Event {
+            context: Context;
+
+            constructor(context: Context) {
+                this.context = context;
+            }
+
+            public getKey = () => {
+                return `${this.context.userId}`;
+            };
+        }
+    }
+
+    export namespace Level {
+        export const Updated = 'LEVEL_UPDATED';
 
         export class Event {
             context: Context;

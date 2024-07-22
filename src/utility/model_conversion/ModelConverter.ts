@@ -35,7 +35,7 @@ import {
     Badge,
     UserBadge,
     HabitStreakTier,
-    PointTier,
+    Level,
     PointDefinition,
     PointLedgerRecord,
 } from '@prisma/client';
@@ -79,7 +79,7 @@ type PrismaModel =
     | Badge
     | UserBadge
     | HabitStreakTier
-    | PointTier
+    | Level
     | PointDefinition
     | PointLedgerRecord;
 

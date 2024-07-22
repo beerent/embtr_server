@@ -1,5 +1,4 @@
 import { Constants } from '@resources/types/constants/constants';
-import { LevelService } from '@src/service/feature/LevelService';
 
 import { Event } from '../events';
 

@@ -204,7 +204,8 @@ export class PlannedHabitService {
             PlannedHabitEventDispatcher.onCompleted(
                 context,
                 plannedTask.id ?? 0,
-                plannedTask.scheduledHabit?.taskId ?? 0
+                plannedTask.scheduledHabit?.taskId ?? 0,
+                plannedTask.scheduledHabit?.timesOfDay?.length ?? 1
             );
         }
     }
@@ -231,7 +232,8 @@ export class PlannedHabitService {
             PlannedHabitEventDispatcher.onCompleted(
                 context,
                 updatedPlannedTask.id ?? 0,
-                existingPlannedTask.scheduledHabit?.taskId ?? 0
+                existingPlannedTask.scheduledHabit?.taskId ?? 0,
+                updatedPlannedTask.scheduledHabit?.timesOfDay?.length ?? 1
             );
         } else if (changedToIncomplete) {
             PlannedHabitEventDispatcher.onIncompleted(

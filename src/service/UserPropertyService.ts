@@ -9,6 +9,7 @@ import { Roles } from '@src/roles/Roles';
 import { HttpCode } from '@src/common/RequestResponses';
 import { UserService } from './UserService';
 import { UserPropertyEventDispatcher } from '@src/event/user_property/UserPropertyEventDispatcher';
+import { LevelEventDispatcher } from '@src/event/level/LevelEventDispatcher';
 
 export class UserPropertyService {
     public static async getAll(context: Context, userId: number): Promise<Property[]> {
@@ -345,6 +346,8 @@ export class UserPropertyService {
             Constants.UserPropertyKey.LEVEL,
             level.toString()
         );
+
+        //console.log('Level updated', level);
 
         return level;
     }
