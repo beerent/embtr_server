@@ -500,6 +500,7 @@ export interface Badge {
   iconId?: number;
   icon?: Icon;
   category?: string;
+  priority?: number;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
