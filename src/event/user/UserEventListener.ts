@@ -12,6 +12,15 @@ eventBus.on(Event.User.Created, async (event: Event.User.Event) => {
     }
 });
 
+eventBus.on(Event.User.Updated, async (event: Event.User.Event) => {
+    try {
+        logger.info('User event received', Event.User.Updated, event);
+        UserEventHandler.onUpdated(event);
+    } catch (e) {
+        console.error('error in UPDATED', e);
+    }
+});
+
 eventBus.on(Event.User.PremiumAdded, async (event: Event.User.Event) => {
     try {
         logger.info('User event received', Event.User.PremiumAdded, event);

@@ -1,8 +1,10 @@
 import { UserBadgeService } from '@src/service/UserBadgeService';
+import { WebSocketService } from '@src/service/WebSocketService';
 import { Event } from '../events';
 
 export class UserEventHandler {
     private static activeOnCreatedEvents = new Set<string>();
+    private static activeOnUpdatedEvents = new Set<string>();
     private static activeOnPremiumAddedEvents = new Set<string>();
     private static activeOnPremiumRemovedEvents = new Set<string>();
     private static activeOnAwayEvents = new Set<string>();
@@ -19,6 +21,19 @@ export class UserEventHandler {
         this.activeOnCreatedEvents.add(eventKey);
         await UserBadgeService.addNewUserBadge(event.context);
         this.activeOnCreatedEvents.delete(eventKey);
+    }
+
+    public static async onUpdated(event: Event.User.Event) {
+        const eventKey = event.getKey();
+
+        if (this.activeOnUpdatedEvents.has(eventKey)) {
+            console.log('Already processing', Event.User.Updated, event);
+            return;
+        }
+
+        this.activeOnUpdatedEvents.add(eventKey);
+        WebSocketService.emitUserUpdated(event.context);
+        this.activeOnUpdatedEvents.delete(eventKey);
     }
 
     public static async onPremiumAdded(event: Event.User.Event) {

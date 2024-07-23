@@ -12,6 +12,7 @@ import { HabitStreakService } from './HabitStreakService';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Badge } from '@resources/schema';
 import { LevelService } from './LevelService';
+import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
 
 // "15 months is almost a year" - TheCaptainCoder - 2024-06-21
 
@@ -42,6 +43,8 @@ export class UserBadgeService {
     public static async refreshPremiumBadge(context: Context) {
         await this.removePremiumBadge(context);
         await this.optionallyAddPremiumBadge(context);
+
+        UserEventDispatcher.onUpdated(context);
     }
 
     public static async optionallyAddPremiumBadge(context: Context) {
@@ -81,6 +84,8 @@ export class UserBadgeService {
     public static async refreshAwayBadge(context: Context) {
         await this.removeAwayBadge(context);
         await this.optionallyAddAwayBadge(context);
+
+        UserEventDispatcher.onUpdated(context);
     }
 
     public static async optionallyAddAwayBadge(context: Context) {
@@ -119,6 +124,8 @@ export class UserBadgeService {
     public static async refreshNewUserBadge(context: Context) {
         await this.removeNewUserBadge(context);
         await this.optionallyAddNewUserBadge(context);
+
+        UserEventDispatcher.onUpdated(context);
     }
 
     public static async optionallyAddNewUserBadge(context: Context) {
@@ -167,6 +174,8 @@ export class UserBadgeService {
         console.log('Refreshing habit streak tier badge');
         await this.removeHabitStreakTierBadge(context);
         await this.optionallyAddHabitStreakTierBadge(context);
+
+        UserEventDispatcher.onUpdated(context);
     }
 
     public static async removeHabitStreakTierBadge(context: Context) {
@@ -215,6 +224,8 @@ export class UserBadgeService {
         console.log('Refreshing level badge');
         await this.removeLevelBadge(context);
         await this.optionallyAddLevelBadge(context);
+
+        UserEventDispatcher.onUpdated(context);
     }
 
     private static async removeLevelBadge(context: Context) {

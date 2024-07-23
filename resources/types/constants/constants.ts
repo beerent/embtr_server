@@ -269,9 +269,9 @@ export namespace Constants {
     export enum WebSocketEventType {
         INVALID = 'INVALID',
         FIRE_CONFETTI = 'FIRE_CONFETTI',
-        POINTS_UPDATED = 'POINTS_UPDATED',
         LEVEL_DETAILS_UPDATED = 'LEVEL_DETAILS_UPDATED',
         DAY_COMPLETE = 'DAY_COMPLETE',
         HABIT_STREAK_UPDATED = 'HABIT_STREAK_UPDATED',
+        USER_UPDATED = 'USER_UPDATED',
     }
 }

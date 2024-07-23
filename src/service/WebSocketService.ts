@@ -87,6 +87,14 @@ export class WebSocketService {
         );
     }
 
+    public static emitUserUpdated(context: Context) {
+        if (!this.roomExists(context)) {
+            return;
+        }
+
+        this.emit(this.getRoomKey(context.userId), Constants.WebSocketEventType.USER_UPDATED, {});
+    }
+
     private static emit(
         roomKey: string,
         eventType: Constants.WebSocketEventType,

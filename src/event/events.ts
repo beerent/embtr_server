@@ -213,6 +213,7 @@ export namespace Event {
 
     export namespace User {
         export const Created = 'USER_CREATED';
+        export const Updated = 'USER_UPDATED';
         export const PremiumAdded = 'USER_PREMIUM_ADDED';
         export const PremiumRemoved = 'USER_PREMIUM_REMOVED';
         export const Away = 'USER_AWAY';
