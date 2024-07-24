@@ -42,9 +42,17 @@ export class ScheduledHabitService {
                 continue;
             }
 
-            const scheduledHabit = await this.getLatestVersionByTaskId(context, task.id);
-            if (!scheduledHabit) {
+            const existingScheduledHabit = await this.getLatestVersionByTaskId(context, task.id);
+            if (!existingScheduledHabit ) {
                 continue;
+            }
+
+            const scheduledHabit: ScheduledHabit = {
+                ...existingScheduledHabit,
+                quantity: requirement.calculationType === ChallengeCalculationType.UNIQUE
+                    ? requirement.requiredTaskQuantity
+                    : 1,
+                unitId: requirement.unitId,
             }
 
             const updatedScheduledHabit = await this.replace(context, scheduledHabit);

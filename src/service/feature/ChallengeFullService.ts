@@ -101,9 +101,10 @@ export class ChallengeFullService {
         const challenge: Challenge = { ...challengeFull.challenge };
         challenge.id = id;
 
-        const award: Award = { ...challengeFull.award };
-        const task: Task = { ...challengeFull.task };
+        const award: Award = { id: existingChallenge.award?.id, ...challengeFull.award };
+        const task: Task = { id: existingChallenge.challengeRequirements?.[0]?.task?.id, ...challengeFull.task };
         const challengeRequirement: ChallengeRequirement = {
+            id: existingChallenge.challengeRequirements?.[0]?.id,
             ...challengeFull.challengeRequirement,
         };
         const milestoneKeys: string[] = [...challengeFull.milestoneKeys];
