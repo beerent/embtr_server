@@ -186,7 +186,7 @@ export class ChallengeDao {
     }
 
     public static async update(challenge: Challenge) {
-        await prisma.challenge.update({
+        return prisma.challenge.update({
             where: {
                 id: challenge.id,
             },
