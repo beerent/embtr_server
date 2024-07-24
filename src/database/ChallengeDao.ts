@@ -112,9 +112,18 @@ export class ChallengeDao {
             include: {
                 challengeRequirements: {
                     include: {
-                        task: true,
+                        task: {
+                            include: {
+                                icon: true
+                            }
+                        },
                         unit: true,
                     },
+                },
+                challengeMilestones: {
+                    include: {
+                        milestone: true
+                    }
                 },
                 challengeParticipants: true,
                 award: { include: { icon: true } },
@@ -177,16 +186,23 @@ export class ChallengeDao {
     }
 
     public static async update(challenge: Challenge) {
-        const result = await prisma.challenge.update({
+        await prisma.challenge.update({
             where: {
                 id: challenge.id,
             },
             data: {
                 timelineTimestamp: challenge.timelineTimestamp,
-            },
-        });
-
-        return result;
+                name: challenge.name ?? '',
+                description: challenge.description ?? '',
+                start: challenge.start ?? new Date(),
+                end: challenge.end ?? new Date(),
+                award: {
+                    connect: {
+                        id: challenge.awardId,
+                    },
+                }
+            }
+        })
     }
 
     public static async getAllRecentJoins(upperBound: Date, lowerBound: Date) {
