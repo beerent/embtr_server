@@ -42,15 +42,35 @@ export class UserPropertyService {
         return timezone;
     }
 
-    public static async setTutorialCompletionState(
-        context: Context,
-        state: Constants.CompletionState
-    ): Promise<User> {
+    public static async setTutorialCompletionState(context: Context, state: string): Promise<User> {
         await UserPropertyService.set(
             context,
             context.userId,
             Constants.UserPropertyKey.TUTORIAL_COMPLETED,
             state
+        );
+
+        const user = await UserService.get(context, context.userUid);
+        if (!user) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.USER_NOT_FOUND,
+                'user not found'
+            );
+        }
+
+        return user;
+    }
+
+    public static async setOperatingSystemState(
+        context: Context,
+        operatingSystem: string
+    ): Promise<User> {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.OPERATING_SYSTEM,
+            operatingSystem
         );
 
         const user = await UserService.get(context, context.userUid);

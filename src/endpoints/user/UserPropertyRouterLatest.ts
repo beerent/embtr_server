@@ -11,6 +11,7 @@ import {
     GetUserSocialNotificationResponse,
     GetUserTimezoneResponse,
     GetUserWarningNotificationResponse,
+    SetOperatingSystemRequest,
     SetUserReminderNotificationRequest,
     SetUserReminderNotificationResponse,
     SetUserSocialNotificationRequest,
@@ -192,6 +193,23 @@ userPropertyRouterLatest.post(
         const state = request.state;
 
         const user = await UserPropertyService.setTutorialCompletionState(context, state);
+        const response: SetUserTutorialCompletionStateResponse = { ...SUCCESS, user };
+
+        res.json(response);
+    })
+);
+
+userPropertyRouterLatest.post(
+    '/operating-system/',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const request: SetOperatingSystemRequest = req.body;
+        const state = request.operatingSystem;
+
+        const user = await UserPropertyService.setOperatingSystemState(context, state);
         const response: SetUserTutorialCompletionStateResponse = { ...SUCCESS, user };
 
         res.json(response);

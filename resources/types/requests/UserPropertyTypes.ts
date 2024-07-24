@@ -51,7 +51,7 @@ export interface GetUserWarningNotificationResponse extends Response {
 }
 
 export interface SetUserTutorialCompletionStateRequest {
-  state: Constants.CompletionState;
+  state: string;
 }
 
 export interface SetUserTutorialCompletionStateResponse extends Response {
@@ -60,4 +60,8 @@ export interface SetUserTutorialCompletionStateResponse extends Response {
 
 export interface GetUserTutorialCompletionStateResponse extends Response {
   state?: Constants.CompletionState;
+}
+
+export interface SetOperatingSystemRequest {
+  operatingSystem: Constants.OperatingSystemCategory;
 }

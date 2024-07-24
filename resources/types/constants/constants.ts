@@ -12,6 +12,7 @@ export namespace Constants {
         TUTORIAL_COMPLETED = 'TUTORIAL_COMPLETED',
         POINTS = 'POINTS',
         LEVEL = 'LEVEL',
+        OPERATING_SYSTEM = 'OPERATING_SYSTEM',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -34,6 +35,8 @@ export namespace Constants {
                 return UserPropertyKey.POINTS;
             case 'LEVEL':
                 return UserPropertyKey.LEVEL;
+            case 'OPERATING_SYSTEM':
+                return UserPropertyKey.OPERATING_SYSTEM;
 
             default:
                 return UserPropertyKey.INVALID;
@@ -274,4 +277,22 @@ export namespace Constants {
         HABIT_STREAK_UPDATED = 'HABIT_STREAK_UPDATED',
         USER_UPDATED = 'USER_UPDATED',
     }
+
+    export enum OperatingSystemCategory {
+        INVALID = 'INVALID',
+        IOS = 'IOS',
+        ANDROID = 'ANDROID',
+    }
+
+    export const getOperatingSystemCategory = (category: string): OperatingSystemCategory => {
+        switch (category) {
+            case 'IOS':
+                return OperatingSystemCategory.IOS;
+            case 'ANDROID':
+                return OperatingSystemCategory.ANDROID;
+
+            default:
+                return OperatingSystemCategory.INVALID;
+        }
+    };
 }
