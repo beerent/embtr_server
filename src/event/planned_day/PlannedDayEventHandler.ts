@@ -54,6 +54,7 @@ export class PlannedDayEventHandler {
 
         this.activeOnIncompletedEvents.add(eventKey);
         await Promise.allSettled([
+            WebSocketService.emitPlannedDayIncomplete(event.context, event.dayKey),
             PointLedgerRecordService.subtractDayComplete(event.context, event.id),
         ]);
         this.activeOnIncompletedEvents.delete(eventKey);

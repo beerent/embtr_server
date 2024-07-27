@@ -488,6 +488,7 @@ export class PlannedDayService {
                     task: {
                         type: timeOfDayScheduledHabit.scheduledHabit?.task?.type,
                     },
+                    timesOfDay: timeOfDayScheduledHabit.scheduledHabit?.timesOfDay,
                 },
                 title: ScheduledHabitUtil.getTitle(timeOfDayScheduledHabit.scheduledHabit),
                 description: ScheduledHabitUtil.getDescription(

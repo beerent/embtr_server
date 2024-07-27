@@ -72,8 +72,10 @@ export class PointLedgerRecordService {
         pointDefinitionType: Constants.PointDefinitionType,
         pointsSplit?: number
     ) {
-        const latestPointDefinitionVersion =
-            await PointDefinitionService.getLatestVersion(pointDefinitionType);
+        const latestPointDefinitionVersion = await PointDefinitionService.getLatestVersion(
+            context,
+            pointDefinitionType
+        );
 
         if (!latestPointDefinitionVersion?.points || !latestPointDefinitionVersion?.version) {
             throw new ServiceException(

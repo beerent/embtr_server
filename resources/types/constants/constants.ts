@@ -274,6 +274,7 @@ export namespace Constants {
         FIRE_CONFETTI = 'FIRE_CONFETTI',
         LEVEL_DETAILS_UPDATED = 'LEVEL_DETAILS_UPDATED',
         DAY_COMPLETE = 'DAY_COMPLETE',
+        DAY_INCOMPLETE = 'DAY_INCOMPLETE',
         HABIT_STREAK_UPDATED = 'HABIT_STREAK_UPDATED',
         USER_UPDATED = 'USER_UPDATED',
     }
@@ -295,4 +296,15 @@ export namespace Constants {
                 return OperatingSystemCategory.INVALID;
         }
     };
+
+    export enum DataDrivenDetailType {
+        INVALID = 'INVALID',
+        POINTS = 'POINTS',
+    }
+
+    export enum MetadataKey {
+        INVALID = 'INVALID',
+        QUOTE_OF_THE_DAY = 'QUOTE_OF_THE_DAY',
+        DATA_DRIVEN_DETAILS_VERSION = 'DATA_DRIVEN_DETAILS_VERSION',
+    }
 }

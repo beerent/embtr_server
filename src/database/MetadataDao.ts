@@ -1,4 +1,5 @@
 import { prisma } from '@database/prisma';
+import { Constants } from '@resources/types/constants/constants';
 import { MetadataBody } from '@resources/types/requests/MetadataTypes';
 
 export class MetadataDao {
@@ -6,7 +7,8 @@ export class MetadataDao {
         const allMetadata = await prisma.metadata.findMany();
         return allMetadata;
     }
-    public static async get(key: string) {
+
+    public static async get(key: Constants.MetadataKey) {
         const metadata = await prisma.metadata.findUnique({
             where: {
                 key,
@@ -20,8 +22,8 @@ export class MetadataDao {
         const metadata = await prisma.metadata.create({
             data: {
                 key,
-                value
-            }
+                value,
+            },
         });
 
         return metadata;
@@ -30,14 +32,14 @@ export class MetadataDao {
     public static async update(id: number, data: MetadataBody) {
         const metadata = await prisma.metadata.update({
             where: {
-                id
+                id,
             },
             data: {
                 ...(data.key && {
-                    key: data.key
+                    key: data.key,
                 }),
-                value: data.value
-            }
+                value: data.value,
+            },
         });
 
         return metadata;
@@ -63,7 +65,7 @@ export class MetadataDao {
     public static async delete(id: number) {
         const metadata = await prisma.metadata.delete({
             where: {
-                id
+                id,
             },
         });
 

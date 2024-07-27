@@ -179,6 +179,11 @@ export class PlannedHabitDao {
                 plannedDay: true,
                 scheduledHabit: {
                     include: {
+                        timesOfDay: {
+                            select: {
+                                period: true,
+                            },
+                        },
                         icon: true,
                         task: true,
                     },

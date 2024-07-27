@@ -5,6 +5,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
+import { Constants } from '@resources/types/constants/constants';
 
 export class QuoteOfTheDayService {
     public static async count(context: Context): Promise<number> {
@@ -26,7 +27,9 @@ export class QuoteOfTheDayService {
     }
 
     public static async get(context: Context): Promise<QuoteOfTheDay> {
-        const quoteOfTheDayFromMetadata = await MetadataDao.get('QUOTE_OF_THE_DAY');
+        const quoteOfTheDayFromMetadata = await MetadataDao.get(
+            Constants.MetadataKey.QUOTE_OF_THE_DAY
+        );
         if (!quoteOfTheDayFromMetadata?.value) {
             throw new ServiceException(
                 404,

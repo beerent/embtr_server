@@ -55,6 +55,24 @@ export class WebSocketService {
         );
     }
 
+    public static emitPlannedDayIncomplete(context: Context, dayKey: string) {
+        if (!this.roomExists(context)) {
+            return;
+        }
+
+        const payload: WebSocketPayload = {
+            payload: {
+                dayKey,
+            },
+        };
+
+        this.emit(
+            this.getRoomKey(context.userId),
+            Constants.WebSocketEventType.DAY_INCOMPLETE,
+            payload
+        );
+    }
+
     public static emitHabitStreakUpdated(context: Context) {
         if (!this.roomExists(context)) {
             return;
@@ -101,7 +119,6 @@ export class WebSocketService {
         payload: WebSocketPayload
     ) {
         this.logEmitEvent(eventType);
-        console.log('emitting', payload);
         this.io.to(roomKey).emit(eventType, payload);
     }
 
