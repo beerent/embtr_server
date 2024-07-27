@@ -28,6 +28,7 @@ import { DateUtility } from './utility/date/DateUtility';
 import { UserBadgeService } from './service/UserBadgeService';
 import { AccountDao } from './database/AccountDao';
 import { NewUserContext } from '@src/general/auth/Context';
+import { ChallengeService } from './service/ChallengeService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -691,6 +692,10 @@ const handleCommandGetAllBadgesForUser = async (username: string) => {
     console.log(badges);
 };
 
+const handleCommandDeleteChallenge = async (challengeId: number) => {
+    await ChallengeService.delete(adminContext, challengeId);
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -905,6 +910,10 @@ const processCommand = async (command: string) => {
 
         case 'setCustomClaims':
             await handleCommandSetCustomClaim();
+            break;
+
+        case 'deleteChallenge':
+            await handleCommandDeleteChallenge(Number(email));
             break;
 
         default:

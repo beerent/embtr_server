@@ -1,7 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Challenge } from '@resources/schema';
-import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 import { UserIncludes } from './UserDao';
 
 export interface ChallengeRequirementResults {
@@ -114,16 +113,16 @@ export class ChallengeDao {
                     include: {
                         task: {
                             include: {
-                                icon: true
-                            }
+                                icon: true,
+                            },
                         },
                         unit: true,
                     },
                 },
                 challengeMilestones: {
                     include: {
-                        milestone: true
-                    }
+                        milestone: true,
+                    },
                 },
                 challengeParticipants: true,
                 award: { include: { icon: true } },
@@ -200,9 +199,9 @@ export class ChallengeDao {
                     connect: {
                         id: challenge.awardId,
                     },
-                }
-            }
-        })
+                },
+            },
+        });
     }
 
     public static async getAllRecentJoins(upperBound: Date, lowerBound: Date) {
@@ -345,6 +344,14 @@ export class ChallengeDao {
         });
 
         return result;
+    }
+
+    public static async delete(id: number) {
+        return prisma.challenge.delete({
+            where: {
+                id,
+            },
+        });
     }
 
     /*

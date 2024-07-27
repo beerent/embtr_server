@@ -407,7 +407,7 @@ enum ChallengeCalculationType {
 model ChallengeRequirement {
     id Int @id @default(autoincrement())
 
-    challenge   Challenge @relation(fields: [challengeId], references: [id])
+    challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
     challengeId Int       @db.Int
 
     task   Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)

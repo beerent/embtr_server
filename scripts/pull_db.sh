@@ -20,8 +20,6 @@ DEVELOPMENT_DB_PASS="pscale_pw_MpoxZLN9DXkV3ObrnunlckUJxXgsKYX2MsQrNOJSiPC"
 DEVELOPMENT_DB_HOST="aws.connect.psdb.cloud"
 DEVELOPMENT_DB_NAME="embtr"
 
-echo $PRODUCTION_DB_USER $PRODUCTION_DB_PASS $PRODUCTION_DB_HOST $PRODUCTION_DB_NAME $TABLE_NAME
-
 # Dump the table from the production database
 mysqldump --single-transaction --set-gtid-purged=OFF --user=$PRODUCTION_DB_USER --password=$PRODUCTION_DB_PASS --host=$PRODUCTION_DB_HOST $PRODUCTION_DB_NAME $TABLE_NAME > /tmp/$TABLE_NAME.sql
 

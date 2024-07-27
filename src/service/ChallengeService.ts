@@ -268,6 +268,10 @@ export class ChallengeService {
         return challengeModels;
     }
 
+    public static async delete(context: Context, id: number) {
+        await ChallengeDao.delete(id);
+    }
+
     private static dispatchChallengeParticipationStateChange(
         context: Context,
         plannedTask: PlannedTask,
