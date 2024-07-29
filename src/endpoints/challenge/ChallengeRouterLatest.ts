@@ -264,4 +264,18 @@ challengeRouterLatest.post(
     })
 );
 
+challengeRouterLatest.delete(
+    '/:id',
+    routeLogger(v),
+    authenticate,
+    authorizeAdmin,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
+        const id = Number(req.params.id);
+
+        await ChallengeService.delete(context, id);
+        res.json(SUCCESS);
+    })
+);
+
 export default challengeRouterLatest;
