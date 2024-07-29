@@ -2,6 +2,7 @@ process.env.TZ = 'UTC';
 require('module-alias/register');
 
 import * as readline from 'readline';
+import '@src/event/event_listener_imports';
 import { UserRoleService } from './service/UserRoleService';
 import { Context, ContextType } from './general/auth/Context';
 import { Role } from './roles/Roles';
@@ -66,9 +67,9 @@ const handleCommandGetProperties = async (username: string) => {
     }
 
     const properties = await UserPropertyService.getAll(adminContext, user.id);
-    const propertyStrings = properties.map((property) => {
-        return `${property.key}: ${property.value}`;
-    });
+    for (const property of properties) {
+        console.log(property.key, property.value);
+    }
 };
 
 const handleCommandGetRoles = async (email: string) => {
@@ -449,13 +450,14 @@ const handleCommandRefreshPremiumUsers = async () => {
 };
 
 const handleCommandRefreshPremiumUser = async (username: string) => {
-    const user = await UserDao.getByUsername(username);
+    const user = await UserService.getByUsername(username);
     if (!user?.id) {
         console.log('user not found');
         return;
     }
 
-    await UserService.updatePremiumStatus(adminContext, user.uid);
+    const context = impersonateContext(user);
+    await UserService.updatePremiumStatus(context, user.uid!);
 };
 
 const handleAddPremiumRole = async (username: string) => {
@@ -696,6 +698,24 @@ const handleCommandDeleteChallenge = async (challengeId: number) => {
     await ChallengeService.delete(adminContext, challengeId);
 };
 
+const handleCommandResetPoints = async () => {
+    const users = await UserService.getAll(adminContext);
+    let count = 0;
+    for (const user of users) {
+        if (!user.id) {
+            continue;
+        }
+
+        count++;
+        console.log('updating (', count, '/', users.length, ')');
+        const context: Context = impersonateContext(user);
+        const points = await UserPropertyService.getPoints(context);
+        if (!points) {
+            UserPropertyService.setPoints(context, 0);
+        }
+    }
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -914,6 +934,10 @@ const processCommand = async (command: string) => {
 
         case 'deleteChallenge':
             await handleCommandDeleteChallenge(Number(email));
+            break;
+
+        case 'resetPoints':
+            await handleCommandResetPoints();
             break;
 
         default:
