@@ -41,6 +41,8 @@ import { GetAllUserPostResponse } from '@resources/types/requests/UserPostTypes'
 import { PremiumService } from '@src/service/PremiumService';
 import { HabitStreakTierService } from '@src/service/HabitStreakTierService';
 import { GetUserHabitStreakTierResponse } from '@resources/types/requests/HabitStreakTypes';
+import { LevelService } from '@src/service/LevelService';
+import { GetLevelDetailsResponse } from '@resources/types/requests/LevelTypes';
 
 const userRouterLatest = express.Router();
 const v = '✓';
@@ -447,12 +449,13 @@ userRouterLatest.get(
     authorize,
     validateGetUserData,
     runEndpoint(async (req, res) => {
+        const context = await ContextService.get(req);
         const userId = Number(req.params.userId);
-        const challengeParticipation = await ChallengeService.getCompletedChallengesForUser(userId);
+        const levelDetails = await LevelService.getDetails(context, userId);
 
-        const response: GetChallengeParticipationResponse = {
+        const response: GetLevelDetailsResponse = {
             ...SUCCESS,
-            challengeParticipation,
+            levelDetails,
         };
 
         res.status(response.httpCode).json(response);
