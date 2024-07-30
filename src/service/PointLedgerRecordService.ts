@@ -16,10 +16,6 @@ export class PointLedgerRecordService {
         habitId: number,
         totalTimesOfDay: number
     ) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         await this.upsertPointsAddedLedgerRecord(
             context,
             habitId,
@@ -29,10 +25,6 @@ export class PointLedgerRecordService {
     }
 
     public static async subtractHabitComplete(context: Context, habitId: number) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         await this.upsertPointsRemovedLedgerRecord(
             context,
             habitId,
@@ -41,10 +33,6 @@ export class PointLedgerRecordService {
     }
 
     public static async addDayComplete(context: Context, dayId: number) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         await this.upsertPointsAddedLedgerRecord(
             context,
             dayId,
@@ -53,10 +41,6 @@ export class PointLedgerRecordService {
     }
 
     public static async subtractDayComplete(context: Context, dayId: number) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         await this.upsertPointsRemovedLedgerRecord(
             context,
             dayId,
@@ -65,10 +49,6 @@ export class PointLedgerRecordService {
     }
 
     public static async addPlannedDayResultCreated(context: Context, plannedDayResultId: number) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         await this.upsertPointsAddedLedgerRecord(
             context,
             plannedDayResultId,
@@ -80,10 +60,6 @@ export class PointLedgerRecordService {
         context: Context,
         plannedDayResultId: number
     ) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         await this.upsertPointsRemovedLedgerRecord(
             context,
             plannedDayResultId,
@@ -141,6 +117,10 @@ export class PointLedgerRecordService {
         pointDefinitionType: Constants.PointDefinitionType,
         points: number
     ) {
+        if (!this.canAddPoints(context)) {
+            return;
+        }
+
         const pointLedgerRecord = await PointLedgerRecordDao.upsert(
             context.userId,
             relevantId,
@@ -155,12 +135,14 @@ export class PointLedgerRecordService {
     }
 
     // TODO remove after august 1, 2024
-    private static async canAddPoints(context: Context) {
+    private static canAddPoints(context: Context) {
         const clientDate = PureDate.fromString(context.dayKey);
         const cutoffDate = PureDate.fromString('2024-08-01');
 
-        console.log(`Client date: ${clientDate}, cutoff date: ${cutoffDate}`);
-
-        return clientDate >= cutoffDate;
+        const canAddPoints = clientDate >= cutoffDate;
+        console.log(
+            `Client date: ${clientDate}, cutoff date: ${cutoffDate}, can add points: ${canAddPoints}`
+        );
+        return canAddPoints;
     }
 }

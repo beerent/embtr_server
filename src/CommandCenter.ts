@@ -16,7 +16,7 @@ import { Constants } from '@resources/types/constants/constants';
 import { UserPropertyService } from './service/UserPropertyService';
 import { UserDao } from './database/UserDao';
 import { UserAwardService } from './service/UserAwardService';
-import { ChallengeCalculationType, HabitStreak, User } from '@resources/schema';
+import { ChallengeCalculationType, User } from '@resources/schema';
 import { DayKeyUtility } from './utility/date/DayKeyUtility';
 import { ChallengeFullService } from './service/feature/ChallengeFullService';
 import { CreateIconRequest } from '@resources/types/requests/IconTypes';
