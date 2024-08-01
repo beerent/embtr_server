@@ -14,8 +14,13 @@ export class PointLedgerRecordService {
     public static async addHabitComplete(
         context: Context,
         habitId: number,
+        dayKey: string,
         totalTimesOfDay: number
     ) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsAddedLedgerRecord(
             context,
             habitId,
@@ -24,7 +29,11 @@ export class PointLedgerRecordService {
         );
     }
 
-    public static async subtractHabitComplete(context: Context, habitId: number) {
+    public static async subtractHabitComplete(context: Context, habitId: number, dayKey: string) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsRemovedLedgerRecord(
             context,
             habitId,
@@ -32,7 +41,11 @@ export class PointLedgerRecordService {
         );
     }
 
-    public static async addDayComplete(context: Context, dayId: number) {
+    public static async addDayComplete(context: Context, dayId: number, dayKey: string) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsAddedLedgerRecord(
             context,
             dayId,
@@ -40,7 +53,11 @@ export class PointLedgerRecordService {
         );
     }
 
-    public static async subtractDayComplete(context: Context, dayId: number) {
+    public static async subtractDayComplete(context: Context, dayId: number, dayKey: string) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsRemovedLedgerRecord(
             context,
             dayId,
@@ -48,7 +65,15 @@ export class PointLedgerRecordService {
         );
     }
 
-    public static async addPlannedDayResultCreated(context: Context, plannedDayResultId: number) {
+    public static async addPlannedDayResultCreated(
+        context: Context,
+        plannedDayResultId: number,
+        dayKey: string
+    ) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsAddedLedgerRecord(
             context,
             plannedDayResultId,
@@ -58,8 +83,13 @@ export class PointLedgerRecordService {
 
     public static async subtractPlannedDayResultCreated(
         context: Context,
-        plannedDayResultId: number
+        plannedDayResultId: number,
+        dayKey: string
     ) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsRemovedLedgerRecord(
             context,
             plannedDayResultId,
@@ -108,6 +138,7 @@ export class PointLedgerRecordService {
         relevantId: number,
         pointDefinitionType: Constants.PointDefinitionType
     ) {
+        console.log(`Removing points for ${pointDefinitionType} on ${relevantId}`);
         return this.upsertPointsLedgerRecord(context, relevantId, pointDefinitionType, 0);
     }
 
@@ -117,10 +148,6 @@ export class PointLedgerRecordService {
         pointDefinitionType: Constants.PointDefinitionType,
         points: number
     ) {
-        if (!this.canAddPoints(context)) {
-            return;
-        }
-
         const pointLedgerRecord = await PointLedgerRecordDao.upsert(
             context.userId,
             relevantId,
@@ -134,15 +161,10 @@ export class PointLedgerRecordService {
         return pointLedgerRecordModel;
     }
 
-    // TODO remove after august 1, 2024
-    private static canAddPoints(context: Context) {
-        const clientDate = PureDate.fromString(context.dayKey);
-        const cutoffDate = PureDate.fromString('2024-08-01');
+    private static shouldAddPoints(dayKey: string) {
+        const clientDate = PureDate.fromString(dayKey);
+        const serverDate = PureDate.fromString('2024-08-01');
 
-        const canAddPoints = clientDate >= cutoffDate;
-        console.log(
-            `Client date: ${clientDate}, cutoff date: ${cutoffDate}, can add points: ${canAddPoints}`
-        );
-        return canAddPoints;
+        return clientDate >= serverDate;
     }
 }

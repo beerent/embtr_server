@@ -193,19 +193,30 @@ export class PlannedHabitService {
     }
 
     private static handleCreateDispatches(context: Context, plannedTask: PlannedTask) {
+        if (
+            !plannedTask.id ||
+            !plannedTask.scheduledHabit?.taskId ||
+            !plannedTask.scheduledHabit.timesOfDay ||
+            !plannedTask.plannedDay?.dayKey
+        ) {
+            return;
+        }
+
         PlannedHabitEventDispatcher.onCreated(
             context,
-            plannedTask.id ?? 0,
-            plannedTask.scheduledHabit?.taskId ?? 0
+            plannedTask.id,
+            plannedTask.scheduledHabit.taskId,
+            plannedTask.plannedDay.dayKey
         );
 
         const isComplete = plannedTask.status === Constants.CompletionState.COMPLETE;
         if (isComplete) {
             PlannedHabitEventDispatcher.onCompleted(
                 context,
-                plannedTask.id ?? 0,
-                plannedTask.scheduledHabit?.taskId ?? 0,
-                plannedTask.scheduledHabit?.timesOfDay?.length ?? 1
+                plannedTask.id,
+                plannedTask.scheduledHabit.taskId,
+                plannedTask.plannedDay.dayKey,
+                plannedTask.scheduledHabit.timesOfDay.length
             );
         }
     }
@@ -215,10 +226,21 @@ export class PlannedHabitService {
         existingPlannedTask: PlannedTask,
         updatedPlannedTask: PlannedTask
     ) {
+        if (
+            !existingPlannedTask.id ||
+            !updatedPlannedTask.id ||
+            !existingPlannedTask.scheduledHabit?.taskId ||
+            !existingPlannedTask.plannedDay?.dayKey ||
+            !updatedPlannedTask.scheduledHabit?.timesOfDay
+        ) {
+            return;
+        }
+
         PlannedHabitEventDispatcher.onUpdated(
             context,
-            existingPlannedTask.id ?? 0,
-            existingPlannedTask.scheduledHabit?.taskId ?? 0
+            existingPlannedTask.id,
+            existingPlannedTask.scheduledHabit.taskId,
+            existingPlannedTask.plannedDay.dayKey
         );
 
         const changedToComplete =
@@ -231,15 +253,17 @@ export class PlannedHabitService {
         if (changedToComplete) {
             PlannedHabitEventDispatcher.onCompleted(
                 context,
-                updatedPlannedTask.id ?? 0,
-                existingPlannedTask.scheduledHabit?.taskId ?? 0,
-                updatedPlannedTask.scheduledHabit?.timesOfDay?.length ?? 1
+                updatedPlannedTask.id,
+                existingPlannedTask.scheduledHabit.taskId,
+                existingPlannedTask.plannedDay.dayKey,
+                updatedPlannedTask.scheduledHabit.timesOfDay.length
             );
         } else if (changedToIncomplete) {
             PlannedHabitEventDispatcher.onIncompleted(
                 context,
-                updatedPlannedTask.id ?? 0,
-                existingPlannedTask.scheduledHabit?.taskId ?? 0
+                updatedPlannedTask.id,
+                existingPlannedTask.scheduledHabit.taskId,
+                existingPlannedTask.plannedDay.dayKey
             );
         }
     }

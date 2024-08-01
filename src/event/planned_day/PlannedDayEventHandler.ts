@@ -39,7 +39,7 @@ export class PlannedDayEventHandler {
         this.activeOnCompletedEvents.add(eventKey);
         await Promise.allSettled([
             WebSocketService.emitPlannedDayComplete(event.context, event.dayKey),
-            PointLedgerRecordService.addDayComplete(event.context, event.id),
+            PointLedgerRecordService.addDayComplete(event.context, event.id, event.dayKey),
         ]);
         this.activeOnCompletedEvents.delete(eventKey);
     }
@@ -55,7 +55,7 @@ export class PlannedDayEventHandler {
         this.activeOnIncompletedEvents.add(eventKey);
         await Promise.allSettled([
             WebSocketService.emitPlannedDayIncomplete(event.context, event.dayKey),
-            PointLedgerRecordService.subtractDayComplete(event.context, event.id),
+            PointLedgerRecordService.subtractDayComplete(event.context, event.id, event.dayKey),
         ]);
         this.activeOnIncompletedEvents.delete(eventKey);
     }

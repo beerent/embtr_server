@@ -17,7 +17,11 @@ export class PlannedDayResultEventHandler {
         this.activeOnCreatedEvents.add(eventKey);
         await Promise.allSettled([
             ApiAlertsService.sendAlert('new planned day result was created!'),
-            PointLedgerRecordService.addPlannedDayResultCreated(event.context, event.id),
+            PointLedgerRecordService.addPlannedDayResultCreated(
+                event.context,
+                event.id,
+                event.dayKey
+            ),
         ]);
         this.activeOnCreatedEvents.delete(eventKey);
     }
@@ -32,7 +36,11 @@ export class PlannedDayResultEventHandler {
 
         this.activeOnDeletedEvents.add(eventKey);
         await Promise.allSettled([
-            PointLedgerRecordService.subtractPlannedDayResultCreated(event.context, event.id),
+            PointLedgerRecordService.subtractPlannedDayResultCreated(
+                event.context,
+                event.id,
+                event.dayKey
+            ),
         ]);
         this.activeOnDeletedEvents.delete(eventKey);
     }

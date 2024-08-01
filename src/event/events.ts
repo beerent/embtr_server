@@ -33,10 +33,12 @@ export namespace Event {
         export class Event {
             context: Context;
             id: number;
+            dayKey: string;
 
-            constructor(context: Context, id: number) {
+            constructor(context: Context, id: number, dayKey: string) {
                 this.context = context;
                 this.id = id;
+                this.dayKey = dayKey;
             }
 
             public getKey = () => {
@@ -55,12 +57,20 @@ export namespace Event {
             context: Context;
             id: number;
             habitId: number;
+            dayKey: string;
             totalTimesOfDay?: number;
 
-            constructor(context: Context, id: number, habitId: number, totalTimesOfDay?: number) {
+            constructor(
+                context: Context,
+                id: number,
+                habitId: number,
+                dayKey: string,
+                totalTimesOfDay?: number
+            ) {
                 this.context = context;
                 this.id = id;
                 this.habitId = habitId;
+                this.dayKey = dayKey;
                 this.totalTimesOfDay = totalTimesOfDay;
             }
 

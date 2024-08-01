@@ -13,7 +13,6 @@ import { PlannedDayResult, PlannedTask } from '@resources/schema';
 import { ImageDetectionService } from './ImageService';
 import { ImageDao } from '@src/database/ImageDao';
 import { BlockUserService } from './BlockUserService';
-import { ApiAlertsService } from './ApiAlertsService';
 import { PlannedDayAttribute, PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 import { PlannedDayResultEventDispatcher } from '@src/event/planned_day_result/PlannedDayResultEventDispatcher';
@@ -46,7 +45,11 @@ export class PlannedDayResultService {
             );
         }
 
-        PlannedDayResultEventDispatcher.onCreated(context, createdPlannedDayResult.id);
+        PlannedDayResultEventDispatcher.onCreated(
+            context,
+            createdPlannedDayResult.id,
+            plannedDay.dayKey
+        );
 
         const plannedDayResultModel: PlannedDayResult =
             ModelConverter.convert(createdPlannedDayResult);
@@ -86,8 +89,12 @@ export class PlannedDayResultService {
 
         const updatedPlannedDayResult = await PlannedDayResultDao.update(plannedDayResult);
 
-        if (!updatedPlannedDayResult.active) {
-            PlannedDayResultEventDispatcher.onDeleted(context, plannedDayResult.id ?? 0);
+        if (!updatedPlannedDayResult.active && plannedDayResult.plannedDay?.dayKey) {
+            PlannedDayResultEventDispatcher.onDeleted(
+                context,
+                plannedDayResult.id ?? 1,
+                plannedDayResult.plannedDay.dayKey
+            );
         }
 
         if (!updatedPlannedDayResult) {

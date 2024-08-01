@@ -57,6 +57,7 @@ export class PlannedHabitEventHandler {
             PointLedgerRecordService.addHabitComplete(
                 event.context,
                 event.id,
+                event.dayKey,
                 event.totalTimesOfDay ?? 1
             ),
         ]);
@@ -75,7 +76,7 @@ export class PlannedHabitEventHandler {
         await Promise.all([
             DetailedHabitStreakService.fullPopulateCurrentStreak(event.context, event.habitId),
             DetailedHabitStreakService.fullPopulateLongestStreak(event.context, event.habitId),
-            PointLedgerRecordService.subtractHabitComplete(event.context, event.id),
+            PointLedgerRecordService.subtractHabitComplete(event.context, event.id, event.dayKey),
         ]);
         this.activeOnIncompletedEvents.delete(eventKey);
     }
