@@ -307,4 +307,28 @@ export namespace Constants {
         QUOTE_OF_THE_DAY = 'QUOTE_OF_THE_DAY',
         DATA_DRIVEN_DETAILS_VERSION = 'DATA_DRIVEN_DETAILS_VERSION',
     }
+
+    export enum LeaderboardType {
+        INVALID = 'INVALID',
+        TODAY = 'TODAY',
+        WEEK = 'WEEK',
+        MONTH = 'MONTH',
+        ALL_TIME = 'ALL_TIME',
+    }
+
+    export const getLeaderboardType = (type: string): LeaderboardType => {
+        switch (type) {
+            case 'TODAY':
+                return LeaderboardType.TODAY;
+            case 'WEEK':
+                return LeaderboardType.WEEK;
+            case 'MONTH':
+                return LeaderboardType.MONTH;
+            case 'ALL_TIME':
+                return LeaderboardType.ALL_TIME;
+
+            default:
+                return LeaderboardType.INVALID;
+        }
+    };
 }

@@ -758,12 +758,15 @@ model PointDefinition {
 }
 
 model PointLedgerRecord {
-    id                  Int    @id @default(autoincrement())
-    userId              Int    @db.Int
-    user                User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    relevantId          Int    @db.Int
-    pointDefinitionType String @db.VarChar(255)
-    points              Int    @db.Int
+    id                  Int      @id @default(autoincrement())
+    userId              Int      @db.Int
+    user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+    relevantId          Int      @db.Int
+    pointDefinitionType String   @db.VarChar(255)
+    points              Int      @db.Int
+    active              Boolean  @default(true)
+    createdAt           DateTime @default(now())
+    updatedAt           DateTime @default(now()) @updatedAt
 
     @@unique([userId, relevantId, pointDefinitionType], name: "unique_user_relevant_type")
     @@index([userId])

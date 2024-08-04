@@ -30,6 +30,10 @@ export class PointLedgerRecordService {
     }
 
     public static async subtractHabitComplete(context: Context, habitId: number, dayKey: string) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsRemovedLedgerRecord(
             context,
             habitId,
@@ -50,6 +54,10 @@ export class PointLedgerRecordService {
     }
 
     public static async subtractDayComplete(context: Context, dayId: number, dayKey: string) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsRemovedLedgerRecord(
             context,
             dayId,
@@ -78,6 +86,10 @@ export class PointLedgerRecordService {
         plannedDayResultId: number,
         dayKey: string
     ) {
+        if (!this.shouldAddPoints(dayKey)) {
+            return;
+        }
+
         await this.upsertPointsRemovedLedgerRecord(
             context,
             plannedDayResultId,
@@ -144,7 +156,7 @@ export class PointLedgerRecordService {
         );
 
         const pointLedgerRecordModel: PointLedgerRecord = ModelConverter.convert(pointLedgerRecord);
-        PointLedgerRecordDispatcher.onUpdated(context);
+        PointLedgerRecordDispatcher.onUpdated(context, relevantId, pointDefinitionType, points);
 
         return pointLedgerRecordModel;
     }

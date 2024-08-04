@@ -1,3 +1,4 @@
+import { Constants } from '@resources/types/constants/constants';
 import { Context } from '@src/general/auth/Context';
 import { NotificationType } from '@src/service/NotificationService';
 
@@ -247,13 +248,24 @@ export namespace Event {
 
         export class Event {
             context: Context;
+            relevantId: number;
+            pointDefinitionType: Constants.PointDefinitionType;
+            points: number;
 
-            constructor(context: Context) {
+            constructor(
+                context: Context,
+                relevantId: number,
+                pointDefinitionType: Constants.PointDefinitionType,
+                points: number
+            ) {
                 this.context = context;
+                this.relevantId = relevantId;
+                this.pointDefinitionType = pointDefinitionType;
+                this.points = points;
             }
 
             public getKey = () => {
-                return `${this.context.userId}`;
+                return `${this.context.userId}_${this.relevantId}_${this.pointDefinitionType}`;
             };
         }
     }

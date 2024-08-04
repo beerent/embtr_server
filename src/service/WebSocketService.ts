@@ -37,16 +37,12 @@ export class WebSocketService {
         );
     }
 
-    public static emitPlannedDayComplete(context: Context, dayKey: string) {
+    public static emitPlannedDayComplete(context: Context) {
         if (!this.roomExists(context)) {
             return;
         }
 
-        const payload: WebSocketPayload = {
-            payload: {
-                dayKey,
-            },
-        };
+        const payload: WebSocketPayload = {};
 
         this.emit(
             this.getRoomKey(context.userId),
@@ -55,16 +51,12 @@ export class WebSocketService {
         );
     }
 
-    public static emitPlannedDayIncomplete(context: Context, dayKey: string) {
+    public static emitPlannedDayIncomplete(context: Context) {
         if (!this.roomExists(context)) {
             return;
         }
 
-        const payload: WebSocketPayload = {
-            payload: {
-                dayKey,
-            },
-        };
+        const payload: WebSocketPayload = {};
 
         this.emit(
             this.getRoomKey(context.userId),

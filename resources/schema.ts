@@ -565,6 +565,9 @@ export interface PointLedgerRecord {
   relevantId?: number;
   pointDefinitionType?: string;
   points?: number;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export enum NotificationTargetPage {
