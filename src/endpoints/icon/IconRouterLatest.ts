@@ -19,19 +19,19 @@ import { IconService } from '@src/service/IconService';
 const iconRouterLatest = express.Router();
 const v = '✓';
 
+iconRouterLatest.get('/all', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
+  const icons = await IconService.getAll();
+  const response: GetIconsResponse = { ...SUCCESS, icons };
+
+  res.json(response);
+});
+
 iconRouterLatest.get('/:key', routeLogger(v), authenticate, authorize, async (req, res) => {
   const context = await ContextService.get(req);
   const key = req.params.key;
 
   const icon = await IconService.getByKey(context, key);
   const response: GetIconResponse = { ...SUCCESS, icon };
-
-  res.json(response);
-});
-
-iconRouterLatest.get('/all', routeLogger(v), authenticate, authorizeAdmin, async (req, res) => {
-  const icons = await IconService.getAll();
-  const response: GetIconsResponse = { ...SUCCESS, icons };
 
   res.json(response);
 });
