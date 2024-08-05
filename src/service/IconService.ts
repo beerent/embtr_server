@@ -10,6 +10,20 @@ import { IconCategoryService } from './IconCategoryService';
 import { TagService } from './TagService';
 
 export class IconService {
+    public static async getByKey(context: Context, key: string): Promise<Icon> {
+        const icon = await IconDao.getByKey(key);
+        if (!icon) {
+            throw new ServiceException(
+                HttpCode.RESOURCE_NOT_FOUND,
+                Code.RESOURCE_NOT_FOUND,
+                'Icon not found'
+            );
+        }
+
+        const iconModel: Icon = ModelConverter.convert(icon);
+        return iconModel;
+    }
+
     public static async get(context: Context, id: number): Promise<Icon> {
         const icon = await IconDao.get(id);
         if (!icon) {
@@ -55,11 +69,15 @@ export class IconService {
         return createdIconModel;
     }
 
-    public static async update(context: Context, iconId: number, data: UpdateIconData): Promise<Icon> {
+    public static async update(
+        context: Context,
+        iconId: number,
+        data: UpdateIconData
+    ): Promise<Icon> {
         let updatedIcon = await IconDao.update(iconId, {
             name: data.name,
             remoteImageUrl: data.remoteImageUrl,
-            localImage: data.localImage
+            localImage: data.localImage,
         });
 
         if (!updatedIcon) {
@@ -73,17 +91,17 @@ export class IconService {
         if (data.tags) {
             await IconService.addTags(context, updatedIcon.id, data.tags);
         } else {
-            await IconService.removeAllTags(iconId)
+            await IconService.removeAllTags(iconId);
         }
 
         if (data.categories) {
             await IconService.addCategories(context, updatedIcon.id, data.categories);
         } else {
-            await IconService.removeAllCategories(iconId)
+            await IconService.removeAllCategories(iconId);
         }
 
-        const icon = await this.get(context, iconId)
-        return icon
+        const icon = await this.get(context, iconId);
+        return icon;
     }
 
     public static async delete(iconId: number): Promise<void> {
@@ -113,7 +131,7 @@ export class IconService {
         const iconCategoryIds = categoryObjects.flatMap((category) =>
             category.id ? [category.id] : []
         );
-        await IconDao.removeAllCategories(iconId)
+        await IconDao.removeAllCategories(iconId);
         await IconDao.addCategories(iconId, iconCategoryIds);
     }
 

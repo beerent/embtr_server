@@ -633,6 +633,7 @@ model Icon {
     badges           Badge[]
     habitStreakTiers HabitStreakTier[]
 
+    @@unique([key])
     @@map("icon")
 }
 

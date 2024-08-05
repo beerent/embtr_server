@@ -26,6 +26,29 @@ export const UserIncludes = {
 };
 
 export class UserDao {
+    public static async getByIds(ids: number[]): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            include: {
+                userBadges: {
+                    include: {
+                        badge: {
+                            include: {
+                                icon: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        return users;
+    }
+
     public static async getByUid(uid: string): Promise<User | null> {
         const user = await prisma.user.findUnique({
             where: {
@@ -484,7 +507,7 @@ export class UserDao {
                     some: {
                         active: true,
                         status: {
-                          not: 'INCOMPLETE'
+                            not: 'INCOMPLETE',
                         },
                         updatedAt: {
                             gt: startDate,

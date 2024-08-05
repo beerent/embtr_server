@@ -2,15 +2,23 @@ import { prisma } from '@database/prisma';
 import { Icon } from '@resources/schema';
 
 export class IconDao {
+    public static async getByKey(key: string) {
+        return prisma.icon.findUnique({
+            where: {
+                key,
+            },
+        });
+    }
+
     public static async get(id: number) {
         return prisma.icon.findUnique({
             where: {
                 id,
             },
             include: {
-              categories: true,
-              tags: true
-            }
+                categories: true,
+                tags: true,
+            },
         });
     }
 
@@ -18,8 +26,8 @@ export class IconDao {
         return prisma.icon.findMany({
             include: {
                 categories: true,
-                tags: true
-            }
+                tags: true,
+            },
         });
     }
 
@@ -53,24 +61,24 @@ export class IconDao {
     public static async update(iconId: number, icon: Partial<Icon>) {
         return prisma.icon.update({
             where: {
-              id: iconId
+                id: iconId,
             },
             data: {
                 name: icon.name ?? '',
                 remoteImageUrl: icon.remoteImageUrl,
-                localImage: icon.localImage
+                localImage: icon.localImage,
             },
             include: {
                 tags: true,
-                categories: true
-            }
+                categories: true,
+            },
         });
     }
 
     public static async delete(iconId: number) {
         return prisma.icon.delete({
             where: {
-              id: iconId
+                id: iconId,
             },
         });
     }
@@ -97,7 +105,7 @@ export class IconDao {
             },
             data: {
                 tags: {
-                  set: []
+                    set: [],
                 },
             },
         });
@@ -125,7 +133,7 @@ export class IconDao {
             },
             data: {
                 categories: {
-                    set: []
+                    set: [],
                 },
             },
         });

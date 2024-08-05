@@ -1,8 +1,9 @@
 import { User } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { Leaderboard, LeaderboardElement } from '@resources/types/dto/Leaderboard';
-import { LeaderboardDao } from '@src/database/custom/LeaderboardDao';
+import { LeaderboardDao, LeaderboardQueryResults } from '@src/database/custom/LeaderboardDao';
 import { Context } from '@src/general/auth/Context';
+import { UserService } from '../UserService';
 
 // "As a troll, I respect him. As thedevdad_, I hate him." - thedevdad_ - TheCaptainCoder - 2024-08-03
 
@@ -13,9 +14,20 @@ export class LeaderboardService {
             return undefined;
         }
 
+        const users = await UserService.getByIds(
+            leaderboardData.leaderboard.map((entry) => entry.userId)
+        );
+
+        const userMap = new Map<number, User>();
+        users.forEach((user) => {
+            if (user.id) {
+                userMap.set(user.id, user);
+            }
+        });
+
         const leaderboardElements: LeaderboardElement[] = [];
         for (let i = 0; i < leaderboardData.leaderboard.length; i++) {
-            const user: User = { ...leaderboardData.leaderboard[i] };
+            const user: User = userMap.get(leaderboardData.leaderboard[i].userId) as User;
             const position = i + 1;
             const points = leaderboardData.leaderboard[i].points;
 
@@ -82,12 +94,8 @@ export class LeaderboardService {
         const endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 7);
 
-        const leaderboardQueryResults = await LeaderboardDao.getByDateAndLimit(
-            context.userId,
-            startDate,
-            endDate,
-            10
-        );
+        const leaderboardQueryResults: LeaderboardQueryResults =
+            await LeaderboardDao.getByDateAndLimit(context.userId, startDate, endDate, 10);
 
         // Calculate the week number of the current month
         let firstDayOfMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1);
@@ -111,7 +119,7 @@ export class LeaderboardService {
         const weekNumberWithSuffix = `${weekNumber}${getOrdinalSuffix(weekNumber)}`;
 
         const monthName = endDate.toLocaleString('default', { month: 'long' });
-        leaderboardQueryResults.summary = `The leaderboard for the ${weekNumberWithSuffix} week of ${monthName}`;
+        leaderboardQueryResults.summary = `Leaderboard for the ${weekNumberWithSuffix} week of ${monthName}`;
 
         return leaderboardQueryResults;
     }
@@ -134,7 +142,7 @@ export class LeaderboardService {
         );
 
         const currentMonthString = startDate.toLocaleString('default', { month: 'long' });
-        leaderboardQueryResults.summary = `The leaderboard for the month of ${currentMonthString}`;
+        leaderboardQueryResults.summary = `Leaderboard for the month of ${currentMonthString}`;
 
         return leaderboardQueryResults;
     }

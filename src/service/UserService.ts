@@ -380,6 +380,13 @@ export class UserService {
         return UserDao.getActiveUsersForRange(startDate, endDate);
     }
 
+    public static async getByIds(ids: number[]): Promise<User[]> {
+        const users = await UserDao.getByIds(ids);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
     private static dispatchUserOnCreated(newUserContext: NewUserContext, user: User) {
         const context: Context = {
             type: ContextType.CONTEXT,

@@ -3,10 +3,7 @@ import { Prisma } from '@prisma/client';
 import { CurrentUserLeaderboardElement } from '@resources/types/dto/Leaderboard';
 
 export interface LeaderboardQueryResult {
-    id: number;
-    userName: string;
-    displayName: string;
-    profileUrl: string;
+    userId: number;
     points: number;
     position: number;
 }
@@ -33,14 +30,11 @@ export class LeaderboardDao {
                 Prisma.sql`
             SELECT 
                 userId, 
-                user.username, 
-                user.displayName, 
-                user.photoUrl, 
                 SUM(points) AS points
             FROM point_ledger_record 
             JOIN user ON userId = user.id 
             WHERE point_ledger_record.createdAt BETWEEN ${startDateString} AND ${endDateString}
-            GROUP BY userId, user.username, user.displayName, user.photoUrl
+            GROUP BY userId
             ORDER BY points DESC
             LIMIT ${limit}`
             ),
