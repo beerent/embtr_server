@@ -1,5 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
+import { CurrentUserLeaderboardElement } from '@resources/types/dto/Leaderboard';
 
 export interface LeaderboardQueryResult {
     id: number;
@@ -10,28 +11,64 @@ export interface LeaderboardQueryResult {
     position: number;
 }
 
+export interface LeaderboardQueryResults {
+    leaderboard: LeaderboardQueryResult[];
+    currentUserLeaderboardElement?: CurrentUserLeaderboardElement;
+    summary?: string;
+}
+
 export class LeaderboardDao {
     public static async getByDateAndLimit(
+        userId: number,
         startDate: Date,
         endDate: Date,
         limit: number
-    ): Promise<LeaderboardQueryResult[]> {
-        const startDateString = startDate
-            .toISOString()
-            .replace('T', ' ')
-            .replace('Z', '')
-            .split(' ')[0];
-        const endDateString = endDate
-            .toISOString()
-            .replace('T', ' ')
-            .replace('Z', '')
-            .split(' ')[0];
+    ): Promise<LeaderboardQueryResults> {
+        const startDateString = startDate.toISOString().split('T')[0];
+        const endDateString = endDate.toISOString().split('T')[0];
 
-        const results: LeaderboardQueryResult[] = await prisma.$queryRaw(
-            Prisma.sql`
-            select userId, user.username, user.displayName, user.photoUrl, sum(points) points from point_ledger_record join user on userId = user.id where point_ledger_record.createdAt between ${startDateString} and ${endDateString} group by userId, username, displayName, photoUrl order by points desc limit ${limit}`
-        );
+        const [leaderboard, userRankResult] = await Promise.all([
+            // Get the leaderboard
+            prisma.$queryRaw<LeaderboardQueryResult[]>(
+                Prisma.sql`
+            SELECT 
+                userId, 
+                user.username, 
+                user.displayName, 
+                user.photoUrl, 
+                SUM(points) AS points
+            FROM point_ledger_record 
+            JOIN user ON userId = user.id 
+            WHERE point_ledger_record.createdAt BETWEEN ${startDateString} AND ${endDateString}
+            GROUP BY userId, user.username, user.displayName, user.photoUrl
+            ORDER BY points DESC
+            LIMIT ${limit}`
+            ),
 
-        return results;
+            // Get the user's rank
+            prisma.$queryRaw<CurrentUserLeaderboardElement[]>(
+                Prisma.sql`
+            SELECT CAST(position AS UNSIGNED) AS position, points
+            FROM (
+                SELECT
+                    userId,
+                    SUM(points) AS points,
+                    RANK() OVER (ORDER BY SUM(points) DESC) AS position 
+                FROM point_ledger_record
+                WHERE createdAt BETWEEN ${startDateString} AND ${endDateString}
+                GROUP BY userId
+            ) ranked_users
+            WHERE userId = ${userId}`
+            ),
+        ]);
+
+        const currentUserLeaderboardElement = userRankResult[0]
+            ? {
+                position: Number(userRankResult[0].position),
+                points: userRankResult[0].points,
+            }
+            : undefined;
+
+        return { leaderboard, currentUserLeaderboardElement };
     }
 }

@@ -18,8 +18,7 @@ leaderboardRouterLatest.get(
   authorize,
   async (req, res) => {
     const context = await ContextService.get(req);
-    const type = Constants.getLeaderboardType(req.params.type);
-    console.log('type', req.params.type, type);
+    const type = Constants.getLeaderboardType(req.params.type.toUpperCase());
 
     const leaderboard = await LeaderboardService.get(context, type);
     const response: GetLeaderboardResponse = { ...SUCCESS, leaderboard };
