@@ -28,15 +28,24 @@ export class LeaderboardDao {
             // Get the leaderboard
             prisma.$queryRaw<LeaderboardQueryResult[]>(
                 Prisma.sql`
-            SELECT 
-                userId, 
-                SUM(points) AS points
-            FROM point_ledger_record 
-            JOIN user ON userId = user.id 
-            WHERE point_ledger_record.createdAt BETWEEN ${startDateString} AND ${endDateString}
-            GROUP BY userId
-            ORDER BY points DESC
-            LIMIT ${limit}`
+                SELECT
+                    plr.userId,
+                    SUM(plr.points) AS points
+                FROM point_ledger_record plr
+                JOIN
+                    user u ON plr.userId = u.id
+                LEFT JOIN
+                    property p ON plr.userId = p.userId
+                    AND p.key = 'SOCIAL_BLACKLIST'
+                    AND p.value = 'ENABLED'
+                WHERE
+                    plr.createdAt BETWEEN ${startDateString} AND ${endDateString}
+                    AND p.userId IS NULL
+                GROUP BY
+                    plr.userId
+                ORDER BY
+                    points DESC
+                LIMIT ${limit}`
             ),
 
             // Get the user's rank
