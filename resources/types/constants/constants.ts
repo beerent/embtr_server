@@ -13,6 +13,7 @@ export namespace Constants {
         POINTS = 'POINTS',
         LEVEL = 'LEVEL',
         OPERATING_SYSTEM = 'OPERATING_SYSTEM',
+        SOCIAL_BLACKLIST = 'SOCIAL_BLACKLIST',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -37,6 +38,8 @@ export namespace Constants {
                 return UserPropertyKey.LEVEL;
             case 'OPERATING_SYSTEM':
                 return UserPropertyKey.OPERATING_SYSTEM;
+            case 'SOCIAL_BLACKLIST':
+                return UserPropertyKey.SOCIAL_BLACKLIST;
 
             default:
                 return UserPropertyKey.INVALID;
@@ -329,6 +332,24 @@ export namespace Constants {
 
             default:
                 return LeaderboardType.INVALID;
+        }
+    };
+
+    export enum BooleanState {
+        INVALID = 'INVALID',
+        ENABLED = 'ENABLED',
+        DISABLED = 'DISABLED',
+    }
+
+    export const getBooleanState = (state: string): BooleanState => {
+        switch (state) {
+            case 'ENABLED':
+                return BooleanState.ENABLED;
+            case 'DISABLED':
+                return BooleanState.DISABLED;
+
+            default:
+                return BooleanState.INVALID;
         }
     };
 }

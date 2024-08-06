@@ -7,6 +7,7 @@ export class UserPropertyUtility {
         Constants.UserPropertyKey.TUTORIAL_COMPLETED.toString(),
         Constants.UserPropertyKey.POINTS.toString(),
         Constants.UserPropertyKey.LEVEL.toString(),
+        Constants.UserPropertyKey.SOCIAL_BLACKLIST.toString(),
     ];
 
     public static getLevel(user: User) {
