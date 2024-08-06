@@ -23,6 +23,7 @@ export class PointLedgerRecordService {
 
         await this.upsertPointsAddedLedgerRecord(
             context,
+            dayKey,
             habitId,
             Constants.PointDefinitionType.HABIT_COMPLETE,
             totalTimesOfDay
@@ -36,6 +37,7 @@ export class PointLedgerRecordService {
 
         await this.upsertPointsRemovedLedgerRecord(
             context,
+            dayKey,
             habitId,
             Constants.PointDefinitionType.HABIT_COMPLETE
         );
@@ -48,6 +50,7 @@ export class PointLedgerRecordService {
 
         await this.upsertPointsAddedLedgerRecord(
             context,
+            dayKey,
             dayId,
             Constants.PointDefinitionType.DAY_COMPLETE
         );
@@ -60,6 +63,7 @@ export class PointLedgerRecordService {
 
         await this.upsertPointsRemovedLedgerRecord(
             context,
+            dayKey,
             dayId,
             Constants.PointDefinitionType.DAY_COMPLETE
         );
@@ -76,6 +80,7 @@ export class PointLedgerRecordService {
 
         await this.upsertPointsAddedLedgerRecord(
             context,
+            dayKey,
             plannedDayResultId,
             Constants.PointDefinitionType.PLANNED_DAY_RESULT_CREATED
         );
@@ -92,6 +97,7 @@ export class PointLedgerRecordService {
 
         await this.upsertPointsRemovedLedgerRecord(
             context,
+            dayKey,
             plannedDayResultId,
             Constants.PointDefinitionType.PLANNED_DAY_RESULT_CREATED
         );
@@ -104,6 +110,7 @@ export class PointLedgerRecordService {
 
     private static async upsertPointsAddedLedgerRecord(
         context: Context,
+        dayKey: string,
         relevantId: number,
         pointDefinitionType: Constants.PointDefinitionType,
         pointsSplit?: number
@@ -127,6 +134,7 @@ export class PointLedgerRecordService {
 
         return this.upsertPointsLedgerRecord(
             context,
+            dayKey,
             relevantId,
             pointDefinitionType,
             latestPointDefinitionVersion.points / (pointsSplit ?? 1)
@@ -135,21 +143,24 @@ export class PointLedgerRecordService {
 
     private static async upsertPointsRemovedLedgerRecord(
         context: Context,
+        dayKey: string,
         relevantId: number,
         pointDefinitionType: Constants.PointDefinitionType
     ) {
         console.log(`Removing points for ${pointDefinitionType} on ${relevantId}`);
-        return this.upsertPointsLedgerRecord(context, relevantId, pointDefinitionType, 0);
+        return this.upsertPointsLedgerRecord(context, dayKey, relevantId, pointDefinitionType, 0);
     }
 
     private static async upsertPointsLedgerRecord(
         context: Context,
+        dayKey: string,
         relevantId: number,
         pointDefinitionType: Constants.PointDefinitionType,
         points: number
     ) {
         const pointLedgerRecord = await PointLedgerRecordDao.upsert(
             context.userId,
+            dayKey,
             relevantId,
             pointDefinitionType,
             points

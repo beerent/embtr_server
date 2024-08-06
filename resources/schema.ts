@@ -563,6 +563,7 @@ export interface PointLedgerRecord {
   userId?: number;
   user?: User;
   relevantId?: number;
+  dayKey?: string;
   pointDefinitionType?: string;
   points?: number;
   active?: boolean;

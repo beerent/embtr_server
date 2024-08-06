@@ -763,6 +763,7 @@ model PointLedgerRecord {
     userId              Int      @db.Int
     user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
     relevantId          Int      @db.Int
+    dayKey              String   @default("2020-01-01") @db.VarChar(10)
     pointDefinitionType String   @db.VarChar(255)
     points              Int      @db.Int
     active              Boolean  @default(true)
@@ -771,5 +772,7 @@ model PointLedgerRecord {
 
     @@unique([userId, relevantId, pointDefinitionType], name: "unique_user_relevant_type")
     @@index([userId])
+    @@index([relevantId])
+    @@index([dayKey])
     @@map("point_ledger_record")
 }

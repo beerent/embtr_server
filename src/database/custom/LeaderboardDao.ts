@@ -39,7 +39,7 @@ export class LeaderboardDao {
                     AND p.key = 'SOCIAL_BLACKLIST'
                     AND p.value = 'ENABLED'
                 WHERE
-                    plr.createdAt BETWEEN ${startDateString} AND ${endDateString}
+                    date(plr.dayKey) BETWEEN ${startDateString} AND ${endDateString}
                     AND p.userId IS NULL
                 GROUP BY
                     plr.userId

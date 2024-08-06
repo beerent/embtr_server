@@ -3,6 +3,7 @@ import { prisma } from '@database/prisma';
 export class PointLedgerRecordDao {
     public static async upsert(
         userId: number,
+        dayKey: string,
         relevantId: number,
         pointDefinitionType: string,
         points: number
@@ -16,10 +17,12 @@ export class PointLedgerRecordDao {
                 },
             },
             update: {
+                dayKey,
                 points,
             },
             create: {
                 userId,
+                dayKey,
                 relevantId,
                 pointDefinitionType,
                 points,
