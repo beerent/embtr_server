@@ -38,6 +38,7 @@ import {
     Level,
     PointDefinition,
     PointLedgerRecord,
+    Feature,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -81,11 +82,12 @@ type PrismaModel =
     | HabitStreakTier
     | Level
     | PointDefinition
-    | PointLedgerRecord;
+    | PointLedgerRecord
+    | Feature;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
-        return prismaObj.map(obj => this.convert<T>(obj));
+        return prismaObj.map((obj) => this.convert<T>(obj));
     }
 
     public static convert<T>(prismaObj: PrismaModel, shouldSanitize: boolean = true): T {
@@ -104,6 +106,6 @@ export class ModelConverter {
 
         const converted = convertObj(prismaObj);
         const sanitized = shouldSanitize ? sanitizeModel(converted) : converted;
-        return sanitized
+        return sanitized;
     }
 }

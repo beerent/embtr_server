@@ -1,22 +1,22 @@
-import { Response } from "./RequestTypes";
-import { Comment, Like } from "../../schema";
+import { Response } from './RequestTypes';
+import { Comment, Like } from '../../schema';
 
 export interface CreateCommentRequest {
-  comment: string
+    comment: string;
 }
 
 export interface CreateCommentResponse extends Response {
-  comment?: Comment
+    comment?: Comment;
 }
 
 export interface DeleteCommentRequest {
-  commentId: number;
+    commentId: number;
 }
 
 export interface GetBooleanResponse extends Response {
-  result?: boolean;
+    result?: boolean;
 }
 
 export interface CreateLikeResponse extends Response {
-  like?: Like
+    like?: Like;
 }

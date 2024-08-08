@@ -435,6 +435,8 @@ export interface BlockedUser {
 export interface Feature {
   id?: number;
   name?: string;
+  description?: string;
+  status?: string;
   requesterRoles?: Role[];
   targetRoles?: Role[];
 }

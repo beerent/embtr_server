@@ -30,6 +30,7 @@ import { UserBadgeService } from './service/UserBadgeService';
 import { AccountDao } from './database/AccountDao';
 import { NewUserContext } from '@src/general/auth/Context';
 import { ChallengeService } from './service/ChallengeService';
+import { LeaderboardService } from './service/feature/LeaderboardService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -716,6 +717,12 @@ const handleCommandResetPoints = async () => {
     }
 };
 
+export const handleCommandGetTodayLeaderboard = async () => {
+    adminContext.dayKey = '2024-08-07';
+    const leaderboard = await LeaderboardService.get(adminContext, Constants.LeaderboardType.TODAY);
+    console.log(leaderboard);
+};
+
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -938,6 +945,10 @@ const processCommand = async (command: string) => {
 
         case 'resetPoints':
             await handleCommandResetPoints();
+            break;
+
+        case 'getTodayLeaderboard':
+            await handleCommandGetTodayLeaderboard();
             break;
 
         default:

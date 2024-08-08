@@ -1,6 +1,6 @@
 import { Context } from '@src/general/auth/Context';
 import { Property, User } from '@resources/schema';
-import { UserPropertyDao } from '@src/database/UserPropertyDao';
+import { UserPropertyDao, ValueCountMap } from '@src/database/UserPropertyDao';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
@@ -9,7 +9,6 @@ import { Roles } from '@src/roles/Roles';
 import { HttpCode } from '@src/common/RequestResponses';
 import { UserService } from './UserService';
 import { UserPropertyEventDispatcher } from '@src/event/user_property/UserPropertyEventDispatcher';
-import { LevelEventDispatcher } from '@src/event/level/LevelEventDispatcher';
 
 export class UserPropertyService {
     public static async getAll(context: Context, userId: number): Promise<Property[]> {
@@ -370,6 +369,35 @@ export class UserPropertyService {
         //console.log('Level updated', level);
 
         return level;
+    }
+
+    public static async getFeatureVote(context: Context): Promise<number | undefined> {
+        const voteId = await this.get(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.FEATURE_VOTE
+        );
+        if (!voteId?.value) {
+            return undefined;
+        }
+
+        return parseInt(voteId.value);
+    }
+
+    public static async setFeatureVote(context: Context, id: number) {
+        await UserPropertyService.set(
+            context,
+            context.userId,
+            Constants.UserPropertyKey.FEATURE_VOTE,
+            id.toString()
+        );
+    }
+
+    public static async countVotesByKey(
+        context: Context,
+        key: Constants.UserPropertyKey
+    ): Promise<ValueCountMap> {
+        return UserPropertyDao.countByDistinctValueForKey(key);
     }
 
     private static async get(

@@ -61,6 +61,7 @@ model Property {
 
     @@unique([userId, key])
     @@index([userId])
+    @@index([key])
     @@map("property")
 }
 
@@ -595,8 +596,10 @@ model BlockedUser {
 }
 
 model Feature {
-    id   Int    @id @default(autoincrement())
-    name String @unique @db.VarChar(255)
+    id          Int    @id @default(autoincrement())
+    name        String @unique @db.VarChar(255)
+    description String @db.VarChar(255)
+    status      String @default("PENDING")
 
     requesterRoles Role[] @relation("FeatureToRequesterRole")
     targetRoles    Role[] @relation("FeatureToTargetRole")

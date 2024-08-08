@@ -14,6 +14,7 @@ export namespace Constants {
         LEVEL = 'LEVEL',
         OPERATING_SYSTEM = 'OPERATING_SYSTEM',
         SOCIAL_BLACKLIST = 'SOCIAL_BLACKLIST',
+        FEATURE_VOTE = 'FEATURE_VOTE',
     }
 
     export const getUserPropertyKey = (key: string): UserPropertyKey => {
@@ -40,6 +41,8 @@ export namespace Constants {
                 return UserPropertyKey.OPERATING_SYSTEM;
             case 'SOCIAL_BLACKLIST':
                 return UserPropertyKey.SOCIAL_BLACKLIST;
+            case 'FEATURE_VOTE':
+                return UserPropertyKey.FEATURE_VOTE;
 
             default:
                 return UserPropertyKey.INVALID;

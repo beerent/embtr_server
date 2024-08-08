@@ -1,6 +1,29 @@
 import { prisma } from '@database/prisma';
 
+export interface ValueCountMap {
+    [value: string]: number;
+}
+
 export class UserPropertyDao {
+    public static async countByDistinctValueForKey(key: string): Promise<ValueCountMap> {
+        const result = await prisma.property.groupBy({
+            by: ['value'],
+            where: {
+                key,
+            },
+            _count: {
+                value: true,
+            },
+        });
+
+        const valueCountMap: ValueCountMap = {};
+        result.forEach((row) => {
+            valueCountMap[row.value] = row._count.value;
+        });
+
+        return valueCountMap;
+    }
+
     public static async getByKey(userId: number, key: string) {
         return prisma.property.findUnique({
             where: {
