@@ -437,6 +437,9 @@ export interface Feature {
   name?: string;
   description?: string;
   status?: string;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
   requesterRoles?: Role[];
   targetRoles?: Role[];
 }

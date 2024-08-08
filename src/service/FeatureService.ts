@@ -8,6 +8,7 @@ import { UserPropertyService } from './UserPropertyService';
 
 // "Look at me, I'm the captain now" - jeroenvanwissen - 2024-08-07
 // eslint-disable-next-line //@ts-ignore. - TheIbraDev - 2024-08-07
+// "Common misconception: Twitch stole from us, we didn't steal from Twitch" - TheCaptainCoder - 2024-08-08
 
 export class FeatureService {
     public static async getAll(context: Context): Promise<Feature[]> {
