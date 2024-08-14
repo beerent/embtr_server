@@ -1,10 +1,10 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
-import { Interactable } from '@resources/types/interactable/Interactable';
+import { Constants } from '@resources/types/constants/constants';
 
 export class CommentDao {
     public static async create(
-        interactable: Interactable,
+        interactable: Constants.Interactable,
         userId: number,
         targetId: number,
         comment: string
@@ -18,20 +18,26 @@ export class CommentDao {
             },
         };
 
-        if (interactable === Interactable.PLANNED_DAY_RESULT) {
+        if (interactable === Constants.Interactable.PLANNED_DAY_RESULT) {
             data.plannedDayResults = {
                 connect: {
                     id: targetId,
                 },
             };
-        } else if (interactable === Interactable.USER_POST) {
+        } else if (interactable === Constants.Interactable.USER_POST) {
             data.userPosts = {
                 connect: {
                     id: targetId,
                 },
             };
-        } else if (interactable === Interactable.CHALLENGE) {
+        } else if (interactable === Constants.Interactable.CHALLENGE) {
             data.challenges = {
+                connect: {
+                    id: targetId,
+                },
+            };
+        } else if (interactable === Constants.Interactable.FEATURED_POST) {
+            data.featuredPosts = {
                 connect: {
                     id: targetId,
                 },
@@ -44,18 +50,18 @@ export class CommentDao {
                 user: true,
                 userPosts: {
                     include: {
-                        comments: true
-                    }
+                        comments: true,
+                    },
                 },
                 challenges: {
                     include: {
-                        comments: true
+                        comments: true,
                     },
                 },
                 plannedDayResults: {
                     include: {
                         plannedDay: true,
-                        comments: true
+                        comments: true,
                     },
                 },
             },

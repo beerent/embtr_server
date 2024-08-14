@@ -45,6 +45,7 @@ model User {
     habitStreaks           HabitStreak[]
     userBadges             UserBadge[]
     pointLedgerRecords     PointLedgerRecord[]
+    userFeaturedPosts      UserFeaturedPost[]
 
     @@index([username])
     @@map("user")
@@ -251,6 +252,7 @@ model Comment {
     plannedDayResults PlannedDayResult[]
     userPosts         UserPost[]
     challenges        Challenge[]
+    featuredPosts     FeaturedPost[]
 
     @@index([userId])
     @@map("comment")
@@ -267,6 +269,7 @@ model Like {
     userPosts         UserPost[]
     quoteOfTheDays    QuoteOfTheDay[]
     challenges        Challenge[]
+    featuredPosts     FeaturedPost[]
 
     @@index([userId])
     @@map("like")
@@ -281,6 +284,7 @@ model Image {
     plannedDayResults PlannedDayResult[]
     userPosts         UserPost[]
     challenges        Challenge[]
+    featuredPosts     FeaturedPost[]
 
     @@map("image")
 }
@@ -782,4 +786,40 @@ model PointLedgerRecord {
     @@index([relevantId])
     @@index([dayKey])
     @@map("point_ledger_record")
+}
+
+model FeaturedPost {
+    id Int @id @default(autoincrement())
+
+    title             String?            @db.VarChar(255)
+    subtitle          String?            @db.VarChar(255)
+    body              String?            @db.VarChar(750)
+    expirationDate    DateTime?          @db.Date
+    active            Boolean            @default(true)
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @default(now()) @updatedAt
+    images            Image[]
+    likes             Like[]
+    comments          Comment[]
+    userFeaturedPosts UserFeaturedPost[]
+
+    @@map("featured_post")
+}
+
+model UserFeaturedPost {
+    id             Int          @id @default(autoincrement())
+    userId         Int          @db.Int
+    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    featuredPostId Int          @db.Int
+    featuredPost   FeaturedPost @relation(fields: [featuredPostId], references: [id], onDelete: Cascade)
+    isViewed       Boolean      @default(false)
+    active         Boolean      @default(true)
+    sortDate       DateTime
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @default(now()) @updatedAt
+
+    @@unique([userId, featuredPostId], name: "unique_user_featured_post")
+    @@index([userId])
+    @@index([featuredPostId])
+    @@map("user_featured_post")
 }

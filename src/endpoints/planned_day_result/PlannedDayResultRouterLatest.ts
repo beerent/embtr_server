@@ -1,5 +1,5 @@
 import { PlannedDayResult } from '@resources/schema';
-import { Interactable } from '@resources/types/interactable/Interactable';
+import { Constants } from '@resources/types/constants/constants';
 import { PlannedDayResultSummary } from '@resources/types/planned_day_result/PlannedDayResult';
 import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
 import {
@@ -186,7 +186,7 @@ plannedDayResultRouterLatest.post(
     validateCommentPost,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const interactable = Interactable.PLANNED_DAY_RESULT;
+        const interactable = Constants.Interactable.PLANNED_DAY_RESULT;
         const targetId = Number(req.params.id);
         const comment = req.body.comment;
 
@@ -225,7 +225,7 @@ plannedDayResultRouterLatest.post(
     runEndpoint(async (req, res) => {
         const context: Context = await ContextService.get(req);
         const targetId = parseInt(req.params.id);
-        const interactable = Interactable.PLANNED_DAY_RESULT;
+        const interactable = Constants.Interactable.PLANNED_DAY_RESULT;
 
         const like = await LikeService.create(context, interactable, targetId);
         const response: CreateLikeResponse = { ...SUCCESS, like };

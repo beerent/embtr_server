@@ -33,6 +33,7 @@ export interface User {
   habitStreaks?: HabitStreak[];
   userBadges?: UserBadge[];
   pointLedgerRecords?: PointLedgerRecord[];
+  userFeaturedPosts?: UserFeaturedPost[];
 }
 
 export interface Property {
@@ -192,6 +193,7 @@ export interface Comment {
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
   challenges?: Challenge[];
+  featuredPosts?: FeaturedPost[];
 }
 
 export interface Like {
@@ -205,6 +207,7 @@ export interface Like {
   userPosts?: UserPost[];
   quoteOfTheDays?: QuoteOfTheDay[];
   challenges?: Challenge[];
+  featuredPosts?: FeaturedPost[];
 }
 
 export interface Image {
@@ -216,6 +219,7 @@ export interface Image {
   plannedDayResults?: PlannedDayResult[];
   userPosts?: UserPost[];
   challenges?: Challenge[];
+  featuredPosts?: FeaturedPost[];
 }
 
 export interface Notification {
@@ -572,6 +576,34 @@ export interface PointLedgerRecord {
   pointDefinitionType?: string;
   points?: number;
   active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface FeaturedPost {
+  id?: number;
+  title?: string;
+  subtitle?: string;
+  body?: string;
+  expirationDate?: Date;
+  active?: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+  images?: Image[];
+  likes?: Like[];
+  comments?: Comment[];
+  userFeaturedPosts?: UserFeaturedPost[];
+}
+
+export interface UserFeaturedPost {
+  id?: number;
+  userId?: number;
+  user?: User;
+  featuredPostId?: number;
+  featuredPost?: FeaturedPost;
+  isViewed?: boolean;
+  active?: boolean;
+  sortDate?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }

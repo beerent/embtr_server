@@ -1,5 +1,5 @@
 import express from 'express';
-import { Interactable } from '@resources/types/interactable/Interactable';
+import { Constants } from '@resources/types/constants/constants';
 import {
     CreateUserPostRequest,
     CreateUserPostResponse,
@@ -18,8 +18,8 @@ import {
 } from '@src/middleware/general/GeneralValidation';
 import {
     validateGetById,
-    validateLike,
     validatePost,
+    validateLike,
     validateUpdate,
 } from '@src/middleware/user_post/UserPostValidation';
 import { CommentService } from '@src/service/CommentService';
@@ -29,7 +29,9 @@ import { UserPostService } from '@src/service/UserPostService';
 import { DateUtility } from '@src/utility/date/DateUtility';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import {
-    CreateCommentRequest, CreateCommentResponse, CreateLikeResponse
+    CreateCommentRequest,
+    CreateCommentResponse,
+    CreateLikeResponse,
 } from '@resources/types/requests/GeneralTypes';
 
 const userPostRouterLatest = express.Router();
@@ -81,7 +83,6 @@ userPostRouterLatest.get(
     })
 );
 
-
 userPostRouterLatest.get(
     '/:id',
     routeLogger(v),
@@ -125,7 +126,7 @@ userPostRouterLatest.post(
         const context = await ContextService.get(req);
         const targetId = Number(req.params.id);
 
-        const like = await LikeService.create(context, Interactable.USER_POST, targetId);
+        const like = await LikeService.create(context, Constants.Interactable.USER_POST, targetId);
         const response: CreateLikeResponse = { ...SUCCESS, like };
         res.status(response.httpCode).json(response);
     })
@@ -143,7 +144,12 @@ userPostRouterLatest.post(
         const request: CreateCommentRequest = req.body;
         const comment = request.comment;
 
-        const createdComment = await CommentService.create(context, Interactable.USER_POST, targetId, comment);
+        const createdComment = await CommentService.create(
+            context,
+            Constants.Interactable.USER_POST,
+            targetId,
+            comment
+        );
         const response: CreateCommentResponse = { ...SUCCESS, comment: createdComment };
 
         res.status(response.httpCode).json(response);

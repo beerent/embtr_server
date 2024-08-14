@@ -1,9 +1,9 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
-import { Interactable } from '@resources/types/interactable/Interactable';
+import { Constants } from '@resources/types/constants/constants';
 
 export class LikeDao {
-    public static async create(interactable: Interactable, userId: number, id: number) {
+    public static async create(interactable: Constants.Interactable, userId: number, id: number) {
         const data: Prisma.LikeCreateInput = {
             user: {
                 connect: {
@@ -12,26 +12,32 @@ export class LikeDao {
             },
         };
 
-        if (interactable === Interactable.PLANNED_DAY_RESULT) {
+        if (interactable === Constants.Interactable.PLANNED_DAY_RESULT) {
             data.plannedDayResults = {
                 connect: {
                     id,
                 },
             };
-        } else if (interactable === Interactable.USER_POST) {
+        } else if (interactable === Constants.Interactable.USER_POST) {
             data.userPosts = {
                 connect: {
                     id,
                 },
             };
-        } else if (interactable === Interactable.QUOTE_OF_THE_DAY) {
+        } else if (interactable === Constants.Interactable.QUOTE_OF_THE_DAY) {
             data.quoteOfTheDays = {
                 connect: {
                     id,
                 },
             };
-        } else if (interactable === Interactable.CHALLENGE) {
+        } else if (interactable === Constants.Interactable.CHALLENGE) {
             data.challenges = {
+                connect: {
+                    id,
+                },
+            };
+        } else if (interactable === Constants.Interactable.FEATURED_POST) {
+            data.featuredPosts = {
                 connect: {
                     id,
                 },
@@ -50,6 +56,7 @@ export class LikeDao {
                 },
                 quoteOfTheDays: true,
                 challenges: true,
+                featuredPosts: true,
             },
         });
 
@@ -78,37 +85,50 @@ export class LikeDao {
         });
     }
 
-    public static async exists(interactable: Interactable, userId: number, targetId: number) {
+    public static async exists(
+        interactable: Constants.Interactable,
+        userId: number,
+        targetId: number
+    ) {
+        console.log('exists', interactable, userId, targetId);
         const where: Prisma.LikeWhereInput = {
             userId,
             active: true,
         };
 
-        if (interactable === Interactable.PLANNED_DAY_RESULT) {
+        if (interactable === Constants.Interactable.PLANNED_DAY_RESULT) {
             where.plannedDayResults = {
                 some: {
                     id: targetId,
                 },
             };
-        } else if (interactable === Interactable.USER_POST) {
+        } else if (interactable === Constants.Interactable.USER_POST) {
             where.userPosts = {
                 some: {
                     id: targetId,
                 },
             };
-        } else if (interactable === Interactable.QUOTE_OF_THE_DAY) {
+        } else if (interactable === Constants.Interactable.QUOTE_OF_THE_DAY) {
             where.quoteOfTheDays = {
                 some: {
                     id: targetId,
                 },
             };
-        } else if (interactable === Interactable.CHALLENGE) {
+        } else if (interactable === Constants.Interactable.CHALLENGE) {
             where.challenges = {
                 some: {
                     id: targetId,
                 },
             };
+        } else if (interactable === Constants.Interactable.FEATURED_POST) {
+            where.featuredPosts = {
+                some: {
+                    id: targetId,
+                },
+            };
         }
+
+        console.log('where', where);
 
         const result = await prisma.like.findFirst({
             where: where,

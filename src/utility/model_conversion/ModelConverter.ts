@@ -39,6 +39,8 @@ import {
     PointDefinition,
     PointLedgerRecord,
     Feature,
+    FeaturedPost,
+    UserFeaturedPost,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -83,7 +85,9 @@ type PrismaModel =
     | Level
     | PointDefinition
     | PointLedgerRecord
-    | Feature;
+    | Feature
+    | FeaturedPost
+    | UserFeaturedPost;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {

@@ -1,10 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express';
+import { ClientVersionUtil } from '@src/utility/ClientVersionUtil';
+import '@src/event/event_listener_imports';
+import { WebSocketService } from './service/WebSocketService';
 import bodyParser from 'body-parser';
 import userRouter from './endpoints/user/UserRouter';
 import { logger } from './common/logger/Logger';
 import { handleError } from './middleware/error/ErrorMiddleware';
 import habitRouter from '@src/endpoints/habit/HabitRouter';
-import { ClientVersionUtil } from '@src/utility/ClientVersionUtil';
 import accountRouter from './endpoints/account/AccountRouter';
 import plannedDayRouter from './endpoints/planned_day/PlannedDayRouter';
 import plannedDayResultRouter from '@src/endpoints/planned_day_result/PlannedDayResultRouter';
@@ -22,7 +24,6 @@ import healthRouter from '@src/endpoints/health/HealthRouter';
 import reportRouter from './endpoints/report/ReportRouter';
 import scheduledHabitRouter from './endpoints/scheduled_habit/ScheduledHabitRouter';
 import habitStreakRouter from './endpoints/habit_streak/HabitStreakRouter';
-import '@src/event/event_listener_imports';
 import newUserRouter from './endpoints/new_user/NewUserRouter';
 import jobRouter from './endpoints/job/JobRouter';
 import challengeRouter from './endpoints/challenge/ChallengeRouter';
@@ -33,11 +34,11 @@ import tagRouter from './endpoints/tag/TagRouter';
 import premiumRouter from './endpoints/premium_router/PremiumRouter';
 import badgeRouter from './endpoints/badge/BadgeRouter';
 import http from 'http';
-import { WebSocketService } from './service/WebSocketService';
 import levelRouter from './endpoints/level/LevelRouter';
 import pointRouter from './endpoints/point/PointRouter';
 import leaderboardRouter from './endpoints/leaderboard/LeaderboardRouter';
 import featureRouter from './endpoints/feature/FeatureRouter';
+import featuredPostRouter from './endpoints/featured_post/FeaturedPostRouter';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
@@ -111,6 +112,7 @@ app.use('/', badgeRouter);
 app.use('/', pointRouter);
 app.use('/', leaderboardRouter);
 app.use('/', featureRouter);
+app.use('/', featuredPostRouter);
 app.use('/', healthRouter);
 
 app.use(handleError);

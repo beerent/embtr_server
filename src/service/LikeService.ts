@@ -1,6 +1,4 @@
-import { NotificationType } from './NotificationService';
 import { HttpCode } from '@src/common/RequestResponses';
-import { Interactable } from '@resources/types/interactable/Interactable';
 import { ChallengeDao } from '@src/database/ChallengeDao';
 import { LikeDao } from '@src/database/LikeDao';
 import { PlannedDayResultDao } from '@src/database/PlannedDayResultDao';
@@ -12,11 +10,14 @@ import { Code } from '@resources/codes';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { LikeEventDispatcher } from '@src/event/like/LikeEventDispatcher';
+import { Constants } from '@resources/types/constants/constants';
+import { NotificationType } from './NotificationService';
+import { FeaturedPostDao } from '@src/database/FeaturedPostDao';
 
 export class LikeService {
     public static async create(
         context: Context,
-        interactable: Interactable,
+        interactable: Constants.Interactable,
         targetId: number
     ): Promise<Like> {
         const exists = await this.exists(interactable, targetId);
@@ -48,6 +49,10 @@ export class LikeService {
         const likeModel: Like = ModelConverter.convert(like);
 
         const toUserId = this.getToUserId(interactable, likeModel);
+        if (!toUserId) {
+            return likeModel;
+        }
+
         const notificationType = this.getNotificationType(interactable);
         LikeEventDispatcher.onCreated(
             context,
@@ -60,56 +65,66 @@ export class LikeService {
         return likeModel;
     }
 
-    private static async exists(interactable: Interactable, targetId: number): Promise<boolean> {
+    private static async exists(
+        interactable: Constants.Interactable,
+        targetId: number
+    ): Promise<boolean> {
         let exists = false;
 
         switch (interactable) {
-            case Interactable.PLANNED_DAY_RESULT:
+            case Constants.Interactable.PLANNED_DAY_RESULT:
                 exists = await PlannedDayResultDao.existsById(targetId);
                 break;
 
-            case Interactable.USER_POST:
+            case Constants.Interactable.USER_POST:
                 exists = await UserPostDao.existsById(targetId);
                 break;
 
-            case Interactable.QUOTE_OF_THE_DAY:
+            case Constants.Interactable.QUOTE_OF_THE_DAY:
                 exists = await QuoteOfTheDayDao.existsById(targetId);
                 break;
 
-            case Interactable.CHALLENGE:
+            case Constants.Interactable.CHALLENGE:
                 exists = await ChallengeDao.existsById(targetId);
+                break;
+
+            case Constants.Interactable.FEATURED_POST:
+                exists = await FeaturedPostDao.existsById(targetId);
                 break;
         }
 
         return exists;
     }
 
-    private static getToUserId(interactable: Interactable, like: Like): number {
-        if (interactable === Interactable.USER_POST) {
-            return like.userPosts?.[0].userId ?? 0;
-        }
+    private static getToUserId(
+        interactable: Constants.Interactable,
+        like: Like
+    ): number | undefined {
+        switch (interactable) {
+            case Constants.Interactable.USER_POST:
+                return like.userPosts?.[0].userId ?? 0;
 
-        if (interactable === Interactable.CHALLENGE) {
-            return like.challenges?.[0].creatorId ?? 0;
-        }
+            case Constants.Interactable.CHALLENGE:
+                return like.challenges?.[0].creatorId ?? 0;
 
-        if (interactable === Interactable.PLANNED_DAY_RESULT) {
-            return like.plannedDayResults?.[0].plannedDay?.userId ?? 0;
-        }
+            case Constants.Interactable.PLANNED_DAY_RESULT:
+                return like.plannedDayResults?.[0].plannedDay?.userId ?? 0;
 
-        if (interactable === Interactable.QUOTE_OF_THE_DAY) {
-            return like.quoteOfTheDays?.[0].userId ?? 0;
-        }
+            case Constants.Interactable.QUOTE_OF_THE_DAY:
+                return like.quoteOfTheDays?.[0].userId ?? 0;
 
-        return 0;
+            case Constants.Interactable.FEATURED_POST:
+            default:
+                return undefined;
+        }
     }
 
-    private static getNotificationType(interactable: Interactable): NotificationType {
-        if (interactable === Interactable.USER_POST) {
+    private static getNotificationType(interactable: Constants.Interactable): NotificationType {
+        if (interactable === Constants.Interactable.USER_POST) {
             return NotificationType.TIMELINE_LIKE;
         }
 
-        if (interactable === Interactable.CHALLENGE) {
+        if (interactable === Constants.Interactable.CHALLENGE) {
             return NotificationType.CHALLENGE_LIKE;
         }
 

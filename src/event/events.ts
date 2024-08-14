@@ -285,4 +285,38 @@ export namespace Event {
             };
         }
     }
+
+    export namespace Timeline {
+        export const Accessed = 'TIMELINE_ACCESSED';
+
+        export class Event {
+            context: Context;
+
+            constructor(context: Context) {
+                this.context = context;
+            }
+
+            public getKey = () => {
+                return `${this.context.userId}`;
+            };
+        }
+    }
+
+    export namespace UserFeaturedPost {
+        export const Accessed = 'USER_FEATURED_POST_ACCESSED';
+
+        export class Event {
+            context: Context;
+            id: number;
+
+            constructor(context: Context, id: number) {
+                this.context = context;
+                this.id = id;
+            }
+
+            public getKey = () => {
+                return `${this.context.userId}_${this.id}`;
+            };
+        }
+    }
 }

@@ -6,7 +6,7 @@ import { QuoteOfTheDayService } from '@src/service/QuoteOfTheDayService';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { validateLikePost } from '@src/middleware/general/GeneralValidation';
 import { LikeService } from '@src/service/LikeService';
-import { Interactable } from '@resources/types/interactable/Interactable';
+import { Constants } from '@resources/types/constants/constants';
 import { ContextService } from '@src/service/ContextService';
 import {
     CreateQuoteOfTheDayRequest,
@@ -74,7 +74,7 @@ quoteOfTheDayRouterLatest.post(
     validateLikePost,
     runEndpoint(async (req, res) => {
         const context: Context = await ContextService.get(req);
-        const interactable = Interactable.QUOTE_OF_THE_DAY;
+        const interactable = Constants.Interactable.QUOTE_OF_THE_DAY;
         const targetId = parseInt(req.params.id);
 
         const like = await LikeService.create(context, interactable, targetId);

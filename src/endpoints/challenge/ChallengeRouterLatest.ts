@@ -10,7 +10,7 @@ import {
 } from '@src/middleware/general/GeneralValidation';
 import { runEndpoint } from '@src/middleware/error/ErrorMiddleware';
 import { LikeService } from '@src/service/LikeService';
-import { Interactable } from '@resources/types/interactable/Interactable';
+import { Constants } from '@resources/types/constants/constants';
 import { CommentService } from '@src/service/CommentService';
 import { routeLogger } from '@src/middleware/logging/LoggingMiddleware';
 import { ContextService } from '@src/service/ContextService';
@@ -150,7 +150,7 @@ challengeRouterLatest.post(
     runEndpoint(async (req, res) => {
         const context: Context = await ContextService.get(req);
         const targetId = Number(req.params.id);
-        const interactable = Interactable.CHALLENGE;
+        const interactable = Constants.Interactable.CHALLENGE;
 
         const like = await LikeService.create(context, interactable, targetId);
         const response: CreateLikeResponse = { ...SUCCESS, like };
@@ -166,7 +166,7 @@ challengeRouterLatest.post(
     validateCommentPost,
     runEndpoint(async (req, res) => {
         const context = await ContextService.get(req);
-        const interactable = Interactable.CHALLENGE;
+        const interactable = Constants.Interactable.CHALLENGE;
         const targetId = Number(req.params.id);
         const comment = req.body.comment;
 

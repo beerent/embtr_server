@@ -6,13 +6,16 @@ import {
 } from '@resources/types/requests/Timeline';
 import { UserPostService } from '@src/service/UserPostService';
 import { PlannedDayResultService } from '@src/service/PlannedDayResultService';
-import { PlannedDayResult, UserPost } from '@resources/schema';
+import { PlannedDayResult, UserFeaturedPost, UserPost } from '@resources/schema';
 import { TimelineDao } from '@src/database/custom/TimelineDao';
 import { Context } from '@src/general/auth/Context';
 import { BlockUserService } from '@src/service/BlockUserService';
 import { ChallengeService } from './ChallengeService';
 import { ChallengeRecentlyJoined } from '@resources/types/dto/Challenge';
 import { PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
+import { TimelineEventDispatcher } from '@src/event/timeline/TimelineEventDispatcher';
+import { UserFeaturedPostService } from './UserFeaturedPostService';
+import { UserFeaturePostEventDispatcher } from '@src/event/user_feature_post/UserFeaturedPostEventDispatcher';
 
 export class TimelineService {
     public static async get(
@@ -28,15 +31,18 @@ export class TimelineService {
         const joinedBlockedUserIds = await BlockUserService.getBlockedAndBlockedByUserIds(context);
 
         const queryData = await TimelineDao.getByDateAndLimit(
+            context.userId,
             timelineRequestCursor.cursor,
             timelineRequestCursor.limit
         );
 
-        let [userPosts, plannedDayResults, challengeSummaries] = await Promise.all([
-            UserPostService.getAllByIds(context, queryData.userPostIds),
-            PlannedDayResultService.getAllByIds(context, queryData.plannedDayResultIds),
-            ChallengeService.getChallengeSummariesByIds(context, queryData.challengeIds),
-        ]);
+        let [userPosts, plannedDayResults, challengeSummaries, userFeaturedPosts] =
+            await Promise.all([
+                UserPostService.getAllByIds(context, queryData.userPostIds),
+                PlannedDayResultService.getAllByIds(context, queryData.plannedDayResultIds),
+                ChallengeService.getChallengeSummariesByIds(context, queryData.challengeIds),
+                UserFeaturedPostService.getAllByIds(context, queryData.userFeaturedPostIds),
+            ]);
 
         userPosts = userPosts.filter(
             (userPost) => !joinedBlockedUserIds.includes(userPost.userId ?? -1)
@@ -52,8 +58,12 @@ export class TimelineService {
             ...TimelineService.createRecentlyJoinedChallengeTimelineElements(
                 challengeSummaries ?? []
             ),
+            ...TimelineService.createUserFeaturedPostTimelineElements(userFeaturedPosts ?? []),
         ];
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        this.dispatchAccessedUserFeaturedPosts(context, userFeaturedPosts);
+        TimelineEventDispatcher.onAccessed(context);
 
         const timelineData = this.postProcessData(elements, timelineRequestCursor.limit);
         return timelineData;
@@ -176,6 +186,34 @@ export class TimelineService {
         }
 
         return elements;
+    }
+
+    private static createUserFeaturedPostTimelineElements(userFeaturedPosts: UserFeaturedPost[]) {
+        const elements: TimelineElement[] = [];
+
+        for (const userFeaturedPost of userFeaturedPosts) {
+            elements.push({
+                type: TimelineElementType.USER_FEATURED_POST,
+                createdAt: userFeaturedPost.sortDate ?? new Date(),
+                userFeaturedPost,
+            });
+        }
+
+        return elements;
+    }
+
+    private static dispatchAccessedUserFeaturedPosts(
+        context: Context,
+        userFeaturedPosts: UserFeaturedPost[]
+    ) {
+        console.log('dispatchAccessedUserFeaturedPosts');
+        for (const userFeaturedPost of userFeaturedPosts) {
+            if (!userFeaturedPost.id || userFeaturedPost.isViewed) {
+                continue;
+            }
+
+            UserFeaturePostEventDispatcher.onAccessed(context, userFeaturedPost.id);
+        }
     }
 
     private static getCursor(

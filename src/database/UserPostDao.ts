@@ -1,7 +1,6 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { UserPost } from '@resources/schema';
-import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
 import { CommonUpserts } from './CommonUpserts';
 import { UserIncludes } from './UserDao';
 
