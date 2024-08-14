@@ -1,5 +1,5 @@
 import express from 'express';
-import featuredPostRouterLatest from './featuredPostRouterLatest';
+import featuredPostRouterLatest from './FeaturedPostRouterLatest';
 
 const featuredPostRouter = express.Router();
 
