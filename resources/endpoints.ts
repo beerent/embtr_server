@@ -12,6 +12,7 @@ export const NOTIFICATION = '/notification/';
 export const DAILY_HISTORY = '/daily-history/';
 export const QUOTE_OF_THE_DAY = '/quote-of-the-day/';
 export const CHALLENGE = '/challenge/';
+export const FEATURED_POST = '/featured-post/';
 
 export const getInteractableEndpoint = (interactable: Interactable) => {
   switch (interactable) {
@@ -23,6 +24,8 @@ export const getInteractableEndpoint = (interactable: Interactable) => {
       return QUOTE_OF_THE_DAY;
     case Interactable.CHALLENGE:
       return CHALLENGE;
+    case Interactable.FEATURED_POST:
+      return FEATURED_POST;
 
     default:
       return undefined;

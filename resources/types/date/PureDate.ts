@@ -31,6 +31,20 @@ export class PureDate {
         return new PureDate(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate());
     }
 
+    public static fromTimeZone(timeone: string): PureDate {
+        const date = new Date();
+
+        const offset = date.getTimezoneOffset();
+        const utc = date.getTime() + offset * 60000;
+        const newDate = new Date(utc + 3600000 * Number(timeone));
+
+        return new PureDate(
+            newDate.getUTCFullYear(),
+            newDate.getUTCMonth() + 1,
+            newDate.getUTCDate()
+        );
+    }
+
     public static fromObject(date: any): PureDate {
         return new PureDate(date.year, date.month, date.day);
     }

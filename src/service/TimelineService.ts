@@ -206,7 +206,6 @@ export class TimelineService {
         context: Context,
         userFeaturedPosts: UserFeaturedPost[]
     ) {
-        console.log('dispatchAccessedUserFeaturedPosts');
         for (const userFeaturedPost of userFeaturedPosts) {
             if (!userFeaturedPost.id || userFeaturedPost.isViewed) {
                 continue;

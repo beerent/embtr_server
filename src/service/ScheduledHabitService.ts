@@ -43,17 +43,18 @@ export class ScheduledHabitService {
             }
 
             const existingScheduledHabit = await this.getLatestVersionByTaskId(context, task.id);
-            if (!existingScheduledHabit ) {
+            if (!existingScheduledHabit) {
                 continue;
             }
 
             const scheduledHabit: ScheduledHabit = {
                 ...existingScheduledHabit,
-                quantity: requirement.calculationType === ChallengeCalculationType.UNIQUE
-                    ? requirement.requiredTaskQuantity
-                    : 1,
+                quantity:
+                    requirement.calculationType === ChallengeCalculationType.UNIQUE
+                        ? requirement.requiredTaskQuantity
+                        : 1,
                 unitId: requirement.unitId,
-            }
+            };
 
             const updatedScheduledHabit = await this.replace(context, scheduledHabit);
             scheduledHabits.push(updatedScheduledHabit);
@@ -304,12 +305,6 @@ export class ScheduledHabitService {
         }
 
         const scheduledHabitModels: ScheduledHabit[] = ModelConverter.convertAll(scheduledHabits);
-
-        // deprecated in 4.0.13
-        scheduledHabitModels.forEach((scheduledHabit) => {
-            DeprecatedImageUtility.setScheduledHabitImages(scheduledHabit);
-        });
-
         return scheduledHabitModels;
     }
 

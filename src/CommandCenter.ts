@@ -31,6 +31,7 @@ import { AccountDao } from './database/AccountDao';
 import { NewUserContext } from '@src/general/auth/Context';
 import { ChallengeService } from './service/ChallengeService';
 import { LeaderboardService } from './service/feature/LeaderboardService';
+import { RetentionService } from './service/feature/RetentionService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -717,6 +718,18 @@ const handleCommandResetPoints = async () => {
     }
 };
 
+const handleCommandNotifyUsersWithNoHabits = async () => {
+    await RetentionService.notifyUsersWithNoScheduledHabits(adminContext);
+};
+
+const handleCommandNotfiyUsersWithAllExpiredHabits = async () => {
+    await RetentionService.notifyUsersWithAllExpiredScheduledHabits(adminContext);
+};
+
+const handleCommandNotifyUsersWithInactiveHabits = async () => {
+    await RetentionService.notifyInactiveUsersWithScheduledHabits(adminContext);
+};
+
 export const handleCommandGetTodayLeaderboard = async () => {
     adminContext.dayKey = '2024-08-07';
     const leaderboard = await LeaderboardService.get(adminContext, Constants.LeaderboardType.TODAY);
@@ -949,6 +962,18 @@ const processCommand = async (command: string) => {
 
         case 'getTodayLeaderboard':
             await handleCommandGetTodayLeaderboard();
+            break;
+
+        case 'notifyUsersWithNoHabits':
+            await handleCommandNotifyUsersWithNoHabits();
+            break;
+
+        case 'notifyUsersWithAllExpiredHabits':
+            await handleCommandNotfiyUsersWithAllExpiredHabits();
+            break;
+
+        case 'notifyUsersWithInactiveHabits':
+            await handleCommandNotifyUsersWithInactiveHabits();
             break;
 
         default:

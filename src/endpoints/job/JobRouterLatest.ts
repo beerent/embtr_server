@@ -86,4 +86,40 @@ jobRouterLatest.get(
     })
 );
 
+jobRouterLatest.get(
+    '/notify-lurking-users',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        logger.info('JOB - Notify users with no scheduled habits');
+        const context = await ContextService.getJobContext(req);
+        await JobService.sendRetentionNotificationToUsersWithNoScheduledHabits(context);
+
+        res.status(200).send('OK');
+    })
+);
+
+jobRouterLatest.get(
+    '/notify-stale-users',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        logger.info('JOB - Notify users with all expired scheduled habits');
+        const context = await ContextService.getJobContext(req);
+        await JobService.sendRetentionNotificationToUsersWithAllExpiredScheduledHabits(context);
+
+        res.status(200).send('OK');
+    })
+);
+
+jobRouterLatest.get(
+    '/notify-inactive-users',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        logger.info('JOB - Notify inactive users with scheduled habits');
+        const context = await ContextService.getJobContext(req);
+        await JobService.sendRetentionNotificationToInactiveUsersWithScheduledHabits(context);
+
+        res.status(200).send('OK');
+    })
+);
+
 export default jobRouterLatest;

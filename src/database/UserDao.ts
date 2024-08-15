@@ -520,4 +520,106 @@ export class UserDao {
 
         return results.length;
     };
+
+    public static async getAllWithInactiveUsers(date: Date): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                scheduledHabits: {
+                    some: {
+                        OR: [
+                            {
+                                endDate: null,
+                            },
+                            {
+                                endDate: {
+                                    gte: date + 'T00:00:00.000Z',
+                                },
+                            },
+                        ],
+                    },
+                },
+            },
+            include: {
+                properties: true,
+            },
+        });
+
+        return users;
+    }
+
+    public static async getAllWithNoScheduledHabits(): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                scheduledHabits: {
+                    none: {},
+                },
+            },
+            include: {
+                properties: true,
+            },
+        });
+
+        return users;
+    }
+
+    public static async getAllWithAllExpiredScheduledHabits(date: Date): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                scheduledHabits: {
+                    every: {
+                        endDate: {
+                            lte: date,
+                        },
+                    },
+                },
+            },
+            include: UserIncludes,
+        });
+
+        return users;
+    }
+
+    public static async getAllInactiveWithScheduledHabits(
+        today: Date,
+        cutoffDate: Date
+    ): Promise<User[]> {
+        const users = await prisma.user.findMany({
+            where: {
+                scheduledHabits: {
+                    some: {
+                        AND: [
+                            {
+                                OR: [
+                                    {
+                                        endDate: null,
+                                        active: true,
+                                    },
+                                    {
+                                        endDate: {
+                                            gte: today,
+                                        },
+                                        active: true,
+                                    },
+                                ],
+                            },
+                            {
+                                plannedTasks: {
+                                    every: {
+                                        updatedAt: {
+                                            lt: cutoffDate,
+                                        },
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                },
+            },
+            include: {
+                properties: true,
+            },
+        });
+
+        return users;
+    }
 }

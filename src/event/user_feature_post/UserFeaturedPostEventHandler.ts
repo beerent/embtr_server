@@ -13,7 +13,6 @@ export class UserFeaturedPostEventHandler {
         }
 
         this.activeOnAccessedEvents.add(eventKey);
-        console.log('Marking as viewed', event.id);
         await UserFeaturedPostService.markAsViewed(event.context, event.id);
         this.activeOnAccessedEvents.delete(eventKey);
     }

@@ -21,6 +21,7 @@ import { PremiumMembershipService } from './feature/PremiumMembershipService';
 import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
 import { UserBadgeService } from './UserBadgeService';
 import { ContextService } from './ContextService';
+import { DateUtility } from '@src/utility/date/DateUtility';
 
 export namespace BADGE_KEYS {
     export const PREMIUM = 'PREMIUM';
@@ -298,24 +299,6 @@ export class UserService {
         return exists;
     }
 
-    private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {
-        const requests = [UserDao.getByUid(uid), this.getByUsername(username)];
-        const [currentUser, targetUser] = await Promise.all(requests);
-        if (!currentUser) {
-            return false;
-        }
-
-        if (!targetUser) {
-            return true;
-        }
-
-        if (currentUser.username === targetUser.username) {
-            return true;
-        }
-
-        return false;
-    }
-
     public static async getByUsername(username: string): Promise<User | null> {
         const user = await UserDao.getByUsername(username);
         if (!user) {
@@ -345,6 +328,50 @@ export class UserService {
         const userModels: User[] = ModelConverter.convertAll(users);
 
         return userModels;
+    }
+
+    public static async getAllWithNoScheduledHabits(context: Context): Promise<User[]> {
+        const users = await UserDao.getAllWithNoScheduledHabits();
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
+    public static async getAllWithAllExpiredScheduledHabits(context: Context): Promise<User[]> {
+        const cutoffDate = DateUtility.getToday();
+
+        const users = await UserDao.getAllWithAllExpiredScheduledHabits(cutoffDate);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
+    public static async getAllInactiveWithScheduledHabits(context: Context): Promise<User[]> {
+        const today = DateUtility.getToday();
+        const cutoffDate = DateUtility.getDaysBefore(today, 3);
+
+        const users = await UserDao.getAllInactiveWithScheduledHabits(today, cutoffDate);
+        const userModels: User[] = ModelConverter.convertAll(users);
+
+        return userModels;
+    }
+
+    private static async usernameIsAvailable(username: string, uid: string): Promise<boolean> {
+        const requests = [UserDao.getByUid(uid), this.getByUsername(username)];
+        const [currentUser, targetUser] = await Promise.all(requests);
+        if (!currentUser) {
+            return false;
+        }
+
+        if (!targetUser) {
+            return true;
+        }
+
+        if (currentUser.username === targetUser.username) {
+            return true;
+        }
+
+        return false;
     }
 
     private static async markUserAsSetupComplete(context: Context, user: User) {

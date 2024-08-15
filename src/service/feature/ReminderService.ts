@@ -101,25 +101,11 @@ export class ReminderService {
     }
 
     private static isDailyReminderLocalTime(timezone: string) {
-        const currentTime = new Date();
-        const usersHour = new Intl.DateTimeFormat('en-US', {
-            hour: 'numeric',
-            hour12: false,
-            timeZone: timezone,
-        }).format(currentTime);
-
-        return usersHour === '11';
+        return TimeOfDayUtility.isHourOfDayForTimezone(10, timezone);
     }
 
     private static isDailyWarningLocalTime(timezone: string) {
-        const currentTime = new Date();
-        const usersHour = new Intl.DateTimeFormat('en-US', {
-            hour: 'numeric',
-            hour12: false,
-            timeZone: timezone,
-        }).format(currentTime);
-
-        return usersHour === '16';
+        return TimeOfDayUtility.isHourOfDayForTimezone(16, timezone);
     }
 
     private static getUserPeriod(timezone: string) {

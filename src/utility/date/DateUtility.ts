@@ -31,8 +31,13 @@ export namespace DateUtility {
     };
 
     export const getDayBefore = (date: Date): Date => {
+        const dayBefore = getDaysBefore(date, 1);
+        return dayBefore;
+    };
+
+    export const getDaysBefore = (date: Date, days: number): Date => {
         const dayBefore = new Date(date);
-        dayBefore.setDate(dayBefore.getDate() - 1);
+        dayBefore.setDate(dayBefore.getDate() - days);
         dayBefore.setUTCHours(0, 0, 0, 0);
 
         return dayBefore;

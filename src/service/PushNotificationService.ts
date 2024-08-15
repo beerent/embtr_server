@@ -15,7 +15,10 @@ export class PushNotificationService {
             return;
         }
 
-        const socialNotificationsEnabled = await this.socialNotificationsEnabled(context, notification.toUserId);
+        const socialNotificationsEnabled = await this.socialNotificationsEnabled(
+            context,
+            notification.toUserId
+        );
         if (!socialNotificationsEnabled) {
             logger.info('skipping social notification, setting is disabled');
             return;
@@ -33,7 +36,10 @@ export class PushNotificationService {
         await this.sendNotification(context, toUser, body);
     }
 
-    public static async socialNotificationsEnabled(context: Context, userId: number): Promise<boolean> {
+    public static async socialNotificationsEnabled(
+        context: Context,
+        userId: number
+    ): Promise<boolean> {
         const property = await UserPropertyService.getSocialNotification(context, userId);
         return property === Constants.SocialNotificationSetting.ENABLED;
     }
@@ -56,13 +62,14 @@ export class PushNotificationService {
                 continue;
             }
 
-            // Construct a message (see https://docs.expo.io/push-notifications/sending-notifications/)
+            /*
             messages.push({
                 to: pushToken.token,
                 sound: 'default',
                 body: body,
                 data: { withSome: 'data' },
             });
+            */
         }
 
         // The Expo push notification service accepts batches of notifications so
