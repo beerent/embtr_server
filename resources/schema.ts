@@ -34,6 +34,8 @@ export interface User {
   userBadges?: UserBadge[];
   pointLedgerRecords?: PointLedgerRecord[];
   userFeaturedPosts?: UserFeaturedPost[];
+  sentPushNotificationReceipt?: PushNotificationReceipt[];
+  receivedPushNotificationReceipt?: PushNotificationReceipt[];
 }
 
 export interface Property {
@@ -604,6 +606,18 @@ export interface UserFeaturedPost {
   isViewed?: boolean;
   active?: boolean;
   sortDate?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PushNotificationReceipt {
+  id?: number;
+  toUserId?: number;
+  toUser?: User;
+  fromUserId?: number;
+  fromUser?: User;
+  message?: string;
+  active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }

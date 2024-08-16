@@ -11,41 +11,43 @@ generator client {
 }
 
 model User {
-    id                     Int                     @id @default(autoincrement())
-    uid                    String                  @unique @db.VarChar(255)
-    email                  String                  @unique @db.VarChar(255)
-    username               String?                 @unique @db.VarChar(255)
-    displayName            String?                 @db.VarChar(255)
-    location               String?                 @db.VarChar(255)
-    bio                    String?                 @db.VarChar(255)
-    photoUrl               String?                 @db.VarChar(255)
-    bannerUrl              String?                 @db.VarChar(255)
-    accountSetup           Boolean                 @default(false)
-    termsVersion           Int                     @default(0)
-    createdAt              DateTime                @default(now())
-    updatedAt              DateTime                @default(now()) @updatedAt
-    user                   UserPost[]
-    plannedDays            PlannedDay[]
-    receivedNotifications  Notification[]          @relation("fromUser")
-    sendNotifications      Notification[]          @relation("toUser")
-    pushNotificationTokens PushNotificationToken[]
-    comments               Comment[]
-    likes                  Like[]
-    widgets                Widget[]
-    quoteOfTheDay          QuoteOfTheDay[]
-    challenges             Challenge[]
-    challengeParticipant   ChallengeParticipant[]
-    userAwards             UserAward[]
-    tasks                  Task[]
-    scheduledHabits        ScheduledHabit[]
-    blockingUsers          BlockedUser[]           @relation("blockingUser")
-    blockedUsers           BlockedUser[]           @relation("blockedUser")
-    roles                  Role[]
-    properties             Property[]
-    habitStreaks           HabitStreak[]
-    userBadges             UserBadge[]
-    pointLedgerRecords     PointLedgerRecord[]
-    userFeaturedPosts      UserFeaturedPost[]
+    id                              Int                       @id @default(autoincrement())
+    uid                             String                    @unique @db.VarChar(255)
+    email                           String                    @unique @db.VarChar(255)
+    username                        String?                   @unique @db.VarChar(255)
+    displayName                     String?                   @db.VarChar(255)
+    location                        String?                   @db.VarChar(255)
+    bio                             String?                   @db.VarChar(255)
+    photoUrl                        String?                   @db.VarChar(255)
+    bannerUrl                       String?                   @db.VarChar(255)
+    accountSetup                    Boolean                   @default(false)
+    termsVersion                    Int                       @default(0)
+    createdAt                       DateTime                  @default(now())
+    updatedAt                       DateTime                  @default(now()) @updatedAt
+    user                            UserPost[]
+    plannedDays                     PlannedDay[]
+    receivedNotifications           Notification[]            @relation("fromUser")
+    sendNotifications               Notification[]            @relation("toUser")
+    pushNotificationTokens          PushNotificationToken[]
+    comments                        Comment[]
+    likes                           Like[]
+    widgets                         Widget[]
+    quoteOfTheDay                   QuoteOfTheDay[]
+    challenges                      Challenge[]
+    challengeParticipant            ChallengeParticipant[]
+    userAwards                      UserAward[]
+    tasks                           Task[]
+    scheduledHabits                 ScheduledHabit[]
+    blockingUsers                   BlockedUser[]             @relation("blockingUser")
+    blockedUsers                    BlockedUser[]             @relation("blockedUser")
+    roles                           Role[]
+    properties                      Property[]
+    habitStreaks                    HabitStreak[]
+    userBadges                      UserBadge[]
+    pointLedgerRecords              PointLedgerRecord[]
+    userFeaturedPosts               UserFeaturedPost[]
+    sentPushNotificationReceipt     PushNotificationReceipt[] @relation("fromUser")
+    receivedPushNotificationReceipt PushNotificationReceipt[] @relation("toUser")
 
     @@index([username])
     @@map("user")
@@ -822,4 +824,20 @@ model UserFeaturedPost {
     @@index([userId])
     @@index([featuredPostId])
     @@map("user_featured_post")
+}
+
+model PushNotificationReceipt {
+    id         Int      @id @default(autoincrement())
+    toUserId   Int      @db.Int
+    toUser     User     @relation("toUser", fields: [toUserId], references: [id], onDelete: Cascade)
+    fromUserId Int?     @db.Int
+    fromUser   User?    @relation("fromUser", fields: [fromUserId], references: [id], onDelete: Cascade)
+    message    String   @db.VarChar(255)
+    active     Boolean  @default(true)
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @default(now()) @updatedAt
+
+    @@index([toUserId])
+    @@index([fromUserId])
+    @@map("push_notification_receipt")
 }

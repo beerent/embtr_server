@@ -4,10 +4,15 @@ import { Context } from '@src/general/auth/Context';
 import { UserPropertyService } from './UserPropertyService';
 import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
+import { PushNotificationReceiptService } from './PushNotificationReceiptService';
 
 export class PushNotificationService {
     public static async sendGenericNotification(context: Context, toUser: User, message: string) {
         await this.sendNotification(context, toUser, message);
+
+        if (toUser.id) {
+            await PushNotificationReceiptService.create(context, message, toUser.id);
+        }
     }
 
     public static async sendSocialNotification(context: Context, notification: Notification) {
@@ -34,6 +39,10 @@ export class PushNotificationService {
 
         const body = fromUser?.displayName + ' ' + summary;
         await this.sendNotification(context, toUser, body);
+
+        if (toUser.id) {
+            await PushNotificationReceiptService.create(context, body, toUser.id, fromUser.id);
+        }
     }
 
     public static async socialNotificationsEnabled(

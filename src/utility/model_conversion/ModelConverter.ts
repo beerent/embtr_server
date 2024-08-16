@@ -41,6 +41,7 @@ import {
     Feature,
     FeaturedPost,
     UserFeaturedPost,
+    PushNotificationReceipt,
 } from '@prisma/client';
 
 import { sanitizeModel } from '@src/middleware/general/GeneralSanitation';
@@ -87,7 +88,8 @@ type PrismaModel =
     | PointLedgerRecord
     | Feature
     | FeaturedPost
-    | UserFeaturedPost;
+    | UserFeaturedPost
+    | PushNotificationReceipt;
 
 export class ModelConverter {
     public static convertAll<T>(prismaObj: PrismaModel[]): T[] {
