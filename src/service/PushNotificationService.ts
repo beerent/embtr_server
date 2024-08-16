@@ -62,14 +62,12 @@ export class PushNotificationService {
                 continue;
             }
 
-            /*
             messages.push({
                 to: pushToken.token,
                 sound: 'default',
                 body: body,
                 data: { withSome: 'data' },
             });
-            */
         }
 
         // The Expo push notification service accepts batches of notifications so
