@@ -58,12 +58,11 @@ export class RetentionService {
             Math.floor(Math.random() * NO_SCHEDULED_HABIT_INSPIRATIONAL_NOTIFICATIONS.length)
             ];
 
-        logger.info('sending notification to user with no habits', {
-            userId: user.id,
-            notification: randomInspirationalNotification,
-        });
-
-        // await PushNotificationService.sendGenericNotification( context, user, randomInspirationalNotification);
+        await PushNotificationService.sendGenericNotification(
+            context,
+            user,
+            randomInspirationalNotification
+        );
     }
 
     /*
@@ -90,12 +89,11 @@ export class RetentionService {
             Math.floor(Math.random() * ALL_SCHEDULED_HABITS_EXPIRED_NOTIFICATIONS.length)
             ];
 
-        logger.info('sending notification to user with all expired habits', {
-            userId: user.id,
-            notification: randomExpiredNotification,
-        });
-
-        // await PushNotificationService.sendGenericNotification( context, user, randomExpiredNotification);
+        await PushNotificationService.sendGenericNotification(
+            context,
+            user,
+            randomExpiredNotification
+        );
     }
 
     /*
@@ -123,11 +121,10 @@ export class RetentionService {
             Math.floor(Math.random() * INACTIVE_SCHEDULED_HABITS_NOTIFICATIONS.length)
             ];
 
-        logger.info('sending notification to inactive user', {
-            userId: user.id,
-            notification: randomExpiredNotification,
-        });
-
-        //await PushNotificationService.sendGenericNotification( context, user, randomExpiredNotification);
+        await PushNotificationService.sendGenericNotification(
+            context,
+            user,
+            randomExpiredNotification
+        );
     }
 }
