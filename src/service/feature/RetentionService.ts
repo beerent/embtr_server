@@ -1,5 +1,4 @@
 import { User } from '@resources/schema';
-import { logger } from '@src/common/logger/Logger';
 import { Context } from '@src/general/auth/Context';
 import { UserTimezoneUtility } from '@src/utility/UserTimezoneUtility';
 import { PushNotificationService } from '../PushNotificationService';
@@ -39,18 +38,25 @@ export class RetentionService {
      */
     public static async notifyUsersWithNoScheduledHabits(context: Context) {
         const users = await UserService.getAllWithNoScheduledHabits(context);
+
+        const pushNotifications = [];
         for (const user of users) {
-            await this.notifyUserWithNoScheduledHabits(context, user);
+            const pushNotification = this.notifyUserWithNoScheduledHabits(context, user);
+            if (pushNotification) {
+                pushNotifications.push(pushNotification);
+            }
         }
+
+        await PushNotificationService.sendPushNotifications(context, pushNotifications);
     }
 
-    public static async notifyUserWithNoScheduledHabits(context: Context, user: User) {
+    private static notifyUserWithNoScheduledHabits(context: Context, user: User) {
         const isTimeForNotification = UserTimezoneUtility.isHourOfDayForUser(
             NOTIFICATION_HOUR,
             user
         );
         if (!isTimeForNotification) {
-            return;
+            return undefined;
         }
 
         const randomInspirationalNotification =
@@ -58,11 +64,13 @@ export class RetentionService {
             Math.floor(Math.random() * NO_SCHEDULED_HABIT_INSPIRATIONAL_NOTIFICATIONS.length)
             ];
 
-        await PushNotificationService.sendGenericNotification(
+        const pushNotification = PushNotificationService.createPushNotification(
             context,
             user,
             randomInspirationalNotification
         );
+
+        return pushNotification;
     }
 
     /*
@@ -70,18 +78,25 @@ export class RetentionService {
      */
     public static async notifyUsersWithAllExpiredScheduledHabits(context: Context) {
         const users = await UserService.getAllWithAllExpiredScheduledHabits(context);
+
+        const pushNotifications = [];
         for (const user of users) {
-            await this.notifyUserWithAllExpiredScheduledHabits(context, user);
+            const pushNotification = this.notifyUserWithAllExpiredScheduledHabits(context, user);
+            if (pushNotification) {
+                pushNotifications.push(pushNotification);
+            }
         }
+
+        await PushNotificationService.sendPushNotifications(context, pushNotifications);
     }
 
-    public static async notifyUserWithAllExpiredScheduledHabits(context: Context, user: User) {
+    private static notifyUserWithAllExpiredScheduledHabits(context: Context, user: User) {
         const isTimeForNotification = UserTimezoneUtility.isHourOfDayForUser(
             NOTIFICATION_HOUR,
             user
         );
         if (!isTimeForNotification) {
-            return;
+            return undefined;
         }
 
         const randomExpiredNotification =
@@ -89,11 +104,13 @@ export class RetentionService {
             Math.floor(Math.random() * ALL_SCHEDULED_HABITS_EXPIRED_NOTIFICATIONS.length)
             ];
 
-        await PushNotificationService.sendGenericNotification(
+        const pushNotification = PushNotificationService.createPushNotification(
             context,
             user,
             randomExpiredNotification
         );
+
+        return pushNotification;
     }
 
     /*
@@ -102,18 +119,24 @@ export class RetentionService {
     public static async notifyInactiveUsersWithScheduledHabits(context: Context) {
         const users = await UserService.getAllInactiveWithScheduledHabits(context);
 
+        const pushNotifications = [];
         for (const user of users) {
-            await this.notifyInactiveUserWithScheduledHabits(context, user);
+            const pushNotification = this.notifyInactiveUserWithScheduledHabits(context, user);
+            if (pushNotification) {
+                pushNotifications.push(pushNotification);
+            }
         }
+
+        await PushNotificationService.sendPushNotifications(context, pushNotifications);
     }
 
-    public static async notifyInactiveUserWithScheduledHabits(context: Context, user: User) {
+    public static notifyInactiveUserWithScheduledHabits(context: Context, user: User) {
         const isTimeForNotification = UserTimezoneUtility.isHourOfDayForUser(
             NOTIFICATION_HOUR,
             user
         );
         if (!isTimeForNotification) {
-            return;
+            return undefined;
         }
 
         const randomExpiredNotification =
@@ -121,10 +144,12 @@ export class RetentionService {
             Math.floor(Math.random() * INACTIVE_SCHEDULED_HABITS_NOTIFICATIONS.length)
             ];
 
-        await PushNotificationService.sendGenericNotification(
+        const pushNotification = PushNotificationService.createPushNotification(
             context,
             user,
             randomExpiredNotification
         );
+
+        return pushNotification;
     }
 }

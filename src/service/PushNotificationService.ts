@@ -4,15 +4,35 @@ import { Context } from '@src/general/auth/Context';
 import { UserPropertyService } from './UserPropertyService';
 import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
-import { PushNotificationReceiptService } from './PushNotificationReceiptService';
+import { ApiAlertsService } from './ApiAlertsService';
+
+export interface PushNotification {
+    context: Context;
+    toUser: User;
+    message: string;
+    fromUser?: User;
+}
 
 export class PushNotificationService {
-    public static async sendGenericNotification(context: Context, toUser: User, message: string) {
-        await this.sendNotification(context, toUser, message);
+    public static createPushNotification(
+        context: Context,
+        toUser: User,
+        message: string,
+        fromUser?: User
+    ) {
+        const pushNotification: PushNotification = {
+            context,
+            toUser,
+            message,
+            fromUser,
+        };
 
-        if (toUser.id) {
-            await PushNotificationReceiptService.create(context, message, toUser.id);
-        }
+        return pushNotification;
+    }
+
+    public static async sendGenericNotification(context: Context, toUser: User, message: string) {
+        const pushNotification = this.createPushNotification(context, toUser, message);
+        await this.sendPushNotification(pushNotification);
     }
 
     public static async sendSocialNotification(context: Context, notification: Notification) {
@@ -38,53 +58,62 @@ export class PushNotificationService {
         }
 
         const body = fromUser?.displayName + ' ' + summary;
-        await this.sendNotification(context, toUser, body);
 
-        if (toUser.id) {
-            await PushNotificationReceiptService.create(context, body, toUser.id, fromUser.id);
-        }
+        const pushNotification = this.createPushNotification(context, toUser, body, fromUser);
+        await this.sendPushNotification(pushNotification);
     }
 
-    public static async socialNotificationsEnabled(
+    public static async sendPushNotifications(
         context: Context,
-        userId: number
-    ): Promise<boolean> {
-        const property = await UserPropertyService.getSocialNotification(context, userId);
-        return property === Constants.SocialNotificationSetting.ENABLED;
+        pushNotifications: PushNotification[]
+    ) {
+        const pushMessages = this.createExpoPushMessages(pushNotifications);
+        await this.sendExpoPushMessages(pushMessages);
     }
 
-    private static async sendNotification(context: Context, toUser: User, body: string) {
+    private static async sendPushNotification(pushNotification: PushNotification) {
+        const pushMessages = await this.createExpoPushMessage(pushNotification);
+        await this.sendExpoPushMessages(pushMessages);
+    }
+
+    private static async createExpoPushMessage(pushNotification: PushNotification) {
+        return this.createExpoPushMessages([pushNotification]);
+    }
+
+    private static createExpoPushMessages(pushNotifications: PushNotification[]) {
+        const messages: ExpoPushMessage[] = [];
+
+        for (const pushNotification of pushNotifications) {
+            const recieverTokens: PushNotificationToken[] =
+                pushNotification.toUser?.pushNotificationTokens || [];
+
+            // Create the messages that you want to send to clients
+            for (let pushToken of recieverTokens) {
+                // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
+
+                // Check that all your push tokens appear to be valid Expo push tokens
+                if (!Expo.isExpoPushToken(pushToken.token)) {
+                    console.error(`Push token ${pushToken} is not a valid Expo push token`);
+                    continue;
+                }
+
+                messages.push({
+                    to: pushToken.token,
+                    sound: 'default',
+                    body: pushNotification.message,
+                    data: { withSome: 'data' },
+                });
+            }
+        }
+
+        return messages;
+    }
+
+    private static async sendExpoPushMessages(pushMessages: ExpoPushMessage[]) {
         // Create a new Expo SDK client
         // optionally providing an access token if you have enabled push security
         let expo = new Expo({ accessToken: process.env.EXPO_ACCESS_TOKEN });
-
-        const recieverTokens: PushNotificationToken[] = toUser?.pushNotificationTokens || [];
-
-        // Create the messages that you want to send to clients
-        let messages: ExpoPushMessage[] = [];
-        for (let pushToken of recieverTokens) {
-            // Each push token looks like ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]
-
-            // Check that all your push tokens appear to be valid Expo push tokens
-            if (!Expo.isExpoPushToken(pushToken.token)) {
-                console.error(`Push token ${pushToken} is not a valid Expo push token`);
-                continue;
-            }
-
-            messages.push({
-                to: pushToken.token,
-                sound: 'default',
-                body: body,
-                data: { withSome: 'data' },
-            });
-        }
-
-        // The Expo push notification service accepts batches of notifications so
-        // that you don't need to send 1000 requests to send 1000 notifications. We
-        // recommend you batch your notifications to reduce the number of requests
-        // and to compress them (notifications with similar content will get
-        // compressed).
-        let chunks = expo.chunkPushNotifications(messages);
+        let chunks = expo.chunkPushNotifications(pushMessages);
         let tickets: ExpoPushTicket[] = [];
         // Send the chunks to the Expo push notification service. There are
         // different strategies you could use. A simple one is to send one chunk at a
@@ -92,7 +121,6 @@ export class PushNotificationService {
         for (let chunk of chunks) {
             try {
                 let ticketChunk: ExpoPushTicket[] = await expo.sendPushNotificationsAsync(chunk);
-                console.log(ticketChunk);
                 tickets.push(...ticketChunk);
                 // NOTE: If a ticket contains an error code in ticket.details.error, you
                 // must handle it appropriately. The error codes are listed in the Expo
@@ -131,31 +159,35 @@ export class PushNotificationService {
         for (let chunk of receiptIdChunks) {
             try {
                 let receipts = await expo.getPushNotificationReceiptsAsync(chunk);
-                console.log('receipts');
-                console.log(receipts);
-
                 // The receipts specify whether Apple or Google successfully received the
                 // notification and information about an error, if one occurred.
+                let oneDelivered = false;
                 for (let receiptId in receipts) {
                     let { status, details } = receipts[receiptId];
                     if (status === 'ok') {
+                        oneDelivered = true;
                         continue;
                     } else if (status === 'error') {
-                        console
-                            .error
-                            //`There was an error sending a notification: ${message}`
-                            ();
-                        if (details && details) {
-                            // The error codes are listed in the Expo documentation:
-                            // https://docs.expo.io/push-notifications/sending-notifications/#individual-errors
-                            // You must handle the errors appropriately.
-                            console.error(`The error code is ${details}`);
-                        }
+                        console.error(status);
+                        console.error(details);
                     }
+                }
+
+                if (oneDelivered) {
+                } else {
+                    ApiAlertsService.sendAlert('Failed to send push notification');
                 }
             } catch (error) {
                 console.error(error);
             }
         }
+    }
+
+    public static async socialNotificationsEnabled(
+        context: Context,
+        userId: number
+    ): Promise<boolean> {
+        const property = await UserPropertyService.getSocialNotification(context, userId);
+        return property === Constants.SocialNotificationSetting.ENABLED;
     }
 }
