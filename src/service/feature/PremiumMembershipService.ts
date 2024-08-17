@@ -6,20 +6,34 @@ import { UserPropertyService } from '@src/service/UserPropertyService';
 import { UserService } from '../UserService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
+import { ContextService } from '../ContextService';
+import { User } from '@resources/schema';
 
 export class PremiumMembershipService {
-    public static async addPremium(context: Context, email: string) {
-        await UserRoleService.addUserRole(context, email, Role.PREMIUM);
-        await UserRoleService.removeUserRole(context, email, Role.FREE);
-        UserEventDispatcher.onPremiumAdded(context);
+    public static async addPremium(context: Context, user: User) {
+        if (!user.email) {
+            return;
+        }
+
+        await UserRoleService.addUserRole(context, user.email, Role.PREMIUM);
+        await UserRoleService.removeUserRole(context, user.email, Role.FREE);
+
+        const userContext = ContextService.impersonateUserContext(context, user);
+        UserEventDispatcher.onPremiumAdded(userContext);
         ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
     }
 
-    public static async removePremium(context: Context, email: string) {
-        await UserRoleService.addUserRole(context, email, Role.FREE);
-        await UserRoleService.removeUserRole(context, email, Role.PREMIUM);
-        await this.removePremiumFeatures(context, email);
-        UserEventDispatcher.onPremiumRemoved(context);
+    public static async removePremium(context: Context, user: User) {
+        if (!user.email) {
+            return;
+        }
+
+        await UserRoleService.addUserRole(context, user.email, Role.FREE);
+        await UserRoleService.removeUserRole(context, user.email, Role.PREMIUM);
+        await this.removePremiumFeatures(context, user.email);
+
+        const userContext = ContextService.impersonateUserContext(context, user);
+        UserEventDispatcher.onPremiumRemoved(userContext);
         ApiAlertsService.sendAlert('we lost a premium user 😢');
     }
 

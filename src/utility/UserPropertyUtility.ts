@@ -10,6 +10,11 @@ export class UserPropertyUtility {
         Constants.UserPropertyKey.SOCIAL_BLACKLIST.toString(),
     ];
 
+    public static getTimezone(user: User) {
+        const timezoneProperty = this.getProperty(user, Constants.UserPropertyKey.TIMEZONE);
+        return timezoneProperty?.value;
+    }
+
     public static getLevel(user: User) {
         const levelProperty = this.getProperty(user, Constants.UserPropertyKey.LEVEL);
         const levelNumber = parseInt(levelProperty?.value ?? '0', 10);

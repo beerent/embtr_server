@@ -1,5 +1,12 @@
 import { AuthorizationDao } from '@src/database/AuthorizationDao';
-import { Context, ContextType, NewUserContext } from '@src/general/auth/Context';
+import {
+    AdminContext,
+    Context,
+    ContextType,
+    JobContext,
+    NewUserContext,
+    UserContext,
+} from '@src/general/auth/Context';
 import { Request } from 'express';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
@@ -8,6 +15,8 @@ import { toZonedTime } from 'date-fns-tz';
 import { User } from '@resources/schema';
 import { HttpCode } from '@src/common/RequestResponses';
 import { Roles } from '@src/roles/Roles';
+import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
+import { DateUtility } from '@src/utility/date/DateUtility';
 
 export class ContextService {
     public static async get(request: Request): Promise<Context> {
@@ -41,6 +50,7 @@ export class ContextService {
             dayKey: dayKey,
             timeZone: timezone,
             dateTime: dateTime,
+            isAdmin: Roles.isAdmin(userRoles),
         };
     }
 
@@ -62,13 +72,19 @@ export class ContextService {
         };
     }
 
-    public static impersonateUserContext(context: Context, user: User): Context {
-        if (!Roles.isAdmin(context.userRoles)) {
-            console.log('user is not admin', context.userRoles);
-            throw new ServiceException(HttpCode.FORBIDDEN, Code.FORBIDDEN, 'user is not admin');
+    public static impersonateUserContext(context: Context, user: User): UserContext {
+        if (!context.isAdmin) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'cannot impersonate user as admin'
+            );
         }
 
-        if (!user.id || !user.uid) {
+        const timeZone = UserPropertyUtility.getTimezone(user);
+        const userRoles = Roles.getRoles(user.roles?.map((role) => role.name ?? '') ?? []);
+
+        if (!user.id || !user.uid || !user.email || !user.roles || !timeZone) {
             logger.error('invalid user:', user);
             throw new ServiceException(
                 HttpCode.GENERAL_FAILURE,
@@ -77,25 +93,58 @@ export class ContextService {
             );
         }
 
-        const impersonatedContext: Context = {
+        const impersonatedContext: UserContext = {
             type: ContextType.CONTEXT,
             userId: user.id,
             userUid: user.uid,
-            userEmail: '',
-            userRoles: [],
+            userEmail: user.email,
+            userRoles: userRoles,
             dayKey: '',
-            timeZone: '',
-            dateTime: new Date(),
+            timeZone: timeZone,
+            dateTime: DateUtility.getDateWithTimezone(new Date(), timeZone),
+            isUser: true,
+            isAdmin: false,
         };
 
         return impersonatedContext;
     }
 
-    public static async getJobContext(request: Request): Promise<Context> {
+    public static async getUserContext(request: Request): Promise<UserContext> {
         const context = await this.get(request);
-        context.type = ContextType.JOB_CONTEXT;
 
-        return context;
+        //TODO - is there a role to look for?
+        const userContext: UserContext = {
+            ...context,
+            type: ContextType.USER_CONTEXT,
+            isUser: true,
+        };
+
+        return userContext;
+    }
+
+    public static async getAdminContext(request: Request): Promise<AdminContext> {
+        const context = await this.get(request);
+
+        const adminContext: AdminContext = {
+            ...context,
+            type: ContextType.ADMIN_CONTEXT,
+            isAdmin: true,
+        };
+
+        return adminContext;
+    }
+
+    public static async getJobContext(request: Request): Promise<JobContext> {
+        const context = await this.get(request);
+
+        const jobContext: JobContext = {
+            ...context,
+            type: ContextType.JOB_CONTEXT,
+            isJob: true,
+            isAdmin: true,
+        };
+
+        return jobContext;
     }
 
     private static getDayKey(request: Request): string {

@@ -1,4 +1,4 @@
-import { Role } from '@src/roles/Roles';
+import { Role, Roles } from '@src/roles/Roles';
 import { Context, ContextType, NewUserContext } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
@@ -238,8 +238,8 @@ export class UserService {
     }
 
     public static async updatePremiumStatus(context: Context, uid: string) {
-        const account = await AccountDao.getByUid(uid);
-        if (!account?.email || !account.customClaims?.userId) {
+        const user = await this.getByUid(uid);
+        if (!user?.id || !user?.email) {
             throw new ServiceException(
                 HttpCode.RESOURCE_NOT_FOUND,
                 Code.USER_NOT_FOUND,
@@ -248,19 +248,19 @@ export class UserService {
         }
 
         const isPremium = await RevenueCatService.isPremium(uid);
-        const hasPremiumRole = await this.isPremium(context, account.customClaims.userId);
+        const hasPremiumRole = await this.isPremium(context, user.id);
         if (isPremium) {
             if (!hasPremiumRole) {
-                await PremiumMembershipService.addPremium(context, account.email);
+                await PremiumMembershipService.addPremium(context, user);
             }
         } else {
             if (hasPremiumRole) {
-                await PremiumMembershipService.removePremium(context, account.email);
+                await PremiumMembershipService.removePremium(context, user);
             }
         }
 
-        const user = await this.getByUid(uid);
-        return user;
+        const updatedUser = await this.getByUid(uid);
+        return updatedUser;
     }
 
     public static async isPremium(context: Context, userId: number): Promise<boolean> {
@@ -424,6 +424,7 @@ export class UserService {
             dayKey: '',
             timeZone: '',
             dateTime: new Date(),
+            isAdmin: false,
         };
 
         UserEventDispatcher.onCreated(context);
