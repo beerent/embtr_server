@@ -213,7 +213,14 @@ export class UserDao {
             },
             include: {
                 properties: true,
-                pushNotificationTokens: true,
+                pushNotificationTokens: {
+                    where: {
+                        active: true,
+                    },
+                    select: {
+                        token: true,
+                    },
+                },
             },
         });
 
@@ -474,7 +481,14 @@ export class UserDao {
             },
             include: {
                 properties: true,
-                pushNotificationTokens: true,
+                pushNotificationTokens: {
+                    where: {
+                        active: true,
+                    },
+                    select: {
+                        token: true,
+                    },
+                },
             },
         });
 
@@ -492,7 +506,14 @@ export class UserDao {
             },
             include: {
                 properties: true,
-                pushNotificationTokens: true,
+                pushNotificationTokens: {
+                    where: {
+                        active: true,
+                    },
+                    select: {
+                        token: true,
+                    },
+                },
             },
         });
 

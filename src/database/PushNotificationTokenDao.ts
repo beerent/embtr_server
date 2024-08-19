@@ -1,5 +1,3 @@
-import { Expo, ExpoPushMessage, ExpoPushTicket } from 'expo-server-sdk';
-import { Notification as NotificationModel, PushNotificationToken } from '@resources/schema';
 import { prisma } from '@database/prisma';
 
 export class PushNotificationTokenDao {
@@ -31,5 +29,18 @@ export class PushNotificationTokenDao {
         });
 
         return tokenModel;
+    }
+
+    public static async invalidateAll(ids: number[]) {
+        await prisma.pushNotificationToken.updateMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            data: {
+                active: false,
+            },
+        });
     }
 }

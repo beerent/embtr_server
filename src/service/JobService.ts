@@ -55,4 +55,8 @@ export class JobService {
     public static async processPendingPushNotifications(context: Context): Promise<void> {
         await PushNotificationService.processPending(context);
     }
+
+    public static async processFailedPushNotifications(context: Context): Promise<void> {
+        await PushNotificationService.processFailed(context);
+    }
 }

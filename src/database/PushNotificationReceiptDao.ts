@@ -31,6 +31,23 @@ export class PushNotificationReceiptDao {
         });
     }
 
+    public static async updateStatuses(pushNotificationReceipts: PushNotificationReceipt[]) {
+        for (const pushNotificationReceipt of pushNotificationReceipts) {
+            if (!pushNotificationReceipt.id) {
+                continue;
+            }
+
+            await prisma.pushNotificationReceipt.update({
+                where: {
+                    id: pushNotificationReceipt.id,
+                },
+                data: {
+                    status: pushNotificationReceipt.status,
+                },
+            });
+        }
+    }
+
     public static async updateAllByTicketId(pushNotificationReceipts: PushNotificationReceipt[]) {
         for (const pushNotificationReceipt of pushNotificationReceipts) {
             if (!pushNotificationReceipt.expoTicketId) {
@@ -51,10 +68,10 @@ export class PushNotificationReceiptDao {
         }
     }
 
-    public static async getAllPending() {
+    public static async getAllByStatus(status: Constants.PushNotificationStatus) {
         const pendingReceipts = await prisma.pushNotificationReceipt.findMany({
             where: {
-                status: Constants.PushNotificationStatus.PENDING,
+                status,
             },
         });
 

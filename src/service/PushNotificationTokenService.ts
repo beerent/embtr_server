@@ -13,8 +13,7 @@ export class PushNotificationTokenService {
     }
 
     public static async register(context: Context, token: string): Promise<void> {
-        const userPushNotificationTokens =
-            await PushNotificationTokenService.getAllForUser(context);
+        const userPushNotificationTokens = await this.getAllForUser(context);
         const alreadyRegistered = userPushNotificationTokens.some(
             (pushNotificationToken) => pushNotificationToken.token === token
         );
@@ -23,5 +22,9 @@ export class PushNotificationTokenService {
         }
 
         await PushNotificationTokenDao.create(context.userUid, token);
+    }
+
+    public static async invalidateAll(context: Context, ids: number[]) {
+        await PushNotificationTokenDao.invalidateAll(ids);
     }
 }

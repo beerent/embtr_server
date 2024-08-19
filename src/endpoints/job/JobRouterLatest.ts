@@ -134,4 +134,16 @@ jobRouterLatest.get(
     })
 );
 
+jobRouterLatest.get(
+    '/process-failed-push-notifications',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        logger.info('JOB - Process failed push notifications');
+        const context = await ContextService.getJobContext(req);
+        await JobService.processFailedPushNotifications(context);
+
+        res.status(200).send('OK');
+    })
+);
+
 export default jobRouterLatest;

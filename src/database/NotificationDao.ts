@@ -30,7 +30,14 @@ export class NotificationDao {
             include: {
                 toUser: {
                     include: {
-                        pushNotificationTokens: true,
+                        pushNotificationTokens: {
+                            where: {
+                                active: true,
+                            },
+                            select: {
+                                token: true,
+                            },
+                        },
                     },
                 },
                 fromUser: true,

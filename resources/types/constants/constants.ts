@@ -369,5 +369,7 @@ export namespace Constants {
         PENDING = 'PENDING',
         SENT = 'SENT',
         FAILED = 'FAILED',
+        FAILED_ACKNOWLEDGED = 'FAILED_ACKNOWLEDGED',
+        FAILED_INVALIDATED = 'FAILED_INVALIDATED',
     }
 }

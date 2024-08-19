@@ -10,6 +10,7 @@ import { UserPropertyService } from './UserPropertyService';
 import { Constants } from '@resources/types/constants/constants';
 import { logger } from '@src/common/logger/Logger';
 import { PushNotificationReceiptService } from './PushNotificationReceiptService';
+import { PushNotificationTokenService } from './PushNotificationTokenService';
 
 interface EmbtrExpoPushMessage extends ExpoPushMessage {
     pushNotificationTokenId: number;
@@ -204,6 +205,41 @@ export class PushNotificationService {
         }
 
         await PushNotificationReceiptService.UpdateAllByTicketId(context, updatedReceipts);
+    }
+
+    public static async processFailed(context: Context) {
+        const pushNotificationTokenIdsToInvalidate = new Set<number>();
+        const updatedReceipts: PushNotificationReceipt[] = [];
+
+        const failedPushNotifications = await PushNotificationReceiptService.getAllFailed(context);
+        for (const failedPushNotification of failedPushNotifications) {
+            const invalidCredentials = ['DeviceNotRegistered', 'InvalidCredentials'].includes(
+                failedPushNotification.expoStatus ?? ''
+            );
+
+            if (invalidCredentials) {
+                pushNotificationTokenIdsToInvalidate.add(
+                    failedPushNotification.pushNotificationTokenId ?? 0
+                );
+                updatedReceipts.push({
+                    id: failedPushNotification.id,
+                    status: Constants.PushNotificationStatus.FAILED_INVALIDATED,
+                });
+            } else {
+                updatedReceipts.push({
+                    id: failedPushNotification.id,
+                    status: Constants.PushNotificationStatus.FAILED_ACKNOWLEDGED,
+                });
+            }
+        }
+
+        await Promise.all([
+            PushNotificationTokenService.invalidateAll(
+                context,
+                Array.from(pushNotificationTokenIdsToInvalidate)
+            ),
+            PushNotificationReceiptService.UpdateStatuses(context, updatedReceipts),
+        ]);
     }
 
     public static async socialNotificationsEnabled(
