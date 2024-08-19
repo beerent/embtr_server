@@ -214,7 +214,7 @@ export class PushNotificationService {
         const failedPushNotifications = await PushNotificationReceiptService.getAllFailed(context);
         for (const failedPushNotification of failedPushNotifications) {
             const invalidCredentials = ['DeviceNotRegistered', 'InvalidCredentials'].includes(
-                failedPushNotification.expoStatus ?? ''
+                failedPushNotification.expoErrorDetail ?? ''
             );
 
             if (invalidCredentials) {
