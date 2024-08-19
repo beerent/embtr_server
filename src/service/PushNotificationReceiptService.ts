@@ -4,18 +4,25 @@ import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class PushNotificationReceiptService {
-    public static async create(
+    public static async createAll(
         context: Context,
-        message: string,
-        userId: number,
-        fromUserId?: number
+        pushNotificationReceipts: PushNotificationReceipt[]
     ) {
-        const receipt = await PushNotificationReceiptDao.create(message, userId, fromUserId);
-        if (!receipt) {
-            throw new Error('Failed to create push notification receipt');
-        }
+        await PushNotificationReceiptDao.createAll(pushNotificationReceipts);
+    }
 
-        const receiptModel: PushNotificationReceipt = ModelConverter.convert(receipt);
-        return receiptModel;
+    public static async getAllPending(context: Context): Promise<PushNotificationReceipt[]> {
+        const pendingReceipts = await PushNotificationReceiptDao.getAllPending();
+        const pendingReceiptModels: PushNotificationReceipt[] =
+            ModelConverter.convertAll(pendingReceipts);
+
+        return pendingReceiptModels;
+    }
+
+    public static async UpdateAllByTicketId(
+        context: Context,
+        pushNotificationReceipts: PushNotificationReceipt[]
+    ) {
+        PushNotificationReceiptDao.updateAllByTicketId(pushNotificationReceipts);
     }
 }

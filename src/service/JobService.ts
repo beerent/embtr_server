@@ -2,6 +2,7 @@ import { Context } from '@src/general/auth/Context';
 import { AwayModeService } from './feature/AwayModeService';
 import { ReminderService } from './feature/ReminderService';
 import { RetentionService } from './feature/RetentionService';
+import { PushNotificationService } from './PushNotificationService';
 import { UserService } from './UserService';
 
 export class JobService {
@@ -49,5 +50,9 @@ export class JobService {
         context: Context
     ): Promise<void> {
         await RetentionService.notifyInactiveUsersWithScheduledHabits(context);
+    }
+
+    public static async processPendingPushNotifications(context: Context): Promise<void> {
+        await PushNotificationService.processPending(context);
     }
 }

@@ -122,4 +122,16 @@ jobRouterLatest.get(
     })
 );
 
+jobRouterLatest.get(
+    '/process-pending-push-notifications',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        logger.info('JOB - Process pending push notifications');
+        const context = await ContextService.getJobContext(req);
+        await JobService.processPendingPushNotifications(context);
+
+        res.status(200).send('OK');
+    })
+);
+
 export default jobRouterLatest;

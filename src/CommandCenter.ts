@@ -32,6 +32,8 @@ import { NewUserContext } from '@src/general/auth/Context';
 import { ChallengeService } from './service/ChallengeService';
 import { LeaderboardService } from './service/feature/LeaderboardService';
 import { RetentionService } from './service/feature/RetentionService';
+import { PushNotificationReceiptService } from './service/PushNotificationReceiptService';
+import { PushNotificationService } from './service/PushNotificationService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -44,6 +46,7 @@ const adminContext: Context = {
     dayKey: '04-04-2021',
     timeZone: 'America/New_York',
     dateTime: new Date(),
+    isAdmin: true,
 };
 
 const impersonateContext = (user: User): Context => {
@@ -56,6 +59,7 @@ const impersonateContext = (user: User): Context => {
         dayKey: DayKeyUtility.getTodayKey(),
         timeZone: 'America/New_York',
         dateTime: new Date(),
+        isAdmin: false,
     };
 
     return context;
@@ -730,6 +734,10 @@ const handleCommandNotifyUsersWithInactiveHabits = async () => {
     await RetentionService.notifyInactiveUsersWithScheduledHabits(adminContext);
 };
 
+const handleCommandProcessPendingPushNotifications = async () => {
+    PushNotificationService.processPending(adminContext);
+};
+
 export const handleCommandGetTodayLeaderboard = async () => {
     adminContext.dayKey = '2024-08-07';
     const leaderboard = await LeaderboardService.get(adminContext, Constants.LeaderboardType.TODAY);
@@ -974,6 +982,10 @@ const processCommand = async (command: string) => {
 
         case 'notifyUsersWithInactiveHabits':
             await handleCommandNotifyUsersWithInactiveHabits();
+            break;
+
+        case 'processPendingPushNotifications':
+            await handleCommandProcessPendingPushNotifications();
             break;
 
         default:
