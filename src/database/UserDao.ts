@@ -580,6 +580,12 @@ export class UserDao {
             },
             include: {
                 properties: true,
+                pushNotificationTokens: {
+                    select: {
+                        id: true,
+                        token: true,
+                    },
+                },
             },
         });
 
@@ -597,7 +603,15 @@ export class UserDao {
                     },
                 },
             },
-            include: UserIncludes,
+            include: {
+                properties: true,
+                pushNotificationTokens: {
+                    select: {
+                        id: true,
+                        token: true,
+                    },
+                },
+            },
         });
 
         return users;
@@ -641,6 +655,12 @@ export class UserDao {
             },
             include: {
                 properties: true,
+                pushNotificationTokens: {
+                    select: {
+                        id: true,
+                        token: true,
+                    },
+                },
             },
         });
 
