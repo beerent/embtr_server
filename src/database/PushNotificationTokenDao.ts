@@ -16,6 +16,19 @@ export class PushNotificationTokenDao {
         return tokens;
     }
 
+    public static async getByToken(token: string) {
+        const tokenModel = await prisma.pushNotificationToken.findFirst({
+            where: {
+                token,
+            },
+            include: {
+                user: true,
+            },
+        });
+
+        return tokenModel;
+    }
+
     public static async create(uid: string, token: string) {
         const tokenModel = await prisma.pushNotificationToken.create({
             data: {
@@ -29,6 +42,20 @@ export class PushNotificationTokenDao {
         });
 
         return tokenModel;
+    }
+
+    public static async revalidate(userId: number, token: string) {
+        await prisma.pushNotificationToken.update({
+            where: {
+                unique_user_token: {
+                    userId,
+                    token,
+                },
+            },
+            data: {
+                active: true,
+            },
+        });
     }
 
     public static async invalidateAll(ids: number[]) {
