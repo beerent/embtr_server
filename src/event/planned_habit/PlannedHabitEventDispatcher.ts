@@ -1,9 +1,14 @@
-import { Context } from '@src/general/auth/Context';
+import { UserContext } from '@src/general/auth/Context';
 import eventBus from '../eventBus';
 import { Event } from '../events';
 
 export namespace PlannedHabitEventDispatcher {
-    export const onUpdated = (context: Context, id: number, habitId: number, dayKey: string) => {
+    export const onUpdated = (
+        context: UserContext,
+        id: number,
+        habitId: number,
+        dayKey: string
+    ) => {
         const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(
             context,
             id,
@@ -13,7 +18,12 @@ export namespace PlannedHabitEventDispatcher {
         eventBus.emit(Event.PlannedHabit.Updated, event);
     };
 
-    export const onCreated = (context: Context, id: number, habitId: number, dayKey: string) => {
+    export const onCreated = (
+        context: UserContext,
+        id: number,
+        habitId: number,
+        dayKey: string
+    ) => {
         const event: Event.PlannedHabit.Event = new Event.PlannedHabit.Event(
             context,
             id,
@@ -24,7 +34,7 @@ export namespace PlannedHabitEventDispatcher {
     };
 
     export const onCompleted = (
-        context: Context,
+        context: UserContext,
         id: number,
         habitId: number,
         dayKey: string,
@@ -41,7 +51,7 @@ export namespace PlannedHabitEventDispatcher {
     };
 
     export const onIncompleted = (
-        context: Context,
+        context: UserContext,
         id: number,
         habitId: number,
         dayKey: string

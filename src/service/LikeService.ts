@@ -13,6 +13,7 @@ import { LikeEventDispatcher } from '@src/event/like/LikeEventDispatcher';
 import { Constants } from '@resources/types/constants/constants';
 import { NotificationType } from './NotificationService';
 import { FeaturedPostDao } from '@src/database/FeaturedPostDao';
+import { ContextService } from './ContextService';
 
 export class LikeService {
     public static async create(
@@ -54,8 +55,10 @@ export class LikeService {
         }
 
         const notificationType = this.getNotificationType(interactable);
+
+        const userContext = ContextService.contextToUserContext(context);
         LikeEventDispatcher.onCreated(
-            context,
+            userContext,
             notificationType,
             context.userId,
             toUserId,

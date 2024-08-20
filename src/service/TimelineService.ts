@@ -16,6 +16,7 @@ import { PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 import { TimelineEventDispatcher } from '@src/event/timeline/TimelineEventDispatcher';
 import { UserFeaturedPostService } from './UserFeaturedPostService';
 import { UserFeaturePostEventDispatcher } from '@src/event/user_feature_post/UserFeaturedPostEventDispatcher';
+import { ContextService } from './ContextService';
 
 export class TimelineService {
     public static async get(
@@ -63,7 +64,9 @@ export class TimelineService {
         elements.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
         this.dispatchAccessedUserFeaturedPosts(context, userFeaturedPosts);
-        TimelineEventDispatcher.onAccessed(context);
+
+        const userContext = ContextService.contextToUserContext(context);
+        TimelineEventDispatcher.onAccessed(userContext);
 
         const timelineData = this.postProcessData(elements, timelineRequestCursor.limit);
         return timelineData;
@@ -206,12 +209,14 @@ export class TimelineService {
         context: Context,
         userFeaturedPosts: UserFeaturedPost[]
     ) {
+        const userContext = ContextService.contextToUserContext(context);
+
         for (const userFeaturedPost of userFeaturedPosts) {
             if (!userFeaturedPost.id || userFeaturedPost.isViewed) {
                 continue;
             }
 
-            UserFeaturePostEventDispatcher.onAccessed(context, userFeaturedPost.id);
+            UserFeaturePostEventDispatcher.onAccessed(userContext, userFeaturedPost.id);
         }
     }
 

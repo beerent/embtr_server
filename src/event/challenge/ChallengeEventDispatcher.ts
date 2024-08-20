@@ -1,24 +1,24 @@
-import { Context } from '@src/general/auth/Context';
+import { UserContext } from '@src/general/auth/Context';
 import eventBus from '../eventBus';
 import { Event } from '../events';
 
 export namespace ChallengeEventDispatcher {
-    export const onJoined = (context: Context, id: number) => {
+    export const onJoined = (context: UserContext, id: number) => {
         const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
         eventBus.emit(Event.Challenge.Joined, event);
     };
 
-    export const onLeft = (context: Context, id: number) => {
+    export const onLeft = (context: UserContext, id: number) => {
         const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
         eventBus.emit(Event.Challenge.Left, event);
     };
 
-    export const onCompleted = (context: Context, id: number) => {
+    export const onCompleted = (context: UserContext, id: number) => {
         const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
         eventBus.emit(Event.Challenge.Completed, event);
     };
 
-    export const onIncompleted = (context: Context, id: number) => {
+    export const onIncompleted = (context: UserContext, id: number) => {
         const event: Event.Challenge.Event = new Event.Challenge.Event(context, id);
         eventBus.emit(Event.Challenge.Incompleted, event);
     };

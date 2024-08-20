@@ -9,6 +9,7 @@ import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { PointLedgerRecord } from '@resources/schema';
 import { PointLedgerRecordDispatcher } from '@src/event/point/PointLedgerRecordEventDispatcher';
 import { PureDate } from '@resources/types/date/PureDate';
+import { ContextService } from './ContextService';
 
 export class PointLedgerRecordService {
     public static async addHabitComplete(
@@ -167,7 +168,8 @@ export class PointLedgerRecordService {
         );
 
         const pointLedgerRecordModel: PointLedgerRecord = ModelConverter.convert(pointLedgerRecord);
-        PointLedgerRecordDispatcher.onUpdated(context, relevantId, pointDefinitionType, points);
+        const userContext = ContextService.contextToUserContext(context);
+        PointLedgerRecordDispatcher.onUpdated(userContext, relevantId, pointDefinitionType, points);
 
         return pointLedgerRecordModel;
     }

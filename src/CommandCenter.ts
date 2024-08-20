@@ -34,6 +34,7 @@ import { LeaderboardService } from './service/feature/LeaderboardService';
 import { RetentionService } from './service/feature/RetentionService';
 import { PushNotificationReceiptService } from './service/PushNotificationReceiptService';
 import { PushNotificationService } from './service/PushNotificationService';
+import { ContextService } from './service/ContextService';
 
 // ‘It’s started to rain we need a Macintosh’ - T_G_Digital - 2024-04-05
 
@@ -462,8 +463,8 @@ const handleCommandRefreshPremiumUser = async (username: string) => {
         return;
     }
 
-    const context = impersonateContext(user);
-    await UserService.updatePremiumStatus(context, user.uid!);
+    const context = ContextService.impersonateUserContext(adminContext, user);
+    await UserService.updatePremiumStatus(context);
 };
 
 const handleAddPremiumRole = async (username: string) => {
@@ -685,7 +686,7 @@ const handleCommandUpdateAllBadgesForUser = async (username: string) => {
 
     console.log('updating badges for user', user.username);
     const context = impersonateContext(user);
-    await UserBadgeService.refreshAllBadges(context);
+    //await UserBadgeService.refreshAllBadges(context);
 };
 
 const handleCommandGetAllBadgesForUser = async (username: string) => {
@@ -696,8 +697,8 @@ const handleCommandGetAllBadgesForUser = async (username: string) => {
     }
 
     const context = impersonateContext(user);
-    const badges = await UserBadgeService.getAll(context);
-    console.log(badges);
+    //const badges = await UserBadgeService.getAll(context);
+    //console.log(badges);
 };
 
 const handleCommandDeleteChallenge = async (challengeId: number) => {
@@ -735,7 +736,11 @@ const handleCommandNotifyUsersWithInactiveHabits = async () => {
 };
 
 const handleCommandProcessPendingPushNotifications = async () => {
-    PushNotificationService.processPending(adminContext);
+    await PushNotificationService.processPending(adminContext);
+};
+
+const handleCommandProcessFailedPushNotifications = async () => {
+    await PushNotificationService.processFailed(adminContext);
 };
 
 export const handleCommandGetTodayLeaderboard = async () => {
@@ -986,6 +991,10 @@ const processCommand = async (command: string) => {
 
         case 'processPendingPushNotifications':
             await handleCommandProcessPendingPushNotifications();
+            break;
+
+        case 'processFailedPushNotifications':
+            await handleCommandProcessFailedPushNotifications();
             break;
 
         default:

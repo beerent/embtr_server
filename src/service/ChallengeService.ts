@@ -17,6 +17,7 @@ import { ChallengeParticipantEventDispatcher } from '@src/event/challenge_partic
 import { Context } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
+import { ContextService } from './ContextService';
 import { PlannedHabitService } from './PlannedHabitService';
 import { ScheduledHabitService } from './ScheduledHabitService';
 
@@ -165,7 +166,8 @@ export class ChallengeService {
             await ScheduledHabitService.unarchiveFromChallenge(context, challenge);
         }
 
-        ChallengeEventDispatcher.onJoined(context, id);
+        const userContext = ContextService.contextToUserContext(context);
+        ChallengeEventDispatcher.onJoined(userContext, id);
 
         return SUCCESS;
     }
@@ -279,9 +281,11 @@ export class ChallengeService {
         currentAmountComplete: number,
         previousAmountComplete: number
     ) {
+        const userContext = ContextService.contextToUserContext(context);
+
         if (currentAmountComplete > previousAmountComplete) {
             ChallengeParticipantEventDispatcher.onProgressIncreased(
-                context,
+                userContext,
                 plannedTask.plannedDayId ?? 0,
                 participant.id ?? 0
             );
@@ -289,7 +293,7 @@ export class ChallengeService {
 
         if (currentAmountComplete < previousAmountComplete) {
             ChallengeParticipantEventDispatcher.onProgressDecreased(
-                context,
+                userContext,
                 plannedTask.plannedDayId ?? 0,
                 participant.id ?? 0
             );
@@ -301,10 +305,12 @@ export class ChallengeService {
         challengeId: number,
         completionState: ChallengeRequirementCompletionState
     ) {
+        const userContext = ContextService.contextToUserContext(context);
+
         if (completionState === ChallengeRequirementCompletionState.COMPLETED) {
-            ChallengeEventDispatcher.onCompleted(context, challengeId);
+            ChallengeEventDispatcher.onCompleted(userContext, challengeId);
         } else {
-            ChallengeEventDispatcher.onIncompleted(context, challengeId);
+            ChallengeEventDispatcher.onIncompleted(userContext, challengeId);
         }
     }
 
@@ -417,7 +423,8 @@ export class ChallengeService {
         participant.active = false;
         await ChallengeParticipantDao.update(participant);
 
-        ChallengeEventDispatcher.onLeft(context, id);
+        const userContext = ContextService.contextToUserContext(context);
+        ChallengeEventDispatcher.onLeft(userContext, id);
     }
 
     static async getParticipantForUserAndChallenge(

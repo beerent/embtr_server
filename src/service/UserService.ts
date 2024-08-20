@@ -1,5 +1,5 @@
 import { Role, Roles } from '@src/roles/Roles';
-import { Context, ContextType, NewUserContext } from '@src/general/auth/Context';
+import { Context, ContextType, NewUserContext, UserContext } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { User } from '@resources/schema';
 import { Prisma } from '@prisma/client';
@@ -121,7 +121,7 @@ export class UserService {
         }
         logger.info('created new user', newUser.id);
 
-        await UserRoleService.addUserRoles(newUserContext, newUser.email, [Role.USER, Role.FREE]);
+        await UserRoleService.addUserRoles(newUserContext, newUser.uid, [Role.USER, Role.FREE]);
         await AccountDao.updateCustomClaim(newUserContext.userUid, 'userId', newUser.id);
 
         const userModel: User = ModelConverter.convert(newUser);
@@ -232,14 +232,14 @@ export class UserService {
                 continue;
             }
 
-            console.log('checking premium status for', user.username);
-            await this.updatePremiumStatus(context, user.uid);
+            const impersonatedContext = ContextService.impersonateUserContext(context, user);
+            await this.updatePremiumStatus(impersonatedContext);
         }
     }
 
-    public static async updatePremiumStatus(context: Context, uid: string) {
-        const user = await this.getByUid(uid);
-        if (!user?.id || !user?.email) {
+    public static async updatePremiumStatus(context: UserContext) {
+        const user = await this.getByUid(context.userUid);
+        if (!user?.id || !user?.uid) {
             throw new ServiceException(
                 HttpCode.RESOURCE_NOT_FOUND,
                 Code.USER_NOT_FOUND,
@@ -247,11 +247,11 @@ export class UserService {
             );
         }
 
-        const isPremium = await RevenueCatService.isPremium(uid);
+        const isPremium = true; // await RevenueCatService.isPremium(context.userUid);
         const hasPremiumRole = await this.isPremium(context, user.id);
         if (isPremium) {
             if (!hasPremiumRole) {
-                await PremiumMembershipService.addPremium(context, user);
+                await PremiumMembershipService.addPremium(context);
             }
         } else {
             if (hasPremiumRole) {
@@ -259,7 +259,7 @@ export class UserService {
             }
         }
 
-        const updatedUser = await this.getByUid(uid);
+        const updatedUser = await this.getByUid(context.userUid);
         return updatedUser;
     }
 
@@ -382,7 +382,7 @@ export class UserService {
         return updatedUser;
     }
 
-    private static async getByUid(uid: string): Promise<User | undefined> {
+    public static async getByUid(uid: string): Promise<User | undefined> {
         const user = await UserDao.getByUid(uid);
 
         if (user) {
@@ -415,7 +415,7 @@ export class UserService {
     }
 
     private static dispatchUserOnCreated(newUserContext: NewUserContext, user: User) {
-        const context: Context = {
+        const context: UserContext = {
             type: ContextType.CONTEXT,
             userId: user.id ?? 0,
             userUid: user.uid ?? newUserContext.userUid,
@@ -424,6 +424,7 @@ export class UserService {
             dayKey: '',
             timeZone: '',
             dateTime: new Date(),
+            isUser: true,
             isAdmin: false,
         };
 

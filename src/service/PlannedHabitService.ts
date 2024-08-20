@@ -8,6 +8,7 @@ import { Code } from '@resources/codes';
 import { Context } from '@src/general/auth/Context';
 import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+import { ContextService } from './ContextService';
 const AsyncLock = require('async-lock');
 
 export class PlannedHabitService {
@@ -193,6 +194,8 @@ export class PlannedHabitService {
     }
 
     private static handleCreateDispatches(context: Context, plannedTask: PlannedTask) {
+        const userContext = ContextService.contextToUserContext(context);
+
         if (
             !plannedTask.id ||
             !plannedTask.scheduledHabit?.taskId ||
@@ -203,7 +206,7 @@ export class PlannedHabitService {
         }
 
         PlannedHabitEventDispatcher.onCreated(
-            context,
+            userContext,
             plannedTask.id,
             plannedTask.scheduledHabit.taskId,
             plannedTask.plannedDay.dayKey
@@ -212,7 +215,7 @@ export class PlannedHabitService {
         const isComplete = plannedTask.status === Constants.CompletionState.COMPLETE;
         if (isComplete) {
             PlannedHabitEventDispatcher.onCompleted(
-                context,
+                userContext,
                 plannedTask.id,
                 plannedTask.scheduledHabit.taskId,
                 plannedTask.plannedDay.dayKey,
@@ -226,6 +229,8 @@ export class PlannedHabitService {
         existingPlannedTask: PlannedTask,
         updatedPlannedTask: PlannedTask
     ) {
+        const userContext = ContextService.contextToUserContext(context);
+
         if (
             !existingPlannedTask.id ||
             !updatedPlannedTask.id ||
@@ -237,7 +242,7 @@ export class PlannedHabitService {
         }
 
         PlannedHabitEventDispatcher.onUpdated(
-            context,
+            userContext,
             existingPlannedTask.id,
             existingPlannedTask.scheduledHabit.taskId,
             existingPlannedTask.plannedDay.dayKey
@@ -252,7 +257,7 @@ export class PlannedHabitService {
 
         if (changedToComplete) {
             PlannedHabitEventDispatcher.onCompleted(
-                context,
+                userContext,
                 updatedPlannedTask.id,
                 existingPlannedTask.scheduledHabit.taskId,
                 existingPlannedTask.plannedDay.dayKey,
@@ -260,7 +265,7 @@ export class PlannedHabitService {
             );
         } else if (changedToIncomplete) {
             PlannedHabitEventDispatcher.onIncompleted(
-                context,
+                userContext,
                 updatedPlannedTask.id,
                 existingPlannedTask.scheduledHabit.taskId,
                 existingPlannedTask.plannedDay.dayKey

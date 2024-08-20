@@ -5,6 +5,7 @@ import { LevelEventDispatcher } from '@src/event/level/LevelEventDispatcher';
 import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { UserPropertyUtility } from '@src/utility/UserPropertyUtility';
+import { ContextService } from './ContextService';
 import { UserPropertyService } from './UserPropertyService';
 import { UserService } from './UserService';
 import { WebSocketService } from './WebSocketService';
@@ -53,7 +54,9 @@ export class LevelService {
 
         console.log(`Setting level to ${level.level}`);
         await UserPropertyService.setLevel(context, level.level);
-        LevelEventDispatcher.onUpdated(context);
+
+        const userContext = ContextService.contextToUserContext(context);
+        LevelEventDispatcher.onUpdated(userContext);
     }
 
     public static async getDetails(context: Context, userId: number) {

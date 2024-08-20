@@ -35,6 +35,7 @@ export class NotificationDao {
                                 active: true,
                             },
                             select: {
+                                id: true,
                                 token: true,
                             },
                         },

@@ -1,11 +1,11 @@
 import { Constants } from '@resources/types/constants/constants';
-import { Context } from '@src/general/auth/Context';
+import { UserContext } from '@src/general/auth/Context';
 import eventBus from '../eventBus';
 import { Event } from '../events';
 
 export namespace PointLedgerRecordDispatcher {
     export const onUpdated = (
-        context: Context,
+        context: UserContext,
         relevantId: number,
         pointDefinitionType: Constants.PointDefinitionType,
         points: number

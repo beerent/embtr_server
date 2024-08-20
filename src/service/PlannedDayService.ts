@@ -18,6 +18,7 @@ import { PlannedDayEventDispatcher } from '@src/event/planned_day/PlannedDayEven
 import { PlannedHabitService } from './PlannedHabitService';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+import { ContextService } from './ContextService';
 const AsyncLock = require('async-lock');
 
 interface ScheduledHabitTimeOfDay {
@@ -354,8 +355,9 @@ export class PlannedDayService {
                 );
             }
 
+            const userContext = ContextService.contextToUserContext(context);
             PlannedDayEventDispatcher.onUpdated(
-                context,
+                userContext,
                 plannedDay.userId,
                 plannedDay.dayKey,
                 plannedDay.id
@@ -535,10 +537,11 @@ export class PlannedDayService {
             return;
         }
 
+        const userContext = ContextService.contextToUserContext(context);
         if (completionState === Constants.CompletionState.COMPLETE) {
-            PlannedDayEventDispatcher.onCompleted(context, plannedDay.dayKey, plannedDay.id);
+            PlannedDayEventDispatcher.onCompleted(userContext, plannedDay.dayKey, plannedDay.id);
         } else {
-            PlannedDayEventDispatcher.onIncompleted(context, plannedDay.dayKey, plannedDay.id);
+            PlannedDayEventDispatcher.onIncompleted(userContext, plannedDay.dayKey, plannedDay.id);
         }
     }
 }

@@ -218,6 +218,7 @@ export class UserDao {
                         active: true,
                     },
                     select: {
+                        id: true,
                         token: true,
                     },
                 },
@@ -307,7 +308,7 @@ export class UserDao {
                 bio: 'welcome to embtr!',
                 location: 'earth',
                 photoUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/common%2Fdefault_profile.png?alt=media&token=ff2e0e76-dc26-43f3-9354-9a14a240dcd6',
+                    'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/common%2Fdefault_profile.png?alt=media',
             },
         });
 
@@ -486,6 +487,7 @@ export class UserDao {
                         active: true,
                     },
                     select: {
+                        id: true,
                         token: true,
                     },
                 },
@@ -511,6 +513,7 @@ export class UserDao {
                         active: true,
                     },
                     select: {
+                        id: true,
                         token: true,
                     },
                 },

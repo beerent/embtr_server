@@ -1,5 +1,5 @@
 import { Constants } from '@resources/types/constants/constants';
-import { Context } from '@src/general/auth/Context';
+import { UserContext } from '@src/general/auth/Context';
 import { NotificationType } from '@src/service/NotificationService';
 
 export namespace Event {
@@ -9,12 +9,12 @@ export namespace Event {
         export const Incompleted = 'PLANNED_DAY_INCOMPLETED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             userId: number;
             dayKey: string;
             id: number;
 
-            constructor(context: Context, userId: number, dayKey: string, id: number) {
+            constructor(context: UserContext, userId: number, dayKey: string, id: number) {
                 this.context = context;
                 this.userId = userId;
                 this.dayKey = dayKey;
@@ -32,11 +32,11 @@ export namespace Event {
         export const Deleted = 'PLANNED_DAY_RESULT_DELETED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             id: number;
             dayKey: string;
 
-            constructor(context: Context, id: number, dayKey: string) {
+            constructor(context: UserContext, id: number, dayKey: string) {
                 this.context = context;
                 this.id = id;
                 this.dayKey = dayKey;
@@ -55,14 +55,14 @@ export namespace Event {
         export const Incompleted = 'PLANNED_HABIT_INCOMPLETED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             id: number;
             habitId: number;
             dayKey: string;
             totalTimesOfDay?: number;
 
             constructor(
-                context: Context,
+                context: UserContext,
                 id: number,
                 habitId: number,
                 dayKey: string,
@@ -86,11 +86,11 @@ export namespace Event {
         export const Updated = 'USER_PROPERTY_UPDATED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             key: string;
             value?: string;
 
-            constructor(context: Context, key: string, value?: string) {
+            constructor(context: UserContext, key: string, value?: string) {
                 this.context = context;
                 this.key = key;
                 this.value = value;
@@ -106,10 +106,10 @@ export namespace Event {
         export const Refresh = 'HABIT_STREAK_REFRESH';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             userId: number;
 
-            constructor(context: Context, userId: number) {
+            constructor(context: UserContext, userId: number) {
                 this.context = context;
                 this.userId = userId;
             }
@@ -124,14 +124,14 @@ export namespace Event {
         export const Created = 'COMMENT_CREATED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             notificationType: NotificationType;
             fromUserId: number;
             toUserId: number;
             targetId: number;
 
             constructor(
-                context: Context,
+                context: UserContext,
                 notificationType: NotificationType,
                 fromUserId: number,
                 toUserId: number,
@@ -154,14 +154,14 @@ export namespace Event {
         export const Created = 'LIKE_CREATED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             notificationType: NotificationType;
             fromUserId: number;
             toUserId: number;
             targetId: number;
 
             constructor(
-                context: Context,
+                context: UserContext,
                 notificationType: NotificationType,
                 fromUserId: number,
                 toUserId: number,
@@ -187,10 +187,10 @@ export namespace Event {
         export const Incompleted = 'CHALLENGE_INCOMPLETED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             id: number;
 
-            constructor(context: Context, id: number) {
+            constructor(context: UserContext, id: number) {
                 this.context = context;
                 this.id = id;
             }
@@ -206,11 +206,11 @@ export namespace Event {
         export const ProgressDecreased = 'CHALLENGE_PARTICIPANT_PROGRESS_DECREASED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             plannedDayId: number;
             id: number;
 
-            constructor(context: Context, plannedDayId: number, id: number) {
+            constructor(context: UserContext, plannedDayId: number, id: number) {
                 this.context = context;
                 this.plannedDayId = plannedDayId;
                 this.id = id;
@@ -231,9 +231,9 @@ export namespace Event {
         export const Returned = 'USER_RETURNED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
 
-            constructor(context: Context) {
+            constructor(context: UserContext) {
                 this.context = context;
             }
 
@@ -247,13 +247,13 @@ export namespace Event {
         export const Updated = 'POINT_LEDGER_RECORD_UPDATED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             relevantId: number;
             pointDefinitionType: Constants.PointDefinitionType;
             points: number;
 
             constructor(
-                context: Context,
+                context: UserContext,
                 relevantId: number,
                 pointDefinitionType: Constants.PointDefinitionType,
                 points: number
@@ -274,9 +274,9 @@ export namespace Event {
         export const Updated = 'LEVEL_UPDATED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
 
-            constructor(context: Context) {
+            constructor(context: UserContext) {
                 this.context = context;
             }
 
@@ -290,9 +290,9 @@ export namespace Event {
         export const Accessed = 'TIMELINE_ACCESSED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
 
-            constructor(context: Context) {
+            constructor(context: UserContext) {
                 this.context = context;
             }
 
@@ -306,10 +306,10 @@ export namespace Event {
         export const Accessed = 'USER_FEATURED_POST_ACCESSED';
 
         export class Event {
-            context: Context;
+            context: UserContext;
             id: number;
 
-            constructor(context: Context, id: number) {
+            constructor(context: UserContext, id: number) {
                 this.context = context;
                 this.id = id;
             }

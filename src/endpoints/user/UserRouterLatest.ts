@@ -217,9 +217,9 @@ userRouterLatest.post(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
+        const context = await ContextService.getUserContext(req);
 
-        const user = await UserService.updatePremiumStatus(context, context.userUid);
+        const user = await UserService.updatePremiumStatus(context);
         const response: UpdatePremiumStatusResponse = { ...SUCCESS, user };
         res.json(response);
     })

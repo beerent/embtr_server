@@ -1,11 +1,11 @@
-import { Context } from '@src/general/auth/Context';
+import { UserContext } from '@src/general/auth/Context';
 import { NotificationType } from '@src/service/NotificationService';
 import eventBus from '../eventBus';
 import { Event } from '../events';
 
 export namespace LikeEventDispatcher {
     export const onCreated = (
-        context: Context,
+        context: UserContext,
         notificationType: NotificationType,
         fromUserId: number,
         toUserId: number,

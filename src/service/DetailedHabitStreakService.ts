@@ -17,6 +17,7 @@ import { ScheduledHabitService } from './ScheduledHabitService';
 import { HabitStreakEventDispatcher } from '@src/event/habit_streak/HabitStreakEventDispatcher';
 import { parseISO, getDay } from 'date-fns';
 import { HabitStreakService } from './HabitStreakService';
+import { ContextService } from './ContextService';
 
 // "comment" - stronkbad - 2024-03-13
 
@@ -87,7 +88,8 @@ export class DetailedHabitStreakService {
         startDate.setDate(endDate.getDate() - days);
         startDate.setHours(0, 0, 0, 0);
 
-        HabitStreakEventDispatcher.onRefresh(context, userId);
+        const userContext = ContextService.contextToUserContext(context);
+        HabitStreakEventDispatcher.onRefresh(userContext, userId);
 
         // 1. get streak constants, schedules and plannedDays
         const [currentHabitStreak, lonestHabitStreak, plannedDays, scheduledHabits] =

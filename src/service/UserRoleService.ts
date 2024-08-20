@@ -5,13 +5,13 @@ import { Context, NewUserContext } from '@src/general/auth/Context';
 import { Role } from '@src/roles/Roles';
 
 export class UserRoleService {
-    public static async addUserRole(context: Context | NewUserContext, email: string, role: Role) {
-        await this.addUserRoles(context, email, [role]);
+    public static async addUserRole(context: Context | NewUserContext, uid: string, role: Role) {
+        await this.addUserRoles(context, uid, [role]);
     }
 
     public static async addUserRoles(
         context: Context | NewUserContext,
-        email: string,
+        uid: string,
         roles: Role[]
     ) {
         const databaseRoles = await RoleDao.getAllByName(roles);
@@ -19,12 +19,12 @@ export class UserRoleService {
             return;
         }
 
-        const user = await UserDao.getByEmail(email);
+        const user = await UserDao.getByUid(uid);
         if (!user) {
-            return;
+            throw new Error('User not found');
         }
 
-        const account = await AccountDao.getByEmail(email);
+        const account = await AccountDao.getByUid(uid);
         if (!account) {
             return;
         }
@@ -49,22 +49,22 @@ export class UserRoleService {
         }
     }
 
-    public static async removeUserRole(context: Context, email: string, role: Role) {
-        await this.removeUserRoles(context, email, [role]);
+    public static async removeUserRole(context: Context, uid: string, role: Role) {
+        await this.removeUserRoles(context, uid, [role]);
     }
 
-    public static async removeUserRoles(context: Context, email: string, roles: Role[]) {
+    public static async removeUserRoles(context: Context, uid: string, roles: Role[]) {
         const databaseRoles = await RoleDao.getAllByName(roles);
         if (!databaseRoles) {
             return;
         }
 
-        const user = await UserDao.getByEmail(email);
+        const user = await UserDao.getByUid(uid);
         if (!user) {
             return;
         }
 
-        const account = await AccountDao.getByEmail(email);
+        const account = await AccountDao.getByUid(uid);
         if (!account) {
             return;
         }

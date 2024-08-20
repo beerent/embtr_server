@@ -16,6 +16,7 @@ import { BlockUserService } from './BlockUserService';
 import { PlannedDayAttribute, PlannedDayResultDto } from '@resources/types/dto/PlannedDay';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 import { PlannedDayResultEventDispatcher } from '@src/event/planned_day_result/PlannedDayResultEventDispatcher';
+import { ContextService } from './ContextService';
 
 export class PlannedDayResultService {
     public static async create(
@@ -45,8 +46,9 @@ export class PlannedDayResultService {
             );
         }
 
+        const userContext = ContextService.contextToUserContext(context);
         PlannedDayResultEventDispatcher.onCreated(
-            context,
+            userContext,
             createdPlannedDayResult.id,
             plannedDay.dayKey
         );
@@ -90,8 +92,9 @@ export class PlannedDayResultService {
         const updatedPlannedDayResult = await PlannedDayResultDao.update(plannedDayResult);
 
         if (!updatedPlannedDayResult.active && plannedDayResult.plannedDay?.dayKey) {
+            const userContext = ContextService.contextToUserContext(context);
             PlannedDayResultEventDispatcher.onDeleted(
-                context,
+                userContext,
                 plannedDayResult.id ?? 1,
                 plannedDayResult.plannedDay.dayKey
             );

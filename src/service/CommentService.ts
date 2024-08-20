@@ -12,6 +12,7 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { CommentEventDispatcher } from '@src/event/comment/CommentEventDispatcher';
 import { FeaturedPostDao } from '@src/database/FeaturedPostDao';
+import { ContextService } from './ContextService';
 
 export class CommentService {
     public static async create(
@@ -99,6 +100,8 @@ export class CommentService {
             return;
         }
 
+        const userContext = ContextService.contextToUserContext(context);
+
         const fromUserId = context.userId;
         const ownerNotificationType = this.getNotificationType(interactable, {
             forOwner: true,
@@ -113,7 +116,7 @@ export class CommentService {
         );
 
         CommentEventDispatcher.onCreated(
-            context,
+            userContext,
             ownerNotificationType,
             fromUserId,
             forOwnerUserId,
@@ -125,7 +128,7 @@ export class CommentService {
                 forOwner: false,
             });
             CommentEventDispatcher.onCreated(
-                context,
+                userContext,
                 notificationType,
                 fromUserId,
                 toUserId,

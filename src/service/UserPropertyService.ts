@@ -9,6 +9,7 @@ import { Roles } from '@src/roles/Roles';
 import { HttpCode } from '@src/common/RequestResponses';
 import { UserService } from './UserService';
 import { UserPropertyEventDispatcher } from '@src/event/user_property/UserPropertyEventDispatcher';
+import { ContextService } from './ContextService';
 
 export class UserPropertyService {
     public static async getAll(context: Context, userId: number): Promise<Property[]> {
@@ -340,8 +341,9 @@ export class UserPropertyService {
             points.toString()
         );
 
+        const userContext = ContextService.contextToUserContext(context);
         UserPropertyEventDispatcher.onUpdated(
-            context,
+            userContext,
             Constants.UserPropertyKey.POINTS,
             points.toString()
         );

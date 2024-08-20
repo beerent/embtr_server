@@ -90,7 +90,6 @@ export class LikeDao {
         userId: number,
         targetId: number
     ) {
-        console.log('exists', interactable, userId, targetId);
         const where: Prisma.LikeWhereInput = {
             userId,
             active: true,
@@ -127,8 +126,6 @@ export class LikeDao {
                 },
             };
         }
-
-        console.log('where', where);
 
         const result = await prisma.like.findFirst({
             where: where,

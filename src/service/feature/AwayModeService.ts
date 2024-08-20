@@ -3,6 +3,7 @@ import { logger } from '@src/common/logger/Logger';
 import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
 import { Context, ContextType } from '@src/general/auth/Context';
 import { DayKeyUtility } from '@src/utility/date/DayKeyUtility';
+import { ContextService } from '../ContextService';
 import { PlannedDayService } from '../PlannedDayService';
 import { UserPropertyService } from '../UserPropertyService';
 import { UserService } from '../UserService';
@@ -27,12 +28,13 @@ export class AwayModeService {
     public static async update(context: Context, awayMode: Constants.AwayMode) {
         await UserPropertyService.setAwayMode(context, awayMode);
 
+        const userContext = ContextService.contextToUserContext(context);
         if (awayMode === Constants.AwayMode.ENABLED) {
             await this.refresh(context, context.userId);
-            UserEventDispatcher.onAway(context);
+            UserEventDispatcher.onAway(userContext);
         } else {
             await this.remove(context, context.userId);
-            UserEventDispatcher.onReturned(context);
+            UserEventDispatcher.onReturned(userContext);
         }
     }
 

@@ -72,6 +72,10 @@ export class ContextService {
         };
     }
 
+    public static contextToUserContext(context: Context): UserContext {
+        return { ...context, isUser: true, isAdmin: false };
+    }
+
     public static impersonateUserContext(context: Context, user: User): UserContext {
         if (!context.isAdmin) {
             throw new ServiceException(

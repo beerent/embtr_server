@@ -139,6 +139,8 @@ export class PushNotificationService {
                     const embtrPushMessage = embtrPushMessages[i];
                     const ticket = ticketChunk[i];
 
+                    //console.log('embtrPushMessage:', embtrPushMessage);
+
                     const expoTicketId =
                         ticket.status === 'ok' && ticket.id ? ticket.id : undefined;
                     const expoErrorMessage = ticket.status === 'error' ? ticket.message : undefined;
@@ -160,6 +162,7 @@ export class PushNotificationService {
             }
         }
 
+        console.log('creating receipts:', receiptsToCreate.length);
         await PushNotificationReceiptService.createAll(context, receiptsToCreate);
     }
 
