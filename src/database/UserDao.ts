@@ -595,13 +595,23 @@ export class UserDao {
     public static async getAllWithAllExpiredScheduledHabits(date: Date): Promise<User[]> {
         const users = await prisma.user.findMany({
             where: {
-                scheduledHabits: {
-                    every: {
-                        endDate: {
-                            lte: date,
+                AND: [
+                    {
+                        scheduledHabits: {
+                            every: {
+                                endDate: {
+                                    lte: date,
+                                    not: null,
+                                },
+                            },
                         },
                     },
-                },
+                    {
+                        scheduledHabits: {
+                            some: {},
+                        },
+                    },
+                ],
             },
             include: {
                 properties: true,
