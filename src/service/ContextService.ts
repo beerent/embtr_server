@@ -88,7 +88,7 @@ export class ContextService {
         const timeZone = UserPropertyUtility.getTimezone(user);
         const userRoles = Roles.getRoles(user.roles?.map((role) => role.name ?? '') ?? []);
 
-        if (!user.id || !user.uid || !user.email || !user.roles || !timeZone) {
+        if (!user.id || !user.uid || !user.roles || !timeZone) {
             logger.error('invalid user:', user);
             throw new ServiceException(
                 HttpCode.GENERAL_FAILURE,
@@ -101,7 +101,7 @@ export class ContextService {
             type: ContextType.CONTEXT,
             userId: user.id,
             userUid: user.uid,
-            userEmail: user.email,
+            userEmail: user.email ?? '',
             userRoles: userRoles,
             dayKey: '',
             timeZone: timeZone,
