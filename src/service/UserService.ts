@@ -247,7 +247,7 @@ export class UserService {
             );
         }
 
-        const isPremium = true; // await RevenueCatService.isPremium(context.userUid);
+        const isPremium = await RevenueCatService.isPremium(context.userUid);
         const hasPremiumRole = await this.isPremium(context, user.id);
         if (isPremium) {
             if (!hasPremiumRole) {
