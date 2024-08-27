@@ -1,9 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 
-export type HabitCategoryPrisma = Prisma.PromiseReturnType<
-    typeof HabitCategoryDao.getAllGeneric
->;
+export type HabitCategoryPrisma = Prisma.PromiseReturnType<typeof HabitCategoryDao.getAllGeneric>;
 
 const CUSTOM_HABITS_CATEGORY_ID = 13;
 const RECENT_HABITS_CATEGORY_ID = 14;
@@ -17,7 +15,11 @@ export class HabitCategoryDao {
                 generic: true,
             },
             include: {
-                tasks: true,
+                tasks: {
+                    include: {
+                        icon: true,
+                    },
+                },
             },
         });
     }

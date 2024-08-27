@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client';
 import { Code } from '@resources/codes';
 import { Task } from '@resources/schema';
 import { TaskDao } from '@src/database/TaskDao';
@@ -15,20 +14,13 @@ export class HabitService {
         return taskModels;
     }
 
-    public static async get(
-        context: Context,
-        id: number,
-        includes?: Prisma.TaskInclude
-    ): Promise<Task> {
-        const task = await TaskDao.get(id, includes);
+    public static async get(context: Context, id: number): Promise<Task> {
+        const task = await TaskDao.get(id);
         if (!task) {
             throw new ServiceException(404, Code.HABIT_NOT_FOUND, 'habit not found');
         }
 
         const taskModel: Task = ModelConverter.convert(task);
-        // deprecated on 4.0.13
-        DeprecatedImageUtility.setTaskImages(taskModel);
-
         return taskModel;
     }
 
