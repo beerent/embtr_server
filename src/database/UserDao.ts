@@ -214,12 +214,12 @@ export class UserDao {
             include: {
                 properties: true,
                 pushNotificationTokens: {
-                    where: {
-                        active: true,
-                    },
                     select: {
                         id: true,
                         token: true,
+                    },
+                    where: {
+                        active: true,
                     },
                 },
             },
@@ -319,14 +319,6 @@ export class UserDao {
         return await prisma.user.delete({
             where: {
                 uid: uid,
-            },
-        });
-    }
-
-    public static async deleteByEmail(email: string): Promise<void> {
-        await prisma.user.delete({
-            where: {
-                email: email,
             },
         });
     }
@@ -483,12 +475,12 @@ export class UserDao {
             include: {
                 properties: true,
                 pushNotificationTokens: {
-                    where: {
-                        active: true,
-                    },
                     select: {
                         id: true,
                         token: true,
+                    },
+                    where: {
+                        active: true,
                     },
                 },
             },
@@ -509,12 +501,12 @@ export class UserDao {
             include: {
                 properties: true,
                 pushNotificationTokens: {
-                    where: {
-                        active: true,
-                    },
                     select: {
                         id: true,
                         token: true,
+                    },
+                    where: {
+                        active: true,
                     },
                 },
             },
@@ -585,6 +577,9 @@ export class UserDao {
                         id: true,
                         token: true,
                     },
+                    where: {
+                        active: true,
+                    },
                 },
             },
         });
@@ -619,6 +614,9 @@ export class UserDao {
                     select: {
                         id: true,
                         token: true,
+                    },
+                    where: {
+                        active: true,
                     },
                 },
             },
@@ -669,6 +667,9 @@ export class UserDao {
                     select: {
                         id: true,
                         token: true,
+                    },
+                    where: {
+                        active: true,
                     },
                 },
             },

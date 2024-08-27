@@ -275,10 +275,6 @@ export class UserService {
         return exists;
     }
 
-    public static async deleteByEmail(email: string): Promise<void> {
-        await UserDao.deleteByEmail(email);
-    }
-
     public static async existsByEmail(email: string): Promise<boolean> {
         const exists = UserDao.existsByEmail(email);
         return exists;
@@ -419,7 +415,6 @@ export class UserService {
             type: ContextType.CONTEXT,
             userId: user.id ?? 0,
             userUid: user.uid ?? newUserContext.userUid,
-            userEmail: user.email ?? '',
             userRoles: [Role.USER, Role.FREE],
             dayKey: '',
             timeZone: '',

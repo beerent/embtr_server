@@ -4,7 +4,6 @@ export interface Context {
     type: ContextType;
     userId: number;
     userUid: string;
-    userEmail: string;
     userRoles: Role[];
     dayKey: string;
     timeZone: string;

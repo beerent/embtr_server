@@ -1,10 +1,54 @@
 import { PushNotificationReceipt } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
+import { PushNotificationStats } from '@resources/types/dto/PushNotification';
 import { PushNotificationReceiptDao } from '@src/database/PushNotificationReceiptDao';
-import { Context } from '@src/general/auth/Context';
+import { AdminContext, Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class PushNotificationReceiptService {
+    public static async getStats(context: AdminContext) {
+        const totalsByStatus = await PushNotificationReceiptDao.countAllByStatus();
+        const allTotals = totalsByStatus.reduce((acc, total) => {
+            return acc + total._count;
+        }, 0);
+
+        const pendingCount = this.getCountFromStats(
+            totalsByStatus,
+            Constants.PushNotificationStatus.PENDING
+        );
+
+        const failedCount = this.getCountFromStats(
+            totalsByStatus,
+            Constants.PushNotificationStatus.FAILED
+        );
+
+        const sentCount = this.getCountFromStats(
+            totalsByStatus,
+            Constants.PushNotificationStatus.SENT
+        );
+
+        const failedAcknowledgedCount = this.getCountFromStats(
+            totalsByStatus,
+            Constants.PushNotificationStatus.FAILED_ACKNOWLEDGED
+        );
+
+        const failedInvalidatedCount = this.getCountFromStats(
+            totalsByStatus,
+            Constants.PushNotificationStatus.FAILED_INVALIDATED
+        );
+
+        const stats: PushNotificationStats = {
+            total: allTotals,
+            pending: pendingCount,
+            sent: sentCount,
+            failed: failedCount,
+            failedAcknowledged: failedAcknowledgedCount,
+            failedInvalidated: failedInvalidatedCount,
+        };
+
+        return stats;
+    }
+
     public static async createAll(
         context: Context,
         pushNotificationReceipts: PushNotificationReceipt[]
@@ -43,5 +87,17 @@ export class PushNotificationReceiptService {
         pushNotificationReceipts: PushNotificationReceipt[]
     ) {
         await PushNotificationReceiptDao.updateStatuses(pushNotificationReceipts);
+    }
+
+    private static getCountFromStats(
+        totalsByStatus: any[],
+        status: Constants.PushNotificationStatus
+    ) {
+        const count =
+            totalsByStatus.find((total) => {
+                return total.status === status;
+            })?._count || 0;
+
+        return count;
     }
 }

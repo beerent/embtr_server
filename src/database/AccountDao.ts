@@ -40,15 +40,13 @@ export class AccountDao {
         return { user: undefined, code: Code.GENERIC_ERROR };
     }
 
-    public static async delete(email?: string): Promise<void> {
-        if (!email) {
+    public static async deleteByUid(uid: string): Promise<void> {
+        const account = await this.getByUid(uid);
+        if (!account) {
             return;
         }
 
-        const account = await this.getByEmail(email);
-        if (account) {
-            await firebase.auth().deleteUser(account.uid);
-        }
+        await firebase.auth().deleteUser(account.uid);
     }
 
     public static async verifyEmail(email: string): Promise<void> {

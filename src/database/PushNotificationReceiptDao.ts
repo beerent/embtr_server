@@ -77,4 +77,13 @@ export class PushNotificationReceiptDao {
 
         return pendingReceipts;
     }
+
+    public static async countAllByStatus() {
+        const counts = await prisma.pushNotificationReceipt.groupBy({
+            by: ['status'],
+            _count: true,
+        });
+
+        return counts;
+    }
 }

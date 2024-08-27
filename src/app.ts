@@ -39,6 +39,7 @@ import pointRouter from './endpoints/point/PointRouter';
 import leaderboardRouter from './endpoints/leaderboard/LeaderboardRouter';
 import featureRouter from './endpoints/feature/FeatureRouter';
 import featuredPostRouter from './endpoints/featured_post/FeaturedPostRouter';
+import pushNotificationRouter from './endpoints/push_notification/PushNotificationRouter';
 
 //  In the realm of code, where logic intertwines, Between "why" and "how," a programmer defines. From cryptic syntax to elegant design, The journey unfolds, a quest for the sublime. In lines of code, creation sparks and shines.
 //
@@ -113,6 +114,7 @@ app.use('/', pointRouter);
 app.use('/', leaderboardRouter);
 app.use('/', featureRouter);
 app.use('/', featuredPostRouter);
+app.use('/', pushNotificationRouter);
 app.use('/', healthRouter);
 
 app.use(handleError);

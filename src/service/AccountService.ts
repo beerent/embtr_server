@@ -177,21 +177,25 @@ export class AccountService {
             'We sorry to see you go! Your account and all of your data has been deleted. If ever want to come back, you can create a new account.'
         );
 
-        await AccountDao.delete(context.userEmail);
-        await UserDao.deleteByEmail(context.userEmail);
+        await AccountDao.deleteByUid(context.userUid);
+        await UserDao.deleteByUid(context.userUid);
 
         return { ...SUCCESS };
     }
 
     public static async adminDelete(userId: number): Promise<Response> {
-        const user = await UserDao.getById(userId)
+        const user = await UserDao.getById(userId);
 
-        if (!user?.email)  {
-            throw new ServiceException(HttpCode.GENERAL_FAILURE, Code.GENERIC_ERROR, 'User not found');
+        if (!user?.email) {
+            throw new ServiceException(
+                HttpCode.GENERAL_FAILURE,
+                Code.GENERIC_ERROR,
+                'User not found'
+            );
         }
 
-        await AccountDao.delete(user.email);
-        await UserDao.deleteByEmail(user.email);
+        await AccountDao.deleteByUid(user.uid);
+        await UserDao.deleteByUid(user.uid);
 
         return { ...SUCCESS };
     }
@@ -202,7 +206,7 @@ export class AccountService {
             return { ...GENERAL_FAILURE, message: 'failed to delete account' };
         }
 
-        await AccountDao.delete(user.email);
+        await AccountDao.deleteByUid(user.uid);
 
         return { ...SUCCESS };
     }
