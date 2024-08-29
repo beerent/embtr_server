@@ -96,7 +96,7 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<boolean> {
-        const completionStatus = await this.getCompletionStatus(context, userId, dayKey);
+        const completionStatus = await this.generateCompletionStatus(context, userId, dayKey);
         return completionStatus === Constants.CompletionState.COMPLETE;
     }
 
@@ -110,6 +110,15 @@ export class PlannedDayService {
             return undefined;
         }
 
+        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+        return plannedDay?.status ? Constants.getCompletionState(plannedDay.status) : undefined;
+    }
+
+    public static async generateCompletionStatus(
+        context: Context,
+        userId: number,
+        dayKey: string
+    ): Promise<Constants.CompletionState | undefined> {
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         if (!plannedDay) {
             return Constants.CompletionState.INVALID;
@@ -314,7 +323,7 @@ export class PlannedDayService {
         }
 
         const oldStatus = plannedDay.status;
-        const newStatus = await this.getCompletionStatus(
+        const newStatus = await this.generateCompletionStatus(
             context,
             plannedDay.userId,
             plannedDay.dayKey

@@ -357,7 +357,7 @@ export class DetailedHabitStreakService {
                 continue;
             }
 
-            const completionStatus = await PlannedDayService.getCompletionStatus(
+            const completionStatus = await PlannedDayService.generateCompletionStatus(
                 context,
                 userId,
                 dayKey

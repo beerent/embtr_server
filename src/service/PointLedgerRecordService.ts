@@ -129,10 +129,6 @@ export class PointLedgerRecordService {
             );
         }
 
-        console.log(
-            `Adding ${latestPointDefinitionVersion.points} points for ${pointDefinitionType} on ${relevantId} with pointsSplit ${pointsSplit}`
-        );
-
         return this.upsertPointsLedgerRecord(
             context,
             dayKey,
