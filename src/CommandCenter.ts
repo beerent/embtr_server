@@ -4,7 +4,7 @@ require('module-alias/register');
 import * as readline from 'readline';
 import '@src/event/event_listener_imports';
 import { UserRoleService } from './service/UserRoleService';
-import { Context, ContextType } from './general/auth/Context';
+import { Context, ContextType, UserContext } from './general/auth/Context';
 import { Role } from './roles/Roles';
 import { AccountService } from './service/AccountService';
 import { UserService } from './service/UserService';
@@ -26,13 +26,11 @@ import { HabitStreakService } from './service/HabitStreakService';
 import { ScheduledHabitService } from './service/ScheduledHabitService';
 import { PureDate } from '@resources/types/date/PureDate';
 import { DateUtility } from './utility/date/DateUtility';
-import { UserBadgeService } from './service/UserBadgeService';
 import { AccountDao } from './database/AccountDao';
 import { NewUserContext } from '@src/general/auth/Context';
 import { ChallengeService } from './service/ChallengeService';
 import { LeaderboardService } from './service/feature/LeaderboardService';
 import { RetentionService } from './service/feature/RetentionService';
-import { PushNotificationReceiptService } from './service/PushNotificationReceiptService';
 import { PushNotificationService } from './service/PushNotificationService';
 import { ContextService } from './service/ContextService';
 
@@ -42,7 +40,6 @@ const adminContext: Context = {
     type: ContextType.CONTEXT,
     userId: 1853,
     userUid: 'hello',
-    userEmail: 'bnren',
     userRoles: [],
     dayKey: '04-04-2021',
     timeZone: 'America/New_York',
@@ -55,7 +52,6 @@ const impersonateContext = (user: User): Context => {
         type: ContextType.CONTEXT,
         userId: user.id || 0,
         userUid: user.uid || '',
-        userEmail: user.email || '',
         userRoles: [],
         dayKey: DayKeyUtility.getTodayKey(),
         timeZone: 'America/New_York',
@@ -463,7 +459,7 @@ const handleCommandRefreshPremiumUser = async (username: string) => {
         return;
     }
 
-    const context = ContextService.impersonateUserContext(adminContext, user);
+    const context: UserContext = ContextService.impersonateUserContext(adminContext, user);
     await UserService.updatePremiumStatus(context);
 };
 
@@ -823,10 +819,6 @@ const processCommand = async (command: string) => {
 
         case 'deleteAccount':
             await AccountService.deleteByEmail(email);
-            break;
-
-        case 'deleteUser':
-            await UserService.deleteByEmail(email);
             break;
 
         case 'emailVerified':

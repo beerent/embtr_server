@@ -211,7 +211,7 @@ export class UserService {
 
     public static async refreshNewUsers(context: Context) {
         const users = await this.getAllWithNewBadge(context);
-        logger.info(`found ${users.length} premium users`);
+        logger.info(`found ${users.length} new users`);
 
         for (const user of users) {
             if (!user.uid) {
@@ -255,7 +255,7 @@ export class UserService {
             }
         } else {
             if (hasPremiumRole) {
-                await PremiumMembershipService.removePremium(context, user);
+                await PremiumMembershipService.removePremium(context);
             }
         }
 

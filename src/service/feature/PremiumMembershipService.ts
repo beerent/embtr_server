@@ -6,8 +6,6 @@ import { UserPropertyService } from '@src/service/UserPropertyService';
 import { UserService } from '../UserService';
 import { Constants } from '@resources/types/constants/constants';
 import { UserEventDispatcher } from '@src/event/user/UserEventDispatcher';
-import { ContextService } from '../ContextService';
-import { User } from '@resources/schema';
 
 export class PremiumMembershipService {
     public static async addPremium(context: UserContext) {
@@ -18,17 +16,11 @@ export class PremiumMembershipService {
         ApiAlertsService.sendAlert('💸💸 NEW PREMIUM USER LFG');
     }
 
-    public static async removePremium(context: Context, user: User) {
-        if (!user.uid) {
-            return;
-        }
-
-        await UserRoleService.addUserRole(context, user.uid, Role.FREE);
-        await UserRoleService.removeUserRole(context, user.uid, Role.PREMIUM);
-        await this.removePremiumFeatures(context, user.uid);
-
-        const userContext = ContextService.impersonateUserContext(context, user);
-        UserEventDispatcher.onPremiumRemoved(userContext);
+    public static async removePremium(context: UserContext) {
+        await UserRoleService.addUserRole(context, context.userUid, Role.FREE);
+        await UserRoleService.removeUserRole(context, context.userUid, Role.PREMIUM);
+        await this.removePremiumFeatures(context, context.userUid);
+        UserEventDispatcher.onPremiumRemoved(context);
         ApiAlertsService.sendAlert('we lost a premium user 😢');
     }
 

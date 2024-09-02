@@ -212,6 +212,11 @@ export class UserDao {
                 username: username,
             },
             include: {
+                roles: {
+                    select: {
+                        name: true,
+                    },
+                },
                 properties: true,
                 pushNotificationTokens: {
                     select: {
