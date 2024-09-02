@@ -84,7 +84,7 @@ export class ContextService {
             );
         }
 
-        const timeZone = UserPropertyUtility.getTimezone(user);
+        const timeZone = UserPropertyUtility.getTimezone(user) ?? 'America/New_York';
         const userRoles = Roles.getRoles(user.roles?.map((role) => role.name ?? '') ?? []);
 
         if (!user.id || !user.uid || !user.roles || !timeZone) {
