@@ -18,6 +18,7 @@ import { PlannedDayEventDispatcher } from '@src/event/planned_day/PlannedDayEven
 import { PlannedHabitService } from './PlannedHabitService';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
 import { ContextService } from './ContextService';
+import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 const AsyncLock = require('async-lock');
 
 interface ScheduledHabitTimeOfDay {
@@ -64,6 +65,7 @@ export class PlannedDayService {
 
         if (plannedDay) {
             const plannedDayModel: PlannedDayModel = ModelConverter.convert(plannedDay);
+
             return plannedDayModel;
         }
 
@@ -81,6 +83,7 @@ export class PlannedDayService {
         }
 
         const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
+
         return plannedDayModel;
     }
 
@@ -90,7 +93,6 @@ export class PlannedDayService {
         dayKey: string
     ): Promise<boolean> {
         const completionStatus = await this.getCompletionStatus(context, userId, dayKey);
-        console.log('????????????????completionStatus', completionStatus);
         return completionStatus === Constants.CompletionState.COMPLETE;
     }
 
@@ -420,6 +422,11 @@ export class PlannedDayService {
         userId: number,
         plannedDay: PlannedDay
     ): Promise<PlannedDay> {
+        plannedDay.plannedTasks?.forEach((plannedTask) => {
+            // deprecated on 4.0.13
+            DeprecatedImageUtility.setPlannedTaskImages(plannedTask);
+        });
+
         const plannedDayDate = plannedDay?.date ?? new Date();
         const dayOfWeek = plannedDay.date!.getUTCDay() + 1 ?? 0;
         let scheduledHabits = await ScheduledHabitDao.getForUserAndDayOfWeekAndDate(
