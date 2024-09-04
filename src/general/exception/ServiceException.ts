@@ -24,6 +24,7 @@ export class ServiceException extends Error {
             };
         }
 
+        console.log('ServiceException.getResponse: error', error);
         return {
             httpCode: 500,
             internalCode: Code.INTERNAL_ERROR,

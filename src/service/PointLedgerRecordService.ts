@@ -165,7 +165,13 @@ export class PointLedgerRecordService {
 
         const pointLedgerRecordModel: PointLedgerRecord = ModelConverter.convert(pointLedgerRecord);
         const userContext = ContextService.contextToUserContext(context);
-        PointLedgerRecordDispatcher.onUpdated(userContext, relevantId, pointDefinitionType, points);
+        PointLedgerRecordDispatcher.onUpdated(
+            userContext,
+            dayKey,
+            relevantId,
+            pointDefinitionType,
+            points
+        );
 
         return pointLedgerRecordModel;
     }

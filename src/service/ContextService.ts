@@ -87,6 +87,7 @@ export class ContextService {
         const timeZone = UserPropertyUtility.getTimezone(user) ?? 'America/New_York';
         const userRoles = Roles.getRoles(user.roles?.map((role) => role.name ?? '') ?? []);
 
+        console.log(!!user.id, !!user.uid, !!user.roles, !!timeZone);
         if (!user.id || !user.uid || !user.roles || !timeZone) {
             logger.error('invalid user:', user);
             throw new ServiceException(

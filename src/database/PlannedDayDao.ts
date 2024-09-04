@@ -8,43 +8,6 @@ export interface QueryResults {
     status: string;
 }
 
-export const PlannedDayGetInclude = {
-    user: true,
-    plannedTasks: {
-        include: {
-            icon: true,
-            scheduledHabit: {
-                include: {
-                    timesOfDay: {
-                        select: {
-                            period: true,
-                        },
-                    },
-                    icon: true,
-                    task: {
-                        select: {
-                            icon: true,
-                            type: true,
-                        },
-                    },
-                },
-            },
-            plannedDay: true,
-            unit: true,
-            timeOfDay: true,
-            originalTimeOfDay: true,
-        },
-    },
-    plannedDayResults: {
-        include: {
-            images: true,
-        },
-        where: {
-            active: true,
-        },
-    },
-} satisfies Prisma.PlannedDayInclude;
-
 export const PlannedDayInclude = {
     user: true,
     plannedTasks: {
@@ -87,23 +50,60 @@ export class PlannedDayDao {
             where: {
                 id: id,
             },
-            include: PlannedDayInclude,
-        });
-    }
-
-    public static async findByUserAndDayKey(userId: number, dayKey: string) {
-        return await prisma.plannedDay.findFirst({
-            where: {
-                userId,
-                dayKey,
-            },
-            include: PlannedDayInclude,
+            //TODO
         });
     }
 
     public static async existsByUserAndDayKey(userId: number, dayKey: string) {
-        const plannedDay = await this.findByUserAndDayKey(userId, dayKey);
+        const plannedDay = await prisma.plannedDay.findFirst({
+            where: {
+                userId,
+                dayKey,
+            },
+        });
+
         return plannedDay !== null;
+    }
+
+    public static async getByUserAndDayKeyForToday(userId: number, dayKey: string) {
+        const results = await prisma.plannedDay.findUnique({
+            where: {
+                unique_user_daykey: {
+                    userId,
+                    dayKey,
+                },
+            },
+            include: {
+                user: true,
+                plannedDayResults: true,
+                plannedTasks: {
+                    include: {
+                        icon: true,
+                        scheduledHabit: {
+                            include: {
+                                timesOfDay: {
+                                    select: {
+                                        period: true,
+                                    },
+                                },
+                                icon: true,
+                                task: {
+                                    select: {
+                                        icon: true,
+                                        type: true,
+                                    },
+                                },
+                            },
+                        },
+                        unit: true,
+                        timeOfDay: true,
+                        originalTimeOfDay: true,
+                    },
+                },
+            },
+        });
+
+        return results;
     }
 
     public static async getByUserAndDayKey(userId: number, dayKey: string) {
@@ -114,7 +114,51 @@ export class PlannedDayDao {
                     dayKey,
                 },
             },
-            include: PlannedDayGetInclude,
+            include: {
+                plannedTasks: {
+                    include: {
+                        icon: true,
+                        scheduledHabit: {
+                            include: {
+                                timesOfDay: {
+                                    select: {
+                                        period: true,
+                                    },
+                                },
+                                icon: true,
+                                task: {
+                                    select: {
+                                        icon: true,
+                                        type: true,
+                                    },
+                                },
+                            },
+                        },
+                        plannedDay: true,
+                        unit: true,
+                        timeOfDay: true,
+                        originalTimeOfDay: true,
+                    },
+                },
+            },
+        });
+
+        return results;
+    }
+
+    public static async getByUserAndDayKeyWithIncludes(
+        userId: number,
+        dayKey: string,
+        includes: Prisma.PlannedDayInclude
+    ) {
+        const results = await prisma.plannedDay.findUnique({
+            where: {
+                unique_user_daykey: {
+                    userId,
+                    dayKey,
+                },
+            },
+            include: includes,
         });
 
         return results;
@@ -140,23 +184,20 @@ export class PlannedDayDao {
                 dayKey,
                 date,
             },
-            include: PlannedDayGetInclude,
         });
 
         return plannedDayUpsert;
     }
 
     public static async deleteByUserAndDayKey(userId: number, dayKey: string) {
-        try {
-            await prisma.plannedDay.delete({
-                where: {
-                    unique_user_daykey: {
-                        userId: userId,
-                        dayKey: dayKey,
-                    },
+        await prisma.plannedDay.delete({
+            where: {
+                unique_user_daykey: {
+                    userId: userId,
+                    dayKey: dayKey,
                 },
-            });
-        } catch (error) { }
+            },
+        });
     }
 
     public static async getByUserInDateRange(userId: number, startDate: Date, endDate: Date) {
@@ -226,7 +267,6 @@ export class PlannedDayDao {
             orderBy: {
                 date: 'asc',
             },
-            include: PlannedDayInclude,
         });
     }
 

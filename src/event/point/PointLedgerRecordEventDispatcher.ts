@@ -6,12 +6,14 @@ import { Event } from '../events';
 export namespace PointLedgerRecordDispatcher {
     export const onUpdated = (
         context: UserContext,
+        dayKey: string,
         relevantId: number,
         pointDefinitionType: Constants.PointDefinitionType,
         points: number
     ) => {
         const event: Event.PointLedgerRecord.Event = new Event.PointLedgerRecord.Event(
             context,
+            dayKey,
             relevantId,
             pointDefinitionType,
             points

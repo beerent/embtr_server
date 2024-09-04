@@ -17,7 +17,6 @@ import { PlannedDayCommonService } from './common/PlannedDayCommonService';
 import { PlannedDayEventDispatcher } from '@src/event/planned_day/PlannedDayEventDispatcher';
 import { PlannedHabitService } from './PlannedHabitService';
 import { PlannedHabitDao } from '@src/database/PlannedHabitDao';
-import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 import { ContextService } from './ContextService';
 const AsyncLock = require('async-lock');
 
@@ -76,18 +75,12 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<PlannedDay | undefined> {
-        const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
+        const plannedDay = await PlannedDayDao.getByUserAndDayKeyForToday(userId, dayKey);
         if (!plannedDay) {
             return undefined;
         }
 
         const plannedDayModel: PlannedDay = ModelConverter.convert(plannedDay);
-
-        //deprecated in 4.0.13
-        plannedDayModel.plannedTasks?.forEach((plannedTask) => {
-            DeprecatedImageUtility.setPlannedTaskImages(plannedTask);
-        });
-
         return plannedDayModel;
     }
 
@@ -96,7 +89,8 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<boolean> {
-        const completionStatus = await this.generateCompletionStatus(context, userId, dayKey);
+        const completionStatus = await this.getCompletionStatus(context, userId, dayKey);
+        console.log('????????????????completionStatus', completionStatus);
         return completionStatus === Constants.CompletionState.COMPLETE;
     }
 
@@ -105,11 +99,6 @@ export class PlannedDayService {
         userId: number,
         dayKey: string
     ): Promise<Constants.CompletionState | undefined> {
-        const exists = await PlannedDayDao.existsByUserAndDayKey(userId, dayKey);
-        if (!exists) {
-            return undefined;
-        }
-
         const plannedDay = await PlannedDayDao.getByUserAndDayKey(userId, dayKey);
         return plannedDay?.status ? Constants.getCompletionState(plannedDay.status) : undefined;
     }
@@ -333,6 +322,9 @@ export class PlannedDayService {
             return plannedDay;
         }
 
+        plannedDay.status = newStatus;
+        const updatedPlannedDay = await this.update(context, plannedDay);
+
         if (
             (newStatus && oldStatus === Constants.CompletionState.COMPLETE) ||
             newStatus === Constants.CompletionState.COMPLETE
@@ -340,8 +332,6 @@ export class PlannedDayService {
             this.dispatchCompletionStatusChanged(context, plannedDay, newStatus);
         }
 
-        plannedDay.status = newStatus;
-        const updatedPlannedDay = await this.update(context, plannedDay);
         return updatedPlannedDay;
     }
 

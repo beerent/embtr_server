@@ -68,7 +68,7 @@ export class AwayModeService {
             return;
         }
 
-        const completionStatus = await PlannedDayService.getCompletionStatus(
+        const completionStatus = await PlannedDayService.generateCompletionStatus(
             context,
             userId,
             dayKey

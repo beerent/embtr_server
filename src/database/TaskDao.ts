@@ -1,5 +1,5 @@
 import { prisma } from '@database/prisma';
-import { Task } from '@prisma/client';
+import { Prisma, Task } from '@prisma/client';
 import { Task as TaskModel } from '@resources/schema';
 import { logger } from '@src/common/logger/Logger';
 
@@ -24,6 +24,23 @@ export class TaskDao {
                     in: ids,
                 },
             },
+        });
+
+        return tasks;
+    }
+
+    public static async getByIdsWithIncludes(
+        userId: number,
+        ids: number[],
+        includes: Prisma.TaskInclude
+    ): Promise<Task[]> {
+        const tasks = await prisma.task.findMany({
+            where: {
+                id: {
+                    in: ids,
+                },
+            },
+            include: includes,
         });
 
         return tasks;

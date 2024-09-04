@@ -28,7 +28,7 @@ export class PlannedDayResultService {
             throw new ServiceException(404, Code.PLANNED_DAY_NOT_FOUND, 'planned day not found');
         }
 
-        if (plannedDay.user.id !== context.userId) {
+        if (plannedDay.userId !== context.userId) {
             throw new ServiceException(404, Code.FORBIDDEN, 'planned day does not belong to user');
         }
 

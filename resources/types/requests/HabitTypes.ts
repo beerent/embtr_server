@@ -1,6 +1,6 @@
 import { Response } from './RequestTypes';
 import { HabitJourneys, HabitSummary } from '../habit/Habit';
-import { HabitCategory } from '../../schema';
+import { HabitCategory, Task } from '../../schema';
 import { HabitStreak, SimpleHabitStreak } from '../dto/HabitStreak';
 
 export interface GetHabitJourneyResponse extends Response {
@@ -29,4 +29,13 @@ export interface GetHabitStreakResponse extends Response {
 
 export interface GetSimpleHabitStreakResponse extends Response {
     simpleHabitStreak: SimpleHabitStreak;
+}
+
+export interface GetHabitsResponse extends Response {
+    habits: Task[];
+}
+
+export interface TutorialHabitSelectedRequest {
+    id?: number;
+    text?: string;
 }

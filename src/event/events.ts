@@ -248,24 +248,27 @@ export namespace Event {
 
         export class Event {
             context: UserContext;
+            dayKey: string;
             relevantId: number;
             pointDefinitionType: Constants.PointDefinitionType;
             points: number;
 
             constructor(
                 context: UserContext,
+                dayKey: string,
                 relevantId: number,
                 pointDefinitionType: Constants.PointDefinitionType,
                 points: number
             ) {
                 this.context = context;
+                this.dayKey = dayKey;
                 this.relevantId = relevantId;
                 this.pointDefinitionType = pointDefinitionType;
                 this.points = points;
             }
 
             public getKey = () => {
-                return `${this.context.userId}_${this.relevantId}_${this.pointDefinitionType}`;
+                return `${this.context.userId}_${this.dayKey}_${this.relevantId}_${this.pointDefinitionType}`;
             };
         }
     }

@@ -9,6 +9,7 @@ import { Context } from '@src/general/auth/Context';
 import { PlannedHabitEventDispatcher } from '@src/event/planned_habit/PlannedHabitEventDispatcher';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
 import { ContextService } from './ContextService';
+import { Prisma } from '@prisma/client';
 const AsyncLock = require('async-lock');
 
 export class PlannedHabitService {
@@ -134,14 +135,22 @@ export class PlannedHabitService {
         dayKey: string,
         scheduledHabitId: number
     ): Promise<boolean> {
-        const plannedDay = await PlannedDayDao.getByUserAndDayKey(context.userId, dayKey);
+        const plannedDay = await PlannedDayDao.getByUserAndDayKeyWithIncludes(
+            context.userId,
+            dayKey,
+            {
+                plannedTasks: true,
+            }
+        );
+
         if (!plannedDay) {
             return false;
         }
 
-        const exists = plannedDay.plannedTasks.some((plannedTask) => {
-            return plannedTask.scheduledHabitId === scheduledHabitId;
-        });
+        const exists =
+            plannedDay.plannedTasks?.some((plannedTask) => {
+                return plannedTask.scheduledHabitId === scheduledHabitId;
+            }) ?? false;
 
         return exists;
     }

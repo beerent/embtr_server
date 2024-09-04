@@ -3,6 +3,7 @@ import {
     ChallengeCalculationType,
     DayOfWeek,
     ScheduledHabit,
+    Task,
     TimeOfDay,
 } from '@resources/schema';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
@@ -17,6 +18,7 @@ import { DateUtility } from '@src/utility/date/DateUtility';
 import { PlannedHabitService } from './PlannedHabitService';
 import { HttpCode } from '@src/common/RequestResponses';
 import { DeprecatedImageUtility } from '@src/utility/DeprecatedImageUtility';
+import { HabitService } from './HabitService';
 
 export class ScheduledHabitService {
     public static async createOrUpdate(
@@ -453,5 +455,58 @@ export class ScheduledHabitService {
         }
 
         return scheduledHabitModels[0];
+    }
+
+    public static async createFromTutorial(
+        context: Context,
+        habitId?: number,
+        habitText?: string
+    ): Promise<ScheduledHabit> {
+        const defaultTimeOfDay: TimeOfDay = {
+            id: 5,
+        };
+
+        const defaultDaysOfWeek: DayOfWeek[] = [
+            { id: 1 },
+            { id: 2 },
+            { id: 3 },
+            { id: 4 },
+            { id: 5 },
+            { id: 6 },
+            { id: 7 },
+        ];
+        const clientDay: PureDate = PureDate.fromString(context.dayKey);
+        const startDate = clientDay.toUtcDate();
+
+        let createdHabit: Task | undefined = undefined;
+        if (habitText) {
+            const habitToCreate: Task = {
+                title: habitText,
+                userId: context.userId,
+            };
+
+            createdHabit = await HabitService.create(context, habitToCreate);
+        }
+
+        if (!createdHabit?.id && !habitId) {
+            throw new ServiceException(
+                400,
+                Code.INVALID_REQUEST,
+                'failed to create habit from tutorial'
+            );
+        }
+
+        const scheduledHabit: ScheduledHabit = {
+            taskId: habitId ?? createdHabit?.id ?? 0,
+            detailsEnabled: true,
+            daysOfWeekEnabled: false,
+            daysOfWeek: defaultDaysOfWeek,
+            timesOfDayEnabled: false,
+            timesOfDay: [defaultTimeOfDay],
+            startDate: startDate,
+        };
+
+        const createdScheduledHabit = await this.create(context, scheduledHabit);
+        return createdScheduledHabit;
     }
 }

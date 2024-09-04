@@ -18,6 +18,7 @@ export class RevenueCatService {
 
         try {
             const json = await response.json();
+            console.log(json);
             const expiresDate = new Date(
                 json.subscriber.entitlements['Embtr Premium'].expires_date
             );
