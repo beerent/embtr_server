@@ -312,8 +312,7 @@ export class UserDao {
                 email: email,
                 bio: 'welcome to embtr!',
                 location: 'earth',
-                photoUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/common%2Fdefault_profile.png?alt=media',
+                photoUrl: '',
             },
         });
 
