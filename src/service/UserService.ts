@@ -130,6 +130,15 @@ export class UserService {
     }
 
     public static async setup(context: Context, user: User): Promise<User> {
+        // DEPRECATED: after version 5.0.26
+        const ADD_PROFILE_IMAGE =
+            'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/icons%2Fnew%20user?alt=media';
+        const DEFAULT_PROFILE_IMAGE =
+            'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/common%2Fdefault_profile.png?alt=media';
+        if (user.photoUrl === ADD_PROFILE_IMAGE) {
+            user.photoUrl = DEFAULT_PROFILE_IMAGE;
+        }
+
         const setupUser = await this.update(context, user);
         await this.markUserAsSetupComplete(context, setupUser);
 
