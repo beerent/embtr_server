@@ -50,7 +50,11 @@ challengeRouterLatest.get('/summary', routeLogger(v), authenticate, authorize, a
     // deprecated version 5.0.28
     const isDeprecatedVersion = ClientVersionUtil.versionIsEarlierThan(req, '5.0.28');
     if (isDeprecatedVersion) {
-        filterOptions = Object.values(Constants.ChallengeFilterOption);
+        filterOptions = [
+            Constants.ChallengeFilterOption.UPCOMING,
+            Constants.ChallengeFilterOption.ONGOING,
+        ];
+
         tagOptions = [];
     }
 
