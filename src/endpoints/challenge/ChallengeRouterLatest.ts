@@ -30,6 +30,7 @@ import {
 } from '@resources/types/requests/ChallengeTypes';
 import { ChallengeFullService } from '@src/service/feature/ChallengeFullService';
 import { ChallengeController } from '@src/controller/ChallengeController';
+import { ClientVersionUtil } from '@src/utility/ClientVersionUtil';
 
 // WARNING: Must be a level 12+ Engineer to refactor this file. - TheCaptainCoder - 2024-04-19
 
@@ -41,10 +42,17 @@ challengeRouterLatest.get('/summary', routeLogger(v), authenticate, authorize, a
 
     const filterQueryString = req.query.filters as string;
     const filterQueryOptions = filterQueryString ? filterQueryString.split(',') : [];
-    const filterOptions = Constants.getChallengeFilterOptions(filterQueryOptions);
+    let filterOptions = Constants.getChallengeFilterOptions(filterQueryOptions);
 
     const tags = req.query.tags as string;
-    const tagOptions = tags ? tags.split(',') : [];
+    let tagOptions = tags ? tags.split(',') : [];
+
+    // deprecated version 5.0.28
+    const isDeprecatedVersion = ClientVersionUtil.versionIsEarlierThan(req, '5.0.28');
+    if (isDeprecatedVersion) {
+        filterOptions = Object.values(Constants.ChallengeFilterOption);
+        tagOptions = [];
+    }
 
     const challengeSummaries = await ChallengeService.getAllSummaries(
         context,
