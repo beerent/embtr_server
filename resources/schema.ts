@@ -483,6 +483,7 @@ export interface Tag {
   id?: number;
   name?: string;
   category?: string;
+  color?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

@@ -64,7 +64,7 @@ export interface ChallengeDetails extends ChallengeBase {
 
 export interface ChallengeFull {
     challenge: Pick<Challenge, 'name' | 'description' | 'start' | 'end'>;
-    tag: Pick<Tag, 'id' | 'name'>;
+    tag: Pick<Tag, 'id' | 'name' | 'color'>;
     award: Pick<AwardSchema, 'name' | 'description' | 'iconId'>;
     task: Pick<Task, 'title' | 'description' | 'iconId'>;
     challengeRequirement: Pick<

@@ -154,6 +154,7 @@ export class ChallengeDao {
             },
 
             include: {
+                tag: true,
                 challengeRequirements: {
                     include: {
                         task: true,
@@ -189,6 +190,7 @@ export class ChallengeDao {
                 },
             },
             include: {
+                tag: true,
                 challengeRequirements: {
                     include: {
                         task: true,

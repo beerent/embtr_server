@@ -29,8 +29,9 @@ export class ChallengeCondenser {
             },
             milestoneKeys: challengeFull.milestoneKeys,
             tag: {
-                name: challengeFull.tag.name,
                 id: challengeFull.tag.id,
+                name: challengeFull.tag.name,
+                color: challengeFull.tag.color,
             },
         };
 

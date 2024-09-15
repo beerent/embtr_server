@@ -37,7 +37,11 @@ export class ChallengeService {
     ): Promise<ChallengeSummary[]> {
         const challenges = await this.getAllFiltered(
             context,
-            filterOptions ?? [],
+            filterOptions
+                ? filterOptions.length
+                    ? filterOptions
+                    : Object.values(Constants.ChallengeFilterOption)
+                : [],
             tagOptions ?? []
         );
         const challengeSummaries: ChallengeSummary[] = [];
@@ -529,8 +533,9 @@ export class ChallengeService {
                 localImage: challenge.award?.icon?.localImage ?? '',
             },
             tag: {
-                name: challenge.tag?.name ?? '',
                 id: challenge.tag?.id ?? 0,
+                name: challenge.tag?.name ?? '',
+                color: challenge.tag?.color ?? '',
             },
             likeCount: challenge.likes?.length ?? 0,
             participantCount: challenge.challengeParticipants?.length ?? 0,
