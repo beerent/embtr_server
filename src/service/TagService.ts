@@ -1,6 +1,7 @@
 import { Tag } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 import { TagDao } from '@src/database/TagDao';
-import { Context } from '@src/general/auth/Context';
+import { Context, UserContext } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 
 export class TagService {
@@ -11,9 +12,22 @@ export class TagService {
         return tagModels;
     }
 
+    public static async getAllByCategory(
+        context: UserContext,
+        category: Constants.TagCategory
+    ): Promise<Tag[]> {
+        const tags = await TagDao.getAllByCategory(category);
 
-    public static async getByName(context: Context, name: string): Promise<Tag | undefined> {
-        const tag = await TagDao.getByName(name);
+        const tagModels: Tag[] = ModelConverter.convertAll(tags);
+        return tagModels;
+    }
+
+    public static async getByCategoryAndName(
+        context: Context,
+        category: Constants.TagCategory,
+        name: string
+    ): Promise<Tag | undefined> {
+        const tag = await TagDao.getByCategoryAndName(category, name);
         if (!tag) {
             return undefined;
         }
@@ -22,22 +36,44 @@ export class TagService {
         return tagModel;
     }
 
-    public static async create(context: Context, name: string): Promise<Tag> {
-        const tag = await TagDao.create(name);
+    public static async create(
+        context: Context,
+        category: Constants.TagCategory,
+        name: string
+    ): Promise<Tag> {
+        const tag = await TagDao.create(category, name);
         const tagModel: Tag = ModelConverter.convert(tag);
         return tagModel;
     }
 
-    public static async createAll(context: Context, tags: string[]): Promise<Tag[]> {
+    public static async getOrCreate(
+        context: Context,
+        category: Constants.TagCategory,
+        name: string
+    ): Promise<Tag> {
+        const existingTag = await this.getByCategoryAndName(context, category, name);
+        if (existingTag) {
+            return existingTag;
+        }
+
+        const createdTag = await this.create(context, category, name);
+        return createdTag;
+    }
+
+    public static async createAll(
+        context: Context,
+        category: Constants.TagCategory,
+        tags: string[]
+    ): Promise<Tag[]> {
         const tagObjects: Tag[] = [];
         for (const tag of tags) {
-            const existingTag = await this.getByName(context, tag);
+            const existingTag = await this.getByCategoryAndName(context, category, tag);
             if (existingTag) {
                 tagObjects.push(existingTag);
                 continue;
             }
 
-            const createdTag = await this.create(context, tag);
+            const createdTag = await this.create(context, category, tag);
             tagObjects.push(createdTag);
         }
 

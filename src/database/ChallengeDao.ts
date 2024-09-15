@@ -1,6 +1,7 @@
 import { prisma } from '@database/prisma';
 import { Prisma } from '@prisma/client';
 import { Challenge } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 import { UserIncludes } from './UserDao';
 
 export interface ChallengeRequirementResults {
@@ -60,6 +61,120 @@ export class ChallengeDao {
                         user: {
                             include: UserIncludes,
                         },
+                    },
+                },
+            },
+        });
+    }
+
+    public static async getAllFiltered(
+        userId: number,
+        date: Date,
+        filterOptions: Constants.ChallengeFilterOption[],
+        tagOptions: string[]
+    ) {
+        const andWhereClauses = [];
+        const orWhereClauses = [];
+        if (filterOptions.includes(Constants.ChallengeFilterOption.UPCOMING)) {
+            orWhereClauses.push({
+                start: {
+                    gt: date,
+                },
+            });
+        }
+
+        if (filterOptions.includes(Constants.ChallengeFilterOption.ONGOING)) {
+            orWhereClauses.push({
+                start: {
+                    lte: date,
+                },
+                end: {
+                    gte: date,
+                },
+            });
+        }
+
+        if (filterOptions.includes(Constants.ChallengeFilterOption.JOINABLE)) {
+            orWhereClauses.push({
+                start: {
+                    lte: date,
+                },
+                end: {
+                    gte: date,
+                },
+                challengeParticipants: {
+                    none: {
+                        userId,
+                    },
+                },
+            });
+        }
+
+        if (filterOptions.includes(Constants.ChallengeFilterOption.JOINED)) {
+            orWhereClauses.push({
+                challengeParticipants: {
+                    some: {
+                        userId,
+                    },
+                },
+            });
+        }
+
+        if (filterOptions.includes(Constants.ChallengeFilterOption.FINISHED)) {
+            orWhereClauses.push({
+                end: {
+                    lt: date,
+                },
+            });
+        }
+
+        if (!filterOptions.includes(Constants.ChallengeFilterOption.FINISHED)) {
+            andWhereClauses.push({
+                end: {
+                    gte: date,
+                },
+            });
+        }
+
+        if (tagOptions.length > 0) {
+            andWhereClauses.push({
+                tag: {
+                    name: {
+                        in: tagOptions,
+                    },
+                },
+            });
+        }
+
+        return prisma.challenge.findMany({
+            where: {
+                active: true,
+                AND: andWhereClauses,
+                OR: orWhereClauses,
+            },
+
+            include: {
+                challengeRequirements: {
+                    include: {
+                        task: true,
+                        unit: true,
+                    },
+                },
+                challengeParticipants: true,
+                award: {
+                    include: {
+                        icon: true,
+                    },
+                },
+                creator: true,
+                likes: {
+                    where: {
+                        active: true,
+                    },
+                },
+                comments: {
+                    where: {
+                        active: true,
                     },
                 },
             },
@@ -389,32 +504,6 @@ export class ChallengeDao {
        AND planned_task.active = true
        AND planned_day.date >= ${startDateString}
        AND planned_day.date <= ${endDateString}
-     group by intervalIndex; 
-            `
-        );
-
-        return result;
-    }
-
-    private static async getHabitBasedChallengeRequirementProgess(
-        startDate: Date,
-        endDate: Date,
-        userId: number,
-        interval: number
-    ) {
-        const startDateString = startDate.toISOString().replace('T', ' ').replace('Z', '');
-        const endDateString = endDate.toISOString().replace('T', ' ').replace('Z', '');
-
-        const result: ChallengeRequirementResults[] = await prisma.$queryRaw(
-            Prisma.sql`
-            SELECT floor((DATEDIFF(planned_day.date, '1971-01-01') - DATEDIFF(${startDateString}, '1971-01-01')) / ${interval}) AS intervalIndex,
-            MIN(planned_day.date)                                                                 AS intervalStartDate,
-            SUM(completedQuantity)                                                                AS totalCompleted
-     FROM planned_task
-              JOIN planned_day ON plannedDayId = planned_day.id
-     WHERE userId = ${userId}
-       AND planned_task.active = true
-       AND planned_day.date >= ${startDateString}
      group by intervalIndex; 
             `
         );

@@ -5,6 +5,7 @@ import {
     ChallengeParticipant,
     ChallengeRequirement,
     Task,
+    Tag,
 } from '../../schema';
 
 interface ChallengeUser {
@@ -29,6 +30,7 @@ interface ChallengeBase {
     name: string;
     description: string;
     award: Award;
+    tag: Tag;
     likeCount: number;
     participantCount: number;
 
@@ -62,6 +64,7 @@ export interface ChallengeDetails extends ChallengeBase {
 
 export interface ChallengeFull {
     challenge: Pick<Challenge, 'name' | 'description' | 'start' | 'end'>;
+    tag: Pick<Tag, 'id' | 'name'>;
     award: Pick<AwardSchema, 'name' | 'description' | 'iconId'>;
     task: Pick<Task, 'title' | 'description' | 'iconId'>;
     challengeRequirement: Pick<

@@ -7,6 +7,7 @@ import {
     ChallengeRequirementCompletionState,
     PlannedTask,
 } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 import { ChallengeDetails, ChallengeSummary } from '@resources/types/dto/Challenge';
 import { GetChallengeParticipationResponse } from '@resources/types/requests/ChallengeTypes';
 import { HttpCode, SUCCESS } from '@src/common/RequestResponses';
@@ -14,7 +15,7 @@ import { ChallengeDao, ChallengeRequirementResults } from '@src/database/Challen
 import { ChallengeParticipantDao } from '@src/database/ChallengeParticipantDao';
 import { ChallengeEventDispatcher } from '@src/event/challenge/ChallengeEventDispatcher';
 import { ChallengeParticipantEventDispatcher } from '@src/event/challenge_participant/ChallengeParticipantEventDispatcher';
-import { Context } from '@src/general/auth/Context';
+import { Context, UserContext } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
 import { ContextService } from './ContextService';
@@ -29,8 +30,16 @@ export class ChallengeService {
         return challengeSummary;
     }
 
-    public static async getAllSummaries(context: Context): Promise<ChallengeSummary[]> {
-        const challenges = await this.getAllOpen(context);
+    public static async getAllSummaries(
+        context: UserContext,
+        filterOptions?: Constants.ChallengeFilterOption[],
+        tagOptions?: string[]
+    ): Promise<ChallengeSummary[]> {
+        const challenges = await this.getAllFiltered(
+            context,
+            filterOptions ?? [],
+            tagOptions ?? []
+        );
         const challengeSummaries: ChallengeSummary[] = [];
         for (const challenge of challenges) {
             const challengeSummary = this.getSummaryFromChallenge(context, challenge);
@@ -71,6 +80,22 @@ export class ChallengeService {
 
     public static async getAllOpen(context: Context): Promise<Challenge[]> {
         const challenges = await ChallengeDao.getAllWhereEndDateGreaterThan(context.dateTime);
+        const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
+
+        return challengeModels;
+    }
+
+    public static async getAllFiltered(
+        context: UserContext,
+        filterOptions: Constants.ChallengeFilterOption[],
+        tagOptions: string[]
+    ): Promise<Challenge[]> {
+        const challenges = await ChallengeDao.getAllFiltered(
+            context.userId,
+            context.dateTime,
+            filterOptions,
+            tagOptions
+        );
         const challengeModels: Challenge[] = ModelConverter.convertAll(challenges);
 
         return challengeModels;
@@ -496,13 +521,16 @@ export class ChallengeService {
             id: challenge.id ?? 0,
             name: challenge.name ?? '',
             description: challenge.description ?? '',
-
             award: {
                 id: challenge.awardId ?? 0,
                 name: challenge.award?.name ?? '',
                 description: challenge.award?.description ?? '',
                 remoteImageUrl: challenge.award?.icon?.remoteImageUrl ?? '',
                 localImage: challenge.award?.icon?.localImage ?? '',
+            },
+            tag: {
+                name: challenge.tag?.name ?? '',
+                id: challenge.tag?.id ?? 0,
             },
             likeCount: challenge.likes?.length ?? 0,
             participantCount: challenge.challengeParticipants?.length ?? 0,
@@ -538,7 +566,10 @@ export class ChallengeService {
                 remoteImageUrl: challenge.award?.icon?.remoteImageUrl ?? '',
                 localImage: challenge.award?.icon?.localImage ?? '',
             },
-
+            tag: {
+                name: challenge.tag?.name ?? '',
+                id: challenge.tag?.id ?? 0,
+            },
             likeCount: challenge.likes?.length ?? 0,
             participantCount: challenge.challengeParticipants?.length ?? 0,
             start: challenge.start ?? new Date(),

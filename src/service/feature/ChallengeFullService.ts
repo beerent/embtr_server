@@ -1,4 +1,4 @@
-import { Award, Challenge, ChallengeRequirement, Task } from '@resources/schema';
+import { Award, Challenge, ChallengeRequirement, Tag, Task } from '@resources/schema';
 import { Context } from '@src/general/auth/Context';
 import { AwardService } from '../AwardService';
 import { ChallengeMilestoneService } from '../ChallengeMilestoneService';
@@ -10,6 +10,9 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { PlannedDayChallengeMilestoneService } from '../PlannedDayChallengeMilestoneService';
 import { ChallengeFull } from '@resources/types/dto/Challenge';
 import { HttpCode } from '@src/common/RequestResponses';
+import { ChallengeDao } from '@src/database/ChallengeDao';
+import { TagService } from '../TagService';
+import { Constants } from '@resources/types/constants/constants';
 
 export class ChallengeFullService {
     public static async get(context: Context, id: number): Promise<ChallengeFull> {
@@ -25,6 +28,10 @@ export class ChallengeFullService {
         const award = await AwardService.get(context, challenge.awardId ?? 0);
         const challengeRequirement = challenge.challengeRequirements![0];
         const task = await HabitService.get(context, challengeRequirement.taskId ?? 0);
+        const tag = challenge.tag ?? {
+            name: 'DEFAULT',
+            id: 1,
+        };
         const challengeMilestones = challenge.challengeMilestones ?? [];
         const challengeMilestoneKeys = challengeMilestones.flatMap((challengeMilestone) => {
             return challengeMilestone.milestone?.key ? [challengeMilestone.milestone.key] : [];
@@ -36,6 +43,7 @@ export class ChallengeFullService {
             challengeRequirement: { ...challengeRequirement },
             task: { ...task },
             milestoneKeys: challengeMilestoneKeys,
+            tag: tag,
         };
 
         return challengeFull;
@@ -47,8 +55,18 @@ export class ChallengeFullService {
         award: Award,
         task: Task,
         challengeRequirement: ChallengeRequirement,
-        milestoneKeys: string[]
+        milestoneKeys: string[],
+        tag: Tag
     ): Promise<Challenge> {
+        const createdTag = tag.id
+            ? tag
+            : await TagService.getOrCreate(
+                context,
+                Constants.TagCategory.CHALLENGE,
+                tag.name ?? ''
+            );
+        console.log('createdTag', createdTag);
+
         //create award
         const createdAward = await AwardService.create(context, award);
         console.log('createdAward', createdAward.id);
@@ -62,6 +80,7 @@ export class ChallengeFullService {
         //create challenge
         challenge.awardId = createdAward.id;
         challenge.creatorId = context.userId;
+        challenge.tagId = createdTag.id;
         const createdChallenge = await ChallengeService.create(context, challenge);
         console.log('createdChallenge', createdChallenge.id);
 
@@ -81,6 +100,7 @@ export class ChallengeFullService {
                 createdChallenge.id,
                 milestoneKeys
             );
+            console.log('createdMilestones', createdMilestones);
         }
 
         // get challenge model
@@ -102,7 +122,17 @@ export class ChallengeFullService {
         challenge.id = id;
 
         const award: Award = { id: existingChallenge.award?.id, ...challengeFull.award };
-        const task: Task = { id: existingChallenge.challengeRequirements?.[0]?.task?.id, ...challengeFull.task };
+        const task: Task = {
+            id: existingChallenge.challengeRequirements?.[0]?.task?.id,
+            ...challengeFull.task,
+        };
+
+        const tag: Tag = await TagService.getOrCreate(
+            context,
+            Constants.TagCategory.CHALLENGE,
+            challengeFull.tag.name ?? ''
+        );
+
         const challengeRequirement: ChallengeRequirement = {
             id: existingChallenge.challengeRequirements?.[0]?.id,
             ...challengeFull.challengeRequirement,
@@ -119,6 +149,7 @@ export class ChallengeFullService {
 
         //update challenge
         challenge.awardId = updatedAward.id;
+        challenge.tagId = tag.id;
         challenge.creatorId = context.userId;
         const updatedChallenge = await ChallengeService.update(context, challenge);
 

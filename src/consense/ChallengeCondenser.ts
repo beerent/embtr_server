@@ -28,6 +28,10 @@ export class ChallengeCondenser {
                 requiredTaskQuantity: challengeFull.challengeRequirement.requiredTaskQuantity,
             },
             milestoneKeys: challengeFull.milestoneKeys,
+            tag: {
+                name: challengeFull.tag.name,
+                id: challengeFull.tag.id,
+            },
         };
 
         return condensedChallengeFull;

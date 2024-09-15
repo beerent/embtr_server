@@ -37,9 +37,20 @@ const challengeRouterLatest = express.Router();
 const v = '✓';
 
 challengeRouterLatest.get('/summary', routeLogger(v), authenticate, authorize, async (req, res) => {
-    const context = await ContextService.get(req);
+    const context = await ContextService.getUserContext(req);
 
-    const challengeSummaries = await ChallengeService.getAllSummaries(context);
+    const filterQueryString = req.query.filters as string;
+    const filterQueryOptions = filterQueryString ? filterQueryString.split(',') : [];
+    const filterOptions = Constants.getChallengeFilterOptions(filterQueryOptions);
+
+    const tags = req.query.tags as string;
+    const tagOptions = tags ? tags.split(',') : [];
+
+    const challengeSummaries = await ChallengeService.getAllSummaries(
+        context,
+        filterOptions,
+        tagOptions
+    );
     const response: GetChallengesSummariesResponse = {
         ...SUCCESS,
         challengesSummaries: challengeSummaries,
@@ -232,6 +243,7 @@ challengeRouterLatest.post(
         const task = request.challengeFull.task;
         const challengeRequirement = request.challengeFull.challengeRequirement;
         const milestoneKeys = request.challengeFull.milestoneKeys;
+        const tag = request.challengeFull.tag;
 
         const createdChallenge = await ChallengeFullService.create(
             context,
@@ -239,7 +251,8 @@ challengeRouterLatest.post(
             award,
             task,
             challengeRequirement,
-            milestoneKeys
+            milestoneKeys,
+            tag
         );
         const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
         res.status(response.httpCode).json(response);

@@ -1,5 +1,6 @@
 import { Code } from '@resources/codes';
 import { Icon, Tag, IconCategory } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 import { UpdateIconData } from '@resources/types/requests/IconTypes';
 import { HttpCode } from '@src/common/RequestResponses';
 import { IconDao } from '@src/database/IconDao';
@@ -109,7 +110,11 @@ export class IconService {
     }
 
     public static async addTags(context: Context, iconId: number, tags: string[]): Promise<void> {
-        const tagObjects: Tag[] = await TagService.createAll(context, tags);
+        const tagObjects: Tag[] = await TagService.createAll(
+            context,
+            Constants.TagCategory.ICON,
+            tags
+        );
         const tagIds = tagObjects.flatMap((tag) => (tag.id ? [tag.id] : []));
         await IconDao.removeAllTags(iconId);
         await IconDao.addTags(iconId, tagIds);

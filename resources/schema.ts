@@ -288,6 +288,8 @@ export interface Challenge extends ChallengeCustom {
   start?: Date;
   end?: Date;
   timelineTimestamp?: Date;
+  tagId?: number;
+  tag?: Tag;
   active?: boolean;
   images?: Image[];
   likes?: Like[];
@@ -480,10 +482,12 @@ export interface Icon {
 export interface Tag {
   id?: number;
   name?: string;
+  category?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;
   icons?: Icon[];
+  Challenge?: Challenge[];
 }
 
 export interface IconCategory {
