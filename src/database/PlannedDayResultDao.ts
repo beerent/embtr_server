@@ -102,6 +102,20 @@ export class PlannedDayResultDao {
         return result;
     }
 
+    public static async exists(userId: number, dayKey: string) {
+        return (
+            (await prisma.plannedDayResult.findFirst({
+                where: {
+                    active: true,
+                    plannedDay: {
+                        userId,
+                        dayKey,
+                    },
+                },
+            })) !== null
+        );
+    }
+
     public static async getAllByIds(ids: number[]) {
         return prisma.plannedDayResult.findMany({
             where: {
@@ -194,6 +208,9 @@ export class PlannedDayResultDao {
                     userId,
                     dayKey,
                 },
+            },
+            orderBy: {
+                id: 'desc',
             },
             include: PlannedDayResultInclude,
         });

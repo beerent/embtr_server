@@ -1,7 +1,7 @@
 import { PlannedDayResult } from '@resources/schema';
 import { Constants } from '@resources/types/constants/constants';
 import { PlannedDayResultSummary } from '@resources/types/planned_day_result/PlannedDayResult';
-import { CreateLikeResponse } from '@resources/types/requests/GeneralTypes';
+import { CreateLikeResponse, GetBooleanResponse } from '@resources/types/requests/GeneralTypes';
 import {
     CreatePlannedDayResultResponse,
     GetPlannedDayResultResponse,
@@ -128,6 +128,22 @@ plannedDayResultRouterLatest.get(
             dayKey
         );
         const response: GetPlannedDayResultResponse = { ...SUCCESS, plannedDayResult };
+        res.json(response);
+    })
+);
+
+plannedDayResultRouterLatest.get(
+    '/:userId/:dayKey/exists',
+    routeLogger(v),
+    authenticate,
+    authorize,
+    runEndpoint(async (req, res) => {
+        const context = await ContextService.getUserContext(req);
+        const dayKey = req.params.dayKey;
+
+        const exists = await PlannedDayResultService.existsByDayKey(context, dayKey);
+        const response: GetBooleanResponse = { ...SUCCESS, result: exists };
+
         res.json(response);
     })
 );

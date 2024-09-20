@@ -6,7 +6,7 @@ import {
 } from '@resources/types/planned_day_result/PlannedDayResult';
 import { PlannedDayDao } from '@src/database/PlannedDayDao';
 import { PlannedDayResultDao, PlannedDayResultType } from '@src/database/PlannedDayResultDao';
-import { Context } from '@src/general/auth/Context';
+import { Context, UserContext } from '@src/general/auth/Context';
 import { ServiceException } from '@src/general/exception/ServiceException';
 import { Code } from '@resources/codes';
 import { PlannedDayResult, PlannedTask } from '@resources/schema';
@@ -247,13 +247,18 @@ export class PlannedDayResultService {
         return plannedDayResultModel;
     }
 
+    public static async existsByDayKey(context: UserContext, dayKey: string): Promise<boolean> {
+        const exists = await PlannedDayResultDao.exists(context.userId, dayKey);
+        return exists;
+    }
+
     public static async getByUserAndDayKey(
         context: Context,
         userId: number,
         dayKey: string
     ): Promise<PlannedDayResult> {
         const plannedDayResult = await PlannedDayResultDao.getByUserAndDayKey(userId, dayKey);
-        if (!plannedDayResult) {
+        if (!plannedDayResult?.active) {
             throw new ServiceException(
                 404,
                 Code.PLANNED_DAY_RESULT_NOT_FOUND,
