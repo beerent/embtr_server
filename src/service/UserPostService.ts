@@ -127,16 +127,4 @@ export class UserPostService {
     }
 }
 
-const newUserPostOptions = [
-    ' has just joined the habit-building community! Today marks the first day of their lifelong pursuit of personal growth. Drop in and say hello!',
-    " has officially embarked on their journey of self-improvement! Let's give them a warm welcome to our habit-building community!",
-    ' just joined us to begin a new chapter of personal growth! Say hi and encourage them as they start this exciting journey!',
-    ' has taken the first step towards building lasting habits! Come and cheer them on as they join our supportive community!',
-    " is now part of our habit-building family! Let's give them a shout-out as they start working towards their goals!",
-    ' has committed to becoming the best version of themselves! Say hello and share your tips to help them on this path!',
-    " has just joined our community and is ready to take on new challenges! Let's welcome them as they begin their habit-building adventure!",
-    ' has taken the plunge into building better habits! Give them a warm welcome as they start this exciting journey!',
-    ' is ready to grow and achieve new milestones! Join in and celebrate their decision to be part of our habit-building family!',
-    ' is embracing a fresh start with new habits! Let’s rally around and support them as they kick off their journey!',
-    ' has chosen today as the first step in their habit-building adventure! Drop in and show some encouragement for the road ahead!',
-];
+const newUserPostOptions = [' has just joined the habit-building community!'];
