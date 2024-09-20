@@ -8,6 +8,11 @@ export namespace UserEventDispatcher {
         eventBus.emit(Event.User.Created, event);
     };
 
+    export const onSetup = (context: UserContext) => {
+        const event: Event.User.Event = new Event.User.Event(context);
+        eventBus.emit(Event.User.Setup, event);
+    };
+
     export const onUpdated = (context: UserContext) => {
         const event: Event.User.Event = new Event.User.Event(context);
         eventBus.emit(Event.User.Updated, event);

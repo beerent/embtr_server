@@ -129,7 +129,7 @@ export class UserService {
         return userModel;
     }
 
-    public static async setup(context: Context, user: User): Promise<User> {
+    public static async setup(context: UserContext, user: User): Promise<User> {
         // DEPRECATED: after version 5.0.26
         const ADD_PROFILE_IMAGE =
             'https://firebasestorage.googleapis.com/v0/b/embtr-app.appspot.com/o/icons%2Fnew%20user?alt=media';
@@ -146,6 +146,7 @@ export class UserService {
             await UserPropertyService.setDefaultProperties(context, setupUser.id);
         }
 
+        UserEventDispatcher.onSetup(context);
         ApiAlertsService.sendAlert(`New user created!`);
 
         return setupUser;

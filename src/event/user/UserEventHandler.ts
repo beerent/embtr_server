@@ -1,4 +1,5 @@
 import { UserBadgeService } from '@src/service/UserBadgeService';
+import { UserPostService } from '@src/service/UserPostService';
 import { WebSocketService } from '@src/service/WebSocketService';
 import { Event } from '../events';
 
@@ -20,6 +21,19 @@ export class UserEventHandler {
 
         this.activeOnCreatedEvents.add(eventKey);
         await UserBadgeService.addNewUserBadge(event.context);
+        this.activeOnCreatedEvents.delete(eventKey);
+    }
+
+    public static async onSetup(event: Event.User.Event) {
+        const eventKey = event.getKey();
+
+        if (this.activeOnCreatedEvents.has(eventKey)) {
+            console.log('Already processing', Event.User.Setup, event);
+            return;
+        }
+
+        this.activeOnCreatedEvents.add(eventKey);
+        await UserPostService.createNewUserPost(event.context);
         this.activeOnCreatedEvents.delete(eventKey);
     }
 

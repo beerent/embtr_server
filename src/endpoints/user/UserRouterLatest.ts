@@ -184,7 +184,7 @@ userRouterLatest.patch(
     authenticate,
     authorize,
     runEndpoint(async (req, res) => {
-        const context = await ContextService.get(req);
+        const context = await ContextService.getUserContext(req);
         const requestBody: UpdateUserRequest = req.body;
         const user: User = requestBody.user;
 

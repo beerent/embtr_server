@@ -12,6 +12,15 @@ eventBus.on(Event.User.Created, async (event: Event.User.Event) => {
     }
 });
 
+eventBus.on(Event.User.Setup, async (event: Event.User.Event) => {
+    try {
+        logger.info('User event received', Event.User.Setup, event);
+        UserEventHandler.onSetup(event);
+    } catch (e) {
+        console.error('error in SETUP', e);
+    }
+});
+
 eventBus.on(Event.User.Updated, async (event: Event.User.Event) => {
     try {
         logger.info('User event received', Event.User.Updated, event);
