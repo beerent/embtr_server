@@ -424,4 +424,11 @@ export namespace Constants {
                 return TagCategory.INVALID;
         }
     };
+
+    export enum FeaturedPostType {
+        INVALID = 'INVALID',
+        DEFAULT = 'DEFAULT',
+        POST = 'POST',
+        QUOTE_OF_THE_DAY = 'QUOTE_OF_THE_DAY',
+    }
 }

@@ -1,4 +1,6 @@
 import { UserFeaturedPost } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
+import { logger } from '@src/common/logger/Logger';
 import { UserFeaturedPostDao } from '@src/database/UserFeaturedPostDao';
 import { Context } from '@src/general/auth/Context';
 import { ModelConverter } from '@src/utility/model_conversion/ModelConverter';
@@ -30,26 +32,11 @@ export class UserFeaturedPostService {
         return userFeaturedPostModels;
     }
 
-    public static async copyLatest(context: Context) {
-        const latestFeaturedPost = await FeaturedPostService.getLatestUnexpired(context);
-        if (!latestFeaturedPost?.id) {
-            console.log('no latest featured post');
-            return;
-        }
-
-        const userFeaturedPost = await this.getByFeaturedPostId(context, latestFeaturedPost.id);
-        if (userFeaturedPost) {
-            console.log('already copied latest featured post');
-            return;
-        }
-        const sortDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
-        await UserFeaturedPostDao.createIfNotExists(
-            context.userId,
-            latestFeaturedPost.id,
-            sortDate
-        );
-
-        console.log('copied latest featured post');
+    public static async copyAllLatest(context: Context) {
+        await Promise.all([
+            this.copyLatestOfType(context, Constants.FeaturedPostType.POST),
+            this.copyLatestOfType(context, Constants.FeaturedPostType.QUOTE_OF_THE_DAY),
+        ]);
     }
 
     public static async markAsViewed(context: Context, id: number) {
@@ -62,6 +49,30 @@ export class UserFeaturedPostService {
         userFeaturedPost.sortDate = new Date();
 
         await UserFeaturedPostDao.update(userFeaturedPost);
+    }
+
+    private static async copyLatestOfType(context: Context, type: Constants.FeaturedPostType) {
+        const latestFeaturedPost = await FeaturedPostService.getLatestUnexpired(context, type);
+
+        if (!latestFeaturedPost?.id) {
+            logger.info(`no latest featured post of type ${type}`);
+            return;
+        }
+
+        const userFeaturedPost = await this.getByFeaturedPostId(context, latestFeaturedPost.id);
+        if (userFeaturedPost) {
+            logger.info(`already copied latest featured post of type ${type}`);
+            return;
+        }
+
+        const sortDate = new Date(new Date().setFullYear(new Date().getFullYear() + 1));
+        await UserFeaturedPostDao.createIfNotExists(
+            context.userId,
+            latestFeaturedPost.id,
+            sortDate
+        );
+
+        logger.info(`copied latest featured post id ${latestFeaturedPost.id} of type ${type}`);
     }
 
     private static async getByFeaturedPostId(context: Context, featuredPostId: number) {

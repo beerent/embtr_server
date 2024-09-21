@@ -146,4 +146,16 @@ jobRouterLatest.get(
     })
 );
 
+jobRouterLatest.get(
+    '/post-quote-of-the-day',
+    routeLogger(v),
+    runEndpoint(async (req, res) => {
+        logger.info('JOB - Post quote of the day');
+        const context = await ContextService.getJobContext(req);
+        await JobService.postQuoteOfTheDay(context);
+
+        res.status(200).send('OK');
+    })
+);
+
 export default jobRouterLatest;

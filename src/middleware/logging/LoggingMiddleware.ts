@@ -13,7 +13,7 @@ export const routeLogger =
             const requestPadding = ' '.repeat(6 - req.method.length);
             const clientVersion = req.header('client-version');
 
-            logger.info(
+            logger.http(
                 `[${timestamp}]  ${req.method}${requestPadding}${res.statusCode}\t${contentLength}b\t${elapsedTime}ms\t ${clientVersion} [${receivingVersion}] ${req.baseUrl}${req.path}`
             );
             return oldSend.apply(this, arguments as any);

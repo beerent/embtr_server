@@ -593,6 +593,7 @@ export interface FeaturedPost {
   subtitle?: string;
   body?: string;
   expirationDate?: Date;
+  type?: string;
   active?: boolean;
   createdAt?: Date;
   updatedAt?: Date;

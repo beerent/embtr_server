@@ -73,17 +73,24 @@ export class QuoteOfTheDayService {
         return hoursSinceUpdate > 24;
     }
 
-    private static async reset() {
-        const quoteOfTheDay = await QuoteOfTheDayDao.getRandom();
-        await MetadataDao.set('QUOTE_OF_THE_DAY', quoteOfTheDay.id.toString());
-
-        return quoteOfTheDay;
-    }
-
     public static async getAll() {
         const quotesOfTheDay = await QuoteOfTheDayDao.getAll();
         const quoteOfTheDayModels: QuoteOfTheDay[] = ModelConverter.convertAll(quotesOfTheDay);
 
         return quoteOfTheDayModels;
+    }
+
+    public static async getRandom() {
+        const quoteOfTheDay = await QuoteOfTheDayDao.getRandom();
+        const quoteOfTheDayModel: QuoteOfTheDay = ModelConverter.convert(quoteOfTheDay);
+
+        return quoteOfTheDayModel;
+    }
+
+    private static async reset() {
+        const quoteOfTheDay = await QuoteOfTheDayDao.getRandom();
+        await MetadataDao.set('QUOTE_OF_THE_DAY', quoteOfTheDay.id.toString());
+
+        return quoteOfTheDay;
     }
 }

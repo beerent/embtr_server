@@ -1,8 +1,10 @@
 import { prisma } from '@database/prisma';
+import { FeaturedPost } from '@resources/schema';
+import { Constants } from '@resources/types/constants/constants';
 import { UserIncludes } from './UserDao';
 
 export class FeaturedPostDao {
-    public static async getLatestUnexpired(currentDate: Date) {
+    public static async getLatestUnexpired(currentDate: Date, type: Constants.FeaturedPostType) {
         return await prisma.featuredPost.findFirst({
             orderBy: {
                 id: 'desc',
@@ -11,6 +13,7 @@ export class FeaturedPostDao {
                 expirationDate: {
                     gte: currentDate,
                 },
+                type,
             },
         });
     }
@@ -54,5 +57,17 @@ export class FeaturedPostDao {
 
     public static async existsById(id: number) {
         return !!this.get(id);
+    }
+
+    public static async create(featuredPost: FeaturedPost) {
+        return await prisma.featuredPost.create({
+            data: {
+                title: featuredPost.title,
+                subtitle: featuredPost.subtitle,
+                body: featuredPost.body,
+                expirationDate: featuredPost.expirationDate,
+                type: featuredPost.type,
+            },
+        });
     }
 }

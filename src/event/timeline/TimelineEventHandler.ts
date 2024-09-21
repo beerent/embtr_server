@@ -13,7 +13,7 @@ export class TimelineEventHandler {
         }
 
         this.activeOnAccessedEvents.add(eventKey);
-        await UserFeaturedPostService.copyLatest(event.context);
+        await UserFeaturedPostService.copyAllLatest(event.context);
         this.activeOnAccessedEvents.delete(eventKey);
     }
 }

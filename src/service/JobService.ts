@@ -2,7 +2,9 @@ import { Context } from '@src/general/auth/Context';
 import { AwayModeService } from './feature/AwayModeService';
 import { ReminderService } from './feature/ReminderService';
 import { RetentionService } from './feature/RetentionService';
+import { FeaturedPostService } from './FeaturedPostService';
 import { PushNotificationService } from './PushNotificationService';
+import { QuoteOfTheDayService } from './QuoteOfTheDayService';
 import { UserService } from './UserService';
 
 export class JobService {
@@ -58,5 +60,9 @@ export class JobService {
 
     public static async processFailedPushNotifications(context: Context): Promise<void> {
         await PushNotificationService.processFailed(context);
+    }
+
+    public static async postQuoteOfTheDay(context: Context): Promise<void> {
+        await FeaturedPostService.createQuoteOfTheDay(context);
     }
 }

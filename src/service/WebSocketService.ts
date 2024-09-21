@@ -124,7 +124,6 @@ export class WebSocketService {
 
     private static addAuthMiddleware(io: Server) {
         io.use(async (socket, next) => {
-            console.log('authing');
             const token = socket.handshake.query.token;
             if (!token || typeof token !== 'string') {
                 console.log('no token');
@@ -143,7 +142,6 @@ export class WebSocketService {
                 return next(new Error('Unauthorized'));
             }
 
-            console.log('user is authed');
             next();
         });
     }

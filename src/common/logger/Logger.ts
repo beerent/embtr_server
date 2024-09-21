@@ -1,18 +1,5 @@
 import winston from 'winston';
 
-const isTestEnv = process.env.NODE_ENV === 'test';
-
-const silentInTestEnv = (
-    transport:
-        | winston.transports.FileTransportInstance
-        | winston.transports.ConsoleTransportInstance
-) => {
-    if (isTestEnv) {
-        transport.silent = true;
-    }
-    return transport;
-};
-
 // Custom format function to colorize the version part of the log message
 const colorizeVersion = winston.format((info, opts) => {
     if (info.message) {
@@ -49,10 +36,10 @@ const colorizeResponseCode = winston.format((info, opts) => {
 
 // Create a logger instance
 export const logger = winston.createLogger({
-    level: 'info',
+    level: 'http',
     transports: [
-        silentInTestEnv(new winston.transports.File({ filename: 'error.log', level: 'error' })),
-        silentInTestEnv(new winston.transports.File({ filename: 'combined.log' })),
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' }),
     ],
 });
 
@@ -60,14 +47,12 @@ export const logger = winston.createLogger({
 // `${info.level}: ${info.message} JSON.stringify({ ...rest }) `
 //
 logger.add(
-    silentInTestEnv(
-        new winston.transports.Console({
-            format: winston.format.combine(
-                colorizeVersion(), // Apply the colorizeVersion format
-                colorizeResponseCode(), // Apply the colorizeResponseCode format
-                winston.format.colorize(),
-                winston.format.simple()
-            ),
-        })
-    )
+    new winston.transports.Console({
+        format: winston.format.combine(
+            colorizeVersion(), // Apply the colorizeVersion format
+            colorizeResponseCode(), // Apply the colorizeResponseCode format
+            winston.format.colorize({ colors: { http: 'green', info: 'cyan' } }),
+            winston.format.simple()
+        ),
+    })
 );
