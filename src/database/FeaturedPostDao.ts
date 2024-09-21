@@ -10,9 +10,16 @@ export class FeaturedPostDao {
                 id: 'desc',
             },
             where: {
-                expirationDate: {
-                    gte: currentDate,
-                },
+                OR: [
+                    {
+                        expirationDate: null,
+                    },
+                    {
+                        expirationDate: {
+                            gte: currentDate,
+                        },
+                    },
+                ],
                 type,
             },
         });
