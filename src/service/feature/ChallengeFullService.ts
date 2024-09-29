@@ -10,7 +10,6 @@ import { ServiceException } from '@src/general/exception/ServiceException';
 import { PlannedDayChallengeMilestoneService } from '../PlannedDayChallengeMilestoneService';
 import { ChallengeFull } from '@resources/types/dto/Challenge';
 import { HttpCode } from '@src/common/RequestResponses';
-import { ChallengeDao } from '@src/database/ChallengeDao';
 import { TagService } from '../TagService';
 import { Constants } from '@resources/types/constants/constants';
 
@@ -55,16 +54,13 @@ export class ChallengeFullService {
         award: Award,
         task: Task,
         challengeRequirement: ChallengeRequirement,
-        milestoneKeys: string[],
-        tag: Tag
+        milestoneKeys: string[]
     ): Promise<Challenge> {
-        const createdTag = tag.id
-            ? tag
-            : await TagService.getOrCreate(
-                context,
-                Constants.TagCategory.CHALLENGE,
-                tag.name ?? ''
-            );
+        const createdTag = await TagService.getOrCreate(
+            context,
+            Constants.TagCategory.CHALLENGE,
+            'DEFAULT'
+        );
         console.log('createdTag', createdTag);
 
         //create award

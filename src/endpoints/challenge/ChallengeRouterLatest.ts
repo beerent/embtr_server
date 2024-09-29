@@ -255,7 +255,6 @@ challengeRouterLatest.post(
         const task = request.challengeFull.task;
         const challengeRequirement = request.challengeFull.challengeRequirement;
         const milestoneKeys = request.challengeFull.milestoneKeys;
-        const tag = request.challengeFull.tag;
 
         const createdChallenge = await ChallengeFullService.create(
             context,
@@ -263,9 +262,9 @@ challengeRouterLatest.post(
             award,
             task,
             challengeRequirement,
-            milestoneKeys,
-            tag
+            milestoneKeys
         );
+
         const response: CreateChallengeResponse = { ...SUCCESS, challenge: createdChallenge };
         res.status(response.httpCode).json(response);
     })
