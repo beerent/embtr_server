@@ -123,12 +123,6 @@ export class ChallengeFullService {
             ...challengeFull.task,
         };
 
-        const tag: Tag = await TagService.getOrCreate(
-            context,
-            Constants.TagCategory.CHALLENGE,
-            challengeFull.tag.name ?? ''
-        );
-
         const challengeRequirement: ChallengeRequirement = {
             id: existingChallenge.challengeRequirements?.[0]?.id,
             ...challengeFull.challengeRequirement,
@@ -145,7 +139,6 @@ export class ChallengeFullService {
 
         //update challenge
         challenge.awardId = updatedAward.id;
-        challenge.tagId = tag.id;
         challenge.creatorId = context.userId;
         const updatedChallenge = await ChallengeService.update(context, challenge);
 
